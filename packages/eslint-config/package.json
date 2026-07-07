@@ -1,0 +1,16 @@
+{
+  "name": "@omnia/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Configurações ESLint compartilhadas do monorepo Omnia",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./next": "./next.js"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:"
+  }
+}

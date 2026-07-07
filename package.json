@@ -1,0 +1,35 @@
+{
+  "name": "omnia-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma SaaS modular do ecossistema Omnia Frigo Holding",
+  "license": "MIT",
+  "author": "Omnia Frigo Holding",
+  "packageManager": "pnpm@9.15.0",
+  "prettier": "@omnia/prettier-config",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,json,md,yml,yaml}\"",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "@omnia/eslint-config": "workspace:*",
+    "@omnia/prettier-config": "workspace:*",
+    "@omnia/typescript-config": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "rimraf": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  }
+}

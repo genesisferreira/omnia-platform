@@ -1,0 +1,26 @@
+{
+  "name": "@omnia/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Schema, migrations e seeds (PostgreSQL + Drizzle ORM)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "node ../../scripts/workspace-placeholder.mjs dev",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

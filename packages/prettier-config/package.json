@@ -1,0 +1,11 @@
+{
+  "name": "@omnia/prettier-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Configuração Prettier compartilhada do monorepo Omnia",
+  "license": "MIT",
+  "main": "index.json",
+  "peerDependencies": {
+    "prettier": ">=3.0.0"
+  }
+}

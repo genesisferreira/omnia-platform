@@ -1,0 +1,26 @@
+# Code Owners
+
+# Arquitetura e decisões técnicas
+* @genesisferreira
+
+# Documentação
+/docs/ @genesisferreira
+*.md @genesisferreira
+
+# Infraestrutura
+/docker/ @genesisferreira
+/.github/ @genesisferreira
+/config/ @genesisferreira
+
+# Pacotes core
+/packages/database/ @genesisferreira
+/packages/auth/ @genesisferreira
+/packages/ai-core/ @genesisferreira
+
+# Aplicações
+/apps/ @genesisferreira
+
+# Configuração raiz
+/package.json @genesisferreira
+/pnpm-workspace.yaml @genesisferreira
+/turbo.json @genesisferreira

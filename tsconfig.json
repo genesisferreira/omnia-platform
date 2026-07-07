@@ -1,0 +1,5 @@
+{
+  "extends": "@omnia/typescript-config/base.json",
+  "files": [],
+  "references": []
+}

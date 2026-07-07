@@ -1,0 +1,10 @@
+{
+  "extends": "@omnia/typescript-config/base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": false,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"]
+}

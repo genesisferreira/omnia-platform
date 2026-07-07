@@ -1,0 +1,19 @@
+{
+  "name": "@omnia/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Portal público, marketplace, blog e área do parceiro",
+  "scripts": {
+    "build": "node ../../scripts/workspace-placeholder.mjs build",
+    "dev": "node ../../scripts/workspace-placeholder.mjs dev",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .next .turbo dist"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}
