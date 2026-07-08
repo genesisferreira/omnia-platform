@@ -45,6 +45,7 @@ uploads/
 
 # Payload CMS
 media/
+apps/admin/src/payload-types.ts
 
 # TypeScript
 *.tsbuildinfo

@@ -1,26 +1,58 @@
-# Code Owners
+# Code Owners — Omnia Platform
 
-# Arquitetura e decisões técnicas
+# Default — fallback
 * @genesisferreira
 
-# Documentação
-/docs/ @genesisferreira
-*.md @genesisferreira
+# =============================================================================
+# Apps
+# =============================================================================
+/apps/web/ @genesisferreira
+/apps/admin/ @genesisferreira
 
-# Infraestrutura
-/docker/ @genesisferreira
-/.github/ @genesisferreira
-/config/ @genesisferreira
+# =============================================================================
+# Packages
+# =============================================================================
+/packages/ @genesisferreira
 
-# Pacotes core
+# Packages críticos (ownership explícito)
 /packages/database/ @genesisferreira
 /packages/auth/ @genesisferreira
 /packages/ai-core/ @genesisferreira
+/packages/security/ @genesisferreira
+/packages/config/ @genesisferreira
+/packages/errors/ @genesisferreira
+/packages/events/ @genesisferreira
 
-# Aplicações
-/apps/ @genesisferreira
+# =============================================================================
+# Domains
+# =============================================================================
+/domains/ @genesisferreira
+/modules/ @genesisferreira
 
+# =============================================================================
+# Docs
+# =============================================================================
+/docs/ @genesisferreira
+*.md @genesisferreira
+/database/ @genesisferreira
+/events/ @genesisferreira
+/storage/ @genesisferreira
+
+# =============================================================================
+# Docker & Infra
+# =============================================================================
+/docker/ @genesisferreira
+/config/ @genesisferreira
+
+# =============================================================================
+# GitHub & CI
+# =============================================================================
+/.github/ @genesisferreira
+
+# =============================================================================
 # Configuração raiz
+# =============================================================================
 /package.json @genesisferreira
 /pnpm-workspace.yaml @genesisferreira
 /turbo.json @genesisferreira
+/pnpm-lock.yaml @genesisferreira

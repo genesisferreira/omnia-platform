@@ -5,22 +5,38 @@
   "description": "Design system baseado em shadcn/ui e Tailwind CSS",
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts",
+    "./globals.css": "./src/styles/globals.css",
+    "./tailwind-preset": "./tailwind.config.ts",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./components/ui/button": "./src/components/ui/button.tsx"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "node ../../scripts/workspace-placeholder.mjs dev",
+    "build": "tsc --noEmit",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist .turbo"
   },
+  "dependencies": {
+    "@radix-ui/react-slot": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
     "eslint": "catalog:",
+    "react": "catalog:",
     "rimraf": "catalog:",
+    "tailwindcss": "catalog:",
+    "tailwindcss-animate": "catalog:",
     "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

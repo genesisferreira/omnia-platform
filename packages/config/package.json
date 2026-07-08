@@ -1,0 +1,24 @@
+{
+  "name": "@omnia/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Configuração centralizada da plataforma — environment, services, features",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./environment": "./src/environment/index.ts",
+    "./application": "./src/application/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

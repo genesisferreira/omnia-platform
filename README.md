@@ -84,7 +84,7 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 |--------|--------|------|
 | Sprint 0 | ✅ Concluída | Fundação — estrutura, docs, monorepo |
 | Sprint 0.5 | ✅ Concluída | Foundation Hardening — tooling, packages infra |
-| Sprint 1 | ⬜ Planejado | Setup Next.js, Payload, Docker Compose |
+| Sprint 1 | 🟡 Em revisão | Base executável — Next.js, Payload, Docker, Drizzle |
 | Sprint 2 | ⬜ Planejado | Auth, database, design system |
 | Sprint 3 | ⬜ Planejado | Portal institucional e CMS |
 | Sprint 4+ | ⬜ Planejado | Blog, CRM, marketplace, IA |
@@ -93,39 +93,47 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 
 ## Como Executar
 
-> ✅ **Foundation concluída (Sprint 0 + 0.5)**: Arquitetura enterprise preparada. Aplicações na **Sprint 1**.
+> 🟡 **Sprint 1 (em revisão)**: Base executável com Next.js 15, Payload CMS, Drizzle ORM e Docker Compose.
 
 ### Pré-requisitos
 
 - Node.js 22+ ([.nvmrc](.nvmrc))
 - pnpm 9+
-- Docker e Docker Compose (Sprint 1+)
-- PostgreSQL 16+ (Sprint 1+)
-- Redis 7+ (Sprint 1+)
+- Docker e Docker Compose
 
-### Setup (Sprint 1+)
+### Setup rápido
 
 ```bash
-# Clonar o repositório
 git clone https://github.com/genesisferreira/omnia-platform.git
 cd omnia-platform
-
-# Instalar dependências
+git checkout develop
 pnpm install
-
-# Verificar qualidade do código
-pnpm lint
-pnpm typecheck
-pnpm format:check
-
-# Configurar variáveis de ambiente
 cp .env.example .env
+pnpm docker:dev
+pnpm dev
+```
 
-# Iniciar infraestrutura (Sprint 1+)
-# docker compose -f docker/compose/development.yml up -d
+### URLs locais
 
-# Iniciar desenvolvimento (Sprint 1+)
-# pnpm dev
+| Serviço | URL |
+|---------|-----|
+| Portal (web) | http://localhost:3000 |
+| Admin | http://localhost:3001 |
+| Payload CMS | http://localhost:3001/admin |
+| Mailpit | http://localhost:8025 | Email dev (SMTP) |
+| pgAdmin | http://localhost:5050 | GUI PostgreSQL |
+| MinIO Console | http://localhost:9001 |
+| Health (web) | http://localhost:3000/api/health |
+| Health (admin) | http://localhost:3001/api/health |
+
+### Comandos úteis
+
+```bash
+pnpm lint          # ESLint
+pnpm typecheck     # TypeScript
+pnpm build         # Build de produção
+pnpm docker:down   # Parar Docker
+pnpm docker:logs   # Logs dos containers
 ```
 
 ### Variáveis de Ambiente
@@ -164,10 +172,10 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 | Aspecto | Status |
 |---------|--------|
 | Fundação (Sprint 0 + 0.5) | ✅ Concluída |
-| Aplicações | ⬜ Sprint 1 |
-| Banco de Dados | ⬜ Sprint 1 |
-| Autenticação | ⬜ Sprint 2 |
-| CMS | ⬜ Sprint 1 |
+| Base executável (Sprint 1) | 🟡 Em revisão |
+| Aplicações Next.js | 🟡 Sprint 1 |
+| Banco de Dados (Drizzle) | 🟡 Sprint 1 |
+| CMS (Payload) | 🟡 Sprint 1 |
 | IA / Chat | ⬜ Sprint 8+ |
 | Automações n8n | ⬜ Sprint 8+ |
 

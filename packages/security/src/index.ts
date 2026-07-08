@@ -1,14 +1,11 @@
 /**
  * @omnia/security — Camada de segurança transversal.
  *
- * Módulos planejados:
- * - auth/         — JWT, refresh tokens, validação
- * - encryption/   — Hash, encrypt/decrypt, secrets
- * - audit/        — Trilha de auditoria (LGPD)
- * - rate-limit/   — Rate limiting por IP/user/tenant
- * - headers/      — CSP, HSTS, X-Frame-Options, CSRF
- * - permissions/  — RBAC, verificação de permissões
+ * Módulos (Sprint 1.1):
+ * rbac, permissions, roles, policies, audit,
+ * headers, csrf, xss, rate-limit, logs,
+ * encryption, tokens, jwt, sessions, middleware
  *
- * Implementação: Sprint 2+ (complementa @omnia/auth).
+ * Fluxos de auth: @omnia/auth (Sprint 2+)
  */
 export {};

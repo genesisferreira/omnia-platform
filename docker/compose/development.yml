@@ -1,0 +1,147 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omnia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-omnia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-omnia_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-omnia_platform}
+    ports:
+      - '5432:5432'
+    volumes:
+      - omnia_postgres_data:/var/lib/postgresql/data
+    networks:
+      - omnia-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-omnia} -d ${POSTGRES_DB:-omnia_platform}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: omnia-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@omnia.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-omnia_pgadmin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5050:80'
+    volumes:
+      - omnia_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - omnia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: omnia-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - omnia_redis_data:/data
+    networks:
+      - omnia-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: omnia-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-omnia_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-omnia_minio_secret}
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - omnia_minio_data:/data
+    networks:
+      - omnia-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: omnia-mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    volumes:
+      - omnia_mailpit_data:/data
+    networks:
+      - omnia-network
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8025/api/v1/info']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: omnia-n8n
+    restart: unless-stopped
+    environment:
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: ${N8N_PORT:-5678}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678}
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-omnia_platform}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-omnia}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-omnia_dev_password}
+    ports:
+      - '5678:5678'
+    volumes:
+      - omnia_n8n_data:/home/node/.n8n
+    networks:
+      - omnia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:5678/healthz || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  omnia-network:
+    driver: bridge
+    name: omnia-network
+
+volumes:
+  omnia_postgres_data:
+    name: omnia_postgres_data
+  omnia_pgadmin_data:
+    name: omnia_pgadmin_data
+  omnia_redis_data:
+    name: omnia_redis_data
+  omnia_minio_data:
+    name: omnia_minio_data
+  omnia_mailpit_data:
+    name: omnia_mailpit_data
+  omnia_n8n_data:
+    name: omnia_n8n_data

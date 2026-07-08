@@ -1,5 +1,2 @@
-/**
- * @omnia/database — camada de acesso a dados.
- * Implementação completa na Sprint 1 (Drizzle ORM).
- */
-export {};
+export { createDatabaseClient, getDatabase, checkDatabaseConnection } from './client/index';
+export * from './schema/index';
