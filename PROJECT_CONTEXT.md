@@ -71,8 +71,9 @@ A plataforma unifica portal institucional, marketplace, CRM, área do parceiro, 
 ```
 omnia-platform/
 ├── apps/           # Aplicações (web, admin → portal, landing, docs)
-├── packages/       # Bibliotecas compartilhadas (18 packages)
-├── modules/        # Bounded contexts de negócio (documentação DDD)
+├── packages/       # Bibliotecas compartilhadas (27 packages)
+├── domains/        # Bounded contexts DDD (documentação)
+├── modules/        # Módulos de negócio (documentação)
 ├── docs/           # Documentação técnica e de produto
 ├── docker/         # Configurações Docker
 ├── scripts/        # Scripts operacionais
@@ -86,9 +87,9 @@ omnia-platform/
 |--------|----------|
 | Tooling | `typescript-config`, `eslint-config`, `prettier-config` |
 | Domínio | `types`, `constants` |
-| Infra | `database`, `integrations`, `logger`, `monitoring` |
-| Cross-cutting | `auth`, `security`, `feature-flags`, `i18n`, `sdk` |
-| UI/IA | `ui`, `ai-core`, `automation`, `shared` |
+| Infra | `database`, `integrations`, `logger`, `monitoring`, `config`, `cache`, `queue`, `mail` |
+| Cross-cutting | `auth`, `security`, `feature-flags`, `i18n`, `sdk`, `errors`, `validation`, `events` |
+| UI/IA | `ui`, `ai-core`, `automation`, `shared`, `search`, `testing` |
 
 ---
 
@@ -120,6 +121,12 @@ omnia-platform/
 | `.cursor/omnia-context.md` | Resumo para Cursor AI (referencia este documento) |
 | `docs/` | Documentação técnica detalhada por domínio |
 | `docs/14-adr/` | Decisões arquiteturais formais (ADRs) |
+| `SYSTEM_OVERVIEW.md` | Visão geral do sistema e fluxos |
+| `PROJECT_PRINCIPLES.md` | Princípios oficiais de engenharia |
+| `GOVERNANCE.md` | Processos Git, PR, release |
+| `QUALITY_GATES.md` | Requisitos mínimos para merge |
+
+> **Arquitetura congelada após Sprint 1.2** — mudanças estruturais exigem ADR (ver ADR-008).
 
 ---
 
@@ -129,7 +136,9 @@ omnia-platform/
 |--------|------|
 | **Sprint 0** | ✅ Fundação — estrutura, docs, monorepo |
 | **Sprint 0.5** | ✅ Foundation Hardening — tooling, packages infra, guidelines |
-| **Sprint 1** | Setup Next.js, Payload CMS, Docker Compose |
+| **Sprint 1** | 🟡 Base executável — Next.js, Payload, Docker, Drizzle |
+| **Sprint 1.1** | 🟡 Architecture Refinement — domínios, ADRs, status |
+| **Sprint 1.2** | 🟡 Platform Standards & Governance — **arquitetura congelada** |
 | **Sprint 2** | Autenticação, banco de dados, design system |
 | **Sprint 3** | Portal institucional e CMS |
 | **Sprint 4** | Blog e conteúdo |

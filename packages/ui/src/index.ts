@@ -1,5 +1,2 @@
-/**
- * @omnia/ui — design system.
- * Implementação completa na Sprint 2.
- */
-export {};
+export { Button, buttonVariants, type ButtonProps } from './components/ui/button';
+export { cn } from './lib/utils';

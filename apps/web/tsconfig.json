@@ -1,4 +1,15 @@
 {
-  "extends": "@omnia/typescript-config/base.json",
-  "include": ["src/**/*"]
+  "extends": "@omnia/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "plugins": [{ "name": "next" }],
+    "jsx": "preserve",
+    "noEmit": true,
+    "incremental": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

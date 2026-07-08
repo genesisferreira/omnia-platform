@@ -3,17 +3,41 @@
   "version": "0.0.0",
   "private": true,
   "description": "Painel administrativo, CRM e CMS",
+  "type": "module",
   "scripts": {
-    "build": "node ../../scripts/workspace-placeholder.mjs build",
-    "dev": "node ../../scripts/workspace-placeholder.mjs dev",
-    "lint": "eslint src/",
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf .next .turbo dist"
   },
+  "dependencies": {
+    "@omnia/database": "workspace:*",
+    "@omnia/monitoring": "workspace:*",
+    "@omnia/ui": "workspace:*",
+    "@payloadcms/db-postgres": "catalog:",
+    "@payloadcms/next": "catalog:",
+    "@payloadcms/richtext-lexical": "catalog:",
+    "@payloadcms/ui": "catalog:",
+    "graphql": "catalog:",
+    "next": "catalog:",
+    "payload": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sharp": "catalog:"
+  },
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "catalog:",
     "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "postcss": "catalog:",
     "rimraf": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }
 }

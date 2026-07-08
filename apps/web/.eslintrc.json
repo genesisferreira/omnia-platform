@@ -1,0 +1,3 @@
+{
+  "extends": ["@omnia/eslint-config", "next/core-web-vitals"]
+}

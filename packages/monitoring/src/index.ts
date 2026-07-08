@@ -1,12 +1,12 @@
 /**
  * @omnia/monitoring — Observabilidade centralizada.
  *
- * Módulos planejados:
- * - opentelemetry/  — Traces, metrics, spans distribuídos
- * - grafana/        # Dashboards e alertas
- * - prometheus/     # Métricas de aplicação
- * - sentry/         # Error tracking e performance
- *
- * Implementação: Sprint 1+.
+ * Módulos:
+ * - health/      — Status e healthchecks da plataforma
+ * - metrics/     — Prometheus (Sprint 2+)
+ * - logs/        — Agregação de logs
+ * - tracing/     — OpenTelemetry
+ * - alerts/      — Alertas e notificações
+ * - dashboards/  — Grafana
  */
-export {};
+export { getPlatformStatus, type PlatformStatus, type ServiceStatus } from './health/index';

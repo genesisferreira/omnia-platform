@@ -1,0 +1,20 @@
+{
+  "name": "@omnia/cache",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Abstração de cache — Redis e memória",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -49,7 +49,7 @@
 | [AI_GUIDELINES.md](../AI_GUIDELINES.md) | Arquitetura de IA |
 | [N8N_GUIDELINES.md](../N8N_GUIDELINES.md) | Automações n8n |
 | [UI_UX_GUIDELINES.md](../UI_UX_GUIDELINES.md) | Design system e a11y |
-| [CONTRIBUTING_GUIDELINES.md](../CONTRIBUTING_GUIDELINES.md) | Contribuição |
+| [DEPLOYMENT_ARCHITECTURE.md](../DEPLOYMENT_ARCHITECTURE.md) | Deploy |
 | [APPS_ARCHITECTURE.md](../APPS_ARCHITECTURE.md) | Divisão futura de apps |
 
 ## Releases

@@ -1,19 +1,30 @@
 # @omnia/admin
 
-Painel administrativo da Omnia Platform.
-
-## Módulos
-
-- Painel Administrativo
-- CRM
-- CMS (Payload)
-- Gestão de Parceiros
-- Configurações
+Painel administrativo e CMS da Omnia Platform.
 
 ## Stack
 
-Next.js 15 | React | TypeScript | Tailwind CSS | shadcn/ui | Payload CMS
+Next.js 15 | Payload CMS 3 | React 19 | TypeScript | Tailwind CSS
+
+## Desenvolvimento
+
+```bash
+pnpm docker:dev                  # PostgreSQL necessário para Payload
+pnpm --filter @omnia/admin dev   # http://localhost:3001
+```
+
+## URLs
+
+| Rota | Descrição |
+|------|-----------|
+| `/` | Página inicial (placeholder) |
+| `/admin` | Payload CMS admin panel |
+| `/api/health` | Healthcheck |
+
+## Payload CMS
+
+Configuração em `payload.config.ts`. Coleções futuras documentadas em `src/collections/README.md`.
 
 ## Status
 
-**Sprint 0** — Workspace configurado (`@omnia/admin`). Implementação na **Sprint 1**.
+**Sprint 1** — Next.js 15 + Payload CMS configurados. Coleções de negócio na Sprint 3+.
