@@ -11,6 +11,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf .next .turbo dist",
+    "migrate": "payload migrate",
+    "migrate:status": "payload migrate:status",
     "seed": "tsx src/seed/index.ts"
   },
   "dependencies": {

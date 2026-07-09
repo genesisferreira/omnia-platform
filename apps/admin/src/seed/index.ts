@@ -55,7 +55,9 @@ async function seed() {
     .findGlobal({ slug: 'global-settings' })
     .catch(() => null);
 
-  if (!existingGlobals?.siteName) {
+  if (existingGlobals?.siteName) {
+    console.log('✓ Global Settings já existe — seed ignorado');
+  } else {
     await payload.updateGlobal({
       slug: 'global-settings',
       data: {
@@ -68,7 +70,7 @@ async function seed() {
         ctaUrl: '#ecossistema',
       },
     });
-    console.log('✓ Global Settings atualizado');
+    console.log('✓ Global Settings criado');
   }
 
   console.log('✅ Seed concluído.');

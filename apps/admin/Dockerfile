@@ -43,6 +43,20 @@ ENV DOCKER_BUILD=true
 RUN pnpm turbo build --filter=@omnia/admin
 
 # ---------------------------------------------------------------------------
+# Bootstrap (migrations + seed — one-off, NÃO usar em runtime)
+# ---------------------------------------------------------------------------
+FROM installer AS bootstrap
+WORKDIR /app
+
+COPY docker/scripts/admin-bootstrap.sh /usr/local/bin/omnia-admin-bootstrap.sh
+RUN chmod +x /usr/local/bin/omnia-admin-bootstrap.sh
+
+ENV NODE_ENV=production
+
+ENTRYPOINT ["/usr/local/bin/omnia-admin-bootstrap.sh"]
+CMD ["bootstrap"]
+
+# ---------------------------------------------------------------------------
 # Runtime (Next.js standalone)
 # ---------------------------------------------------------------------------
 FROM base AS runner

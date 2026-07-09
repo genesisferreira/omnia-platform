@@ -61,11 +61,24 @@
 
 ## Banco (PostgreSQL)
 
-- [ ] Host confirmado: `POSTGRES_HOST=<NOME_DO_SERVICO_POSTGRES>`
-- [ ] Database de homologação criada
+- [ ] Host confirmado: `POSTGRES_HOST=<NOME_DO_SERVICO_POSTGRES>` (ex.: `omnia-postgres`)
+- [ ] Database de homologação criada (`omnia_staging`)
 - [ ] Usuário com permissões adequadas
-- [ ] `DATABASE_URL` testada a partir da rede `omnia_internal`
-- [ ] Payload conecta sem `ECONNREFUSED`
+- [ ] `DATABASE_URL` aponta para host interno na rede `omnia_internal`
+- [ ] **Bootstrap executado** antes do primeiro acesso ao Payload Admin
+
+### Bootstrap (migrations + seed)
+
+- [ ] Imagem bootstrap construída (`docker compose ... build`)
+- [ ] `admin-bootstrap` executado com sucesso:
+  ```bash
+  docker compose -f docker/compose/staging.yml --env-file .env.staging \
+    --profile bootstrap run --rm admin-bootstrap
+  ```
+- [ ] Tabelas Payload criadas (`users`, `tenants`, `companies`, `media`, `global_settings`)
+- [ ] Seed idempotente executado (6 empresas da Holding)
+- [ ] Sem erro `relation "global_settings" does not exist`
+- [ ] **Não** depende de Node/pnpm instalado no host Ubuntu
 
 ---
 
@@ -98,8 +111,12 @@
 ## Deploy
 
 - [ ] Branch correta no VPS (`feature/sprint-02-platform-base` ou branch aprovada)
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm build` OK antes do deploy
-- [ ] `docker compose ... up -d --build` executado
+- [ ] `git pull` executado
+- [ ] `.env.staging` validado
+- [ ] `docker compose ... config` sem erros
+- [ ] `docker compose ... build` executado
+- [ ] **`admin-bootstrap` executado** (banco vazio ou após novas migrations)
+- [ ] `docker compose ... up -d` executado
 - [ ] Containers `healthy` em `docker compose ps`
 - [ ] Portal acessível em https://dev.omniafrigo.com.br
 - [ ] Admin acessível em https://admin.dev.omniafrigo.com.br
@@ -143,8 +160,23 @@
 # Validar compose
 docker compose -f docker/compose/staging.yml --env-file .env.staging config
 
+# Build
+docker compose -f docker/compose/staging.yml --env-file .env.staging build
+
+# Bootstrap (migrations + seed) — obrigatório em banco vazio
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-bootstrap
+
+# Apenas migrations
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-migrate
+
+# Apenas seed (idempotente)
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-seed
+
 # Deploy
-docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build
+docker compose -f docker/compose/staging.yml --env-file .env.staging up -d
 
 # Status
 docker compose -f docker/compose/staging.yml --env-file .env.staging ps

@@ -18,6 +18,70 @@
 - **Não criar** novos containers de infraestrutura
 - **Não expor** portas no host — tráfego somente via Traefik (`omnia_proxy`)
 - **Não assumir** nomes de serviços internos — confirmar na rede `omnia_internal`
+- **Migrations/seed** via container one-off (`admin-bootstrap`) — **sem Node no host**
+
+## Fluxo oficial de deploy (VPS)
+
+```bash
+# 1. Atualizar código
+git pull origin feature/sprint-02-platform-base
+
+# 2. Configurar variáveis (se ainda não existir)
+cp .env.staging.example .env.staging
+nano .env.staging
+
+# 3. Validar compose
+docker compose -f docker/compose/staging.yml --env-file .env.staging config
+
+# 4. Build das imagens (web, admin, bootstrap)
+export DOCKER_BUILDKIT=1
+docker compose -f docker/compose/staging.yml --env-file .env.staging build
+
+# 5. Bootstrap do banco (migrations + seed) — OBRIGATÓRIO em banco vazio
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-bootstrap
+
+# 6. Subir aplicações
+docker compose -f docker/compose/staging.yml --env-file .env.staging up -d
+
+# 7. Validar
+curl -s https://dev.omniafrigo.com.br/api/health
+curl -s https://admin.dev.omniafrigo.com.br/api/health
+```
+
+### Atalhos via pnpm (na VPS, se pnpm estiver disponível)
+
+```bash
+pnpm docker:staging:config
+pnpm docker:staging:build
+pnpm docker:staging:bootstrap    # migrate + seed
+pnpm docker:staging:up
+```
+
+### Comandos granulares
+
+```bash
+# Apenas migrations Payload
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-migrate
+
+# Apenas seed (idempotente — seguro reexecutar)
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-seed
+```
+
+## Bootstrap — como funciona
+
+| Serviço | Imagem | Função |
+|---------|--------|--------|
+| `admin-bootstrap` | stage `bootstrap` do `apps/admin/Dockerfile` | `payload migrate` + `seed` |
+| `admin-migrate` | mesma imagem | somente `payload migrate` |
+| `admin-seed` | mesma imagem | somente seed idempotente |
+
+- Usa **profile `bootstrap`** — não sobe com `docker compose up -d`
+- Conecta apenas na rede **`omnia_internal`** (sem Traefik)
+- **Não expõe portas**
+- Imagem **runtime** (`admin`) continua minimalista (Next.js standalone)
 
 ## 1. Identificar serviços na VPS
 
@@ -27,50 +91,30 @@ docker network inspect omnia_internal --format '{{range .Containers}}{{.Name}} {
 
 Preencher em `.env.staging`:
 
-- `POSTGRES_HOST=<NOME_DO_SERVICO_POSTGRES>`
+- `POSTGRES_HOST=<NOME_DO_SERVICO_POSTGRES>` (ex.: `omnia-postgres`)
 - `REDIS_HOST=<NOME_DO_SERVICO_REDIS>`
 - `MINIO_HOST=<NOME_DO_SERVICO_MINIO>`
 
 ## 2. Preparar banco de dados
 
 ```sql
-CREATE DATABASE <POSTGRES_DATABASE>;
+CREATE DATABASE omnia_staging;
 -- Ajustar usuário/permissões conforme política do VPS
 ```
 
-## 3. Configurar variáveis
+`DATABASE_URL` deve apontar para o host interno, ex.:
 
-```bash
-cp .env.staging.example .env.staging
-nano .env.staging
+```
+postgresql://omnia:SENHA@omnia-postgres:5432/omnia_staging
 ```
 
-Substituir **todos** os placeholders `<...>` por valores reais.
+## 3. Primeiro usuário Payload
 
-## 4. Validar compose (sem subir)
+Após bootstrap, acesse https://admin.dev.omniafrigo.com.br/admin e crie o administrador.
 
-```bash
-docker compose -f docker/compose/staging.yml --env-file .env.staging config
-```
+O seed **não** cria usuários — apenas tenant, empresas e global settings.
 
-## 5. Build e deploy
-
-```bash
-export DOCKER_BUILDKIT=1
-docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build
-```
-
-## 6. Verificação pós-deploy
-
-```bash
-docker compose -f docker/compose/staging.yml --env-file .env.staging ps
-docker compose -f docker/compose/staging.yml --env-file .env.staging logs -f web admin
-
-curl -s https://dev.omniafrigo.com.br/api/health
-curl -s https://admin.dev.omniafrigo.com.br/api/health
-```
-
-## 7. Rollback
+## 4. Rollback
 
 ```bash
 docker compose -f docker/compose/staging.yml --env-file .env.staging down
@@ -80,13 +124,11 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging down
 
 | Arquivo | Função |
 |---------|--------|
-| `docker/compose/staging.yml` | Compose homologação |
-| `docker/compose/development.yml` | Compose desenvolvimento local |
-| `docker/compose/production.yml` | Placeholder produção |
+| `docker/compose/staging.yml` | Compose homologação + serviços bootstrap |
+| `docker/scripts/admin-bootstrap.sh` | Script migrate/seed no container |
+| `apps/admin/Dockerfile` | Targets: `bootstrap` (CLI) e `runner` (runtime) |
+| `apps/admin/src/migrations/` | Migrations Payload versionadas |
 | `.env.staging.example` | Template de variáveis |
-| `apps/web/Dockerfile` | Build portal |
-| `apps/admin/Dockerfile` | Build admin + Payload |
-| `.dockerignore` | Contexto de build |
 
 ## Validação local (antes do deploy)
 
@@ -97,7 +139,4 @@ pnpm build
 docker compose -f docker/compose/staging.yml --env-file .env.staging.example config
 ```
 
-> **Windows:** `pnpm build` local não usa `standalone` (evita EPERM de symlinks).  
-> O build Docker define `DOCKER_BUILD=true` e gera standalone no Linux.
-
-> **docker compose config** deve ser executado no VPS se Docker não estiver disponível localmente.
+> **docker compose config** e **bootstrap** devem ser executados no VPS (ou máquina com Docker).
