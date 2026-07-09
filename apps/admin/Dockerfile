@@ -40,6 +40,7 @@ ENV PAYLOAD_SECRET=$PAYLOAD_SECRET
 ENV NODE_ENV=production
 ENV DOCKER_BUILD=true
 
+RUN pnpm --filter @omnia/admin generate:importmap
 RUN pnpm turbo build --filter=@omnia/admin
 
 # ---------------------------------------------------------------------------
