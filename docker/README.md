@@ -13,6 +13,22 @@ pnpm docker:down     # Parar serviços
 
 Arquivo: [`compose/development.yml`](compose/development.yml)
 
+## Homologação (VPS)
+
+```bash
+cp .env.staging.example .env.staging
+pnpm docker:staging:config   # validar compose
+pnpm docker:staging:up       # build + deploy
+pnpm docker:staging:down     # parar
+```
+
+Arquivo: [`compose/staging.yml`](compose/staging.yml)
+
+Documentação:
+
+- [Deploy staging](staging/DEPLOY.md)
+- [Checklist homologação](../docs/09-infrastructure/STAGING_CHECKLIST.md)
+
 ## Serviços
 
 | Serviço | Porta | Descrição |
@@ -28,4 +44,4 @@ Arquivo: [`compose/development.yml`](compose/development.yml)
 
 ## Status
 
-**Sprint 1** — Docker Compose funcional para desenvolvimento.
+**Sprint 2** — Docker Compose para desenvolvimento local e homologação VPS.

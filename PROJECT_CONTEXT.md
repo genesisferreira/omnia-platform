@@ -136,11 +136,9 @@ omnia-platform/
 |--------|------|
 | **Sprint 0** | ✅ Fundação — estrutura, docs, monorepo |
 | **Sprint 0.5** | ✅ Foundation Hardening — tooling, packages infra, guidelines |
-| **Sprint 1** | 🟡 Base executável — Next.js, Payload, Docker, Drizzle |
-| **Sprint 1.1** | 🟡 Architecture Refinement — domínios, ADRs, status |
-| **Sprint 1.2** | 🟡 Platform Standards & Governance — **arquitetura congelada** |
-| **Sprint 2** | Autenticação, banco de dados, design system |
-| **Sprint 3** | Portal institucional e CMS |
+| **Sprint 1.2** | ✅ Platform Standards & Governance — arquitetura congelada |
+| **Sprint 2** | 🟡 Platform Base — CMS, portal, admin, design system |
+| **Sprint 3** | Auth (JWT, RBAC), migrations Drizzle |
 | **Sprint 4** | Blog e conteúdo |
 | **Sprint 5** | CRM base |
 | **Sprint 6** | Marketplace |

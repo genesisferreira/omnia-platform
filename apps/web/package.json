@@ -12,6 +12,7 @@
     "clean": "rimraf .next .turbo dist"
   },
   "dependencies": {
+    "@omnia/config": "workspace:*",
     "@omnia/database": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/ui": "workspace:*",

@@ -84,21 +84,22 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 |--------|--------|------|
 | Sprint 0 | ✅ Concluída | Fundação — estrutura, docs, monorepo |
 | Sprint 0.5 | ✅ Concluída | Foundation Hardening — tooling, packages infra |
-| Sprint 1 | 🟡 Em revisão | Base executável — Next.js, Payload, Docker, Drizzle |
-| Sprint 2 | ⬜ Planejado | Auth, database, design system |
-| Sprint 3 | ⬜ Planejado | Portal institucional e CMS |
+| Sprint 1 | ✅ Concluída | Base executável — Next.js, Payload, Docker |
+| Sprint 1.2 | ✅ Concluída | Governança e packages transversais |
+| Sprint 2 | 🟡 Em revisão | Platform Base — CMS, design system, portal |
+| Sprint 3 | ⬜ Planejada | Auth (JWT, RBAC), migrations Drizzle |
 | Sprint 4+ | ⬜ Planejado | Blog, CRM, marketplace, IA |
 
 ---
 
 ## Como Executar
 
-> 🟡 **Sprint 1 (em revisão)**: Base executável com Next.js 15, Payload CMS, Drizzle ORM e Docker Compose.
+> **Sprint 2 (em revisão)**: Payload CMS com coleções, portal, admin dashboard e design system Omnia.
 
 ### Pré-requisitos
 
 - Node.js 22+ ([.nvmrc](.nvmrc))
-- pnpm 9+
+- pnpm 9+ (**não use npm** — o monorepo é gerenciado com pnpm)
 - Docker e Docker Compose
 
 ### Setup rápido
@@ -106,12 +107,15 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 ```bash
 git clone https://github.com/genesisferreira/omnia-platform.git
 cd omnia-platform
-git checkout develop
+git checkout feature/sprint-02-platform-base
 pnpm install
 cp .env.example .env
 pnpm docker:dev
+pnpm --filter @omnia/admin seed   # cadastra empresas da Holding
 pnpm dev
 ```
+
+> ⚠️ Use sempre `pnpm dev`, **não** `npm run dev`.
 
 ### URLs locais
 
@@ -171,11 +175,11 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 
 | Aspecto | Status |
 |---------|--------|
-| Fundação (Sprint 0 + 0.5) | ✅ Concluída |
-| Base executável (Sprint 1) | 🟡 Em revisão |
-| Aplicações Next.js | 🟡 Sprint 1 |
-| Banco de Dados (Drizzle) | 🟡 Sprint 1 |
-| CMS (Payload) | 🟡 Sprint 1 |
+| Fundação (Sprint 0–1.2) | ✅ Concluída |
+| Platform Base (Sprint 2) | 🟡 Em revisão |
+| Aplicações Next.js | ✅ Sprint 2 |
+| CMS (Payload) | ✅ Sprint 2 — coleções ativas |
+| Banco de Dados (Drizzle) | 🟡 Schema vazio — Sprint 3 |
 | IA / Chat | ⬜ Sprint 8+ |
 | Automações n8n | ⬜ Sprint 8+ |
 

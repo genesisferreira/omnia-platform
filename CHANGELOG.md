@@ -4,6 +4,17 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Sprint 2 — Platform Base (em revisão)
+
+#### Adicionado
+- Payload CMS: coleções `tenants`, `companies`, `media` + global `global-settings`
+- Media Library com upload local; MinIO documentado
+- `@omnia/config` runtime com validação Zod
+- Design System Omnia: tokens + Card, Container, Badge, SectionTitle, Input, Textarea
+- Portal: homepage com Hero, Ecossistema, Empresas, CTA
+- Admin: dashboard com stats, navegação e atalhos CMS
+- Seed das 6 empresas da Holding (`pnpm --filter @omnia/admin seed`)
+
 ### Sprint 1.2 — Platform Standards & Governance (em revisão)
 
 #### Adicionado

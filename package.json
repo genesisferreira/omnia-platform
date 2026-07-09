@@ -1,6 +1,6 @@
 {
   "name": "omnia-platform",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Plataforma SaaS modular do ecossistema Omnia Frigo Holding",
   "license": "MIT",
@@ -21,7 +21,10 @@
     "clean": "turbo run clean && rimraf node_modules",
     "docker:dev": "docker compose -f docker/compose/development.yml --env-file .env up -d",
     "docker:down": "docker compose -f docker/compose/development.yml --env-file .env down",
-    "docker:logs": "docker compose -f docker/compose/development.yml --env-file .env logs -f"
+    "docker:logs": "docker compose -f docker/compose/development.yml --env-file .env logs -f",
+    "docker:staging:config": "docker compose -f docker/compose/staging.yml --env-file .env.staging.example config",
+    "docker:staging:up": "docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build",
+    "docker:staging:down": "docker compose -f docker/compose/staging.yml --env-file .env.staging down"
   },
   "devDependencies": {
     "@omnia/eslint-config": "workspace:*",

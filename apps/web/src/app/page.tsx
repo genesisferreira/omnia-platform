@@ -1,15 +1,18 @@
-import { Button } from '@omnia/ui';
+import { CtaSection } from '@/components/home/CtaSection';
+import { CompanyCards } from '@/components/home/CompanyCards';
+import { EcosystemSection } from '@/components/home/EcosystemSection';
+import { Hero } from '@/components/home/Hero';
+import { fetchCompanies, fetchGlobalSettings } from '@/lib/cms';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [settings, companies] = await Promise.all([fetchGlobalSettings(), fetchCompanies()]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">Omnia Platform</h1>
-        <p className="mt-4 text-lg text-muted-foreground">Portal em construção</p>
-      </div>
-      <Button variant="outline" disabled>
-        Sprint 1 — Base executável
-      </Button>
-    </main>
+    <>
+      <Hero settings={settings} />
+      <EcosystemSection />
+      <CompanyCards companies={companies} />
+      <CtaSection />
+    </>
   );
 }

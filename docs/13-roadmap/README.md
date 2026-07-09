@@ -10,8 +10,9 @@
 | **0.5** | Foundation Hardening — tooling, packages infra | ✅ Concluída |
 | **1** | Base executável — Next.js, Payload, Docker, Drizzle | 🟡 Em revisão |
 | **1.1** | Architecture Refinement — domínios, status, ADRs | 🟡 Em revisão |
-| **1.2** | Platform Standards & Governance — packages, docs, freeze | 🟡 Em revisão |
-| **2** | Auth (JWT, RBAC), design system, migrations base | ⬜ Planejada |
+| **1.2** | Platform Standards & Governance — packages, docs, freeze | ✅ Concluída |
+| **2** | Platform Base — CMS, portal, admin, design system | 🟡 Em revisão |
+| **3** | Auth (JWT, RBAC), migrations Drizzle | ⬜ Planejada |
 | **3** | Portal institucional + CMS coleções | ⬜ Planejada |
 | **4** | Blog + conteúdo editorial | ⬜ Planejada |
 | **5** | CRM — leads, pipeline, eventos | ⬜ Planejada |

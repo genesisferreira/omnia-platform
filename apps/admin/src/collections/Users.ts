@@ -1,19 +1,27 @@
 import type { CollectionConfig } from 'payload';
 
-/**
- * Coleção mínima de usuários admin — necessária para o Payload CMS.
- * Autenticação completa será implementada na Sprint 2.
- */
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   admin: {
     useAsTitle: 'email',
+    group: 'Sistema',
   },
   fields: [
     {
       name: 'name',
       type: 'text',
+      label: 'Nome',
+    },
+    {
+      name: 'role',
+      type: 'select',
+      defaultValue: 'editor',
+      options: [
+        { label: 'Administrador', value: 'admin' },
+        { label: 'Editor', value: 'editor' },
+      ],
+      label: 'Papel',
     },
   ],
 };

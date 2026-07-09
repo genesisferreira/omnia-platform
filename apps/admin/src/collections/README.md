@@ -1,29 +1,27 @@
-# Coleções Payload CMS — Roadmap
+# Coleções Payload CMS — Sprint 2
 
-> Configuração mínima na Sprint 1. Coleções de negócio nas próximas sprints.
+| Coleção | Slug | Descrição |
+|---------|------|-----------|
+| Users | `users` | Usuários admin com autenticação |
+| Tenants | `tenants` | Multiempresa — tenant principal |
+| Companies | `companies` | Empresas do ecossistema Holding |
+| Media | `media` | Biblioteca de mídia (upload local; MinIO preparado) |
 
-## Sprint 1
+## Global
 
-| Coleção | Status | Propósito |
-|---------|--------|-----------|
-| `users` | ✅ Mínima | Autenticação admin do Payload |
+| Global | Slug | Descrição |
+|--------|------|-----------|
+| GlobalSettings | `global-settings` | Configurações do site e portal |
 
-## Planejado
+## Seed
 
-| Coleção | Sprint | Módulo |
-|---------|--------|--------|
-| `pages` | 3 | Portal / CMS |
-| `posts` | 4 | Blog |
-| `categories` | 4 | Blog |
-| `tags` | 4 | Blog |
-| `companies` | 3 | Multiempresa |
-| `partners` | 7 | Parceiros |
-| `products` | 6 | Marketplace |
-| `services` | 6 | Marketplace |
-| `banners` | 3 | Portal |
-| `media` | 1+ | Biblioteca de mídia |
+```bash
+pnpm --filter @omnia/admin seed
+```
 
-## Nota
+Cadastra tenant Omnia Holding + 6 empresas do ecossistema.
 
-Dados de CRM, marketplace (pedidos, leads) usam **Drizzle ORM** (`@omnia/database`), não Payload.
-Payload é para **conteúdo gerenciável** (CMS).
+## Regras
+
+- Portal (`apps/web`) consome via REST API — nunca importa Payload
+- Blog, CRM, Marketplace → sprints futuras

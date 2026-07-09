@@ -5,17 +5,15 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { Companies } from './src/collections/Companies';
+import { Media } from './src/collections/Media';
+import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
+import { GlobalSettings } from './src/globals/GlobalSettings';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-/**
- * Payload CMS — configuração mínima Sprint 1.
- *
- * Coleções de negócio (blog, parceiros, produtos, etc.) serão adicionadas
- * nas próximas sprints. Ver src/collections/README.md
- */
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -26,7 +24,8 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users],
+  collections: [Users, Tenants, Companies, Media],
+  globals: [GlobalSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
   typescript: {
@@ -37,4 +36,5 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
+  cors: [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'],
 });

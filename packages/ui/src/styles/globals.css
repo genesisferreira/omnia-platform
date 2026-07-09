@@ -4,44 +4,52 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Omnia Brand Tokens — Sprint 2 */
+    --omnia-emerald: 164 79% 20%;
+    --omnia-deep-blue: 209 69% 18%;
+    --omnia-copper: 27 53% 51%;
+    --omnia-graphite: 210 17% 9%;
+    --omnia-white: 0 0% 100%;
+
+    --background: var(--omnia-white);
+    --foreground: var(--omnia-graphite);
+    --card: var(--omnia-white);
+    --card-foreground: var(--omnia-graphite);
+    --primary: var(--omnia-emerald);
+    --primary-foreground: var(--omnia-white);
+    --secondary: 209 69% 18%;
+    --secondary-foreground: var(--omnia-white);
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 40%;
+    --accent: var(--omnia-copper);
+    --accent-foreground: var(--omnia-white);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: var(--omnia-white);
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: var(--omnia-emerald);
     --radius: 0.5rem;
+
+    --font-heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --background: var(--omnia-graphite);
+    --foreground: var(--omnia-white);
+    --card: 210 17% 12%;
+    --card-foreground: var(--omnia-white);
+    --primary: 164 60% 35%;
+    --primary-foreground: var(--omnia-white);
+    --secondary: 209 50% 25%;
+    --secondary-foreground: var(--omnia-white);
+    --muted: 210 17% 15%;
+    --muted-foreground: 215 15% 65%;
+    --accent: var(--omnia-copper);
+    --accent-foreground: var(--omnia-white);
+    --border: 210 17% 20%;
+    --input: 210 17% 20%;
+    --ring: 164 60% 35%;
   }
 
   * {
@@ -50,5 +58,15 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
   }
 }
