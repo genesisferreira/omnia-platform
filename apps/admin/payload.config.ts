@@ -7,6 +7,7 @@ import { buildConfig } from 'payload';
 
 import { Companies } from './src/collections/Companies';
 import { Media } from './src/collections/Media';
+import { Sites } from './src/collections/Sites';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { GlobalSettings } from './src/globals/GlobalSettings';
@@ -24,7 +25,7 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users, Tenants, Companies, Media],
+  collections: [Users, Tenants, Companies, Sites, Media],
   globals: [GlobalSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
