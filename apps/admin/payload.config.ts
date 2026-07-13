@@ -6,6 +6,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
 import { Companies } from './src/collections/Companies';
+import { Domains } from './src/collections/Domains';
 import { Media } from './src/collections/Media';
 import { Sites } from './src/collections/Sites';
 import { Tenants } from './src/collections/Tenants';
@@ -25,7 +26,7 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users, Tenants, Companies, Sites, Media],
+  collections: [Users, Tenants, Companies, Sites, Domains, Media],
   globals: [GlobalSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
