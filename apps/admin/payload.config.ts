@@ -11,6 +11,7 @@ import { Media } from './src/collections/Media';
 import { Sites } from './src/collections/Sites';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
+import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 
 const filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,7 @@ export default buildConfig({
   },
   collections: [Users, Tenants, Companies, Sites, Domains, Media],
   globals: [GlobalSettings],
+  endpoints: [resolveSiteEndpoint],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
   typescript: {
