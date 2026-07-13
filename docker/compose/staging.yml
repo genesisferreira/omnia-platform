@@ -34,6 +34,7 @@ services:
       REDIS_URL: ${REDIS_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     networks:
       - omnia_proxy
       - omnia_internal
@@ -91,6 +92,7 @@ services:
       MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     volumes:
       - omnia_platform_admin_media_dev:/app/media
     networks:
@@ -139,6 +141,7 @@ services:
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     networks:
       - omnia_internal
     restart: 'no'
@@ -157,6 +160,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     networks:
       - omnia_internal
     restart: 'no'
@@ -177,6 +181,7 @@ services:
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     networks:
       - omnia_internal
     restart: 'no'
