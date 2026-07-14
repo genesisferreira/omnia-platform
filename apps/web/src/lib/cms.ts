@@ -1,17 +1,16 @@
 import { getConfig } from '@omnia/config';
 
 export type CmsCompany = {
-  id: string | number;
+  id: string;
   name: string;
   slug: string;
   shortDescription: string;
   ecosystemRole: string;
   displayOrder: number;
-  externalSite?: string | null;
-  status: string;
-  logo?: {
-    url?: string;
-    alt?: string;
+  externalSite: string | null;
+  logo: {
+    url: string;
+    alt: string | null;
   } | null;
 };
 
@@ -25,20 +24,34 @@ export type CmsGlobalSettings = {
   contactEmail?: string;
 };
 
+type PublicCompaniesResponse = {
+  ok: true;
+  companies: CmsCompany[];
+};
+
 function getAdminApiUrl(): string {
   return getConfig().app.adminUrl;
+}
+
+function isPublicCompaniesResponse(value: unknown): value is PublicCompaniesResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return record.ok === true && Array.isArray(record.companies);
 }
 
 export async function fetchCompanies(): Promise<CmsCompany[]> {
   try {
     const base = getAdminApiUrl();
-    const res = await fetch(
-      `${base}/api/companies?where[status][equals]=active&sort=displayOrder&limit=20&depth=1`,
-      { next: { revalidate: 60 } },
-    );
+    const res = await fetch(`${base}/api/omnia/public-companies`, {
+      next: { revalidate: 60 },
+    });
     if (!res.ok) return [];
-    const data = (await res.json()) as { docs?: CmsCompany[] };
-    return data.docs ?? [];
+    const data: unknown = await res.json();
+    if (!isPublicCompaniesResponse(data)) return [];
+    return data.companies;
   } catch {
     return [];
   }

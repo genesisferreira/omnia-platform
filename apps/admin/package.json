@@ -14,7 +14,8 @@
     "generate:importmap": "payload generate:importmap",
     "migrate": "payload migrate",
     "migrate:status": "payload migrate:status",
-    "seed": "tsx src/seed/index.ts"
+    "seed": "tsx src/seed/index.ts",
+    "test:public-companies": "tsx src/scripts/test-public-companies.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
