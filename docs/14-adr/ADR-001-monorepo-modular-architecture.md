@@ -31,21 +31,21 @@ Adotar uma **arquitetura monorepo modular** com as seguintes tecnologias e padr�
 
 ### Aplicações (`apps/`)
 
-| App | Propósito |
-|-----|-----------|
-| `web` | Portal público, marketplace, blog, área do parceiro |
-| `admin` | Painel administrativo, CRM, CMS |
+| App     | Propósito                                           |
+| ------- | --------------------------------------------------- |
+| `web`   | Portal público, marketplace, blog, área do parceiro |
+| `admin` | Painel administrativo, CRM, CMS                     |
 
 ### Pacotes (`packages/`)
 
-| Pacote | Responsabilidade |
-|--------|------------------|
-| `ui` | Design system (shadcn/ui, tokens, hooks) |
-| `database` | Schema, migrations, seeds (PostgreSQL) |
-| `auth` | Autenticação e autorização |
-| `ai-core` | Motor de IA (providers, agents, RAG) |
-| `shared` | Utilitários e tipos compartilhados |
-| `automation` | Workflows n8n |
+| Pacote       | Responsabilidade                         |
+| ------------ | ---------------------------------------- |
+| `ui`         | Design system (shadcn/ui, tokens, hooks) |
+| `database`   | Schema, migrations, seeds (PostgreSQL)   |
+| `auth`       | Autenticação e autorização               |
+| `ai-core`    | Motor de IA (providers, agents, RAG)     |
+| `shared`     | Utilitários e tipos compartilhados       |
+| `automation` | Workflows n8n                            |
 
 ### Padrões Arquiteturais
 
@@ -106,11 +106,11 @@ Adotar uma **arquitetura monorepo modular** com as seguintes tecnologias e padr�
 
 ### Riscos Mitigados
 
-| Risco | Mitigação |
-|-------|-----------|
-| Acoplamento entre packages | ESLint boundaries, code review, ADRs |
-| Build lento | Turborepo remote cache, affected builds |
-| Conflitos de merge | Feature branches curtas, CODEOWNERS |
+| Risco                      | Mitigação                               |
+| -------------------------- | --------------------------------------- |
+| Acoplamento entre packages | ESLint boundaries, code review, ADRs    |
+| Build lento                | Turborepo remote cache, affected builds |
+| Conflitos de merge         | Feature branches curtas, CODEOWNERS     |
 
 ## Referências
 

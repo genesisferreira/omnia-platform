@@ -1,9 +1,9 @@
 {
-  "extends": "@omnia/typescript-config/node.json",
+  "extends": "@omnia/typescript-config/base.json",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "noEmit": false
+    "noEmit": true
   },
   "include": ["src/**/*"]
 }

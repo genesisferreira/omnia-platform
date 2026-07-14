@@ -2,12 +2,18 @@
 
 Scripts auxiliares para operações Docker.
 
-## Status
+## Scripts
 
-Será populado na Sprint 1.
+| Script               | Uso                                                      |
+| -------------------- | -------------------------------------------------------- |
+| `admin-bootstrap.sh` | Migrations Payload + seed em staging (container one-off) |
 
-## Scripts Planejados
+Invocado pelo target `bootstrap` em `apps/admin/Dockerfile` e pelos serviços `admin-bootstrap`, `admin-migrate`, `admin-seed` em `docker/compose/staging.yml`.
 
-- `init-db.sh` — Inicializar banco de dados
-- `backup-db.sh` — Backup do PostgreSQL
-- `reset-dev.sh` — Reset do ambiente de desenvolvimento
+```bash
+# Na VPS (a partir da raiz do repositório)
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-bootstrap
+```
+
+Modos: `migrate` | `seed` | `bootstrap` (padrão).

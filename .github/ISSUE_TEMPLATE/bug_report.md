@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Reportar um bug na Omnia Platform
-title: "[bug]: "
+title: '[bug]: '
 labels: bug
 assignees: ''
 ---

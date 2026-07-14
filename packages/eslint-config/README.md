@@ -4,9 +4,9 @@ Configurações ESLint compartilhadas do monorepo Omnia Platform.
 
 ## Configurações
 
-| Export | Uso |
-|--------|-----|
-| `@omnia/eslint-config` | Base TypeScript strict |
+| Export                      | Uso                      |
+| --------------------------- | ------------------------ |
+| `@omnia/eslint-config`      | Base TypeScript strict   |
 | `@omnia/eslint-config/next` | Apps Next.js (Sprint 1+) |
 
 ## Uso

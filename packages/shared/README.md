@@ -12,11 +12,11 @@ Utilitários **puros** compartilhados entre apps e packages (sem dependência de
 
 ## O que NÃO vai aqui
 
-| Conteúdo | Package correto |
-|----------|-----------------|
-| Tipos de domínio | `@omnia/types` |
+| Conteúdo                   | Package correto    |
+| -------------------------- | ------------------ |
+| Tipos de domínio           | `@omnia/types`     |
 | Roles, permissions, routes | `@omnia/constants` |
-| Lógica de negócio | Apps / use cases |
+| Lógica de negócio          | Apps / use cases   |
 
 ## Regra
 

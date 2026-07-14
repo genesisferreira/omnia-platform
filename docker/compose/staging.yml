@@ -1,0 +1,198 @@
+# Omnia Platform — Homologação (VPS)
+#
+# Deploy APENAS apps/web e apps/admin.
+# Reutiliza infraestrutura existente: Traefik, PostgreSQL, Redis, MinIO.
+# NÃO cria containers para serviços de infraestrutura.
+#
+# Uso (a partir da raiz do repositório):
+#   docker compose -f docker/compose/staging.yml --env-file .env.staging config
+#   docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap run --rm admin-bootstrap
+#   docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build
+#
+# Redes externas obrigatórias: omnia_proxy, omnia_internal
+
+name: omnia-platform-dev
+
+services:
+  web:
+    container_name: omnia-platform-web-dev
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+    restart: unless-stopped
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      APP_VERSION: ${APP_VERSION}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_proxy
+      - omnia_internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      # Router — Portal público
+      - traefik.http.routers.omnia-platform-web-dev.rule=Host(`dev.omniafrigo.com.br`)
+      - traefik.http.routers.omnia-platform-web-dev.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-platform-web-dev.tls=true
+      - traefik.http.routers.omnia-platform-web-dev.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-platform-web-dev.service=omnia-platform-web-dev
+      - traefik.http.services.omnia-platform-web-dev.loadbalancer.server.port=3000
+      # Middlewares opcionais — descomente se existirem no Traefik do VPS
+      # - traefik.http.routers.omnia-platform-web-dev.middlewares=omnia-platform-compress@docker,omnia-platform-security-headers@docker
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  admin:
+    container_name: omnia-platform-admin-dev
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+        DATABASE_URL: ${DATABASE_URL}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+    restart: unless-stopped
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      APP_VERSION: ${APP_VERSION}
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      MINIO_ENDPOINT: ${MINIO_HOST}
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    volumes:
+      - omnia_platform_admin_media_dev:/app/media
+    networks:
+      - omnia_proxy
+      - omnia_internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      # Router — Admin + Payload CMS (/admin)
+      - traefik.http.routers.omnia-platform-admin-dev.rule=Host(`admin.dev.omniafrigo.com.br`)
+      - traefik.http.routers.omnia-platform-admin-dev.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-platform-admin-dev.tls=true
+      - traefik.http.routers.omnia-platform-admin-dev.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-platform-admin-dev.service=omnia-platform-admin-dev
+      - traefik.http.services.omnia-platform-admin-dev.loadbalancer.server.port=3000
+      # Middlewares opcionais — descomente se existirem no Traefik do VPS
+      # - traefik.http.routers.omnia-platform-admin-dev.middlewares=omnia-platform-compress@docker,omnia-platform-security-headers@docker
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ---------------------------------------------------------------------------
+  # Bootstrap one-off — migrations + seed (profile bootstrap, não sobe com up -d)
+  # ---------------------------------------------------------------------------
+  admin-bootstrap:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-bootstrap
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['bootstrap']
+
+  admin-migrate:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-migrate
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['migrate']
+
+  admin-seed:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['seed']
+
+networks:
+  omnia_proxy:
+    external: true
+  omnia_internal:
+    external: true
+
+volumes:
+  omnia_platform_admin_media_dev:
+    name: omnia_platform_admin_media_dev

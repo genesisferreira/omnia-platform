@@ -13,11 +13,11 @@ src/
 
 ## Idiomas planejados
 
-| Locale | Status |
-|--------|--------|
+| Locale  | Status              |
+| ------- | ------------------- |
 | `pt-BR` | Inicial (Sprint 3+) |
-| `en-US` | Futuro |
-| `es-ES` | Futuro |
+| `en-US` | Futuro              |
+| `es-ES` | Futuro              |
 
 ## Integração
 

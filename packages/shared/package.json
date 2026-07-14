@@ -5,13 +5,10 @@
   "description": "Tipos, constantes e utilitários compartilhados",
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit",
     "dev": "node ../../scripts/workspace-placeholder.mjs dev",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",

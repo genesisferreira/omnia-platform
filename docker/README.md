@@ -1,40 +1,47 @@
 # Docker — Omnia Platform
 
-> Estrutura de containerização da Omnia Platform.
+Configurações de containerização da Omnia Platform.
 
-## Finalidade
+## Desenvolvimento
 
-Esta pasta contém todas as configurações Docker para os ambientes da plataforma.
-
-## Estrutura
-
+```bash
+cp .env.example .env
+pnpm docker:dev      # Subir todos os serviços
+pnpm docker:logs     # Acompanhar logs
+pnpm docker:down     # Parar serviços
 ```
-docker/
-├── development/    # Configurações para desenvolvimento local
-├── production/     # Configurações para produção
-├── compose/        # Arquivos Docker Compose
-└── scripts/        # Scripts auxiliares Docker
+
+Arquivo: [`compose/development.yml`](compose/development.yml)
+
+## Homologação (VPS)
+
+```bash
+cp .env.staging.example .env.staging
+pnpm docker:staging:config   # validar compose
+pnpm docker:staging:up       # build + deploy
+pnpm docker:staging:down     # parar
 ```
+
+Arquivo: [`compose/staging.yml`](compose/staging.yml)
+
+Documentação:
+
+- [Deploy staging](staging/DEPLOY.md)
+- [Checklist homologação](../docs/09-infrastructure/STAGING_CHECKLIST.md)
+
+## Serviços
+
+| Serviço       | Porta     | Descrição                           |
+| ------------- | --------- | ----------------------------------- |
+| PostgreSQL 16 | 5432      | Banco principal (Payload + Drizzle) |
+| Redis 7       | 6379      | Cache e sessões                     |
+| MinIO         | 9000/9001 | Object storage                      |
+| n8n           | 5678      | Automações                          |
+
+## Documentação
+
+- [SPRINT-01-INFRASTRUCTURE](../docs/09-infrastructure/SPRINT-01-INFRASTRUCTURE.md)
 
 ## Status
 
-**Sprint 0** — Estrutura preparada. Containers serão criados na **Sprint 1**.
-
-## Serviços Planejados (Sprint 1+)
-
-| Serviço | Imagem | Porta |
-|---------|--------|-------|
-| PostgreSQL | postgres:16-alpine | 5432 |
-| Redis | redis:7-alpine | 6379 |
-| MinIO | minio/minio | 9000, 9001 |
-| n8n | n8nio/n8n | 5678 |
-
-## Uso (Sprint 1+)
-
-```bash
-# Desenvolvimento
-docker compose -f docker/compose/development.yml up -d
-
-# Produção
-docker compose -f docker/compose/production.yml up -d
-```
+**Sprint 2** — Docker Compose para desenvolvimento local e homologação VPS.

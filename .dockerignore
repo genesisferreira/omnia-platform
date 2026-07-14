@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next
+**/.next
+dist
+**/dist
+.turbo
+**/.turbo
+
+# Git & IDE
+.git
+.gitignore
+.cursor
+.vscode
+.idea
+
+# Env & secrets (injected at runtime)
+.env
+.env.*
+!.env.staging.example
+!.env.example
+
+# Docs & misc
+*.md
+!docker/**/*.md
+docs
+agent-transcripts
+
+# Docker
+docker/compose/development.yml
+
+# Tests & coverage
+coverage
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# OS
+.DS_Store
+Thumbs.db

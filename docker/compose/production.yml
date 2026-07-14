@@ -1,0 +1,11 @@
+# Omnia Platform — Produção
+#
+# Placeholder — será populado em sprint futura.
+# NÃO utilizar para deploy nesta fase.
+#
+# Uso previsto:
+#   docker compose -f docker/compose/production.yml --env-file .env.production config
+
+name: omnia-platform-prod
+
+services: {}

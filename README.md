@@ -47,32 +47,32 @@ Consulte [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) e [docs/08-architecture](docs/
 
 ## Tecnologias
 
-| Categoria | Stack |
-|-----------|-------|
-| Framework | Next.js 15, React, TypeScript |
-| UI | Tailwind CSS, shadcn/ui |
-| CMS | Payload CMS |
-| Banco | PostgreSQL + Drizzle ORM |
-| Cache | Redis |
-| Storage | MinIO |
-| IA | DeepSeek API, Omnia AI Core |
-| Automação | n8n |
-| Infra | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
+| Categoria | Stack                          |
+| --------- | ------------------------------ |
+| Framework | Next.js 15, React, TypeScript  |
+| UI        | Tailwind CSS, shadcn/ui        |
+| CMS       | Payload CMS                    |
+| Banco     | PostgreSQL + Drizzle ORM       |
+| Cache     | Redis                          |
+| Storage   | MinIO                          |
+| IA        | DeepSeek API, Omnia AI Core    |
+| Automação | n8n                            |
+| Infra     | Docker, Docker Compose         |
+| CI/CD     | GitHub Actions                 |
 | Qualidade | ESLint, Prettier, EditorConfig |
 
 ---
 
 ## Estrutura de Documentação
 
-| Pasta | Conteúdo |
-|-------|----------|
-| `docs/00-product-vision` | Visão de produto |
-| `docs/01-blueprint` | Blueprint técnico |
-| `docs/02-prd` | Product Requirements Document |
-| `docs/08-architecture` | Arquitetura e ADRs |
-| `docs/13-roadmap` | Roadmap de sprints |
-| `docs/14-adr` | Architecture Decision Records |
+| Pasta                    | Conteúdo                      |
+| ------------------------ | ----------------------------- |
+| `docs/00-product-vision` | Visão de produto              |
+| `docs/01-blueprint`      | Blueprint técnico             |
+| `docs/02-prd`            | Product Requirements Document |
+| `docs/08-architecture`   | Arquitetura e ADRs            |
+| `docs/13-roadmap`        | Roadmap de sprints            |
+| `docs/14-adr`            | Architecture Decision Records |
 
 Veja a pasta [docs/](docs/) para a documentação completa.
 
@@ -80,52 +80,64 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 
 ## Roadmap
 
-| Sprint | Status | Foco |
-|--------|--------|------|
-| Sprint 0 | ✅ Concluída | Fundação — estrutura, docs, monorepo |
-| Sprint 0.5 | ✅ Concluída | Foundation Hardening — tooling, packages infra |
-| Sprint 1 | ⬜ Planejado | Setup Next.js, Payload, Docker Compose |
-| Sprint 2 | ⬜ Planejado | Auth, database, design system |
-| Sprint 3 | ⬜ Planejado | Portal institucional e CMS |
-| Sprint 4+ | ⬜ Planejado | Blog, CRM, marketplace, IA |
+| Sprint     | Status        | Foco                                           |
+| ---------- | ------------- | ---------------------------------------------- |
+| Sprint 0   | ✅ Concluída  | Fundação — estrutura, docs, monorepo           |
+| Sprint 0.5 | ✅ Concluída  | Foundation Hardening — tooling, packages infra |
+| Sprint 1   | ✅ Concluída  | Base executável — Next.js, Payload, Docker     |
+| Sprint 1.2 | ✅ Concluída  | Governança e packages transversais             |
+| Sprint 2   | 🟡 Em revisão | Platform Base — CMS, design system, portal     |
+| Sprint 3   | ⬜ Planejada  | Auth (JWT, RBAC), migrations Drizzle           |
+| Sprint 4+  | ⬜ Planejado  | Blog, CRM, marketplace, IA                     |
 
 ---
 
 ## Como Executar
 
-> ✅ **Foundation concluída (Sprint 0 + 0.5)**: Arquitetura enterprise preparada. Aplicações na **Sprint 1**.
+> **Sprint 2 (em revisão)**: Payload CMS com coleções, portal, admin dashboard e design system Omnia.
 
 ### Pré-requisitos
 
 - Node.js 22+ ([.nvmrc](.nvmrc))
-- pnpm 9+
-- Docker e Docker Compose (Sprint 1+)
-- PostgreSQL 16+ (Sprint 1+)
-- Redis 7+ (Sprint 1+)
+- pnpm 9+ (**não use npm** — o monorepo é gerenciado com pnpm)
+- Docker e Docker Compose
 
-### Setup (Sprint 1+)
+### Setup rápido
 
 ```bash
-# Clonar o repositório
 git clone https://github.com/genesisferreira/omnia-platform.git
 cd omnia-platform
-
-# Instalar dependências
+git checkout feature/sprint-02-platform-base
 pnpm install
-
-# Verificar qualidade do código
-pnpm lint
-pnpm typecheck
-pnpm format:check
-
-# Configurar variáveis de ambiente
 cp .env.example .env
+pnpm docker:dev
+pnpm --filter @omnia/admin seed   # cadastra empresas da Holding
+pnpm dev
+```
 
-# Iniciar infraestrutura (Sprint 1+)
-# docker compose -f docker/compose/development.yml up -d
+> ⚠️ Use sempre `pnpm dev`, **não** `npm run dev`.
 
-# Iniciar desenvolvimento (Sprint 1+)
-# pnpm dev
+### URLs locais
+
+| Serviço        | URL                              |
+| -------------- | -------------------------------- |
+| Portal (web)   | http://localhost:3000            |
+| Admin          | http://localhost:3001            |
+| Payload CMS    | http://localhost:3001/admin      |
+| Mailpit        | http://localhost:8025            | Email dev (SMTP) |
+| pgAdmin        | http://localhost:5050            | GUI PostgreSQL   |
+| MinIO Console  | http://localhost:9001            |
+| Health (web)   | http://localhost:3000/api/health |
+| Health (admin) | http://localhost:3001/api/health |
+
+### Comandos úteis
+
+```bash
+pnpm lint          # ESLint
+pnpm typecheck     # TypeScript
+pnpm build         # Build de produção
+pnpm docker:down   # Parar Docker
+pnpm docker:logs   # Logs dos containers
 ```
 
 ### Variáveis de Ambiente
@@ -150,27 +162,27 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 
 **Omnia Frigo Holding** — Engenharia de Software
 
-| Papel | Responsabilidade |
-|-------|------------------|
+| Papel                 | Responsabilidade                   |
+| --------------------- | ---------------------------------- |
 | Arquiteto de Software | Arquitetura, ADRs, revisão técnica |
-| Engenheiro Full Stack | Desenvolvimento de módulos |
-| DevOps | Infraestrutura, CI/CD, Docker |
-| Product Owner | Requisitos, priorização |
+| Engenheiro Full Stack | Desenvolvimento de módulos         |
+| DevOps                | Infraestrutura, CI/CD, Docker      |
+| Product Owner         | Requisitos, priorização            |
 
 ---
 
 ## Status do Projeto
 
-| Aspecto | Status |
-|---------|--------|
-| Fundação (Sprint 0 + 0.5) | ✅ Concluída |
-| Aplicações | ⬜ Sprint 1 |
-| Banco de Dados | ⬜ Sprint 1 |
-| Autenticação | ⬜ Sprint 2 |
-| CMS | ⬜ Sprint 1 |
-| IA / Chat | ⬜ Sprint 8+ |
-| Automações n8n | ⬜ Sprint 8+ |
+| Aspecto                  | Status                        |
+| ------------------------ | ----------------------------- |
+| Fundação (Sprint 0–1.2)  | ✅ Concluída                  |
+| Platform Base (Sprint 2) | 🟡 Em revisão                 |
+| Aplicações Next.js       | ✅ Sprint 2                   |
+| CMS (Payload)            | ✅ Sprint 2 — coleções ativas |
+| Banco de Dados (Drizzle) | 🟡 Schema vazio — Sprint 3    |
+| IA / Chat                | ⬜ Sprint 8+                  |
+| Automações n8n           | ⬜ Sprint 8+                  |
 
 ---
 
-*Omnia Platform — Construindo o futuro do ecossistema Omnia Frigo Holding.*
+_Omnia Platform — Construindo o futuro do ecossistema Omnia Frigo Holding._

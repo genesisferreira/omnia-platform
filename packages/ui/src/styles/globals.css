@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Omnia Brand Tokens — Sprint 2 */
+    --omnia-emerald: 164 79% 20%;
+    --omnia-deep-blue: 209 69% 18%;
+    --omnia-copper: 27 53% 51%;
+    --omnia-graphite: 210 17% 9%;
+    --omnia-white: 0 0% 100%;
+
+    --background: var(--omnia-white);
+    --foreground: var(--omnia-graphite);
+    --card: var(--omnia-white);
+    --card-foreground: var(--omnia-graphite);
+    --primary: var(--omnia-emerald);
+    --primary-foreground: var(--omnia-white);
+    --secondary: 209 69% 18%;
+    --secondary-foreground: var(--omnia-white);
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 40%;
+    --accent: var(--omnia-copper);
+    --accent-foreground: var(--omnia-white);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: var(--omnia-white);
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: var(--omnia-emerald);
+    --radius: 0.5rem;
+
+    --font-heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  .dark {
+    --background: var(--omnia-graphite);
+    --foreground: var(--omnia-white);
+    --card: 210 17% 12%;
+    --card-foreground: var(--omnia-white);
+    --primary: 164 60% 35%;
+    --primary-foreground: var(--omnia-white);
+    --secondary: 209 50% 25%;
+    --secondary-foreground: var(--omnia-white);
+    --muted: 210 17% 15%;
+    --muted-foreground: 215 15% 65%;
+    --accent: var(--omnia-copper);
+    --accent-foreground: var(--omnia-white);
+    --border: 210 17% 20%;
+    --input: 210 17% 20%;
+    --ring: 164 60% 35%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}

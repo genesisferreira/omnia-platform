@@ -1,27 +1,50 @@
 # @omnia/monitoring
 
-Observabilidade centralizada — métricas, traces, logs e alertas.
+Observabilidade centralizada.
 
-## Estrutura
+## Estrutura (Sprint 1.1)
 
 ```
 src/
-├── opentelemetry/  # Traces distribuídos, spans, context propagation
-├── grafana/        # Dashboards e alertas
-├── prometheus/     # Métricas de aplicação (RED/USE)
-├── sentry/         # Error tracking e performance monitoring
-└── index.ts
+├── health/       # Status global (/api/status) ✅ Sprint 1.1
+├── metrics/      # Prometheus (Sprint 2+)
+├── logs/         # Agregação de logs
+├── tracing/      # OpenTelemetry
+├── alerts/       # Alertas e notificações
+└── dashboards/   # Grafana
+```
+
+## Integrações futuras
+
+| Ferramenta    | Módulo        | Sprint |
+| ------------- | ------------- | ------ |
+| Prometheus    | `metrics/`    | 2+     |
+| Grafana       | `dashboards/` | 2+     |
+| OpenTelemetry | `tracing/`    | 2+     |
+| Sentry        | `alerts/`     | 2+     |
+
+## Uso
+
+```typescript
+import { getPlatformStatus } from '@omnia/monitoring';
+
+const status = await getPlatformStatus({ includePayload: false });
 ```
 
 ## Pilares de observabilidade
 
-| Pilar | Ferramenta | Package |
-|-------|------------|---------|
-| Traces | OpenTelemetry | `opentelemetry/` |
-| Metrics | Prometheus + Grafana | `prometheus/`, `grafana/` |
-| Logs | `@omnia/logger` | — |
-| Errors | Sentry | `sentry/` |
+Documentação completa: [OBSERVABILITY.md](../../OBSERVABILITY.md)
+
+| Pilar      | Módulo                     | Sprint |
+| ---------- | -------------------------- | ------ |
+| Logs       | `@omnia/logger` + `logs/`  | 2+     |
+| Tracing    | `tracing/` (OpenTelemetry) | 2+     |
+| Métricas   | `metrics/` (Prometheus)    | 2+     |
+| Alertas    | `alerts/` (Sentry)         | 2+     |
+| Dashboards | `dashboards/` (Grafana)    | 11     |
+| Auditoria  | `@omnia/security/audit`    | 2+     |
+| Health     | `health/`                  | 1.1 ✅ |
 
 ## Status
 
-**Sprint 0.5** — Estrutura preparada. Implementação na **Sprint 1+**.
+**Sprint 1.1** — Health/status operacional. Métricas na **Sprint 2+**.

@@ -24,14 +24,14 @@ A plataforma unifica portal institucional, marketplace, CRM, área do parceiro, 
 
 ## Empresas do Ecossistema
 
-| Empresa | Sigla | Domínio |
-|---------|-------|---------|
-| Omnia Frigo Holding | OFH | Holding e gestão central |
-| Renovação Refrigeração | RR | Serviços de refrigeração |
-| Neurofrigo | NF | Soluções neurotecnológicas |
-| Fred do Frio Academy | FDFA | Educação e capacitação |
-| CTE | CTE | Centro Técnico Especializado |
-| Centro Educacional Sapientia | CES | Educação formal |
+| Empresa                      | Sigla | Domínio                      |
+| ---------------------------- | ----- | ---------------------------- |
+| Omnia Frigo Holding          | OFH   | Holding e gestão central     |
+| Renovação Refrigeração       | RR    | Serviços de refrigeração     |
+| Neurofrigo                   | NF    | Soluções neurotecnológicas   |
+| Fred do Frio Academy         | FDFA  | Educação e capacitação       |
+| CTE                          | CTE   | Centro Técnico Especializado |
+| Centro Educacional Sapientia | CES   | Educação formal              |
 
 ---
 
@@ -71,8 +71,9 @@ A plataforma unifica portal institucional, marketplace, CRM, área do parceiro, 
 ```
 omnia-platform/
 ├── apps/           # Aplicações (web, admin → portal, landing, docs)
-├── packages/       # Bibliotecas compartilhadas (18 packages)
-├── modules/        # Bounded contexts de negócio (documentação DDD)
+├── packages/       # Bibliotecas compartilhadas (27 packages)
+├── domains/        # Bounded contexts DDD (documentação)
+├── modules/        # Módulos de negócio (documentação)
 ├── docs/           # Documentação técnica e de produto
 ├── docker/         # Configurações Docker
 ├── scripts/        # Scripts operacionais
@@ -82,61 +83,67 @@ omnia-platform/
 
 ### Packages principais
 
-| Camada | Packages |
-|--------|----------|
-| Tooling | `typescript-config`, `eslint-config`, `prettier-config` |
-| Domínio | `types`, `constants` |
-| Infra | `database`, `integrations`, `logger`, `monitoring` |
-| Cross-cutting | `auth`, `security`, `feature-flags`, `i18n`, `sdk` |
-| UI/IA | `ui`, `ai-core`, `automation`, `shared` |
+| Camada        | Packages                                                                               |
+| ------------- | -------------------------------------------------------------------------------------- |
+| Tooling       | `typescript-config`, `eslint-config`, `prettier-config`                                |
+| Domínio       | `types`, `constants`                                                                   |
+| Infra         | `database`, `integrations`, `logger`, `monitoring`, `config`, `cache`, `queue`, `mail` |
+| Cross-cutting | `auth`, `security`, `feature-flags`, `i18n`, `sdk`, `errors`, `validation`, `events`   |
+| UI/IA         | `ui`, `ai-core`, `automation`, `shared`, `search`, `testing`                           |
 
 ---
 
 ## Stack Tecnológica
 
-| Categoria | Tecnologia |
-|-----------|------------|
-| Framework | Next.js 15 |
-| UI | React, TypeScript, Tailwind CSS, shadcn/ui |
-| CMS | Payload CMS |
-| Banco de Dados | PostgreSQL + Drizzle ORM |
-| Cache | Redis |
-| Object Storage | MinIO |
-| IA | DeepSeek API, Omnia AI Core |
-| Automação | n8n |
-| Monorepo | Turborepo, pnpm Workspaces |
-| Containerização | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
-| Qualidade | ESLint, Prettier, EditorConfig |
+| Categoria       | Tecnologia                                 |
+| --------------- | ------------------------------------------ |
+| Framework       | Next.js 15                                 |
+| UI              | React, TypeScript, Tailwind CSS, shadcn/ui |
+| CMS             | Payload CMS                                |
+| Banco de Dados  | PostgreSQL + Drizzle ORM                   |
+| Cache           | Redis                                      |
+| Object Storage  | MinIO                                      |
+| IA              | DeepSeek API, Omnia AI Core                |
+| Automação       | n8n                                        |
+| Monorepo        | Turborepo, pnpm Workspaces                 |
+| Containerização | Docker, Docker Compose                     |
+| CI/CD           | GitHub Actions                             |
+| Qualidade       | ESLint, Prettier, EditorConfig             |
 
 ---
 
 ## Hierarquia de Documentação
 
-| Documento | Papel |
-|-----------|-------|
-| `PROJECT_CONTEXT.md` | **Fonte única de verdade** — visão, arquitetura, convenções |
-| `README.md` | Visão geral e instruções de execução (referencia este documento) |
-| `.cursor/omnia-context.md` | Resumo para Cursor AI (referencia este documento) |
-| `docs/` | Documentação técnica detalhada por domínio |
-| `docs/14-adr/` | Decisões arquiteturais formais (ADRs) |
+| Documento                  | Papel                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `PROJECT_CONTEXT.md`       | **Fonte única de verdade** — visão, arquitetura, convenções      |
+| `README.md`                | Visão geral e instruções de execução (referencia este documento) |
+| `.cursor/omnia-context.md` | Resumo para Cursor AI (referencia este documento)                |
+| `docs/`                    | Documentação técnica detalhada por domínio                       |
+| `docs/14-adr/`             | Decisões arquiteturais formais (ADRs)                            |
+| `SYSTEM_OVERVIEW.md`       | Visão geral do sistema e fluxos                                  |
+| `PROJECT_PRINCIPLES.md`    | Princípios oficiais de engenharia                                |
+| `GOVERNANCE.md`            | Processos Git, PR, release                                       |
+| `QUALITY_GATES.md`         | Requisitos mínimos para merge                                    |
+
+> **Arquitetura congelada após Sprint 1.2** — mudanças estruturais exigem ADR (ver ADR-008).
 
 ---
 
 ## Roadmap
 
-| Sprint | Foco |
-|--------|------|
-| **Sprint 0** | ✅ Fundação — estrutura, docs, monorepo |
+| Sprint         | Foco                                                          |
+| -------------- | ------------------------------------------------------------- |
+| **Sprint 0**   | ✅ Fundação — estrutura, docs, monorepo                       |
 | **Sprint 0.5** | ✅ Foundation Hardening — tooling, packages infra, guidelines |
-| **Sprint 1** | Setup Next.js, Payload CMS, Docker Compose |
-| **Sprint 2** | Autenticação, banco de dados, design system |
-| **Sprint 3** | Portal institucional e CMS |
-| **Sprint 4** | Blog e conteúdo |
-| **Sprint 5** | CRM base |
-| **Sprint 6** | Marketplace |
-| **Sprint 7** | Área do parceiro e painel admin |
-| **Sprint 8+** | IA, chat, automações n8n |
+| **Sprint 1.2** | ✅ Platform Standards & Governance — arquitetura congelada    |
+| **Sprint 2**   | 🟡 Platform Base — CMS, portal, admin, design system          |
+| **Sprint 3**   | Auth (JWT, RBAC), migrations Drizzle                          |
+| **Sprint 4**   | Blog e conteúdo                                               |
+| **Sprint 5**   | CRM base                                                      |
+| **Sprint 6**   | Marketplace                                                   |
+| **Sprint 7**   | Área do parceiro e painel admin                               |
+| **Sprint 8+**  | IA, chat, automações n8n                                      |
 
 ---
 
@@ -212,4 +219,4 @@ chore(deps): atualizar dependências
 
 ---
 
-*Última atualização: Sprint 0.5 — Foundation Hardening v1.2 (concluída)*
+_Última atualização: Sprint 0.5 — Foundation Hardening v1.2 (concluída)_

@@ -1,0 +1,4 @@
+{
+  "extends": ["@omnia/eslint-config", "next/core-web-vitals"],
+  "ignorePatterns": ["src/app/(payload)/admin/importMap.js"]
+}

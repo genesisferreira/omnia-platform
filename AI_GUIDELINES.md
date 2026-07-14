@@ -19,10 +19,10 @@
 
 ## Providers
 
-| Provider | Uso | Prioridade |
-|----------|-----|------------|
-| DeepSeek | Primário — custo/performance | 1 |
-| OpenAI | Fallback, modelos específicos | 2 |
+| Provider | Uso                           | Prioridade |
+| -------- | ----------------------------- | ---------- |
+| DeepSeek | Primário — custo/performance  | 1          |
+| OpenAI   | Fallback, modelos específicos | 2          |
 
 Interface comum em `@omnia/ai-core/providers`:
 

@@ -4,16 +4,36 @@
   "private": true,
   "description": "Portal público, marketplace, blog e área do parceiro",
   "scripts": {
-    "build": "node ../../scripts/workspace-placeholder.mjs build",
-    "dev": "node ../../scripts/workspace-placeholder.mjs dev",
-    "lint": "eslint src/",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "clean": "rimraf .next .turbo dist"
+    "clean": "rimraf .next .turbo dist",
+    "test:site-resolver": "tsx src/scripts/test-site-resolver.ts"
+  },
+  "dependencies": {
+    "@omnia/config": "workspace:*",
+    "@omnia/database": "workspace:*",
+    "@omnia/monitoring": "workspace:*",
+    "@omnia/shared": "workspace:*",
+    "@omnia/ui": "workspace:*",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "catalog:",
     "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "postcss": "catalog:",
     "rimraf": "catalog:",
+    "tailwindcss": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

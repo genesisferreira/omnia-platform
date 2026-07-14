@@ -9,3 +9,7 @@ pnpm-lock.yaml
 *.min.js
 *.min.css
 assets/documents
+
+# Generated Payload artifacts
+apps/admin/src/app/(payload)/admin/importMap.js
+apps/admin/src/migrations/

@@ -1,34 +1,37 @@
 # @omnia/security
 
-Utilitários de segurança transversais da Omnia Platform.
+Utilitários de segurança transversais.
 
-## Estrutura
+## Estrutura (Sprint 1.1)
 
 ```
 src/
-├── auth/         # JWT, refresh tokens, validação de sessão
-├── encryption/   # Hash (bcrypt/argon2), encrypt/decrypt
-├── audit/        # Trilha de auditoria imutável (LGPD)
-├── rate-limit/   # Rate limiting (Redis-backed)
-├── headers/      # CSP, HSTS, X-Frame-Options, CSRF tokens
-├── permissions/  # RBAC, verificação de permissões granulares
-└── index.ts
+├── rbac/         # Role-Based Access Control
+├── permissions/  # Permissões granulares
+├── roles/        # Definição de roles
+├── policies/     # Políticas de acesso
+├── audit/        # Trilha de auditoria (LGPD)
+├── headers/      # CSP, HSTS, security headers
+├── csrf/         # CSRF protection
+├── xss/          # Sanitização XSS
+├── rate-limit/   # Rate limiting (Redis)
+├── logs/         # Security event logging
+├── encryption/   # Hash, encrypt/decrypt
+├── tokens/       # Token utilities
+├── jwt/          # JWT sign/verify
+├── sessions/     # Session management
+└── middleware/   # Security middleware
 ```
 
-## Relação com outros packages
+## Relação com `@omnia/auth`
 
-| Package | Responsabilidade |
-|---------|------------------|
-| `@omnia/auth` | Fluxos de autenticação (login, logout, middleware) |
-| `@omnia/security` | Primitivas de segurança reutilizáveis |
-| `@omnia/constants` | Roles e permissions como constantes |
+| Package           | Escopo                   |
+| ----------------- | ------------------------ |
+| `@omnia/auth`     | Login, logout, fluxos    |
+| `@omnia/security` | Primitivas reutilizáveis |
 
-## Preparação LGPD
-
-- `audit/` — registro de acesso a dados pessoais
-- `encryption/` — criptografia de campos sensíveis
-- Redação de PII em logs via `@omnia/logger`
+Ver [SECURITY_ARCHITECTURE.md](../../SECURITY_ARCHITECTURE.md).
 
 ## Status
 
-**Sprint 0.5** — Estrutura preparada. Implementação na **Sprint 2+**.
+**Sprint 1.1** — Estrutura expandida. Implementação na **Sprint 2+**.
