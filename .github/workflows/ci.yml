@@ -38,6 +38,9 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Public companies contract tests
+        run: pnpm --filter @omnia/admin test:public-companies
+
   build:
     name: Build
     runs-on: ubuntu-latest
