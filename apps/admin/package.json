@@ -20,6 +20,7 @@
     "@omnia/config": "workspace:*",
     "@omnia/database": "workspace:*",
     "@omnia/monitoring": "workspace:*",
+    "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",
     "@payloadcms/next": "catalog:",

@@ -149,6 +149,9 @@ importers:
       '@omnia/monitoring':
         specifier: workspace:*
         version: link:../../packages/monitoring
+      '@omnia/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@omnia/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -231,6 +234,9 @@ importers:
       '@omnia/monitoring':
         specifier: workspace:*
         version: link:../../packages/monitoring
+      '@omnia/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@omnia/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -26,3 +26,5 @@ export {
 } from './errors';
 
 export { fetchSiteResolution } from './client';
+
+export { resolveSite } from './resolve-site';
