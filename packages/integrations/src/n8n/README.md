@@ -10,11 +10,11 @@ Usado por `@omnia/automation` e eventos de domínio. Workflows versionados em `p
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
-| `N8N_HOST` | Host do servidor n8n |
-| `N8N_PORT` | Porta (padrão `5678`) |
-| `N8N_PROTOCOL` | `http` ou `https` |
+| Variável          | Descrição              |
+| ----------------- | ---------------------- |
+| `N8N_HOST`        | Host do servidor n8n   |
+| `N8N_PORT`        | Porta (padrão `5678`)  |
+| `N8N_PROTOCOL`    | `http` ou `https`      |
 | `N8N_WEBHOOK_URL` | URL base para webhooks |
 
 ## Sprint

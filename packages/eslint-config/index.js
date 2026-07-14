@@ -12,15 +12,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint'],
-  ignorePatterns: [
-    'node_modules/',
-    'dist/',
-    'build/',
-    '.next/',
-    'out/',
-    '.turbo/',
-    'coverage/',
-  ],
+  ignorePatterns: ['node_modules/', 'dist/', 'build/', '.next/', 'out/', '.turbo/', 'coverage/'],
   rules: {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-unused-vars': 'off',

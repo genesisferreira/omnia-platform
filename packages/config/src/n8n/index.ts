@@ -1,3 +1,2 @@
-/** Config: n8n — Sprint 2+ */
+/** Config: n8n ï¿½ Sprint 2+ */
 export {};
-

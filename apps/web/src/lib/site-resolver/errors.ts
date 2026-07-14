@@ -1,26 +1,24 @@
 import type { SiteResolutionFailure } from './contracts';
 
-export const createInternalApiUnauthorizedFailure =
-  (): SiteResolutionFailure => ({
-    ok: false,
-    status: 'not_found',
-    error: {
-      code: 'INTERNAL_API_UNAUTHORIZED',
-      message: 'Falha de autenticação na API interna.',
-      recoverable: false,
-    },
-  });
+export const createInternalApiUnauthorizedFailure = (): SiteResolutionFailure => ({
+  ok: false,
+  status: 'not_found',
+  error: {
+    code: 'INTERNAL_API_UNAUTHORIZED',
+    message: 'Falha de autenticação na API interna.',
+    recoverable: false,
+  },
+});
 
-export const createInternalApiUnavailableFailure =
-  (): SiteResolutionFailure => ({
-    ok: false,
-    status: 'not_found',
-    error: {
-      code: 'INTERNAL_API_UNAVAILABLE',
-      message: 'API interna indisponível.',
-      recoverable: true,
-    },
-  });
+export const createInternalApiUnavailableFailure = (): SiteResolutionFailure => ({
+  ok: false,
+  status: 'not_found',
+  error: {
+    code: 'INTERNAL_API_UNAVAILABLE',
+    message: 'API interna indisponível.',
+    recoverable: true,
+  },
+});
 
 export const createInternalApiTimeoutFailure = (): SiteResolutionFailure => ({
   ok: false,
@@ -42,24 +40,22 @@ export const createInternalApiNetworkFailure = (): SiteResolutionFailure => ({
   },
 });
 
-export const createInvalidInternalApiResponseFailure =
-  (): SiteResolutionFailure => ({
-    ok: false,
-    status: 'not_found',
-    error: {
-      code: 'INVALID_INTERNAL_API_RESPONSE',
-      message: 'Resposta inválida da API interna.',
-      recoverable: false,
-    },
-  });
+export const createInvalidInternalApiResponseFailure = (): SiteResolutionFailure => ({
+  ok: false,
+  status: 'not_found',
+  error: {
+    code: 'INVALID_INTERNAL_API_RESPONSE',
+    message: 'Resposta inválida da API interna.',
+    recoverable: false,
+  },
+});
 
-export const createInternalConfigurationFailure =
-  (): SiteResolutionFailure => ({
-    ok: false,
-    status: 'not_found',
-    error: {
-      code: 'INTERNAL_CONFIGURATION_ERROR',
-      message: 'Configuração interna indisponível.',
-      recoverable: false,
-    },
-  });
+export const createInternalConfigurationFailure = (): SiteResolutionFailure => ({
+  ok: false,
+  status: 'not_found',
+  error: {
+    code: 'INTERNAL_CONFIGURATION_ERROR',
+    message: 'Configuração interna indisponível.',
+    recoverable: false,
+  },
+});

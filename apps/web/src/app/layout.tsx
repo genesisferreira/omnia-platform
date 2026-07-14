@@ -11,11 +11,7 @@ export const metadata: Metadata = {
   description: 'Ecossistema digital da Omnia Frigo Holding',
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const siteRequestContext = await getSiteContext();
   const { hostname, resolution } = siteRequestContext;
 
@@ -23,19 +19,11 @@ export default async function RootLayout({
     <html
       lang="pt-BR"
       data-site-resolution={resolution.ok ? 'resolved' : resolution.status}
-      data-site-hostname={
-        resolution.ok ? resolution.context.hostname : hostname
-      }
+      data-site-hostname={resolution.ok ? resolution.context.hostname : hostname}
       data-site-slug={resolution.ok ? resolution.context.site.slug : undefined}
-      data-company-slug={
-        resolution.ok ? (resolution.context.company?.slug ?? '') : undefined
-      }
-      data-tenant-slug={
-        resolution.ok ? resolution.context.tenant.slug : undefined
-      }
-      data-site-error-code={
-        resolution.ok ? undefined : resolution.error.code
-      }
+      data-company-slug={resolution.ok ? (resolution.context.company?.slug ?? '') : undefined}
+      data-tenant-slug={resolution.ok ? resolution.context.tenant.slug : undefined}
+      data-site-error-code={resolution.ok ? undefined : resolution.error.code}
     >
       <body className="font-sans antialiased">
         <Header />

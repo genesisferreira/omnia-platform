@@ -17,11 +17,11 @@ Oferecer atendimento conversacional com IA — suporte, FAQ inteligente e assist
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos compartilhados |
+| Domínio      | Uso                                |
+| ------------ | ---------------------------------- |
+| **core**     | Primitivos compartilhados          |
 | **identity** | Autenticação e contexto do usuário |
-| **ai-core** | Abstração de modelos e prompts |
+| **ai-core**  | Abstração de modelos e prompts     |
 
 ## Integrações
 
@@ -29,9 +29,9 @@ Oferecer atendimento conversacional com IA — suporte, FAQ inteligente e assist
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `MessageReceived` | Mensagem recebida em sessão de chat | 8+ |
+| Evento            | Descrição                           | Sprint |
+| ----------------- | ----------------------------------- | ------ |
+| `MessageReceived` | Mensagem recebida em sessão de chat | 8+     |
 
 ## Referências
 

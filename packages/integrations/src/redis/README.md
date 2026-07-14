@@ -10,8 +10,8 @@ Usado por `@omnia/auth` (sessões), `@omnia/security` (rate limit) e `@omnia/mon
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
+| Variável    | Descrição                                      |
+| ----------- | ---------------------------------------------- |
 | `REDIS_URL` | URL de conexão (ex.: `redis://localhost:6379`) |
 
 ## Sprint

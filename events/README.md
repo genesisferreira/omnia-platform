@@ -21,46 +21,46 @@ interface LeadCreated {
 
 ### CRM
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `LeadCreated` | Novo lead cadastrado | 5 |
-| `LeadUpdated` | Lead atualizado | 5 |
-| `LeadConverted` | Lead convertido em oportunidade | 5 |
+| Evento          | Descrição                       | Sprint |
+| --------------- | ------------------------------- | ------ |
+| `LeadCreated`   | Novo lead cadastrado            | 5      |
+| `LeadUpdated`   | Lead atualizado                 | 5      |
+| `LeadConverted` | Lead convertido em oportunidade | 5      |
 
 ### Partner
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `PartnerCreated` | Novo parceiro registrado | 7 |
-| `PartnerApproved` | Parceiro aprovado | 7 |
+| Evento            | Descrição                | Sprint |
+| ----------------- | ------------------------ | ------ |
+| `PartnerCreated`  | Novo parceiro registrado | 7      |
+| `PartnerApproved` | Parceiro aprovado        | 7      |
 
 ### Identity
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `UserCreated` | Novo usuário | 2 |
-| `UserLoggedIn` | Login realizado | 2 |
+| Evento         | Descrição       | Sprint |
+| -------------- | --------------- | ------ |
+| `UserCreated`  | Novo usuário    | 2      |
+| `UserLoggedIn` | Login realizado | 2      |
 
 ### Academy
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `CoursePurchased` | Curso adquirido | 7+ |
-| `CourseCompleted` | Curso concluído | 7+ |
+| Evento            | Descrição       | Sprint |
+| ----------------- | --------------- | ------ |
+| `CoursePurchased` | Curso adquirido | 7+     |
+| `CourseCompleted` | Curso concluído | 7+     |
 
 ### Chat
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `MessageReceived` | Mensagem recebida | 8+ |
-| `TicketOpened` | Ticket de suporte aberto | 8+ |
+| Evento            | Descrição                | Sprint |
+| ----------------- | ------------------------ | ------ |
+| `MessageReceived` | Mensagem recebida        | 8+     |
+| `TicketOpened`    | Ticket de suporte aberto | 8+     |
 
 ### Automation
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `WorkflowExecuted` | Workflow n8n executado | 8+ |
-| `WorkflowFailed` | Workflow falhou | 8+ |
+| Evento             | Descrição              | Sprint |
+| ------------------ | ---------------------- | ------ |
+| `WorkflowExecuted` | Workflow n8n executado | 8+     |
+| `WorkflowFailed`   | Workflow falhou        | 8+     |
 
 ## Publicação (futuro)
 

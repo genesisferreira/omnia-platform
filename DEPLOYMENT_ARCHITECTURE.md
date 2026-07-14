@@ -4,28 +4,28 @@
 
 ## Ambientes
 
-| Ambiente | Branch | Infra |
-|----------|--------|-------|
-| development | local | Docker Compose |
-| staging | `staging` | TBD (Sprint 2+) |
-| production | `main` | TBD (Sprint 2+) |
+| Ambiente    | Branch    | Infra           |
+| ----------- | --------- | --------------- |
+| development | local     | Docker Compose  |
+| staging     | `staging` | TBD (Sprint 2+) |
+| production  | `main`    | TBD (Sprint 2+) |
 
 ## Apps
 
-| App | Porta (dev) | Deploy futuro |
-|-----|-------------|---------------|
-| `@omnia/web` | 3000 | Vercel / container |
-| `@omnia/admin` | 3001 | Vercel / container |
+| App            | Porta (dev) | Deploy futuro      |
+| -------------- | ----------- | ------------------ |
+| `@omnia/web`   | 3000        | Vercel / container |
+| `@omnia/admin` | 3001        | Vercel / container |
 
 ## Serviços
 
-| Serviço | Dev | Produção (planejado) |
-|---------|-----|----------------------|
-| PostgreSQL | Docker | Managed (RDS/Supabase) |
-| Redis | Docker | Managed (ElastiCache) |
-| MinIO | Docker | S3 / MinIO HA |
-| n8n | Docker | n8n Cloud / self-hosted |
-| Mailpit | Docker | SMTP produção (Resend/SendGrid) |
+| Serviço    | Dev    | Produção (planejado)            |
+| ---------- | ------ | ------------------------------- |
+| PostgreSQL | Docker | Managed (RDS/Supabase)          |
+| Redis      | Docker | Managed (ElastiCache)           |
+| MinIO      | Docker | S3 / MinIO HA                   |
+| n8n        | Docker | n8n Cloud / self-hosted         |
+| Mailpit    | Docker | SMTP produção (Resend/SendGrid) |
 
 ## CI/CD
 

@@ -85,14 +85,7 @@ export const Domains: CollectionConfig = {
   admin: {
     useAsTitle: 'hostname',
     description: 'Gerencia os domínios resolvidos pela Omnia Platform.',
-    defaultColumns: [
-      'hostname',
-      'site',
-      'environment',
-      'isPrimary',
-      'isActive',
-      'updatedAt',
-    ],
+    defaultColumns: ['hostname', 'site', 'environment', 'isPrimary', 'isActive', 'updatedAt'],
     group: 'Multiempresa',
   },
   timestamps: true,

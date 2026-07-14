@@ -25,9 +25,9 @@ src/
 
 ## Relação com `@omnia/auth`
 
-| Package | Escopo |
-|---------|--------|
-| `@omnia/auth` | Login, logout, fluxos |
+| Package           | Escopo                   |
+| ----------------- | ------------------------ |
+| `@omnia/auth`     | Login, logout, fluxos    |
 | `@omnia/security` | Primitivas reutilizáveis |
 
 Ver [SECURITY_ARCHITECTURE.md](../../SECURITY_ARCHITECTURE.md).

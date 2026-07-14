@@ -6,13 +6,13 @@
 
 ### `automation_workflows`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `tenant_id` | UUID | FK |
-| `n8n_workflow_id` | VARCHAR(50) | ID no n8n |
-| `name` | VARCHAR(255) | — |
-| `status` | ENUM | `active`, `inactive` |
+| Coluna            | Tipo         | Descrição            |
+| ----------------- | ------------ | -------------------- |
+| `id`              | UUID         | PK                   |
+| `tenant_id`       | UUID         | FK                   |
+| `n8n_workflow_id` | VARCHAR(50)  | ID no n8n            |
+| `name`            | VARCHAR(255) | —                    |
+| `status`          | ENUM         | `active`, `inactive` |
 
 ### `automation_executions`
 

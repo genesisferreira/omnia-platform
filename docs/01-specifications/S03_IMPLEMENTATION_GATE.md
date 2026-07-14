@@ -14,9 +14,9 @@ Este documento fecha o ciclo de documentação arquitetural da Sprint 3 (3.1–3
 
 Nenhum código de CMS, collections, globals, blocks ou portal dinâmico deve ser iniciado sem:
 
-1. Leitura deste gate  
-2. Conformidade com [ADR-011](../07-adrs/ADR-011_PLATFORM_PRINCIPLES.md)  
-3. Revisão humana antes de cada commit  
+1. Leitura deste gate
+2. Conformidade com [ADR-011](../07-adrs/ADR-011_PLATFORM_PRINCIPLES.md)
+3. Revisão humana antes de cada commit
 
 ---
 
@@ -24,18 +24,18 @@ Nenhum código de CMS, collections, globals, blocks ou portal dinâmico deve ser
 
 A documentação abaixo constitui a **fonte oficial** para implementação da fundação CMS e portal até nova revisão de produto.
 
-| Fase | Documento | Escopo |
-|------|-----------|--------|
-| Produto | `PRODUCT_MASTER_V2.md` | Visão, CMS-first, empresas, regras de ouro |
-| Domínio | `DOMAIN_MODEL_V2.md` | Entidades, RBAC, eventos, fronteiras Payload/Drizzle |
-| Roadmap | `MASTER_ROADMAP_V2.md` | Sprints 0–16, critérios por sprint |
-| Backlog | `BACKLOG_V2.md` | MoSCoW, IDs rastreáveis |
-| Revisão | `PRODUCT_REVIEW_V2.md` | Lacunas, gate Sprint 3 |
-| CMS | `S03_CMS_FOUNDATION.md` | Collections, globals, blocks, media, SEO |
-| Portal | `S03_PORTAL_ARCHITECTURE.md` | Rotas, home, performance, integrações |
-| Multisite | `S03_MULTISITE_BRANDING.md` | Holding, brands, sites, temas |
-| Editorial | `S03_EDITORIAL_GOVERNANCE.md` | Workflow, papéis, preview, auditoria |
-| Princípios | `ADR-011_PLATFORM_PRINCIPLES.md` | **Aceito** — prevalece sobre código |
+| Fase       | Documento                        | Escopo                                               |
+| ---------- | -------------------------------- | ---------------------------------------------------- |
+| Produto    | `PRODUCT_MASTER_V2.md`           | Visão, CMS-first, empresas, regras de ouro           |
+| Domínio    | `DOMAIN_MODEL_V2.md`             | Entidades, RBAC, eventos, fronteiras Payload/Drizzle |
+| Roadmap    | `MASTER_ROADMAP_V2.md`           | Sprints 0–16, critérios por sprint                   |
+| Backlog    | `BACKLOG_V2.md`                  | MoSCoW, IDs rastreáveis                              |
+| Revisão    | `PRODUCT_REVIEW_V2.md`           | Lacunas, gate Sprint 3                               |
+| CMS        | `S03_CMS_FOUNDATION.md`          | Collections, globals, blocks, media, SEO             |
+| Portal     | `S03_PORTAL_ARCHITECTURE.md`     | Rotas, home, performance, integrações                |
+| Multisite  | `S03_MULTISITE_BRANDING.md`      | Holding, brands, sites, temas                        |
+| Editorial  | `S03_EDITORIAL_GOVERNANCE.md`    | Workflow, papéis, preview, auditoria                 |
+| Princípios | `ADR-011_PLATFORM_PRINCIPLES.md` | **Aceito** — prevalece sobre código                  |
 
 ### ADRs técnicos históricos
 
@@ -48,16 +48,16 @@ Princípios transversais: [`docs/07-adrs/`](../07-adrs/) (ADR-011+).
 
 ## 2. Documentos fonte oficial
 
-| Prioridade | Documento | Uso na implementação |
-|------------|-----------|------------------------|
-| 1 | ADR-011 | Princípios invioláveis; checklist PR |
-| 2 | S03_CMS_FOUNDATION | Schema collections/globals/blocks |
-| 3 | S03_MULTISITE_BRANDING | sites, domains, themes, companies expand |
-| 4 | S03_EDITORIAL_GOVERNANCE | editorialStatus, workflow, preview, audit |
-| 5 | S03_PORTAL_ARCHITECTURE | Consumo REST, BlockRenderer, rotas |
-| 6 | DOMAIN_MODEL_V2 | RBAC, eventos, fronteiras |
-| 7 | PRODUCT_MASTER_V2 | Escopo produto |
-| 8 | BACKLOG_V2 | IDs Must Have Sprint 3–4 |
+| Prioridade | Documento                | Uso na implementação                      |
+| ---------- | ------------------------ | ----------------------------------------- |
+| 1          | ADR-011                  | Princípios invioláveis; checklist PR      |
+| 2          | S03_CMS_FOUNDATION       | Schema collections/globals/blocks         |
+| 3          | S03_MULTISITE_BRANDING   | sites, domains, themes, companies expand  |
+| 4          | S03_EDITORIAL_GOVERNANCE | editorialStatus, workflow, preview, audit |
+| 5          | S03_PORTAL_ARCHITECTURE  | Consumo REST, BlockRenderer, rotas        |
+| 6          | DOMAIN_MODEL_V2          | RBAC, eventos, fronteiras                 |
+| 7          | PRODUCT_MASTER_V2        | Escopo produto                            |
+| 8          | BACKLOG_V2               | IDs Must Have Sprint 3–4                  |
 
 Em conflito: **ADR-011 > especificações S03 > PRODUCT_MASTER > código existente**.
 
@@ -65,20 +65,20 @@ Em conflito: **ADR-011 > especificações S03 > PRODUCT_MASTER > código existen
 
 ## 3. Decisões obrigatórias (já aprovadas na documentação)
 
-| ID | Decisão | Fonte |
-|----|---------|-------|
-| D-01 | Tenant único `omnia-holding` com N companies | S03_MULTISITE |
-| D-02 | Portal consome Payload via REST — nunca import direto | ADR-004, ADR-011 |
-| D-03 | Conteúdo editorial no Payload; transacional no Drizzle | ADR-002, DOMAIN_MODEL |
-| D-04 | Neurofrigo Carga = Product, não Company | S03_MULTISITE §7 |
-| D-05 | Sites oficiais coexistem — modelo híbrido | ADR-011 P17 |
-| D-06 | Holding não é card filha no ecossistema | S03_MULTISITE |
-| D-07 | `/empresas/[slug]` (plural) para páginas empresa | S03_PORTAL |
-| D-08 | IA nunca auto-publica | ADR-011 P8, S03_EDITORIAL |
-| D-09 | Design System federado — sem CSS arbitrário | ADR-011 P18 |
-| D-10 | Site implícito `omnia-hub` na fase 3.4A | S03_MULTISITE |
-| D-11 | `editorialStatus` separado de `_status` Payload | S03_EDITORIAL |
-| D-12 | Evolução incremental — prompts 3.4A-1 a 3.4B | Este documento |
+| ID   | Decisão                                                | Fonte                     |
+| ---- | ------------------------------------------------------ | ------------------------- |
+| D-01 | Tenant único `omnia-holding` com N companies           | S03_MULTISITE             |
+| D-02 | Portal consome Payload via REST — nunca import direto  | ADR-004, ADR-011          |
+| D-03 | Conteúdo editorial no Payload; transacional no Drizzle | ADR-002, DOMAIN_MODEL     |
+| D-04 | Neurofrigo Carga = Product, não Company                | S03_MULTISITE §7          |
+| D-05 | Sites oficiais coexistem — modelo híbrido              | ADR-011 P17               |
+| D-06 | Holding não é card filha no ecossistema                | S03_MULTISITE             |
+| D-07 | `/empresas/[slug]` (plural) para páginas empresa       | S03_PORTAL                |
+| D-08 | IA nunca auto-publica                                  | ADR-011 P8, S03_EDITORIAL |
+| D-09 | Design System federado — sem CSS arbitrário            | ADR-011 P18               |
+| D-10 | Site implícito `omnia-hub` na fase 3.4A                | S03_MULTISITE             |
+| D-11 | `editorialStatus` separado de `_status` Payload        | S03_EDITORIAL             |
+| D-12 | Evolução incremental — prompts 3.4A-1 a 3.4B           | Este documento            |
 
 Decisões **ainda pendentes** de steering (não bloqueiam 3.4A-1): ADR-009 dual users, ADR-010 PostGIS, reorganização pasta ADRs.
 
@@ -147,22 +147,22 @@ Decisões **ainda pendentes** de steering (não bloqueiam 3.4A-1): ADR-009 dual 
 
 ## 6. Itens proibidos durante a implementação
 
-| # | Proibido | Motivo |
-|---|----------|--------|
-| X1 | Hardcodar conteúdo de marketing no portal | ADR-011 P1 |
-| X2 | Importar Payload em `apps/web` | ADR-004 |
-| X3 | Criar autenticação paralela ad hoc | ADR-011 N5 |
-| X4 | Publicar conteúdo via IA sem humano | ADR-011 P8 |
-| X5 | CSS arbitrário por página | ADR-011 P18 |
-| X6 | Company para Neurofrigo Carga | S03_MULTISITE |
-| X7 | Substituir sites oficiais sem plano migração | ADR-011 P17 |
-| X8 | Collections não documentadas em S03_CMS / MULTISITE | Scope creep |
-| X9 | Migrations sem versionamento em `src/migrations/` | Rollback |
-| X10 | `git push` sem revisão humana explícita | Este gate |
-| X11 | Commit sem passar lint/typecheck/build | Qualidade |
-| X12 | Alterar Docker/staging sem ADR se estrutural | ADR-008 |
-| X13 | Drizzle schema CRM/LMS na 3.4A | Fora de escopo |
-| X14 | Reorganizar sprints ou roadmap nos docs durante código | Governança |
+| #   | Proibido                                               | Motivo         |
+| --- | ------------------------------------------------------ | -------------- |
+| X1  | Hardcodar conteúdo de marketing no portal              | ADR-011 P1     |
+| X2  | Importar Payload em `apps/web`                         | ADR-004        |
+| X3  | Criar autenticação paralela ad hoc                     | ADR-011 N5     |
+| X4  | Publicar conteúdo via IA sem humano                    | ADR-011 P8     |
+| X5  | CSS arbitrário por página                              | ADR-011 P18    |
+| X6  | Company para Neurofrigo Carga                          | S03_MULTISITE  |
+| X7  | Substituir sites oficiais sem plano migração           | ADR-011 P17    |
+| X8  | Collections não documentadas em S03_CMS / MULTISITE    | Scope creep    |
+| X9  | Migrations sem versionamento em `src/migrations/`      | Rollback       |
+| X10 | `git push` sem revisão humana explícita                | Este gate      |
+| X11 | Commit sem passar lint/typecheck/build                 | Qualidade      |
+| X12 | Alterar Docker/staging sem ADR se estrutural           | ADR-008        |
+| X13 | Drizzle schema CRM/LMS na 3.4A                         | Fora de escopo |
+| X14 | Reorganizar sprints ou roadmap nos docs durante código | Governança     |
 
 ---
 
@@ -176,14 +176,14 @@ Todo PR da Sprint 3.4 deve satisfazer:
 
 ### 7.2 Checklist por sub-sprint
 
-| Sub-sprint | Gate mínimo |
-|------------|-------------|
-| 3.4A-1 | Field groups reutilizáveis; plugin SEO instalado; sem collection nova |
-| 3.4A-2 | Collections criadas conforme spec; seed idempotente preparado |
-| 3.4A-3 | Globals com `site` FK; drafts habilitados |
-| 3.4A-4 | 9 blocks registrados; `generate:importmap` CI |
-| 3.4A-5 | `pnpm build` verde; migration up/down testada; staging smoke |
-| 3.4B | Zero hardcode Must; preview staging; home CMS-driven |
+| Sub-sprint | Gate mínimo                                                           |
+| ---------- | --------------------------------------------------------------------- |
+| 3.4A-1     | Field groups reutilizáveis; plugin SEO instalado; sem collection nova |
+| 3.4A-2     | Collections criadas conforme spec; seed idempotente preparado         |
+| 3.4A-3     | Globals com `site` FK; drafts habilitados                             |
+| 3.4A-4     | 9 blocks registrados; `generate:importmap` CI                         |
+| 3.4A-5     | `pnpm build` verde; migration up/down testada; staging smoke          |
+| 3.4B       | Zero hardcode Must; preview staging; home CMS-driven                  |
 
 ### 7.3 Comandos obrigatórios antes de commit
 
@@ -245,34 +245,34 @@ Inventário Must: `EcosystemSection`, `Header`, `Footer`, `CtaSection`, `layout.
 
 ### 8.9 Revisão humana antes de commit
 
-| Etapa | Responsável |
-|-------|-------------|
-| Código conforme spec | Dev / agente |
-| Lint/typecheck/build | CI local |
-| Conformidade ADR-011 | Revisor |
-| Aprovação commit | **Humano explícito** |
-| Deploy staging | Humano após smoke |
+| Etapa                | Responsável          |
+| -------------------- | -------------------- |
+| Código conforme spec | Dev / agente         |
+| Lint/typecheck/build | CI local             |
+| Conformidade ADR-011 | Revisor              |
+| Aprovação commit     | **Humano explícito** |
+| Deploy staging       | Humano após smoke    |
 
 ---
 
 ## 9. Estado do repositório no fechamento documental
 
-| Item | Estado Sprint 2 |
-|------|-----------------|
-| Collections Payload | users, tenants, companies, media |
-| Globals | global-settings |
-| Portal hardcoded | Parcial (hero CMS; resto hardcoded) |
-| Documentação V2 | Completa em `docs/00-product/`, `docs/01-specifications/` |
-| ADR-011 | Aceito |
+| Item                | Estado Sprint 2                                           |
+| ------------------- | --------------------------------------------------------- |
+| Collections Payload | users, tenants, companies, media                          |
+| Globals             | global-settings                                           |
+| Portal hardcoded    | Parcial (hero CMS; resto hardcoded)                       |
+| Documentação V2     | Completa em `docs/00-product/`, `docs/01-specifications/` |
+| ADR-011             | Aceito                                                    |
 
 ---
 
 ## 10. Próximo passo
 
-1. Humano revisa este gate + ADR-011 v1.1  
-2. Commit documentação (branch sugerida: `docs/sprint-03-implementation-gate` ou continuação em feature branch)  
-3. Iniciar **Sprint 3.4A-1** em prompt dedicado — somente após commit aprovado  
-4. Cada sub-sprint = um PR revisável  
+1. Humano revisa este gate + ADR-011 v1.1
+2. Commit documentação (branch sugerida: `docs/sprint-03-implementation-gate` ou continuação em feature branch)
+3. Iniciar **Sprint 3.4A-1** em prompt dedicado — somente após commit aprovado
+4. Cada sub-sprint = um PR revisável
 
 ---
 
@@ -286,5 +286,5 @@ Inventário Must: `EcosystemSection`, `Header`, `Footer`, `CtaSection`, `layout.
 
 ---
 
-*Omnia Platform — Implementation Gate — Fechamento documental Sprint 3*  
-*Aguardando revisão humana para commit.*
+_Omnia Platform — Implementation Gate — Fechamento documental Sprint 3_  
+_Aguardando revisão humana para commit._

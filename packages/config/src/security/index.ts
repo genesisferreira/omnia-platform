@@ -1,3 +1,2 @@
-/** Config: security — Sprint 2+ */
+/** Config: security ï¿½ Sprint 2+ */
 export {};
-

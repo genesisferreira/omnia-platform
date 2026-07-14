@@ -1,9 +1,4 @@
-export {
-  buildCanonicalUrl,
-  getRootDomain,
-  isValidHostname,
-  normalizeHostname,
-} from './domain';
+export { buildCanonicalUrl, getRootDomain, isValidHostname, normalizeHostname } from './domain';
 
 export {
   mergeThemeTokens,

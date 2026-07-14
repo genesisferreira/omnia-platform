@@ -15,9 +15,9 @@
 
 ### `blog_post_analytics`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `post_id` | VARCHAR | ID Payload |
-| `tenant_id` | UUID | FK |
-| `views` | INTEGER | — |
-| `date` | DATE | — |
+| Coluna      | Tipo    | Descrição  |
+| ----------- | ------- | ---------- |
+| `post_id`   | VARCHAR | ID Payload |
+| `tenant_id` | UUID    | FK         |
+| `views`     | INTEGER | —          |
+| `date`      | DATE    | —          |

@@ -7,9 +7,7 @@ export function Footer() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="font-heading text-lg font-semibold">Omnia Platform</p>
-            <p className="mt-1 text-sm text-white/70">
-              Ecossistema digital da Omnia Frigo Holding
-            </p>
+            <p className="mt-1 text-sm text-white/70">Ecossistema digital da Omnia Frigo Holding</p>
           </div>
           <p className="text-sm text-white/50">© {new Date().getFullYear()} Omnia Frigo Holding</p>
         </div>

@@ -20,9 +20,7 @@ const createInvalidHostnameFailure = (
 /**
  * Orquestra normalização/validação local e a resolução via API interna.
  */
-export async function resolveSite(
-  hostname: string,
-): Promise<SiteResolutionResult> {
+export async function resolveSite(hostname: string): Promise<SiteResolutionResult> {
   if (typeof hostname !== 'string' || hostname.trim() === '') {
     return createInvalidHostnameFailure('', 'Hostname obrigatório.');
   }
@@ -30,10 +28,7 @@ export async function resolveSite(
   const normalizedHostname = normalizeHostname(hostname.trim());
 
   if (!normalizedHostname || !isValidHostname(normalizedHostname)) {
-    return createInvalidHostnameFailure(
-      normalizedHostname,
-      'Hostname inválido.',
-    );
+    return createInvalidHostnameFailure(normalizedHostname, 'Hostname inválido.');
   }
 
   return fetchSiteResolution(normalizedHostname);

@@ -5,6 +5,8 @@ export default defineConfig({
   out: './src/migrations',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'postgresql://omnia:omnia_dev_password@localhost:5432/omnia_platform',
+    url:
+      process.env.DATABASE_URL ??
+      'postgresql://omnia:omnia_dev_password@localhost:5432/omnia_platform',
   },
 });

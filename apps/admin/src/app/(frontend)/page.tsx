@@ -15,8 +15,7 @@ import { getDashboardStats } from '@/lib/dashboard';
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
   return (
     <div className="space-y-8">
@@ -24,9 +23,7 @@ export default async function AdminDashboardPage() {
         <h1 className="font-heading text-3xl font-bold tracking-tight">
           {greeting}, bem-vindo ao Omnia Admin
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Dashboard inicial — Sprint 2 Platform Base
-        </p>
+        <p className="mt-2 text-muted-foreground">Dashboard inicial — Sprint 2 Platform Base</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -92,9 +89,7 @@ export default async function AdminDashboardPage() {
               <Link href="/admin/globals/global-settings">Configurações globais</Link>
             </Button>
             <Button asChild variant="outline">
-              <a href={process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}>
-                Ver portal
-              </a>
+              <a href={process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}>Ver portal</a>
             </Button>
           </CardContent>
         </Card>
@@ -106,8 +101,16 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
           <ul className="list-inside list-disc space-y-1">
-            <li>Execute <code className="rounded bg-muted px-1">pnpm --filter @omnia/admin seed</code> para cadastrar as empresas da Holding</li>
-            <li>Crie um usuário admin em <Link href="/admin" className="text-primary hover:underline">Payload CMS</Link></li>
+            <li>
+              Execute <code className="rounded bg-muted px-1">pnpm --filter @omnia/admin seed</code>{' '}
+              para cadastrar as empresas da Holding
+            </li>
+            <li>
+              Crie um usuário admin em{' '}
+              <Link href="/admin" className="text-primary hover:underline">
+                Payload CMS
+              </Link>
+            </li>
             <li>Faça upload de logos na Media Library</li>
           </ul>
         </CardContent>

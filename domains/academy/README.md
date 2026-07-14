@@ -17,11 +17,11 @@ Oferecer cursos, trilhas de aprendizado e gestão de matrículas, integrando com
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos compartilhados |
-| **identity** | Autenticação e autorização de alunos |
-| **marketplace** | Processamento de compra de cursos |
+| Domínio         | Uso                                  |
+| --------------- | ------------------------------------ |
+| **core**        | Primitivos compartilhados            |
+| **identity**    | Autenticação e autorização de alunos |
+| **marketplace** | Processamento de compra de cursos    |
 
 ## Integrações
 
@@ -29,9 +29,9 @@ Nenhuma integração externa direta além dos domínios listados. Persistência 
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `CoursePurchased` | Curso adquirido e matrícula criada | 7 |
+| Evento            | Descrição                          | Sprint |
+| ----------------- | ---------------------------------- | ------ |
+| `CoursePurchased` | Curso adquirido e matrícula criada | 7      |
 
 ## Referências
 

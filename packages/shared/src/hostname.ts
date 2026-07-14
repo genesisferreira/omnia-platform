@@ -1,5 +1,4 @@
-const IPV4_PATTERN =
-  /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
+const IPV4_PATTERN = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
 
 const HOSTNAME_LABEL_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i;
 
@@ -25,8 +24,7 @@ export const normalizeHostname = (value: string): string => {
 
   if (candidate.startsWith('[')) {
     const closingBracket = candidate.indexOf(']');
-    candidate =
-      closingBracket >= 0 ? candidate.slice(1, closingBracket) : candidate.slice(1);
+    candidate = closingBracket >= 0 ? candidate.slice(1, closingBracket) : candidate.slice(1);
   } else {
     const colonIndex = candidate.lastIndexOf(':');
 
@@ -151,9 +149,7 @@ export const buildCanonicalUrl = (
   const trimmedPath = pathWithoutFragment.trim();
 
   const normalizedPath =
-    trimmedPath === ''
-      ? '/'
-      : `/${trimmedPath.replace(/^\/+/, '').replace(/\/{2,}/g, '/')}`;
+    trimmedPath === '' ? '/' : `/${trimmedPath.replace(/^\/+/, '').replace(/\/{2,}/g, '/')}`;
 
   return `${protocol}://${normalizedHostname}${normalizedPath}`;
 };

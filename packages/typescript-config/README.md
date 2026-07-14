@@ -4,12 +4,12 @@ Configurações TypeScript compartilhadas do monorepo Omnia Platform.
 
 ## Configurações
 
-| Arquivo | Uso |
-|---------|-----|
-| `base.json` | Base strict para todos os workspaces |
-| `nextjs.json` | Apps Next.js 15 (Sprint 1+) |
-| `react-library.json` | Packages React (`@omnia/ui`) |
-| `node.json` | Packages Node.js puros (SDK, logger, integrations) |
+| Arquivo              | Uso                                                |
+| -------------------- | -------------------------------------------------- |
+| `base.json`          | Base strict para todos os workspaces               |
+| `nextjs.json`        | Apps Next.js 15 (Sprint 1+)                        |
+| `react-library.json` | Packages React (`@omnia/ui`)                       |
+| `node.json`          | Packages Node.js puros (SDK, logger, integrations) |
 
 ## Uso
 

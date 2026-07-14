@@ -28,12 +28,12 @@ src/
 
 ## Relação com outros packages
 
-| Package | Responsabilidade |
-|---------|------------------|
-| `@omnia/integrations` | Conectores raw (HTTP, SDK) |
-| `@omnia/ai-core` | Orquestração (agents, RAG, prompts, memory) |
-| `@omnia/auth` | Fluxos de autenticação (consome `oauth/`, `redis/`) |
-| `@omnia/automation` | Workflows n8n versionados (consome `n8n/`) |
+| Package               | Responsabilidade                                    |
+| --------------------- | --------------------------------------------------- |
+| `@omnia/integrations` | Conectores raw (HTTP, SDK)                          |
+| `@omnia/ai-core`      | Orquestração (agents, RAG, prompts, memory)         |
+| `@omnia/auth`         | Fluxos de autenticação (consome `oauth/`, `redis/`) |
+| `@omnia/automation`   | Workflows n8n versionados (consome `n8n/`)          |
 
 ## Notas
 

@@ -15,10 +15,10 @@ src/
 
 ## Estratégia
 
-| Tipo | Package | Uso |
-|------|---------|-----|
+| Tipo      | Package                     | Uso          |
+| --------- | --------------------------- | ------------ |
 | Estáticas | `@omnia/constants/features` | Build/deploy |
-| Dinâmicas | `@omnia/feature-flags` | Runtime |
+| Dinâmicas | `@omnia/feature-flags`      | Runtime      |
 
 ## Status
 

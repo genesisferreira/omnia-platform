@@ -1,12 +1,8 @@
-import type {
-  SITE_RESOLUTION_ERROR_CODES,
-  SITE_RESOLUTION_STATUSES,
-} from './constants';
+import type { SITE_RESOLUTION_ERROR_CODES, SITE_RESOLUTION_STATUSES } from './constants';
 
 export type SiteResolutionStatus = (typeof SITE_RESOLUTION_STATUSES)[number];
 
-export type SiteResolutionErrorCode =
-  (typeof SITE_RESOLUTION_ERROR_CODES)[number];
+export type SiteResolutionErrorCode = (typeof SITE_RESOLUTION_ERROR_CODES)[number];
 
 export type SiteResolutionError = {
   code: SiteResolutionErrorCode | string;
@@ -60,6 +56,4 @@ export type SiteResolutionFailure = {
   error: SiteResolutionError;
 };
 
-export type SiteResolutionResult =
-  | SiteResolutionSuccess
-  | SiteResolutionFailure;
+export type SiteResolutionResult = SiteResolutionSuccess | SiteResolutionFailure;

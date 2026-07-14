@@ -18,30 +18,30 @@
 
 ## Módulos `@omnia/ai-core`
 
-| Módulo | Responsabilidade |
-|--------|------------------|
-| `providers/` | Interface LLM unificada |
-| `router/` | DeepSeek primário, OpenAI fallback |
-| `agents/` | Agentes por domínio |
-| `assistant/` | Assistente Omnia (UX) |
-| `prompts/` | Prompt library versionada |
-| `knowledge/` | Base de conhecimento |
-| `rag/` | Pipeline retrieval-augmented |
-| `embeddings/` | Geração de vetores |
-| `vector-store/` | pgvector / serviço dedicado |
-| `memory/` | Memória curto/longo prazo |
-| `sessions/` | Sessões de conversa |
-| `context/` | Contexto dinâmico |
-| `tools/` | Function calling |
-| `workflow-engine/` | Chains de IA |
-| `models/` | Configuração de modelos |
+| Módulo             | Responsabilidade                   |
+| ------------------ | ---------------------------------- |
+| `providers/`       | Interface LLM unificada            |
+| `router/`          | DeepSeek primário, OpenAI fallback |
+| `agents/`          | Agentes por domínio                |
+| `assistant/`       | Assistente Omnia (UX)              |
+| `prompts/`         | Prompt library versionada          |
+| `knowledge/`       | Base de conhecimento               |
+| `rag/`             | Pipeline retrieval-augmented       |
+| `embeddings/`      | Geração de vetores                 |
+| `vector-store/`    | pgvector / serviço dedicado        |
+| `memory/`          | Memória curto/longo prazo          |
+| `sessions/`        | Sessões de conversa                |
+| `context/`         | Contexto dinâmico                  |
+| `tools/`           | Function calling                   |
+| `workflow-engine/` | Chains de IA                       |
+| `models/`          | Configuração de modelos            |
 
 ## Providers
 
-| Provider | Uso | Prioridade |
-|----------|-----|------------|
-| DeepSeek | Chat, agents, RAG | 1 |
-| OpenAI | Fallback, embeddings | 2 |
+| Provider | Uso                  | Prioridade |
+| -------- | -------------------- | ---------- |
+| DeepSeek | Chat, agents, RAG    | 1          |
+| OpenAI   | Fallback, embeddings | 2          |
 
 ## Segurança
 

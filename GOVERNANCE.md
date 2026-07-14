@@ -22,13 +22,13 @@ gitGraph
 
 ### Branches
 
-| Branch | Propósito | Protegida |
-|--------|-----------|-----------|
-| `main` | Produção estável | ✅ |
-| `develop` | Integração contínua | ✅ |
-| `feature/*` | Novas features / sprints | — |
-| `fix/*` | Correções não urgentes | — |
-| `hotfix/*` | Correções urgentes em produção | — |
+| Branch      | Propósito                      | Protegida |
+| ----------- | ------------------------------ | --------- |
+| `main`      | Produção estável               | ✅        |
+| `develop`   | Integração contínua            | ✅        |
+| `feature/*` | Novas features / sprints       | —         |
+| `fix/*`     | Correções não urgentes         | —         |
+| `hotfix/*`  | Correções urgentes em produção | —         |
 
 ### Convenção de nomes
 
@@ -86,17 +86,18 @@ tipo(escopo): descrição curta
 Corpo opcional com contexto.
 ```
 
-| Tipo | Uso |
-|------|-----|
-| `feat` | Nova funcionalidade |
-| `fix` | Correção de bug |
-| `docs` | Documentação |
+| Tipo       | Uso                                      |
+| ---------- | ---------------------------------------- |
+| `feat`     | Nova funcionalidade                      |
+| `fix`      | Correção de bug                          |
+| `docs`     | Documentação                             |
 | `refactor` | Refatoração sem mudança de comportamento |
-| `chore` | Manutenção, deps |
-| `test` | Testes |
-| `ci` | CI/CD |
+| `chore`    | Manutenção, deps                         |
+| `test`     | Testes                                   |
+| `ci`       | CI/CD                                    |
 
 **Exemplos:**
+
 ```
 feat(auth): add JWT refresh token rotation
 docs(governance): add quality gates
@@ -109,11 +110,11 @@ fix(web): correct health endpoint response
 
 [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
-| Incremento | Quando |
-|------------|--------|
-| MAJOR | Breaking changes de API |
-| MINOR | Features compatíveis |
-| PATCH | Bug fixes |
+| Incremento | Quando                  |
+| ---------- | ----------------------- |
+| MAJOR      | Breaking changes de API |
+| MINOR      | Features compatíveis    |
+| PATCH      | Bug fixes               |
 
 Tags em `main`: `v0.2.0`, `v1.0.0`, etc.
 
@@ -121,12 +122,12 @@ Tags em `main`: `v0.2.0`, `v1.0.0`, etc.
 
 ## Sprints
 
-| Fase | Duração sugerida | Entregável |
-|------|-----------------|------------|
-| Planejamento | 1–2 dias | Escopo + ADRs se necessário |
-| Implementação | Restante | Código + docs |
-| Revisão | 1–2 dias | PR + auditoria |
-| Merge | Após aprovação | `develop` |
+| Fase          | Duração sugerida | Entregável                  |
+| ------------- | ---------------- | --------------------------- |
+| Planejamento  | 1–2 dias         | Escopo + ADRs se necessário |
+| Implementação | Restante         | Código + docs               |
+| Revisão       | 1–2 dias         | PR + auditoria              |
+| Merge         | Após aprovação   | `develop`                   |
 
 Roadmap: [docs/13-roadmap/README.md](docs/13-roadmap/README.md)
 

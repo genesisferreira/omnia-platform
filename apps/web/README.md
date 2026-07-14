@@ -14,10 +14,10 @@ Next.js 15 | React 19 | TypeScript | Tailwind | `@omnia/ui`
 
 ## Endpoints
 
-| Rota | Descrição |
-|------|-----------|
-| `/` | Portal em construção |
-| `/api/health` | Healthcheck simples |
+| Rota          | Descrição                                 |
+| ------------- | ----------------------------------------- |
+| `/`           | Portal em construção                      |
+| `/api/health` | Healthcheck simples                       |
 | `/api/status` | Status global (`payload: not_applicable`) |
 
 ## Desenvolvimento

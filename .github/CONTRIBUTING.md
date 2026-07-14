@@ -22,14 +22,14 @@ feature/*  hotfix/*  staging
 
 ### Branches
 
-| Branch | Propósito | Base | Merge para |
-|--------|-----------|------|------------|
-| `main` | Código em produção | — | — |
-| `develop` | Integração contínua | `main` | `main` (via release) |
-| `staging` | Homologação / QA | `develop` | `develop` |
-| `feature/*` | Nova funcionalidade | `develop` | `develop` |
-| `release/*` | Preparação de release | `develop` | `main` + `develop` |
-| `hotfix/*` | Correção urgente | `main` | `main` + `develop` |
+| Branch      | Propósito             | Base      | Merge para           |
+| ----------- | --------------------- | --------- | -------------------- |
+| `main`      | Código em produção    | —         | —                    |
+| `develop`   | Integração contínua   | `main`    | `main` (via release) |
+| `staging`   | Homologação / QA      | `develop` | `develop`            |
+| `feature/*` | Nova funcionalidade   | `develop` | `develop`            |
+| `release/*` | Preparação de release | `develop` | `main` + `develop`   |
+| `hotfix/*`  | Correção urgente      | `main`    | `main` + `develop`   |
 
 ### Convenção de Nomenclatura
 
@@ -99,17 +99,17 @@ Seguir [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Tipos
 
-| Tipo | Uso |
-|------|-----|
-| `feat` | Nova funcionalidade |
-| `fix` | Correção de bug |
-| `docs` | Documentação |
-| `style` | Formatação (sem mudança de lógica) |
-| `refactor` | Refatoração |
-| `test` | Testes |
-| `chore` | Manutenção, deps, config |
-| `ci` | CI/CD |
-| `perf` | Performance |
+| Tipo       | Uso                                |
+| ---------- | ---------------------------------- |
+| `feat`     | Nova funcionalidade                |
+| `fix`      | Correção de bug                    |
+| `docs`     | Documentação                       |
+| `style`    | Formatação (sem mudança de lógica) |
+| `refactor` | Refatoração                        |
+| `test`     | Testes                             |
+| `chore`    | Manutenção, deps, config           |
+| `ci`       | CI/CD                              |
+| `perf`     | Performance                        |
 
 ### Escopos Comuns
 
@@ -119,39 +119,39 @@ Seguir [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## Labels do GitHub
 
-| Label | Uso |
-|-------|-----|
-| `bug` | Algo não funciona como esperado |
-| `feature` | Nova funcionalidade |
-| `enhancement` | Melhoria em funcionalidade existente |
-| `documentation` | Documentação |
-| `architecture` | Decisões e mudanças arquiteturais |
-| `database` | Schema, migrations, queries |
-| `infra` | Docker, CI/CD, deploy |
-| `security` | Segurança |
-| `ai` | Inteligência artificial |
-| `crm` | Módulo CRM |
-| `marketplace` | Módulo marketplace |
-| `portal` | Portal institucional |
-| `blog` | Módulo blog |
-| `admin` | Painel administrativo |
-| `partner` | Área do parceiro |
-| `high-priority` | Prioridade alta |
+| Label           | Uso                                  |
+| --------------- | ------------------------------------ |
+| `bug`           | Algo não funciona como esperado      |
+| `feature`       | Nova funcionalidade                  |
+| `enhancement`   | Melhoria em funcionalidade existente |
+| `documentation` | Documentação                         |
+| `architecture`  | Decisões e mudanças arquiteturais    |
+| `database`      | Schema, migrations, queries          |
+| `infra`         | Docker, CI/CD, deploy                |
+| `security`      | Segurança                            |
+| `ai`            | Inteligência artificial              |
+| `crm`           | Módulo CRM                           |
+| `marketplace`   | Módulo marketplace                   |
+| `portal`        | Portal institucional                 |
+| `blog`          | Módulo blog                          |
+| `admin`         | Painel administrativo                |
+| `partner`       | Área do parceiro                     |
+| `high-priority` | Prioridade alta                      |
 
 ---
 
 ## Milestones
 
-| Milestone | Descrição |
-|-----------|-----------|
-| Sprint 0 | Fundação — estrutura, docs, configuração |
-| Sprint 1 | Setup técnico (Next.js, Payload, Docker) |
-| Sprint 2 | Auth, database, design system |
-| Sprint 3 | Portal institucional e CMS |
-| Sprint 4 | Blog e conteúdo |
-| Sprint 5 | CRM base |
-| Sprint 6 | Marketplace |
-| Sprint 7 | Área do parceiro e admin |
+| Milestone | Descrição                                |
+| --------- | ---------------------------------------- |
+| Sprint 0  | Fundação — estrutura, docs, configuração |
+| Sprint 1  | Setup técnico (Next.js, Payload, Docker) |
+| Sprint 2  | Auth, database, design system            |
+| Sprint 3  | Portal institucional e CMS               |
+| Sprint 4  | Blog e conteúdo                          |
+| Sprint 5  | CRM base                                 |
+| Sprint 6  | Marketplace                              |
+| Sprint 7  | Área do parceiro e admin                 |
 
 ---
 

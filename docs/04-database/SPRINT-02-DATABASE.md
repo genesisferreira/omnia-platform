@@ -2,10 +2,10 @@
 
 ## Camadas de dados
 
-| Camada | Tecnologia | Sprint 2 |
-|--------|------------|----------|
-| CMS | Payload + PostgreSQL | ✅ Coleções ativas |
-| App | Drizzle ORM | ⬜ Schema vazio (Sprint 3+) |
+| Camada | Tecnologia           | Sprint 2                    |
+| ------ | -------------------- | --------------------------- |
+| CMS    | Payload + PostgreSQL | ✅ Coleções ativas          |
+| App    | Drizzle ORM          | ⬜ Schema vazio (Sprint 3+) |
 
 ## Tabelas Payload (auto-geradas)
 

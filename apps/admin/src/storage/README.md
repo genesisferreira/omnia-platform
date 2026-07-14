@@ -2,11 +2,11 @@
 
 ## Sprint 2 — Estado atual
 
-| Recurso | Implementação |
-|---------|---------------|
-| Media Library | Coleção `media` com upload local em `apps/admin/media/` |
-| MinIO (Docker) | Disponível em `localhost:9000` via `pnpm docker:dev` |
-| Adapter S3/MinIO | **Preparado** — integração completa na Sprint 3+ |
+| Recurso          | Implementação                                           |
+| ---------------- | ------------------------------------------------------- |
+| Media Library    | Coleção `media` com upload local em `apps/admin/media/` |
+| MinIO (Docker)   | Disponível em `localhost:9000` via `pnpm docker:dev`    |
+| Adapter S3/MinIO | **Preparado** — integração completa na Sprint 3+        |
 
 ## Variáveis de ambiente
 

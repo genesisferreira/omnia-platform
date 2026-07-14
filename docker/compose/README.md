@@ -4,11 +4,11 @@ Arquivos Docker Compose por ambiente.
 
 ## Arquivos
 
-| Arquivo | Ambiente | Descrição |
-|---------|----------|-----------|
+| Arquivo           | Ambiente              | Descrição                            |
+| ----------------- | --------------------- | ------------------------------------ |
 | `development.yml` | Desenvolvimento local | Postgres, Redis, MinIO, n8n, Mailpit |
-| `staging.yml` | Homologação (VPS) | Apenas web + admin via Traefik |
-| `production.yml` | Produção | Placeholder — sprint futura |
+| `staging.yml`     | Homologação (VPS)     | Apenas web + admin via Traefik       |
+| `production.yml`  | Produção              | Placeholder — sprint futura          |
 
 ## Desenvolvimento local
 

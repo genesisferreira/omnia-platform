@@ -4,12 +4,12 @@
 
 ## Autenticação (JWT)
 
-| Aspecto | Diretriz | Package |
-|---------|----------|---------|
-| Access token | JWT, TTL curto (15min) | `@omnia/auth` |
-| Refresh token | HttpOnly cookie, rotação | `@omnia/auth` |
-| Algoritmo | RS256 ou HS256 com secret forte | `@omnia/security/auth` |
-| Payload | `sub`, `tenantId`, `roles`, `iat`, `exp` | `@omnia/types/auth` |
+| Aspecto       | Diretriz                                 | Package                |
+| ------------- | ---------------------------------------- | ---------------------- |
+| Access token  | JWT, TTL curto (15min)                   | `@omnia/auth`          |
+| Refresh token | HttpOnly cookie, rotação                 | `@omnia/auth`          |
+| Algoritmo     | RS256 ou HS256 com secret forte          | `@omnia/security/auth` |
+| Payload       | `sub`, `tenantId`, `roles`, `iat`, `exp` | `@omnia/types/auth`    |
 
 ## Autorização (RBAC)
 
@@ -23,13 +23,13 @@
 
 Preparado em `@omnia/security/headers`:
 
-| Header | Valor |
-|--------|-------|
-| `Content-Security-Policy` | Restritivo, nonce para scripts |
+| Header                      | Valor                                 |
+| --------------------------- | ------------------------------------- |
+| `Content-Security-Policy`   | Restritivo, nonce para scripts        |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
-| `X-Frame-Options` | `DENY` |
-| `X-Content-Type-Options` | `nosniff` |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Frame-Options`           | `DENY`                                |
+| `X-Content-Type-Options`    | `nosniff`                             |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`     |
 
 ## CSRF
 

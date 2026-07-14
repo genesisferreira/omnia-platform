@@ -17,21 +17,21 @@ flowchart TB
 
 ## Decisões mantidas (ADR)
 
-| ADR | Regra |
-|-----|-------|
-| ADR-004 | Portal **não** importa Payload |
-| ADR-005 | Multi-tenant via coleção `tenants` |
+| ADR     | Regra                                            |
+| ------- | ------------------------------------------------ |
+| ADR-004 | Portal **não** importa Payload                   |
+| ADR-005 | Multi-tenant via coleção `tenants`               |
 | ADR-008 | Arquitetura congelada — sem mudanças estruturais |
 
 ## Coleções Payload
 
-| Coleção | Camada | Consumidor |
-|---------|--------|------------|
-| tenants | CMS | Admin |
-| companies | CMS | Portal (REST), Admin |
-| media | CMS | Portal (REST), Admin |
-| global-settings | CMS Global | Portal (REST) |
-| users | CMS Auth | Admin |
+| Coleção         | Camada     | Consumidor           |
+| --------------- | ---------- | -------------------- |
+| tenants         | CMS        | Admin                |
+| companies       | CMS        | Portal (REST), Admin |
+| media           | CMS        | Portal (REST), Admin |
+| global-settings | CMS Global | Portal (REST)        |
+| users           | CMS Auth   | Admin                |
 
 ## Fluxo Portal → CMS
 

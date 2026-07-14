@@ -10,11 +10,11 @@ Adapter para **Payload CMS** — configuração, plugins e helpers server-side d
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
+| Variável         | Descrição                              |
+| ---------------- | -------------------------------------- |
 | `PAYLOAD_SECRET` | Secret do Payload (mín. 32 caracteres) |
-| `DATABASE_URL` | PostgreSQL compartilhado com Drizzle |
-| `MINIO_*` | Storage de mídia via adapter S3/MinIO |
+| `DATABASE_URL`   | PostgreSQL compartilhado com Drizzle   |
+| `MINIO_*`        | Storage de mídia via adapter S3/MinIO  |
 
 ## Sprint
 

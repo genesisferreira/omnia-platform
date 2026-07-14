@@ -1,16 +1,16 @@
 # Coleções Payload CMS — Sprint 2
 
-| Coleção | Slug | Descrição |
-|---------|------|-----------|
-| Users | `users` | Usuários admin com autenticação |
-| Tenants | `tenants` | Multiempresa — tenant principal |
-| Companies | `companies` | Empresas do ecossistema Holding |
-| Media | `media` | Biblioteca de mídia (upload local; MinIO preparado) |
+| Coleção   | Slug        | Descrição                                           |
+| --------- | ----------- | --------------------------------------------------- |
+| Users     | `users`     | Usuários admin com autenticação                     |
+| Tenants   | `tenants`   | Multiempresa — tenant principal                     |
+| Companies | `companies` | Empresas do ecossistema Holding                     |
+| Media     | `media`     | Biblioteca de mídia (upload local; MinIO preparado) |
 
 ## Global
 
-| Global | Slug | Descrição |
-|--------|------|-----------|
+| Global         | Slug              | Descrição                      |
+| -------------- | ----------------- | ------------------------------ |
 | GlobalSettings | `global-settings` | Configurações do site e portal |
 
 ## Seed

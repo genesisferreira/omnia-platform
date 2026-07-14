@@ -1,3 +1,2 @@
-/** Config: mail — Sprint 2+ */
+/** Config: mail ï¿½ Sprint 2+ */
 export {};
-

@@ -1,10 +1,6 @@
 import { loadApplicationConfig } from './application/index';
 import { loadDatabaseConfig } from './database/index';
-import {
-  parseEnvironment,
-  requiresStrictSecrets,
-  type AppEnvironment,
-} from './environment/index';
+import { parseEnvironment, requiresStrictSecrets, type AppEnvironment } from './environment/index';
 import { loadPayloadConfig } from './payload/index';
 import { loadStorageConfig } from './storage/index';
 

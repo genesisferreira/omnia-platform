@@ -31,14 +31,14 @@ Unidade de **isolamento de dados**. Todo registro de negócio possui `tenantId`.
 
 Empresa do ecossistema Omnia Frigo Holding dentro de um tenant.
 
-| Sigla | Empresa |
-|-------|---------|
-| OFH | Omnia Frigo Holding |
-| RR | Renovação Refrigeração |
-| NF | Neurofrigo |
-| FDFA | Fred do Frio Academy |
-| CTE | Centro Técnico Especializado |
-| CES | Centro Educacional Sapientia |
+| Sigla | Empresa                      |
+| ----- | ---------------------------- |
+| OFH   | Omnia Frigo Holding          |
+| RR    | Renovação Refrigeração       |
+| NF    | Neurofrigo                   |
+| FDFA  | Fred do Frio Academy         |
+| CTE   | Centro Técnico Especializado |
+| CES   | Centro Educacional Sapientia |
 
 ### Workspace
 
@@ -54,13 +54,13 @@ Ator externo B2B (parceiro comercial) com acesso restrito à área do parceiro.
 
 ## Relações
 
-| De | Para | Cardinalidade |
-|----|------|---------------|
-| Tenant | Company | 1:N |
-| Company | Workspace | 1:N |
-| Workspace | User | N:M |
-| Workspace | Partner | 1:N |
-| User | Partner | 0:1 (partner pode ser user) |
+| De        | Para      | Cardinalidade               |
+| --------- | --------- | --------------------------- |
+| Tenant    | Company   | 1:N                         |
+| Company   | Workspace | 1:N                         |
+| Workspace | User      | N:M                         |
+| Workspace | Partner   | 1:N                         |
+| User      | Partner   | 0:1 (partner pode ser user) |
 
 ## Implementação futura
 

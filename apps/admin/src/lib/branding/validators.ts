@@ -1,5 +1,4 @@
-const HEX_COLOR_PATTERN =
-  /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 const SAFE_TOKEN_REFERENCE_PATTERN = /^var\(--[a-z0-9]+(?:-[a-z0-9]+)*\)$/;
 
@@ -40,11 +39,7 @@ export const isValidRgbColor = (value: string): boolean => {
   const alpha = match[4] === undefined ? undefined : Number(match[4]);
   const expectsAlpha = value.trim().toLowerCase().startsWith('rgba(');
 
-  if (
-    !isInRange(red, 0, 255) ||
-    !isInRange(green, 0, 255) ||
-    !isInRange(blue, 0, 255)
-  ) {
+  if (!isInRange(red, 0, 255) || !isInRange(green, 0, 255) || !isInRange(blue, 0, 255)) {
     return false;
   }
 
@@ -76,11 +71,7 @@ export const isValidHslColor = (value: string): boolean => {
   const alpha = match[4] === undefined ? undefined : Number(match[4]);
   const expectsAlpha = value.trim().toLowerCase().startsWith('hsla(');
 
-  if (
-    !isInRange(hue, 0, 360) ||
-    !isInRange(saturation, 0, 100) ||
-    !isInRange(lightness, 0, 100)
-  ) {
+  if (!isInRange(hue, 0, 360) || !isInRange(saturation, 0, 100) || !isInRange(lightness, 0, 100)) {
     return false;
   }
 
@@ -134,10 +125,7 @@ export const isValidOfficialUrl = (value: string): boolean => {
     const protocol = url.protocol.toLowerCase();
 
     return (
-      protocol === 'http:' ||
-      protocol === 'https:' ||
-      protocol === 'mailto:' ||
-      protocol === 'tel:'
+      protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:' || protocol === 'tel:'
     );
   } catch {
     return false;

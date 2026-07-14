@@ -17,8 +17,8 @@ Suportar o modelo multi-tenant com múltiplas empresas por organização, isolan
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
+| Domínio  | Uso                                    |
+| -------- | -------------------------------------- |
 | **core** | Primitivos (`Tenant`, identificadores) |
 
 ## Integrações
@@ -27,9 +27,9 @@ Nenhuma integração externa direta. Persistência via Drizzle ORM em PostgreSQL
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `CompanyCreated` | Nova empresa cadastrada no tenant | 2 |
+| Evento           | Descrição                         | Sprint |
+| ---------------- | --------------------------------- | ------ |
+| `CompanyCreated` | Nova empresa cadastrada no tenant | 2      |
 
 ## Referências
 

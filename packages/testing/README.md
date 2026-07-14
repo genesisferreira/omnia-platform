@@ -17,11 +17,11 @@ src/
 
 ## Estratégia (Sprint 2+)
 
-| Tipo | Ferramenta | Escopo |
-|------|------------|--------|
-| Unitário | Vitest | packages, domains |
-| Integração | Vitest | APIs, database |
-| E2E | Playwright | fluxos críticos web/admin |
+| Tipo       | Ferramenta | Escopo                    |
+| ---------- | ---------- | ------------------------- |
+| Unitário   | Vitest     | packages, domains         |
+| Integração | Vitest     | APIs, database            |
+| E2E        | Playwright | fluxos críticos web/admin |
 
 ## Status
 

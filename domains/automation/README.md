@@ -17,8 +17,8 @@ Orquestrar processos automatizados — notificações, sincronizações e reaç�
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
+| Domínio  | Uso                                              |
+| -------- | ------------------------------------------------ |
 | **core** | Primitivos compartilhados e contratos de eventos |
 
 ## Integrações
@@ -27,9 +27,9 @@ Orquestrar processos automatizados — notificações, sincronizações e reaç�
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `WorkflowExecuted` | Workflow n8n executado com sucesso | 8+ |
+| Evento             | Descrição                          | Sprint |
+| ------------------ | ---------------------------------- | ------ |
+| `WorkflowExecuted` | Workflow n8n executado com sucesso | 8+     |
 
 ## Referências
 

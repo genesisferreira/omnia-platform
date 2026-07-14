@@ -1,3 +1,2 @@
-/** Config: constants — Sprint 2+ */
+/** Config: constants ï¿½ Sprint 2+ */
 export {};
-

@@ -10,15 +10,15 @@ Usado por apps e módulos que precisam de upload/download. Delega ao conector `m
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
+| Variável           | Descrição                       |
+| ------------------ | ------------------------------- |
 | `STORAGE_PROVIDER` | Provider ativo: `minio` ou `s3` |
-| `MINIO_ENDPOINT` | Host MinIO (dev) |
-| `MINIO_PORT` | Porta API MinIO |
-| `MINIO_ACCESS_KEY` | Access key |
-| `MINIO_SECRET_KEY` | Secret key |
-| `MINIO_BUCKET` | Bucket padrão (`omnia-media`) |
-| `MINIO_USE_SSL` | `true`/`false` |
+| `MINIO_ENDPOINT`   | Host MinIO (dev)                |
+| `MINIO_PORT`       | Porta API MinIO                 |
+| `MINIO_ACCESS_KEY` | Access key                      |
+| `MINIO_SECRET_KEY` | Secret key                      |
+| `MINIO_BUCKET`     | Bucket padrão (`omnia-media`)   |
+| `MINIO_USE_SSL`    | `true`/`false`                  |
 
 ## Sprint
 

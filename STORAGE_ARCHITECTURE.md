@@ -6,16 +6,16 @@
 
 Documentação em [storage/](storage/).
 
-| Bucket/Pasta | Uso | Retenção |
-|--------------|-----|----------|
-| `uploads/` | Uploads gerais | Permanente |
-| `media/` | Mídia CMS (Payload) | Permanente |
-| `avatars/` | Fotos de perfil | Permanente |
-| `documents/` | PDFs, contratos | LGPD — auditado |
-| `images/` | Imagens otimizadas | Permanente |
-| `backups/` | Backups DB e exports | 90 dias |
-| `exports/` | Relatórios exportados | 30 dias |
-| `imports/` | Arquivos de importação | 7 dias |
+| Bucket/Pasta | Uso                    | Retenção        |
+| ------------ | ---------------------- | --------------- |
+| `uploads/`   | Uploads gerais         | Permanente      |
+| `media/`     | Mídia CMS (Payload)    | Permanente      |
+| `avatars/`   | Fotos de perfil        | Permanente      |
+| `documents/` | PDFs, contratos        | LGPD — auditado |
+| `images/`    | Imagens otimizadas     | Permanente      |
+| `backups/`   | Backups DB e exports   | 90 dias         |
+| `exports/`   | Relatórios exportados  | 30 dias         |
+| `imports/`   | Arquivos de importação | 7 dias          |
 
 ## MinIO
 

@@ -4,10 +4,10 @@
 
 ## Packages
 
-| Package | Escopo |
-|---------|--------|
-| `@omnia/auth` | Fluxos de autenticação (login, logout, middleware) |
-| `@omnia/security` | Primitivas reutilizáveis |
+| Package           | Escopo                                             |
+| ----------------- | -------------------------------------------------- |
+| `@omnia/auth`     | Fluxos de autenticação (login, logout, middleware) |
+| `@omnia/security` | Primitivas reutilizáveis                           |
 
 ## Módulos `@omnia/security`
 

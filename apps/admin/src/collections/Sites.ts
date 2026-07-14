@@ -89,14 +89,7 @@ export const Sites: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     description: 'Gerencia as presenças digitais do ecossistema Omnia.',
-    defaultColumns: [
-      'name',
-      'slug',
-      'siteStatus',
-      'environment',
-      'company',
-      'updatedAt',
-    ],
+    defaultColumns: ['name', 'slug', 'siteStatus', 'environment', 'company', 'updatedAt'],
     group: 'Multiempresa',
   },
   timestamps: true,

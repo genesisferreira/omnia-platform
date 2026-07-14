@@ -6,15 +6,15 @@
 
 ### `acad_courses`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `tenant_id` | UUID | FK |
-| `title` | VARCHAR(255) | — |
-| `slug` | VARCHAR(255) | — |
-| `description` | TEXT | — |
-| `price` | DECIMAL | — |
-| `status` | ENUM | `draft`, `published`, `archived` |
+| Coluna        | Tipo         | Descrição                        |
+| ------------- | ------------ | -------------------------------- |
+| `id`          | UUID         | PK                               |
+| `tenant_id`   | UUID         | FK                               |
+| `title`       | VARCHAR(255) | —                                |
+| `slug`        | VARCHAR(255) | —                                |
+| `description` | TEXT         | —                                |
+| `price`       | DECIMAL      | —                                |
+| `status`      | ENUM         | `draft`, `published`, `archived` |
 
 ### `acad_enrollments`
 

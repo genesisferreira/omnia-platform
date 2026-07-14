@@ -29,11 +29,11 @@ Após três sprints de fundação (0, 0.5, 1, 1.1), a plataforma possui estrutur
 
 ## Alternativas consideradas
 
-| Alternativa | Motivo rejeição |
-|-------------|-----------------|
-| Evoluir estrutura organicamente | Risco de inconsistência e débito técnico |
-| Microserviços desde o início | Complexidade prematura; monorepo modular suficiente |
-| Implementar tudo na Sprint 1.2 | Escopo inflado; estrutura + docs primeiro |
+| Alternativa                     | Motivo rejeição                                     |
+| ------------------------------- | --------------------------------------------------- |
+| Evoluir estrutura organicamente | Risco de inconsistência e débito técnico            |
+| Microserviços desde o início    | Complexidade prematura; monorepo modular suficiente |
+| Implementar tudo na Sprint 1.2  | Escopo inflado; estrutura + docs primeiro           |
 
 ## Consequências
 

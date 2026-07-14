@@ -9,23 +9,23 @@ import { getConfig } from '@omnia/config';
 
 const config = getConfig();
 
-config.env;           // 'development' | 'staging' | 'production'
+config.env; // 'development' | 'staging' | 'production'
 config.app.publicUrl; // http://localhost:3000
-config.app.adminUrl;  // http://localhost:3001
-config.database.url;  // PostgreSQL connection string
-config.storage;       // MinIO settings
+config.app.adminUrl; // http://localhost:3001
+config.database.url; // PostgreSQL connection string
+config.storage; // MinIO settings
 config.payload.secret;
 ```
 
 ## Módulos
 
-| Módulo | Variáveis |
-|--------|-----------|
-| `environment` | `NODE_ENV` |
+| Módulo        | Variáveis                                                     |
+| ------------- | ------------------------------------------------------------- |
+| `environment` | `NODE_ENV`                                                    |
 | `application` | `APP_VERSION`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_ADMIN_URL` |
-| `database` | `DATABASE_URL` |
-| `storage` | `MINIO_*` |
-| `payload` | `PAYLOAD_SECRET` |
+| `database`    | `DATABASE_URL`                                                |
+| `storage`     | `MINIO_*`                                                     |
+| `payload`     | `PAYLOAD_SECRET`                                              |
 
 ## Regras
 

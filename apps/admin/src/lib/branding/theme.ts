@@ -66,30 +66,17 @@ const TYPOGRAPHY_KEYS = [
   'lineHeightBase',
 ] as const satisfies ReadonlyArray<keyof TypographyTokenSet>;
 
-const RADIUS_KEYS = [
-  'none',
-  'small',
-  'medium',
-  'large',
-  'full',
-] as const satisfies ReadonlyArray<keyof RadiusTokenSet>;
+const RADIUS_KEYS = ['none', 'small', 'medium', 'large', 'full'] as const satisfies ReadonlyArray<
+  keyof RadiusTokenSet
+>;
 
-const SHADOW_KEYS = [
-  'none',
-  'small',
-  'medium',
-  'large',
-] as const satisfies ReadonlyArray<keyof ShadowTokenSet>;
+const SHADOW_KEYS = ['none', 'small', 'medium', 'large'] as const satisfies ReadonlyArray<
+  keyof ShadowTokenSet
+>;
 
-const SPACING_KEYS = [
-  'xs',
-  'sm',
-  'md',
-  'lg',
-  'xl',
-  '2xl',
-  '3xl',
-] as const satisfies ReadonlyArray<keyof SpacingTokenSet>;
+const SPACING_KEYS = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const satisfies ReadonlyArray<
+  keyof SpacingTokenSet
+>;
 
 const FONT_WEIGHT_KEYS = [
   'fontWeightRegular',
@@ -226,9 +213,7 @@ export const mergeThemeTokens = (
  * Resolve tokens na ordem: core → holding → brand → site.
  * Se `core` não for informado, a base é `OMNIA_HOLDING_THEME_DEFAULTS.tokens`.
  */
-export const resolveThemeTokens = (
-  options: ResolveThemeTokensOptions = {},
-): ThemeTokens => {
+export const resolveThemeTokens = (options: ResolveThemeTokensOptions = {}): ThemeTokens => {
   let resolved = cloneThemeTokens(OMNIA_HOLDING_THEME_DEFAULTS.tokens);
 
   if (options.core) {
@@ -262,9 +247,7 @@ const isValidFontWeight = (value: string): boolean => {
   return Number.isFinite(weight) && weight >= 100 && weight <= 900;
 };
 
-export const validateThemeTokens = (
-  tokens: ThemeTokens,
-): ThemeValidationResult => {
+export const validateThemeTokens = (tokens: ThemeTokens): ThemeValidationResult => {
   const errors: ThemeValidationError[] = [];
 
   for (const key of COLOR_KEYS) {

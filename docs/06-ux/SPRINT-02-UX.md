@@ -4,20 +4,20 @@
 
 ### Cores
 
-| Token | Hex | Uso |
-|-------|-----|-----|
-| Verde Esmeralda | `#0A5A47` | Primary, CTAs |
-| Azul Profundo | `#0E2D4D` | Secondary, hero gradient |
-| Cobre Premium | `#C7783D` | Accent, badges |
-| Grafite Escuro | `#11161B` | Texto, footer |
-| Branco | `#FFFFFF` | Background |
+| Token           | Hex       | Uso                      |
+| --------------- | --------- | ------------------------ |
+| Verde Esmeralda | `#0A5A47` | Primary, CTAs            |
+| Azul Profundo   | `#0E2D4D` | Secondary, hero gradient |
+| Cobre Premium   | `#C7783D` | Accent, badges           |
+| Grafite Escuro  | `#11161B` | Texto, footer            |
+| Branco          | `#FFFFFF` | Background               |
 
 ### Tipografia
 
-| Uso | Fonte | Fallback |
-|-----|-------|----------|
+| Uso     | Fonte      | Fallback              |
+| ------- | ---------- | --------------------- |
 | Títulos | Montserrat | system-ui, sans-serif |
-| Corpo | Inter | system-ui, sans-serif |
+| Corpo   | Inter      | system-ui, sans-serif |
 
 > Google Fonts **não** usado no build (proxy corporativo). Fallback system-ui garante renderização.
 

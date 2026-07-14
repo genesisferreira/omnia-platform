@@ -4,16 +4,16 @@
 
 ## Buckets / Pastas
 
-| Pasta | Propósito | Público |
-|-------|-----------|---------|
-| [uploads/](uploads/) | Uploads gerais de usuários | Privado |
-| [media/](media/) | Mídia do Payload CMS | Misto |
-| [avatars/](avatars/) | Fotos de perfil | Privado |
-| [documents/](documents/) | PDFs, contratos (LGPD) | Privado |
-| [images/](images/) | Imagens otimizadas | Misto |
-| [backups/](backups/) | Backups DB e exports | Privado |
-| [exports/](exports/) | Relatórios exportados | Privado |
-| [imports/](imports/) | Arquivos de importação | Privado |
+| Pasta                    | Propósito                  | Público |
+| ------------------------ | -------------------------- | ------- |
+| [uploads/](uploads/)     | Uploads gerais de usuários | Privado |
+| [media/](media/)         | Mídia do Payload CMS       | Misto   |
+| [avatars/](avatars/)     | Fotos de perfil            | Privado |
+| [documents/](documents/) | PDFs, contratos (LGPD)     | Privado |
+| [images/](images/)       | Imagens otimizadas         | Misto   |
+| [backups/](backups/)     | Backups DB e exports       | Privado |
+| [exports/](exports/)     | Relatórios exportados      | Privado |
+| [imports/](imports/)     | Arquivos de importação     | Privado |
 
 ## MinIO
 

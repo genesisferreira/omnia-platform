@@ -48,9 +48,9 @@ Não conflita com tabelas Drizzle quando prefixadas corretamente (ADR-002).
 
 ## Próximas tabelas (planejado)
 
-| Módulo | Prefixo | Sprint |
-|--------|---------|--------|
-| CRM | `crm_` | 5 |
-| Marketplace | `mkt_` | 6 |
-| Partner | `ptr_` | 7 |
-| Academy | `acad_` | 7+ |
+| Módulo      | Prefixo | Sprint |
+| ----------- | ------- | ------ |
+| CRM         | `crm_`  | 5      |
+| Marketplace | `mkt_`  | 6      |
+| Partner     | `ptr_`  | 7      |
+| Academy     | `acad_` | 7+     |

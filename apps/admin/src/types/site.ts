@@ -1,19 +1,8 @@
-export const SITE_STATUSES = [
-  'draft',
-  'active',
-  'inactive',
-  'maintenance',
-  'archived',
-] as const;
+export const SITE_STATUSES = ['draft', 'active', 'inactive', 'maintenance', 'archived'] as const;
 
 export type SiteStatus = (typeof SITE_STATUSES)[number];
 
-export const SITE_ENVIRONMENTS = [
-  'local',
-  'development',
-  'staging',
-  'production',
-] as const;
+export const SITE_ENVIRONMENTS = ['local', 'development', 'staging', 'production'] as const;
 
 export type SiteEnvironment = (typeof SITE_ENVIRONMENTS)[number];
 

@@ -17,9 +17,9 @@ Centralizar a gestão de leads, oportunidades e pipeline comercial, permitindo r
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos compartilhados |
+| Domínio      | Uso                                         |
+| ------------ | ------------------------------------------- |
+| **core**     | Primitivos compartilhados                   |
 | **identity** | Associação de leads a usuários e permissões |
 
 ## Integrações
@@ -28,10 +28,10 @@ Centralizar a gestão de leads, oportunidades e pipeline comercial, permitindo r
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `LeadCreated` | Novo lead cadastrado no pipeline | 5 |
-| `LeadConverted` | Lead convertido em oportunidade ou cliente | 5 |
+| Evento          | Descrição                                  | Sprint |
+| --------------- | ------------------------------------------ | ------ |
+| `LeadCreated`   | Novo lead cadastrado no pipeline           | 5      |
+| `LeadConverted` | Lead convertido em oportunidade ou cliente | 5      |
 
 ## Referências
 

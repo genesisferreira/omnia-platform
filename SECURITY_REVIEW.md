@@ -8,19 +8,19 @@ Package principal: [`@omnia/security`](packages/security/) + [`@omnia/auth`](pac
 
 ## Resumo executivo
 
-| Área | Status atual | Sprint implementação |
-|------|--------------|---------------------|
-| JWT | Estrutura preparada | 2 |
-| RBAC | Módulos documentados | 2 |
-| Headers | Guidelines definidos | 2 |
-| CSP | Módulo `headers/` | 2 |
-| XSS | Módulo `xss/` | 2 |
-| CSRF | Módulo `csrf/` | 2 |
-| Rate Limit | Módulo `rate-limit/` | 2 |
-| Audit | Módulo `audit/` | 2 |
-| LGPD | Arquitetura definida | 2–3 |
-| Cookies | Pendente | 2 |
-| Sessões | Módulo `sessions/` | 2 |
+| Área       | Status atual         | Sprint implementação |
+| ---------- | -------------------- | -------------------- |
+| JWT        | Estrutura preparada  | 2                    |
+| RBAC       | Módulos documentados | 2                    |
+| Headers    | Guidelines definidos | 2                    |
+| CSP        | Módulo `headers/`    | 2                    |
+| XSS        | Módulo `xss/`        | 2                    |
+| CSRF       | Módulo `csrf/`       | 2                    |
+| Rate Limit | Módulo `rate-limit/` | 2                    |
+| Audit      | Módulo `audit/`      | 2                    |
+| LGPD       | Arquitetura definida | 2–3                  |
+| Cookies    | Pendente             | 2                    |
+| Sessões    | Módulo `sessions/`   | 2                    |
 
 ---
 
@@ -28,13 +28,13 @@ Package principal: [`@omnia/security`](packages/security/) + [`@omnia/auth`](pac
 
 ### Decisões planejadas (Sprint 2)
 
-| Aspecto | Recomendação |
-|---------|--------------|
-| Algoritmo | RS256 (prod) / HS256 (dev) |
-| Access token | 15 min, header `Authorization: Bearer` |
-| Refresh token | 7 dias, httpOnly cookie |
-| Rotação | Refresh token rotation a cada uso |
-| Revogação | Blacklist em Redis |
+| Aspecto       | Recomendação                           |
+| ------------- | -------------------------------------- |
+| Algoritmo     | RS256 (prod) / HS256 (dev)             |
+| Access token  | 15 min, header `Authorization: Bearer` |
+| Refresh token | 7 dias, httpOnly cookie                |
+| Rotação       | Refresh token rotation a cada uso      |
+| Revogação     | Blacklist em Redis                     |
 
 ### Riscos mitigados
 
@@ -54,13 +54,13 @@ User → Roles → Permissions → Resources
 
 ### Roles iniciais (Sprint 2)
 
-| Role | Escopo |
-|------|--------|
-| `super_admin` | Plataforma inteira |
-| `tenant_admin` | Tenant específico |
-| `editor` | CMS conteúdo |
-| `user` | Portal autenticado |
-| `partner` | Área parceiro |
+| Role           | Escopo             |
+| -------------- | ------------------ |
+| `super_admin`  | Plataforma inteira |
+| `tenant_admin` | Tenant específico  |
+| `editor`       | CMS conteúdo       |
+| `user`         | Portal autenticado |
+| `partner`      | Área parceiro      |
 
 ### Recomendações
 
@@ -98,33 +98,33 @@ Content-Security-Policy:
 
 ## XSS
 
-| Vetor | Mitigação |
-|-------|-----------|
-| User input | Sanitização (`@omnia/security/xss`) |
-| Rich text CMS | Payload sanitization + CSP |
-| React | JSX auto-escape (default) |
-| dangerouslySetInnerHTML | Proibido sem sanitização |
+| Vetor                   | Mitigação                           |
+| ----------------------- | ----------------------------------- |
+| User input              | Sanitização (`@omnia/security/xss`) |
+| Rich text CMS           | Payload sanitization + CSP          |
+| React                   | JSX auto-escape (default)           |
+| dangerouslySetInnerHTML | Proibido sem sanitização            |
 
 ---
 
 ## CSRF
 
-| Contexto | Estratégia |
-|----------|------------|
-| Cookie-based auth | CSRF token double-submit |
-| Bearer token API | Não aplicável |
-| Webhooks | Signature verification (HMAC) |
+| Contexto          | Estratégia                    |
+| ----------------- | ----------------------------- |
+| Cookie-based auth | CSRF token double-submit      |
+| Bearer token API  | Não aplicável                 |
+| Webhooks          | Signature verification (HMAC) |
 
 ---
 
 ## Rate Limit
 
-| Endpoint | Limite sugerido |
-|----------|-----------------|
-| Login | 5/min por IP |
-| API geral | 100/min por user |
-| Chat IA | 20/min por user |
-| Webhooks | 1000/min por tenant |
+| Endpoint  | Limite sugerido     |
+| --------- | ------------------- |
+| Login     | 5/min por IP        |
+| API geral | 100/min por user    |
+| Chat IA   | 20/min por user     |
+| Webhooks  | 1000/min por tenant |
 
 Implementação: `@omnia/security/rate-limit` + Redis.
 
@@ -140,13 +140,13 @@ Implementação: `@omnia/security/rate-limit` + Redis.
 
 ### LGPD
 
-| Direito | Implementação |
-|---------|---------------|
-| Acesso | Export API |
-| Retificação | Update com audit |
-| Exclusão | Soft delete + anonymization job |
-| Portabilidade | JSON/CSV export |
-| Consentimento | Registro com timestamp |
+| Direito       | Implementação                   |
+| ------------- | ------------------------------- |
+| Acesso        | Export API                      |
+| Retificação   | Update com audit                |
+| Exclusão      | Soft delete + anonymization job |
+| Portabilidade | JSON/CSV export                 |
+| Consentimento | Registro com timestamp          |
 
 ### Dados sensíveis
 
@@ -165,11 +165,11 @@ Set-Cookie:
   HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800
 ```
 
-| Cookie | Uso |
-|--------|-----|
-| `refresh_token` | Auth refresh |
-| `session_id` | Sessão server-side (Redis) |
-| `csrf_token` | Proteção CSRF |
+| Cookie          | Uso                        |
+| --------------- | -------------------------- |
+| `refresh_token` | Auth refresh               |
+| `session_id`    | Sessão server-side (Redis) |
+| `csrf_token`    | Proteção CSRF              |
 
 **Nunca** armazenar access token em cookie sem criptografia adicional.
 
@@ -177,16 +177,16 @@ Set-Cookie:
 
 ## Recomendações futuras
 
-| Prioridade | Item | Sprint |
-|------------|------|--------|
-| Alta | Implementar JWT + refresh rotation | 2 |
-| Alta | RBAC middleware | 2 |
-| Alta | Rate limit em login e IA | 2 |
-| Média | CSP com nonces | 2 |
-| Média | Sentry para erros de segurança | 2 |
-| Média | Penetration test pré-produção | 10 |
-| Baixa | WAF (Cloudflare/AWS) | Deploy |
-| Baixa | mTLS entre serviços | Microserviços |
+| Prioridade | Item                               | Sprint        |
+| ---------- | ---------------------------------- | ------------- |
+| Alta       | Implementar JWT + refresh rotation | 2             |
+| Alta       | RBAC middleware                    | 2             |
+| Alta       | Rate limit em login e IA           | 2             |
+| Média      | CSP com nonces                     | 2             |
+| Média      | Sentry para erros de segurança     | 2             |
+| Média      | Penetration test pré-produção      | 10            |
+| Baixa      | WAF (Cloudflare/AWS)               | Deploy        |
+| Baixa      | mTLS entre serviços                | Microserviços |
 
 ---
 

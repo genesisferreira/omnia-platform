@@ -1,3 +1,2 @@
-/** Config: deepseek — Sprint 2+ */
+/** Config: deepseek ï¿½ Sprint 2+ */
 export {};
-

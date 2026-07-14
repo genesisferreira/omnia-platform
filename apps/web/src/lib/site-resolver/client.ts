@@ -10,9 +10,7 @@ import { createInternalConfigurationFailure } from './errors';
  * Consome GET /api/omnia/resolve-site no Admin (server-only).
  * Não resolve hostname localmente — apenas transporte + mapeamento HTTP.
  */
-export async function fetchSiteResolution(
-  hostname: string,
-): Promise<SiteResolutionResult> {
+export async function fetchSiteResolution(hostname: string): Promise<SiteResolutionResult> {
   let adminUrl: string;
   let secret: string;
 

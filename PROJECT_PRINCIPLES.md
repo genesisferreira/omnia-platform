@@ -49,14 +49,14 @@
 
 ## Anti-padrões (proibidos)
 
-| Anti-padrão | Correto |
-|-------------|---------|
-| `import payload from 'payload'` em `apps/web` | API REST do admin |
-| `process.env.DATABASE_URL` em componentes | `@omnia/config` |
-| Lógica CRM em `packages/ui` | `domains/crm` |
-| Chamada direta OpenAI em page | `@omnia/ai-core` |
-| Copy-paste de utils entre apps | `@omnia/shared` ou package específico |
+| Anti-padrão                                   | Correto                               |
+| --------------------------------------------- | ------------------------------------- |
+| `import payload from 'payload'` em `apps/web` | API REST do admin                     |
+| `process.env.DATABASE_URL` em componentes     | `@omnia/config`                       |
+| Lógica CRM em `packages/ui`                   | `domains/crm`                         |
+| Chamada direta OpenAI em page                 | `@omnia/ai-core`                      |
+| Copy-paste de utils entre apps                | `@omnia/shared` ou package específico |
 
 ---
 
-*Última atualização: Sprint 1.2 — Arquitetura congelada.*
+_Última atualização: Sprint 1.2 — Arquitetura congelada._

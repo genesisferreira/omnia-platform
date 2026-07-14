@@ -22,10 +22,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="text-sm font-medium text-primary hover:underline"
-            >
+            <Link href="/admin" className="text-sm font-medium text-primary hover:underline">
               Payload CMS →
             </Link>
           </div>

@@ -1,10 +1,6 @@
 import type { PartialThemeTokens } from '../branding/theme';
 import type { BrandReference } from '../../types/brand';
-import type {
-  SiteEnvironment,
-  SiteLocale,
-  SiteReference,
-} from '../../types/site';
+import type { SiteEnvironment, SiteLocale, SiteReference } from '../../types/site';
 import type { ThemeTokens } from '../../types/theme';
 
 export type SiteResolverInput = {
@@ -48,8 +44,7 @@ export const SITE_RESOLUTION_ERROR_CODES = [
   'THEME_INVALID',
 ] as const;
 
-export type SiteResolutionErrorCode =
-  (typeof SITE_RESOLUTION_ERROR_CODES)[number];
+export type SiteResolutionErrorCode = (typeof SITE_RESOLUTION_ERROR_CODES)[number];
 
 export type SiteResolutionError = {
   code: SiteResolutionErrorCode;
@@ -108,10 +103,7 @@ export type SiteDomainRecord = {
 };
 
 export type SiteDomainRepository = {
-  findByHostname(
-    hostname: string,
-    environment?: SiteEnvironment,
-  ): Promise<SiteDomainRecord | null>;
+  findByHostname(hostname: string, environment?: SiteEnvironment): Promise<SiteDomainRecord | null>;
 };
 
 export type SiteThemeResolver = {

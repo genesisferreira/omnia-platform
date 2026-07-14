@@ -130,9 +130,7 @@ async function seed() {
     console.log(`  ✓ Site criado: ${site.slug}`);
   }
 
-  const existingGlobals = await payload
-    .findGlobal({ slug: 'global-settings' })
-    .catch(() => null);
+  const existingGlobals = await payload.findGlobal({ slug: 'global-settings' }).catch(() => null);
 
   if (existingGlobals?.siteName) {
     console.log('✓ Global Settings já existe — seed ignorado');

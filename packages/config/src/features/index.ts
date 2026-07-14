@@ -1,3 +1,2 @@
-/** Config: features — Sprint 2+ */
+/** Config: features ï¿½ Sprint 2+ */
 export {};
-

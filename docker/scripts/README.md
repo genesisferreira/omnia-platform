@@ -4,8 +4,8 @@ Scripts auxiliares para operações Docker.
 
 ## Scripts
 
-| Script | Uso |
-|--------|-----|
+| Script               | Uso                                                      |
+| -------------------- | -------------------------------------------------------- |
 | `admin-bootstrap.sh` | Migrations Payload + seed em staging (container one-off) |
 
 Invocado pelo target `bootstrap` em `apps/admin/Dockerfile` e pelos serviços `admin-bootstrap`, `admin-migrate`, `admin-seed` em `docker/compose/staging.yml`.

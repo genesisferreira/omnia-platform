@@ -29,24 +29,18 @@ export type SiteResolutionClientOptions = {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const isFailureStatus = (
-  value: unknown,
-): value is Exclude<SiteResolutionStatus, 'resolved'> =>
+const isFailureStatus = (value: unknown): value is Exclude<SiteResolutionStatus, 'resolved'> =>
   typeof value === 'string' &&
   value !== 'resolved' &&
   (SITE_RESOLUTION_STATUSES as readonly string[]).includes(value);
 
-const isNamedEntity = (
-  value: unknown,
-): value is { id: string; slug: string; name: string } => {
+const isNamedEntity = (value: unknown): value is { id: string; slug: string; name: string } => {
   if (!isRecord(value)) {
     return false;
   }
 
   return (
-    typeof value.id === 'string' &&
-    typeof value.slug === 'string' &&
-    typeof value.name === 'string'
+    typeof value.id === 'string' && typeof value.slug === 'string' && typeof value.name === 'string'
   );
 };
 
@@ -98,23 +92,15 @@ const isResolvedSiteContext = (value: unknown): value is ResolvedSiteContext => 
   return true;
 };
 
-const isSiteResolutionSuccess = (
-  value: unknown,
-): value is SiteResolutionSuccess => {
+const isSiteResolutionSuccess = (value: unknown): value is SiteResolutionSuccess => {
   if (!isRecord(value)) {
     return false;
   }
 
-  return (
-    value.ok === true &&
-    value.status === 'resolved' &&
-    isResolvedSiteContext(value.context)
-  );
+  return value.ok === true && value.status === 'resolved' && isResolvedSiteContext(value.context);
 };
 
-const isSiteResolutionFailure = (
-  value: unknown,
-): value is SiteResolutionFailure => {
+const isSiteResolutionFailure = (value: unknown): value is SiteResolutionFailure => {
   if (!isRecord(value)) {
     return false;
   }
@@ -140,9 +126,7 @@ const isSiteResolutionFailure = (
   return true;
 };
 
-const isSiteResolutionResult = (
-  value: unknown,
-): value is SiteResolutionResult =>
+const isSiteResolutionResult = (value: unknown): value is SiteResolutionResult =>
   isSiteResolutionSuccess(value) || isSiteResolutionFailure(value);
 
 const isAbortError = (error: unknown): boolean => {

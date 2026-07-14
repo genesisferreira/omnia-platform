@@ -10,12 +10,12 @@ Usado por módulos de CRM e automações via services server-side. Não exposto 
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
-| `WHATSAPP_API_TOKEN` | Token de acesso da Meta Cloud API |
-| `WHATSAPP_PHONE_NUMBER_ID` | ID do número de telefone business |
-| `WHATSAPP_BUSINESS_ACCOUNT_ID` | ID da conta business (opcional) |
-| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Token de verificação de webhooks |
+| Variável                        | Descrição                         |
+| ------------------------------- | --------------------------------- |
+| `WHATSAPP_API_TOKEN`            | Token de acesso da Meta Cloud API |
+| `WHATSAPP_PHONE_NUMBER_ID`      | ID do número de telefone business |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID`  | ID da conta business (opcional)   |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Token de verificação de webhooks  |
 
 ## Sprint
 

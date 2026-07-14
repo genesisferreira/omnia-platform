@@ -19,12 +19,12 @@ packages/automation/src/
 
 ## Convenções de workflow
 
-| Aspecto | Diretriz |
-|---------|----------|
-| Nome | `{modulo}-{acao}-v{versao}` — ex: `crm-lead-notify-v1` |
-| Tags | `omnia`, módulo, ambiente |
-| Secrets | Sempre via credentials do n8n — nunca no JSON |
-| Error handling | Branch de erro com notificação |
+| Aspecto        | Diretriz                                               |
+| -------------- | ------------------------------------------------------ |
+| Nome           | `{modulo}-{acao}-v{versao}` — ex: `crm-lead-notify-v1` |
+| Tags           | `omnia`, módulo, ambiente                              |
+| Secrets        | Sempre via credentials do n8n — nunca no JSON          |
+| Error handling | Branch de erro com notificação                         |
 
 ## Triggers comuns
 
@@ -39,11 +39,11 @@ packages/automation/src/
 
 ## Ambientes
 
-| Ambiente | Instância n8n |
-|----------|---------------|
-| development | Docker local |
-| staging | n8n dedicado |
-| production | n8n HA com backup |
+| Ambiente    | Instância n8n     |
+| ----------- | ----------------- |
+| development | Docker local      |
+| staging     | n8n dedicado      |
+| production  | n8n HA com backup |
 
 ## Segurança
 

@@ -6,11 +6,11 @@
 
 ## URLs
 
-| Serviço | Domínio | Container |
-|---------|---------|-----------|
-| Portal | https://dev.omniafrigo.com.br | `omnia-platform-web-dev` |
-| Admin + Payload | https://admin.dev.omniafrigo.com.br | `omnia-platform-admin-dev` |
-| Payload CMS | https://admin.dev.omniafrigo.com.br/admin | (mesmo container admin) |
+| Serviço         | Domínio                                   | Container                  |
+| --------------- | ----------------------------------------- | -------------------------- |
+| Portal          | https://dev.omniafrigo.com.br             | `omnia-platform-web-dev`   |
+| Admin + Payload | https://admin.dev.omniafrigo.com.br       | `omnia-platform-admin-dev` |
+| Payload CMS     | https://admin.dev.omniafrigo.com.br/admin | (mesmo container admin)    |
 
 ## Princípios
 
@@ -72,11 +72,11 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging \
 
 ## Bootstrap — como funciona
 
-| Serviço | Imagem | Função |
-|---------|--------|--------|
+| Serviço           | Imagem                                       | Função                     |
+| ----------------- | -------------------------------------------- | -------------------------- |
 | `admin-bootstrap` | stage `bootstrap` do `apps/admin/Dockerfile` | `payload migrate` + `seed` |
-| `admin-migrate` | mesma imagem | somente `payload migrate` |
-| `admin-seed` | mesma imagem | somente seed idempotente |
+| `admin-migrate`   | mesma imagem                                 | somente `payload migrate`  |
+| `admin-seed`      | mesma imagem                                 | somente seed idempotente   |
 
 - Usa **profile `bootstrap`** — não sobe com `docker compose up -d`
 - Conecta apenas na rede **`omnia_internal`** (sem Traefik)
@@ -122,13 +122,13 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging down
 
 ## Arquivos de referência
 
-| Arquivo | Função |
-|---------|--------|
-| `docker/compose/staging.yml` | Compose homologação + serviços bootstrap |
-| `docker/scripts/admin-bootstrap.sh` | Script migrate/seed no container |
-| `apps/admin/Dockerfile` | Targets: `bootstrap` (CLI) e `runner` (runtime) |
-| `apps/admin/src/migrations/` | Migrations Payload versionadas |
-| `.env.staging.example` | Template de variáveis |
+| Arquivo                             | Função                                          |
+| ----------------------------------- | ----------------------------------------------- |
+| `docker/compose/staging.yml`        | Compose homologação + serviços bootstrap        |
+| `docker/scripts/admin-bootstrap.sh` | Script migrate/seed no container                |
+| `apps/admin/Dockerfile`             | Targets: `bootstrap` (CLI) e `runner` (runtime) |
+| `apps/admin/src/migrations/`        | Migrations Payload versionadas                  |
+| `.env.staging.example`              | Template de variáveis                           |
 
 ## Validação local (antes do deploy)
 

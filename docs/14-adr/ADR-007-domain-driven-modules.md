@@ -16,12 +16,12 @@ O monorepo crescerá com múltiplos módulos de negócio. Pastas `modules/` (doc
 
 Criar pasta `domains/` na raiz como **mapa de bounded contexts** com documentação rica, complementando:
 
-| Pasta | Papel |
-|-------|-------|
-| `domains/` | Bounded contexts — objetivo, responsabilidades, eventos |
-| `modules/` | Visão de produto e módulos de negócio |
-| `packages/types/` | Tipos TypeScript por domínio |
-| `packages/database/` | Persistência por domínio |
+| Pasta                | Papel                                                   |
+| -------------------- | ------------------------------------------------------- |
+| `domains/`           | Bounded contexts — objetivo, responsabilidades, eventos |
+| `modules/`           | Visão de produto e módulos de negócio                   |
+| `packages/types/`    | Tipos TypeScript por domínio                            |
+| `packages/database/` | Persistência por domínio                                |
 
 ### Domínios
 

@@ -7,6 +7,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 ### Sprint 2 — Platform Base (em revisão)
 
 #### Adicionado
+
 - Payload CMS: coleções `tenants`, `companies`, `media` + global `global-settings`
 - Media Library com upload local; MinIO documentado
 - `@omnia/config` runtime com validação Zod
@@ -18,6 +19,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 ### Sprint 1.2 — Platform Standards & Governance (em revisão)
 
 #### Adicionado
+
 - **9 novos packages:** `config`, `testing`, `errors`, `events`, `cache`, `mail`, `queue`, `validation`, `search`
 - **Governança:** `SYSTEM_OVERVIEW.md`, `PROJECT_PRINCIPLES.md`, `GOVERNANCE.md`, `QUALITY_GATES.md`
 - **Regras:** `DEPENDENCY_RULES.md`, `IMPORT_RULES.md`
@@ -26,12 +28,14 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 - **CODEOWNERS** atualizado por área (apps, packages, domains, docs, docker, .github)
 
 #### Arquitetura
+
 - Arquitetura considerada **CONGELADA** após Sprint 1.2
 - Mudanças estruturais exigem ADR
 
 ### Sprint 1.1 — Architecture Refinement (em revisão)
 
 #### Adicionado
+
 - ADR-004 a ADR-007 (Portal/CMS, multi-tenant, IA, domínios)
 - `/api/status` global via `@omnia/monitoring`
 - Docker: Mailpit, pgAdmin
@@ -47,6 +51,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 ### Sprint 1 — Base Executável (em revisão)
 
 #### Adicionado
+
 - Next.js 15 em `apps/web` e `apps/admin`
 - Tailwind CSS e shadcn/ui em `@omnia/ui`
 - Payload CMS em `apps/admin` (exclusivo)

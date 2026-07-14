@@ -18,12 +18,7 @@ type ResolutionErrorCode =
   | 'INTERNAL_CONFIGURATION_ERROR'
   | 'INTERNAL_RESOLUTION_ERROR';
 
-type ResolutionStatus =
-  | 'resolved'
-  | 'not_found'
-  | 'inactive'
-  | 'maintenance'
-  | 'invalid_hostname';
+type ResolutionStatus = 'resolved' | 'not_found' | 'inactive' | 'maintenance' | 'invalid_hostname';
 
 type NamedEntityDto = {
   id: string;
@@ -155,7 +150,11 @@ const readStringField = (doc: Record<string, unknown>, field: string): string | 
   return null;
 };
 
-const readBooleanField = (doc: Record<string, unknown>, field: string, fallback: boolean): boolean => {
+const readBooleanField = (
+  doc: Record<string, unknown>,
+  field: string,
+  fallback: boolean,
+): boolean => {
   const value = doc[field];
   return typeof value === 'boolean' ? value : fallback;
 };
@@ -176,10 +175,7 @@ const toNamedEntity = (value: unknown): NamedEntityDto | null => {
   return { id, slug, name };
 };
 
-const mapSiteStatusFailure = (
-  hostname: string,
-  siteStatus: string | null,
-): Response | null => {
+const mapSiteStatusFailure = (hostname: string, siteStatus: string | null): Response | null => {
   switch (siteStatus) {
     case 'active':
       return null;
@@ -285,10 +281,7 @@ export const resolveSiteEndpoint: Endpoint = {
       const result = await req.payload.find({
         collection: DOMAINS_COLLECTION,
         where: {
-          and: [
-            { normalizedHostname: { equals: hostname } },
-            { isActive: { equals: true } },
-          ],
+          and: [{ normalizedHostname: { equals: hostname } }, { isActive: { equals: true } }],
         },
         limit: 1,
         depth: 2,

@@ -17,8 +17,8 @@ Gerenciar identidade, autenticação e autorização de usuários, servindo como
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
+| Domínio  | Uso                       |
+| -------- | ------------------------- |
 | **core** | Primitivos compartilhados |
 
 ## Integrações
@@ -28,9 +28,9 @@ Gerenciar identidade, autenticação e autorização de usuários, servindo como
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `UserCreated` | Novo usuário registrado na plataforma | 2 |
+| Evento        | Descrição                             | Sprint |
+| ------------- | ------------------------------------- | ------ |
+| `UserCreated` | Novo usuário registrado na plataforma | 2      |
 
 ## Referências
 

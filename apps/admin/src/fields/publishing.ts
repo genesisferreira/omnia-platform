@@ -41,9 +41,7 @@ const createNotBeforePublishAtValidator =
       return true;
     }
 
-    const publishAtTime = parseFieldDate(
-      (siblingData as PublishingSiblingData).publishAt,
-    );
+    const publishAtTime = parseFieldDate((siblingData as PublishingSiblingData).publishAt);
     const fieldTime = parseFieldDate(value);
 
     if (publishAtTime === null || fieldTime === null) {

@@ -47,32 +47,32 @@ Consulte [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) e [docs/08-architecture](docs/
 
 ## Tecnologias
 
-| Categoria | Stack |
-|-----------|-------|
-| Framework | Next.js 15, React, TypeScript |
-| UI | Tailwind CSS, shadcn/ui |
-| CMS | Payload CMS |
-| Banco | PostgreSQL + Drizzle ORM |
-| Cache | Redis |
-| Storage | MinIO |
-| IA | DeepSeek API, Omnia AI Core |
-| Automação | n8n |
-| Infra | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
+| Categoria | Stack                          |
+| --------- | ------------------------------ |
+| Framework | Next.js 15, React, TypeScript  |
+| UI        | Tailwind CSS, shadcn/ui        |
+| CMS       | Payload CMS                    |
+| Banco     | PostgreSQL + Drizzle ORM       |
+| Cache     | Redis                          |
+| Storage   | MinIO                          |
+| IA        | DeepSeek API, Omnia AI Core    |
+| Automação | n8n                            |
+| Infra     | Docker, Docker Compose         |
+| CI/CD     | GitHub Actions                 |
 | Qualidade | ESLint, Prettier, EditorConfig |
 
 ---
 
 ## Estrutura de Documentação
 
-| Pasta | Conteúdo |
-|-------|----------|
-| `docs/00-product-vision` | Visão de produto |
-| `docs/01-blueprint` | Blueprint técnico |
-| `docs/02-prd` | Product Requirements Document |
-| `docs/08-architecture` | Arquitetura e ADRs |
-| `docs/13-roadmap` | Roadmap de sprints |
-| `docs/14-adr` | Architecture Decision Records |
+| Pasta                    | Conteúdo                      |
+| ------------------------ | ----------------------------- |
+| `docs/00-product-vision` | Visão de produto              |
+| `docs/01-blueprint`      | Blueprint técnico             |
+| `docs/02-prd`            | Product Requirements Document |
+| `docs/08-architecture`   | Arquitetura e ADRs            |
+| `docs/13-roadmap`        | Roadmap de sprints            |
+| `docs/14-adr`            | Architecture Decision Records |
 
 Veja a pasta [docs/](docs/) para a documentação completa.
 
@@ -80,15 +80,15 @@ Veja a pasta [docs/](docs/) para a documentação completa.
 
 ## Roadmap
 
-| Sprint | Status | Foco |
-|--------|--------|------|
-| Sprint 0 | ✅ Concluída | Fundação — estrutura, docs, monorepo |
-| Sprint 0.5 | ✅ Concluída | Foundation Hardening — tooling, packages infra |
-| Sprint 1 | ✅ Concluída | Base executável — Next.js, Payload, Docker |
-| Sprint 1.2 | ✅ Concluída | Governança e packages transversais |
-| Sprint 2 | 🟡 Em revisão | Platform Base — CMS, design system, portal |
-| Sprint 3 | ⬜ Planejada | Auth (JWT, RBAC), migrations Drizzle |
-| Sprint 4+ | ⬜ Planejado | Blog, CRM, marketplace, IA |
+| Sprint     | Status        | Foco                                           |
+| ---------- | ------------- | ---------------------------------------------- |
+| Sprint 0   | ✅ Concluída  | Fundação — estrutura, docs, monorepo           |
+| Sprint 0.5 | ✅ Concluída  | Foundation Hardening — tooling, packages infra |
+| Sprint 1   | ✅ Concluída  | Base executável — Next.js, Payload, Docker     |
+| Sprint 1.2 | ✅ Concluída  | Governança e packages transversais             |
+| Sprint 2   | 🟡 Em revisão | Platform Base — CMS, design system, portal     |
+| Sprint 3   | ⬜ Planejada  | Auth (JWT, RBAC), migrations Drizzle           |
+| Sprint 4+  | ⬜ Planejado  | Blog, CRM, marketplace, IA                     |
 
 ---
 
@@ -119,15 +119,15 @@ pnpm dev
 
 ### URLs locais
 
-| Serviço | URL |
-|---------|-----|
-| Portal (web) | http://localhost:3000 |
-| Admin | http://localhost:3001 |
-| Payload CMS | http://localhost:3001/admin |
-| Mailpit | http://localhost:8025 | Email dev (SMTP) |
-| pgAdmin | http://localhost:5050 | GUI PostgreSQL |
-| MinIO Console | http://localhost:9001 |
-| Health (web) | http://localhost:3000/api/health |
+| Serviço        | URL                              |
+| -------------- | -------------------------------- |
+| Portal (web)   | http://localhost:3000            |
+| Admin          | http://localhost:3001            |
+| Payload CMS    | http://localhost:3001/admin      |
+| Mailpit        | http://localhost:8025            | Email dev (SMTP) |
+| pgAdmin        | http://localhost:5050            | GUI PostgreSQL   |
+| MinIO Console  | http://localhost:9001            |
+| Health (web)   | http://localhost:3000/api/health |
 | Health (admin) | http://localhost:3001/api/health |
 
 ### Comandos úteis
@@ -162,27 +162,27 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 
 **Omnia Frigo Holding** — Engenharia de Software
 
-| Papel | Responsabilidade |
-|-------|------------------|
+| Papel                 | Responsabilidade                   |
+| --------------------- | ---------------------------------- |
 | Arquiteto de Software | Arquitetura, ADRs, revisão técnica |
-| Engenheiro Full Stack | Desenvolvimento de módulos |
-| DevOps | Infraestrutura, CI/CD, Docker |
-| Product Owner | Requisitos, priorização |
+| Engenheiro Full Stack | Desenvolvimento de módulos         |
+| DevOps                | Infraestrutura, CI/CD, Docker      |
+| Product Owner         | Requisitos, priorização            |
 
 ---
 
 ## Status do Projeto
 
-| Aspecto | Status |
-|---------|--------|
-| Fundação (Sprint 0–1.2) | ✅ Concluída |
-| Platform Base (Sprint 2) | 🟡 Em revisão |
-| Aplicações Next.js | ✅ Sprint 2 |
-| CMS (Payload) | ✅ Sprint 2 — coleções ativas |
-| Banco de Dados (Drizzle) | 🟡 Schema vazio — Sprint 3 |
-| IA / Chat | ⬜ Sprint 8+ |
-| Automações n8n | ⬜ Sprint 8+ |
+| Aspecto                  | Status                        |
+| ------------------------ | ----------------------------- |
+| Fundação (Sprint 0–1.2)  | ✅ Concluída                  |
+| Platform Base (Sprint 2) | 🟡 Em revisão                 |
+| Aplicações Next.js       | ✅ Sprint 2                   |
+| CMS (Payload)            | ✅ Sprint 2 — coleções ativas |
+| Banco de Dados (Drizzle) | 🟡 Schema vazio — Sprint 3    |
+| IA / Chat                | ⬜ Sprint 8+                  |
+| Automações n8n           | ⬜ Sprint 8+                  |
 
 ---
 
-*Omnia Platform — Construindo o futuro do ecossistema Omnia Frigo Holding.*
+_Omnia Platform — Construindo o futuro do ecossistema Omnia Frigo Holding._

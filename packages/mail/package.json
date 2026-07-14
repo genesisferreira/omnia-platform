@@ -4,7 +4,9 @@
   "private": true,
   "description": "Envio de e-mail — SMTP, Mailpit, templates",
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "eslint src/",
