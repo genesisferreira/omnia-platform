@@ -4,7 +4,7 @@ import '@omnia/ui/globals.css';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
-import { getSiteRequestContext } from '@/lib/request-context';
+import { getSiteContext } from '@/lib/site-context';
 
 export const metadata: Metadata = {
   title: 'Omnia Platform',
@@ -16,7 +16,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const siteRequestContext = await getSiteRequestContext();
+  const siteRequestContext = await getSiteContext();
   const { hostname, resolution } = siteRequestContext;
 
   return (
