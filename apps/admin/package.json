@@ -15,7 +15,8 @@
     "migrate": "payload migrate",
     "migrate:status": "payload migrate:status",
     "seed": "tsx src/seed/index.ts",
-    "test:public-companies": "tsx src/scripts/test-public-companies.ts"
+    "test:public-companies": "tsx src/scripts/test-public-companies.ts",
+    "test:holding-companies-seed": "tsx src/scripts/test-holding-companies-seed.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
