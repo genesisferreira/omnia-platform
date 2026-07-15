@@ -1,4 +1,3 @@
-import { CtaSection } from '@/components/home/CtaSection';
 import { CompanyCards } from '@/components/home/CompanyCards';
 import { EcosystemSection } from '@/components/home/EcosystemSection';
 import { Hero } from '@/components/home/Hero';
@@ -12,7 +11,6 @@ export default async function HomePage() {
       <Hero settings={settings} />
       <EcosystemSection />
       <CompanyCards companies={companies} />
-      <CtaSection />
     </>
   );
 }

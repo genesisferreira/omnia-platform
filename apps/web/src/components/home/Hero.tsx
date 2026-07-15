@@ -1,4 +1,4 @@
-import { Badge, Button, Container } from '@omnia/ui';
+import { Button, Container } from '@omnia/ui';
 
 import type { CmsGlobalSettings } from '@/lib/cms';
 
@@ -9,8 +9,7 @@ type HeroProps = {
 export function Hero({ settings }: HeroProps) {
   const title = settings?.heroTitle ?? 'Ecossistema Omnia Frigo Holding';
   const subtitle =
-    settings?.heroSubtitle ??
-    'Uma plataforma unificada para gestão, educação, serviços e inovação no setor de refrigeração.';
+    settings?.heroSubtitle ?? 'Tradição, Educação e Inteligência Artificial em Refrigeração.';
   const ctaLabel = settings?.ctaLabel ?? 'Conheça o ecossistema';
   const ctaUrl = settings?.ctaUrl ?? '#ecossistema';
 
@@ -18,9 +17,6 @@ export function Hero({ settings }: HeroProps) {
     <section className="relative overflow-hidden bg-gradient-to-br from-omnia-deep-blue to-omnia-emerald py-20 text-white md:py-28">
       <Container>
         <div className="max-w-3xl space-y-6">
-          <Badge variant="accent" className="bg-omnia-copper text-white">
-            Sprint 2 — Platform Base
-          </Badge>
           <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
             {title}
           </h1>

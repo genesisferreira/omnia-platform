@@ -141,8 +141,7 @@ async function seed() {
         siteName: 'Omnia Platform',
         tagline: 'Ecossistema digital da Omnia Frigo Holding',
         heroTitle: 'Ecossistema Omnia Frigo Holding',
-        heroSubtitle:
-          'Uma plataforma unificada para gestão, educação, serviços e inovação no setor de refrigeração.',
+        heroSubtitle: 'Tradição, Educação e Inteligência Artificial em Refrigeração.',
         ctaLabel: 'Conheça o ecossistema',
         ctaUrl: '#ecossistema',
       },
