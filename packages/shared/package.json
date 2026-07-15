@@ -12,12 +12,15 @@
     "dev": "node ../../scripts/workspace-placeholder.mjs dev",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "test:public-page-contracts": "tsx src/cms/public-page/test-public-page-contracts.ts",
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
     "eslint": "catalog:",
     "rimraf": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -44,6 +44,9 @@ jobs:
       - name: Holding companies seed invariants
         run: pnpm --filter @omnia/admin test:holding-companies-seed
 
+      - name: Public page contracts
+        run: pnpm --filter @omnia/shared test:public-page-contracts
+
   build:
     name: Build
     runs-on: ubuntu-latest
