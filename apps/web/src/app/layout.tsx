@@ -1,14 +1,28 @@
+import { Inter, Montserrat } from 'next/font/google';
 import type { Metadata } from 'next';
 
 import '@omnia/ui/globals.css';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
+import { SkipLink } from '@/components/layout/SkipLink';
 import { getSiteContext } from '@/lib/site-context';
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-montserrat',
+});
+
 export const metadata: Metadata = {
-  title: 'Omnia Platform',
-  description: 'Ecossistema digital da Omnia Frigo Holding',
+  title: 'Omnia Frigo Holding',
+  description: 'Tradição, Educação e Inteligência Artificial em Refrigeração.',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -24,10 +38,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-company-slug={resolution.ok ? (resolution.context.company?.slug ?? '') : undefined}
       data-tenant-slug={resolution.ok ? resolution.context.tenant.slug : undefined}
       data-site-error-code={resolution.ok ? undefined : resolution.error.code}
+      className={`${inter.variable} ${montserrat.variable}`}
     >
       <body className="font-sans antialiased">
+        <SkipLink />
         <Header />
-        <main>{children}</main>
+        <main id="conteudo-principal">{children}</main>
         <Footer />
       </body>
     </html>

@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* Omnia Brand Tokens — Sprint 2 */
     --omnia-emerald: 164 79% 20%;
     --omnia-deep-blue: 209 69% 18%;
     --omnia-copper: 27 53% 51%;
     --omnia-graphite: 210 17% 9%;
+    --omnia-graphite-light: 210 9% 59%;
     --omnia-white: 0 0% 100%;
 
     --background: var(--omnia-white);
@@ -30,8 +30,9 @@
     --ring: var(--omnia-emerald);
     --radius: 0.5rem;
 
-    --font-heading: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-heading:
+      var(--font-montserrat), 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-body: var(--font-inter), 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
 
   .dark {

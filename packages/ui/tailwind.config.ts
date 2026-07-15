@@ -11,9 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Montserrat', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
+        body: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -26,6 +26,7 @@ const config: Config = {
           'deep-blue': '#0E2D4D',
           copper: '#C7783D',
           graphite: '#11161B',
+          'graphite-light': '#8E969E',
           white: '#FFFFFF',
         },
         primary: {
