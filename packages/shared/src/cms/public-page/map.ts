@@ -29,7 +29,6 @@ import {
 } from './constants';
 import {
   isPlainRecord,
-  readBoundedStringArray,
   readBoundedTrimmedString,
   readOptionalTrimmedString,
   readRequiredTrimmedString,
@@ -165,7 +164,7 @@ const mapInstitutionalIntroBlock = (
   }
 
   const eyebrow = readBoundedTrimmedString(value.eyebrow, INSTITUTIONAL_INTRO_MAX_EYEBROW);
-  let highlights: string[] = [];
+  const highlights: string[] = [];
   if (value.highlights !== null && value.highlights !== undefined) {
     if (!Array.isArray(value.highlights)) {
       return null;
