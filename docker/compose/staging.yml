@@ -187,6 +187,28 @@ services:
     restart: 'no'
     command: ['seed']
 
+  # Seed exclusivo da Home (omnia-hub) — não executa seed geral
+  admin-seed-holding-home:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-home
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-home']
+
 networks:
   omnia_proxy:
     external: true

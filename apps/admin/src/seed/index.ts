@@ -3,7 +3,8 @@ import { getPayload } from 'payload';
 
 import config from '../../payload.config';
 import { defaultTenantSeed, holdingCompaniesSeed } from './holding-companies';
-import { decideHoldingHomeSeed, holdingHomeSeed } from './holding-home';
+import { holdingHomeSeed } from './holding-home';
+import { adaptPayloadForHoldingHomeSeed, runHoldingHomeSeed } from './run-holding-home';
 import { sitesSeed } from './sites';
 
 async function seed() {
@@ -152,74 +153,17 @@ async function seed() {
 
   console.log('🌱 Seed Home (omnia-hub)...');
 
-  const homeSite = await payload.find({
-    collection: 'sites',
-    where: { slug: { equals: holdingHomeSeed.siteSlug } },
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
-  });
+  const homeOutcome = await runHoldingHomeSeed(adaptPayloadForHoldingHomeSeed(payload));
 
-  const homeSiteDoc = homeSite.docs[0];
-
-  const existingHome = homeSiteDoc
-    ? await payload.find({
-        collection: 'pages',
-        where: {
-          and: [{ site: { equals: homeSiteDoc.id } }, { pageType: { equals: 'home' } }],
-        },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-    : { docs: [] as { id: string | number; slug: string; pageType: string }[] };
-
-  const existingBySlugHome = homeSiteDoc
-    ? await payload.find({
-        collection: 'pages',
-        where: {
-          and: [{ site: { equals: homeSiteDoc.id } }, { slug: { equals: holdingHomeSeed.slug } }],
-        },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-    : { docs: [] as { id: string | number; slug: string; pageType: string }[] };
-
-  const homeDoc = existingHome.docs[0];
-  const slugDoc = existingBySlugHome.docs[0];
-
-  const decision = decideHoldingHomeSeed({
-    siteFound: Boolean(homeSiteDoc),
-    siteSlug: holdingHomeSeed.siteSlug,
-    existingHome: homeDoc
-      ? { id: homeDoc.id, slug: String(homeDoc.slug), pageType: String(homeDoc.pageType) }
-      : null,
-    existingBySlugHome: slugDoc
-      ? { id: slugDoc.id, slug: String(slugDoc.slug), pageType: String(slugDoc.pageType) }
-      : null,
-  });
-
-  if (decision.action === 'abort') {
-    throw new Error(`Seed Home abortado: ${decision.detail}`);
+  if (homeOutcome.status === 'aborted') {
+    throw new Error(
+      `Seed Home abortado: Site "${holdingHomeSeed.siteSlug}" não encontrado. Execute o seed de sites antes.`,
+    );
   }
 
-  if (decision.action === 'skip') {
-    console.log(`✓ Home seed ignorado (${decision.reason}): ${decision.detail}`);
+  if (homeOutcome.status === 'skipped') {
+    console.log(`✓ Home seed ignorado (${homeOutcome.reason})`);
   } else {
-    await payload.create({
-      collection: 'pages',
-      overrideAccess: true,
-      data: {
-        title: holdingHomeSeed.title,
-        slug: holdingHomeSeed.slug,
-        pageType: holdingHomeSeed.pageType,
-        site: homeSiteDoc!.id,
-        layout: holdingHomeSeed.layout,
-        seo: holdingHomeSeed.seo,
-        _status: 'published',
-      },
-    });
     console.log('✓ Home criada para omnia-hub');
   }
 
