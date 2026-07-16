@@ -11,7 +11,11 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-omnia-deep-blue/40 bg-omnia-graphite text-omnia-white">
+    <footer className="relative border-t border-omnia-deep-blue/50 bg-omnia-graphite text-omnia-white">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-omnia-copper/45 to-transparent"
+      />
       <Container className="py-10 md:py-12">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-xl space-y-3">

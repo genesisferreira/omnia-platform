@@ -11,7 +11,7 @@ export function BrandHomeLink() {
       className="inline-flex min-h-10 items-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label="Omnia Frigo Holding — início"
     >
-      <span className="font-heading text-base font-semibold tracking-tight text-foreground sm:text-lg">
+      <span className="font-heading text-base font-semibold tracking-tight text-omnia-deep-blue sm:text-lg">
         Omnia Frigo Holding
       </span>
     </Link>
