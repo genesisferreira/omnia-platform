@@ -9,6 +9,8 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { down as rollbackInstitutionalMigration } from '../migrations/20260716_172340_pages_institutional';
+
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   console.log('SKIP test:pages-migration-db — DATABASE_URL não definido');
@@ -29,11 +31,24 @@ const { Client } = require(pgModulePath) as {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- resolve transitive drizzle
+const { drizzle } = require(
+  require.resolve('drizzle-orm/node-postgres', {
+    paths: [require.resolve('@payloadcms/db-postgres')],
+  }),
+) as {
+  drizzle: (client: unknown) => { execute: (query: unknown) => Promise<unknown> };
+};
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const adminRoot = path.resolve(__dirname, '../..');
 
+const INSTITUTIONAL_MIGRATION_NAME = '20260716_172340_pages_institutional';
+
 const runAdmin = (args: string[]): void => {
-  const result = spawnSync('corepack', ['pnpm', ...args], {
+  const command = process.platform === 'win32' ? 'corepack' : 'pnpm';
+  const commandArgs = process.platform === 'win32' ? ['pnpm', ...args] : args;
+  const result = spawnSync(command, commandArgs, {
     cwd: adminRoot,
     env: process.env,
     stdio: 'pipe',
@@ -45,6 +60,26 @@ const runAdmin = (args: string[]): void => {
       `command failed: pnpm ${args.join(' ')}\n${result.stderr ?? result.stdout ?? ''}`,
     );
   }
+};
+
+const rollbackInstitutionalOnly = async (): Promise<void> => {
+  const latest = await client.query(`
+    SELECT name FROM payload_migrations
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `);
+  assert.equal(String(latest.rows[0]?.name), INSTITUTIONAL_MIGRATION_NAME);
+
+  const migrationDb = drizzle(client);
+  await rollbackInstitutionalMigration({
+    db: migrationDb as never,
+    payload: {} as never,
+    req: {} as never,
+  });
+
+  await client.query(
+    `DELETE FROM payload_migrations WHERE name = '${INSTITUTIONAL_MIGRATION_NAME}'`,
+  );
 };
 
 const client = new Client({ connectionString: databaseUrl });
@@ -138,20 +173,25 @@ try {
     assert.equal(fks.rows.length, 1);
   });
 
-  await test('ciclo migrate:down → migrate reaplica última migration institucional', async () => {
+  await test('ciclo rollback institucional → migrate reaplica última migration', async () => {
     const before = await client.query(`
       SELECT tablename FROM pg_tables
       WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
     `);
     assert.equal(before.rows.length, 1);
 
-    runAdmin(['exec', 'payload', 'migrate:down']);
+    await rollbackInstitutionalOnly();
 
     const afterDown = await client.query(`
       SELECT tablename FROM pg_tables
       WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
     `);
     assert.equal(afterDown.rows.length, 0);
+
+    const remaining = await client.query(`
+      SELECT name FROM payload_migrations ORDER BY created_at DESC, id DESC LIMIT 1
+    `);
+    assert.equal(String(remaining.rows[0]?.name), '20260716_124305_pages');
 
     runAdmin(['migrate']);
 
@@ -160,6 +200,11 @@ try {
       WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
     `);
     assert.equal(afterUp.rows.length, 1);
+
+    const restored = await client.query(
+      `SELECT name FROM payload_migrations WHERE name = '${INSTITUTIONAL_MIGRATION_NAME}'`,
+    );
+    assert.equal(restored.rows.length, 1);
   });
 
   console.log(`\n${passed} testes DB de migration passaram.`);
