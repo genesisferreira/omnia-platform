@@ -8,10 +8,12 @@ import { buildConfig } from 'payload';
 import { Companies } from './src/collections/Companies';
 import { Domains } from './src/collections/Domains';
 import { Media } from './src/collections/Media';
+import { Pages } from './src/collections/Pages';
 import { Sites } from './src/collections/Sites';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { publicCompaniesEndpoint } from './src/endpoints/public-companies';
+import { publicPageEndpoint } from './src/endpoints/public-page';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 
@@ -28,9 +30,9 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users, Tenants, Companies, Sites, Domains, Media],
+  collections: [Users, Tenants, Companies, Sites, Domains, Media, Pages],
   globals: [GlobalSettings],
-  endpoints: [resolveSiteEndpoint, publicCompaniesEndpoint],
+  endpoints: [resolveSiteEndpoint, publicCompaniesEndpoint, publicPageEndpoint],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
   typescript: {

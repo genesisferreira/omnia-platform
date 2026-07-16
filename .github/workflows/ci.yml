@@ -47,6 +47,9 @@ jobs:
       - name: Public page contracts
         run: pnpm --filter @omnia/shared test:public-page-contracts
 
+      - name: Public page endpoint and Pages rules
+        run: pnpm --filter @omnia/admin test:public-page
+
   build:
     name: Build
     runs-on: ubuntu-latest

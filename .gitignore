@@ -54,6 +54,7 @@ apps/admin/src/payload-types.ts
 # Misc
 .cache/
 tmp/
+.tmp/
 temp/
 *.swp
 *.swo

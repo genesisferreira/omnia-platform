@@ -45,12 +45,27 @@ const readBoolean = (value: unknown, fallback: boolean): boolean => {
   return fallback;
 };
 
+const isEmptyLinkAction = (value: unknown): boolean => {
+  if (!isPlainRecord(value)) {
+    return false;
+  }
+
+  return (
+    readOptionalTrimmedString(value.label) === null &&
+    readOptionalTrimmedString(value.href) === null
+  );
+};
+
 const mapLinkAction = (value: unknown): PublicLinkActionDto | null => {
   if (value === null || value === undefined) {
     return null;
   }
 
   if (!isPlainRecord(value)) {
+    return null;
+  }
+
+  if (isEmptyLinkAction(value)) {
     return null;
   }
 
@@ -75,21 +90,29 @@ const mapHeroBlock = (value: Record<string, unknown>): PublicHeroBlockDto | null
     ? variantRaw
     : 'default';
 
+  const primaryRaw = value.primaryAction;
   const primaryAction =
-    value.primaryAction === null || value.primaryAction === undefined
+    primaryRaw === null || primaryRaw === undefined || isEmptyLinkAction(primaryRaw)
       ? null
-      : mapLinkAction(value.primaryAction);
-  if (value.primaryAction !== null && value.primaryAction !== undefined && primaryAction === null) {
+      : mapLinkAction(primaryRaw);
+  if (
+    primaryRaw !== null &&
+    primaryRaw !== undefined &&
+    !isEmptyLinkAction(primaryRaw) &&
+    primaryAction === null
+  ) {
     return null;
   }
 
+  const secondaryRaw = value.secondaryAction;
   const secondaryAction =
-    value.secondaryAction === null || value.secondaryAction === undefined
+    secondaryRaw === null || secondaryRaw === undefined || isEmptyLinkAction(secondaryRaw)
       ? null
-      : mapLinkAction(value.secondaryAction);
+      : mapLinkAction(secondaryRaw);
   if (
-    value.secondaryAction !== null &&
-    value.secondaryAction !== undefined &&
+    secondaryRaw !== null &&
+    secondaryRaw !== undefined &&
+    !isEmptyLinkAction(secondaryRaw) &&
     secondaryAction === null
   ) {
     return null;
@@ -149,7 +172,10 @@ const mapFeaturesBlock = (value: Record<string, unknown>): PublicFeaturesBlockDt
     items.push(mapped);
   }
 
-  const columnsRaw = value.columns;
+  const columnsRaw =
+    typeof value.columns === 'string' && /^\d+$/.test(value.columns)
+      ? Number(value.columns)
+      : value.columns;
   const columns: FeaturesBlockColumns = includesLiteral(FEATURES_BLOCK_COLUMNS, columnsRaw)
     ? columnsRaw
     : 3;
