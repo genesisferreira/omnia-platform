@@ -1,7 +1,12 @@
 /**
  * Seed idempotente da Home do site omnia-hub (S04-F4C / F4C.2).
- * Nunca sobrescreve conteúdo editorial existente.
+ * Nunca sobrescreve conteúdo editorial existente — use upgrade-holding-home para evolução.
  */
+
+import {
+  holdingHomeFullLayout,
+  holdingHomeInstitutionalBlocks,
+} from './holding-home-institutional';
 
 export type HoldingHomeSeedDecision =
   | { action: 'create' }
@@ -61,50 +66,7 @@ export const holdingHomeSeed = {
     canonicalUrl: null as string | null,
     noIndex: false,
   },
-  layout: [
-    {
-      blockType: 'hero' as const,
-      title: 'Ecossistema Omnia Frigo Holding',
-      subtitle: 'Tradição, Educação e Inteligência Artificial em Refrigeração.',
-      primaryAction: {
-        label: 'Conheça o ecossistema',
-        href: '#ecossistema',
-      },
-      secondaryAction: undefined,
-      variant: 'default' as const,
-    },
-    {
-      blockType: 'features' as const,
-      title: 'Um ecossistema integrado',
-      subtitle:
-        'A Omnia Frigo Holding conecta holding, serviços, tecnologia, educação e engenharia em uma única plataforma.',
-      columns: '3' as const,
-      items: [
-        {
-          title: 'Multiempresa',
-          description: 'Estrutura de tenants e empresas preparada para escalar.',
-          iconKey: 'multiempresa' as const,
-        },
-        {
-          title: 'CMS centralizado',
-          description: 'Conteúdo gerenciado via Payload CMS no painel admin.',
-          iconKey: 'cms' as const,
-        },
-        {
-          title: 'Design unificado',
-          description: 'Identidade visual Omnia aplicada em portal e admin.',
-          iconKey: 'design' as const,
-        },
-      ],
-    },
-    {
-      blockType: 'companies' as const,
-      title: 'Empresas do ecossistema',
-      subtitle: 'Conheça as marcas que compõem a Omnia Frigo Holding.',
-      limit: 6,
-      showRole: true,
-      showDescription: true,
-      layout: 'grid' as const,
-    },
-  ],
+  layout: [...holdingHomeFullLayout],
 };
+
+export { holdingHomeInstitutionalBlocks, holdingHomeFullLayout };

@@ -26,6 +26,7 @@ import {
   validatePublicPageQuery,
 } from '../endpoints/public-page-query';
 import { decideHoldingHomeSeed, holdingHomeSeed } from '../seed/holding-home';
+import { holdingHomeInstitutionalBlocks } from '../seed/holding-home-institutional';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const migrationsDir = path.resolve(__dirname, '../migrations');
@@ -53,6 +54,7 @@ const publishedDoc = {
       primaryAction: { label: 'Conheça o ecossistema', href: '#ecossistema' },
       variant: 'default',
     },
+    ...holdingHomeInstitutionalBlocks,
     {
       blockType: 'features',
       title: 'Um ecossistema integrado',
@@ -103,7 +105,7 @@ test('página válida é mapeada para PublicPageDto', () => {
   assert.equal(dto.id, '11');
   assert.equal(dto.title, 'Home Omnia Hub');
   assert.equal(dto.pageType, 'home');
-  assert.equal(dto.blocks.length, 3);
+  assert.equal(dto.blocks.length, 6);
 });
 
 test('DTO inclui site e slug do site', () => {
@@ -210,14 +212,17 @@ test('ordem dos blocks é preservada', () => {
   assert.ok(dto);
   assert.deepEqual(
     dto.blocks.map((b) => b.blockType),
-    ['hero', 'features', 'companies'],
+    ['hero', 'institutionalIntro', 'missionVision', 'values', 'features', 'companies'],
   );
 });
 
-test('Hero / Features / Companies válidos', () => {
+test('Hero / blocos institucionais / Features / Companies válidos', () => {
   assert.equal(mapPublicPageBlock(publishedDoc.layout[0])?.blockType, 'hero');
-  assert.equal(mapPublicPageBlock(publishedDoc.layout[1])?.blockType, 'features');
-  assert.equal(mapPublicPageBlock(publishedDoc.layout[2])?.blockType, 'companies');
+  assert.equal(mapPublicPageBlock(publishedDoc.layout[1])?.blockType, 'institutionalIntro');
+  assert.equal(mapPublicPageBlock(publishedDoc.layout[2])?.blockType, 'missionVision');
+  assert.equal(mapPublicPageBlock(publishedDoc.layout[3])?.blockType, 'values');
+  assert.equal(mapPublicPageBlock(publishedDoc.layout[4])?.blockType, 'features');
+  assert.equal(mapPublicPageBlock(publishedDoc.layout[5])?.blockType, 'companies');
 });
 
 test('unknown block é ignorado conforme contrato', () => {
@@ -230,7 +235,7 @@ test('unknown block é ignorado conforme contrato', () => {
     blocks: [
       publishedDoc.layout[0],
       { blockType: 'video', url: 'https://example.com' },
-      publishedDoc.layout[2],
+      publishedDoc.layout[5],
     ],
     seo: {},
   });
@@ -376,8 +381,8 @@ test('seed layout mapeia para DTO válido', () => {
   assert.equal((mapped as PublicPageDto).blocks[0]?.blockType, 'hero');
 });
 
-test('migration Pages snapshot JSON não é placeholder', () => {
-  const snapshotPath = path.join(migrationsDir, '20260716_124305_pages.json');
+test('migration institucional snapshot JSON não é placeholder', () => {
+  const snapshotPath = path.join(migrationsDir, '20260716_172340_pages_institutional.json');
   assert.equal(fs.existsSync(snapshotPath), true);
   const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8')) as {
     tables?: Record<string, unknown>;
@@ -387,44 +392,59 @@ test('migration Pages snapshot JSON não é placeholder', () => {
   assert.ok(snapshot.tables);
   assert.ok(Object.keys(snapshot.tables).length >= 5);
   assert.ok(snapshot.enums);
-  assert.ok(Object.keys(snapshot.enums).length >= 5);
+  assert.ok('public.pages_blocks_institutional_intro' in snapshot.tables);
+  assert.ok('public.pages_blocks_mission_vision' in snapshot.tables);
+  assert.ok('public.pages_blocks_values' in snapshot.tables);
   assert.ok(!snapshot.notes?.includes('placeholder'));
-  assert.ok('public.pages' in snapshot.tables);
-  assert.ok('public.pages_blocks_hero' in snapshot.tables);
-  assert.ok('public._pages_v' in snapshot.tables);
 });
 
-test('migration Pages TS declara tabelas e enums essenciais', () => {
-  const ts = fs.readFileSync(path.join(migrationsDir, '20260716_124305_pages.ts'), 'utf8');
+test('migration institucional TS declara tabelas essenciais', () => {
+  const ts = fs.readFileSync(
+    path.join(migrationsDir, '20260716_172340_pages_institutional.ts'),
+    'utf8',
+  );
   for (const token of [
-    'CREATE TABLE "pages"',
-    'CREATE TABLE "pages_blocks_hero"',
-    'CREATE TABLE "pages_blocks_features"',
-    'CREATE TABLE "pages_blocks_companies"',
-    'CREATE TABLE "_pages_v"',
-    'page_type',
-    '_status',
-    'seo_meta_title',
-    'pages_site_id_sites_id_fk',
+    'CREATE TABLE "pages_blocks_institutional_intro"',
+    'CREATE TABLE "pages_blocks_mission_vision"',
+    'CREATE TABLE "pages_blocks_values"',
+    'CREATE TABLE "pages_blocks_values_items"',
+    'enum_pages_blocks_values_items_icon_key',
+    'ethics',
+    'results',
   ]) {
     assert.equal(ts.includes(token), true, `missing token: ${token}`);
   }
 });
 
-test('migration Pages declara índices de integridade no TS oficial', () => {
+test('migration Pages baseline preserva índices de integridade no TS oficial', () => {
   const ts = fs.readFileSync(path.join(migrationsDir, '20260716_124305_pages.ts'), 'utf8');
   assert.equal(ts.includes('pages_site_slug_unique'), true);
   assert.equal(ts.includes('pages_one_home_per_site'), true);
   assert.equal(ts.includes('WHERE "page_type" = \'home\''), true);
 });
 
-test('snapshot canônico Pages é o lexicograficamente mais recente', () => {
+test('snapshot canônico é o lexicograficamente mais recente (institucional)', () => {
   const jsons = fs
     .readdirSync(migrationsDir)
     .filter((f) => f.endsWith('.json'))
     .sort()
     .reverse();
-  assert.equal(jsons[0], '20260716_124305_pages.json');
+  assert.equal(jsons[0], '20260716_172340_pages_institutional.json');
+});
+
+test('compatibilidade: página legada com hero → features → companies', () => {
+  const legacyDto = mapPageDocumentToPublicDto({
+    ...publishedDoc,
+    layout: publishedDoc.layout.filter((b) =>
+      ['hero', 'features', 'companies'].includes((b as { blockType: string }).blockType),
+    ),
+  });
+  assert.ok(legacyDto);
+  assert.equal(legacyDto.blocks.length, 3);
+  assert.deepEqual(
+    legacyDto.blocks.map((b) => b.blockType),
+    ['hero', 'features', 'companies'],
+  );
 });
 
 test('fallback Web: Hero/Features defaults institucionais (sem Sprint 2)', () => {
@@ -440,6 +460,17 @@ test('fallback Web: Hero/Features defaults institucionais (sem Sprint 2)', () =>
   assert.equal(features.includes('Um ecossistema integrado'), true);
   assert.equal(features.includes('Sprint 2'), false);
   assert.equal(features.includes('Platform Base'), false);
+});
+
+test('fallback Web: BlockRenderer registra blocos institucionais', () => {
+  const rendererPath = path.resolve(
+    __dirname,
+    '../../../web/src/components/home/BlockRenderer.tsx',
+  );
+  const renderer = fs.readFileSync(rendererPath, 'utf8');
+  assert.equal(renderer.includes("case 'institutionalIntro'"), true);
+  assert.equal(renderer.includes("case 'missionVision'"), true);
+  assert.equal(renderer.includes("case 'values'"), true);
 });
 
 test('deduplicação Web: loadHomePage e fetchCompanies usam cache()', () => {

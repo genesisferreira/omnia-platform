@@ -47,6 +47,9 @@ jobs:
       - name: Holding home exclusive seed
         run: pnpm --filter @omnia/admin test:seed-holding-home
 
+      - name: Holding home institutional upgrade
+        run: pnpm --filter @omnia/admin test:upgrade-holding-home
+
       - name: Public page contracts
         run: pnpm --filter @omnia/shared test:public-page-contracts
 
@@ -83,6 +86,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Pages migration DB validation
+        run: pnpm --filter @omnia/admin test:pages-migration-db
 
       - name: Build
         run: pnpm build

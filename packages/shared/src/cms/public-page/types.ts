@@ -4,6 +4,7 @@ import type {
   FeaturesIconKey,
   HeroBlockVariant,
   PublicPageType,
+  ValuesIconKey,
 } from './constants';
 
 export type PublicLinkActionDto = {
@@ -19,6 +20,36 @@ export type PublicHeroBlockDto = {
   primaryAction: PublicLinkActionDto | null;
   secondaryAction: PublicLinkActionDto | null;
   variant: HeroBlockVariant;
+};
+
+export type PublicInstitutionalIntroBlockDto = {
+  blockType: 'institutionalIntro';
+  eyebrow: string | null;
+  title: string;
+  body: string;
+  highlights: string[];
+};
+
+export type PublicMissionVisionBlockDto = {
+  blockType: 'missionVision';
+  missionTitle: string;
+  missionBody: string;
+  visionTitle: string;
+  visionBody: string;
+  visionYear: string | null;
+};
+
+export type PublicValueItemDto = {
+  title: string;
+  description: string | null;
+  iconKey: ValuesIconKey | null;
+};
+
+export type PublicValuesBlockDto = {
+  blockType: 'values';
+  title: string | null;
+  subtitle: string | null;
+  items: PublicValueItemDto[];
 };
 
 export type PublicFeatureItemDto = {
@@ -50,7 +81,12 @@ export type PublicCompaniesBlockDto = {
 };
 
 export type PublicPageBlockDto =
-  PublicHeroBlockDto | PublicFeaturesBlockDto | PublicCompaniesBlockDto;
+  | PublicHeroBlockDto
+  | PublicInstitutionalIntroBlockDto
+  | PublicMissionVisionBlockDto
+  | PublicValuesBlockDto
+  | PublicFeaturesBlockDto
+  | PublicCompaniesBlockDto;
 
 export type PublicPageSeoDto = {
   metaTitle: string | null;

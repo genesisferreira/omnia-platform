@@ -3,6 +3,9 @@ import type { PublicPageBlockDto } from '@omnia/shared';
 import { CompaniesBlockView } from '@/components/home/CompanyCards';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { Hero } from '@/components/home/Hero';
+import { InstitutionalIntroSection } from '@/components/home/InstitutionalIntroSection';
+import { MissionVisionSection } from '@/components/home/MissionVisionSection';
+import { ValuesSection } from '@/components/home/ValuesSection';
 
 type BlockRendererProps = {
   blocks: PublicPageBlockDto[];
@@ -18,6 +21,12 @@ export async function BlockRenderer({ blocks }: BlockRendererProps) {
         switch (block.blockType) {
           case 'hero':
             return <Hero key={`hero-${index}`} block={block} />;
+          case 'institutionalIntro':
+            return <InstitutionalIntroSection key={`intro-${index}`} block={block} />;
+          case 'missionVision':
+            return <MissionVisionSection key={`mission-${index}`} block={block} />;
+          case 'values':
+            return <ValuesSection key={`values-${index}`} block={block} />;
           case 'features':
             return <FeaturesSection key={`features-${index}`} block={block} />;
           case 'companies':

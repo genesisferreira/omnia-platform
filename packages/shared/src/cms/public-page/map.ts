@@ -7,16 +7,30 @@ import {
   FEATURES_BLOCK_MIN_ITEMS,
   FEATURES_ICON_KEYS,
   HERO_BLOCK_VARIANTS,
+  INSTITUTIONAL_INTRO_MAX_BODY,
+  INSTITUTIONAL_INTRO_MAX_EYEBROW,
+  INSTITUTIONAL_INTRO_MAX_HIGHLIGHT_LENGTH,
+  INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS,
+  INSTITUTIONAL_INTRO_MAX_TITLE,
+  MISSION_VISION_MAX_BODY,
+  MISSION_VISION_MAX_TITLE,
+  MISSION_VISION_MAX_YEAR,
   PUBLIC_PAGE_MAX_BLOCKS,
   PUBLIC_PAGE_TYPES,
+  VALUES_BLOCK_MAX_ITEMS,
+  VALUES_BLOCK_MIN_ITEMS,
+  VALUES_ICON_KEYS,
   type CompaniesBlockLayout,
   type FeaturesBlockColumns,
   type FeaturesIconKey,
   type HeroBlockVariant,
   type PublicPageType,
+  type ValuesIconKey,
 } from './constants';
 import {
   isPlainRecord,
+  readBoundedStringArray,
+  readBoundedTrimmedString,
   readOptionalTrimmedString,
   readRequiredTrimmedString,
   sanitizePublicCanonicalUrl,
@@ -27,11 +41,23 @@ import type {
   PublicFeatureItemDto,
   PublicFeaturesBlockDto,
   PublicHeroBlockDto,
-  PublicLinkActionDto,
+  PublicInstitutionalIntroBlockDto,
+  PublicMissionVisionBlockDto,
   PublicPageBlockDto,
   PublicPageDto,
   PublicPageSeoDto,
+  PublicValueItemDto,
+  PublicValuesBlockDto,
 } from './types';
+
+const KNOWN_BLOCK_TYPES = new Set([
+  'hero',
+  'institutionalIntro',
+  'missionVision',
+  'values',
+  'features',
+  'companies',
+]);
 
 const includesLiteral = <T extends string | number>(
   list: readonly T[],
@@ -56,7 +82,7 @@ const isEmptyLinkAction = (value: unknown): boolean => {
   );
 };
 
-const mapLinkAction = (value: unknown): PublicLinkActionDto | null => {
+const mapLinkAction = (value: unknown): PublicHeroBlockDto['primaryAction'] => {
   if (value === null || value === undefined) {
     return null;
   }
@@ -129,6 +155,131 @@ const mapHeroBlock = (value: Record<string, unknown>): PublicHeroBlockDto | null
   };
 };
 
+const mapInstitutionalIntroBlock = (
+  value: Record<string, unknown>,
+): PublicInstitutionalIntroBlockDto | null => {
+  const title = readBoundedTrimmedString(value.title, INSTITUTIONAL_INTRO_MAX_TITLE, true);
+  const body = readBoundedTrimmedString(value.body, INSTITUTIONAL_INTRO_MAX_BODY, true);
+  if (!title || !body) {
+    return null;
+  }
+
+  const eyebrow = readBoundedTrimmedString(value.eyebrow, INSTITUTIONAL_INTRO_MAX_EYEBROW);
+  let highlights: string[] = [];
+  if (value.highlights !== null && value.highlights !== undefined) {
+    if (!Array.isArray(value.highlights)) {
+      return null;
+    }
+    if (value.highlights.length > INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS) {
+      return null;
+    }
+    for (const entry of value.highlights) {
+      if (typeof entry === 'string') {
+        const trimmed = readBoundedTrimmedString(
+          entry,
+          INSTITUTIONAL_INTRO_MAX_HIGHLIGHT_LENGTH,
+          true,
+        );
+        if (!trimmed) return null;
+        highlights.push(trimmed);
+        continue;
+      }
+      if (isPlainRecord(entry)) {
+        const trimmed = readBoundedTrimmedString(
+          entry.text,
+          INSTITUTIONAL_INTRO_MAX_HIGHLIGHT_LENGTH,
+          true,
+        );
+        if (!trimmed) return null;
+        highlights.push(trimmed);
+        continue;
+      }
+      return null;
+    }
+  }
+
+  return {
+    blockType: 'institutionalIntro',
+    eyebrow,
+    title,
+    body,
+    highlights,
+  };
+};
+
+const mapMissionVisionBlock = (
+  value: Record<string, unknown>,
+): PublicMissionVisionBlockDto | null => {
+  const missionTitle = readBoundedTrimmedString(value.missionTitle, MISSION_VISION_MAX_TITLE, true);
+  const missionBody = readBoundedTrimmedString(value.missionBody, MISSION_VISION_MAX_BODY, true);
+  const visionTitle = readBoundedTrimmedString(value.visionTitle, MISSION_VISION_MAX_TITLE, true);
+  const visionBody = readBoundedTrimmedString(value.visionBody, MISSION_VISION_MAX_BODY, true);
+  if (!missionTitle || !missionBody || !visionTitle || !visionBody) {
+    return null;
+  }
+
+  const visionYear = readBoundedTrimmedString(value.visionYear, MISSION_VISION_MAX_YEAR);
+
+  return {
+    blockType: 'missionVision',
+    missionTitle,
+    missionBody,
+    visionTitle,
+    visionBody,
+    visionYear,
+  };
+};
+
+const mapValueItem = (value: unknown): PublicValueItemDto | null => {
+  if (!isPlainRecord(value)) {
+    return null;
+  }
+
+  const title = readBoundedTrimmedString(value.title, INSTITUTIONAL_INTRO_MAX_TITLE, true);
+  if (!title) {
+    return null;
+  }
+
+  const description = readBoundedTrimmedString(
+    value.description,
+    INSTITUTIONAL_INTRO_MAX_BODY,
+    false,
+  );
+
+  let iconKey: ValuesIconKey | null = null;
+  if (value.iconKey !== null && value.iconKey !== undefined) {
+    iconKey = includesLiteral(VALUES_ICON_KEYS, value.iconKey) ? value.iconKey : null;
+  }
+
+  return { title, description, iconKey };
+};
+
+const mapValuesBlock = (value: Record<string, unknown>): PublicValuesBlockDto | null => {
+  if (!Array.isArray(value.items)) {
+    return null;
+  }
+
+  if (value.items.length < VALUES_BLOCK_MIN_ITEMS || value.items.length > VALUES_BLOCK_MAX_ITEMS) {
+    return null;
+  }
+
+  const items: PublicValueItemDto[] = [];
+  for (const item of value.items) {
+    const mapped = mapValueItem(item);
+    if (!mapped) {
+      return null;
+    }
+    items.push(mapped);
+  }
+
+  return {
+    blockType: 'values',
+    title: readBoundedTrimmedString(value.title, INSTITUTIONAL_INTRO_MAX_TITLE),
+    subtitle: readBoundedTrimmedString(value.subtitle, INSTITUTIONAL_INTRO_MAX_BODY),
+    items,
+  };
+};
+
 const mapFeatureItem = (value: unknown): PublicFeatureItemDto | null => {
   if (!isPlainRecord(value)) {
     return null;
@@ -189,10 +340,6 @@ const mapFeaturesBlock = (value: Record<string, unknown>): PublicFeaturesBlockDt
   };
 };
 
-/**
- * `limit` acima do teto é **normalizado** (clamp) para COMPANIES_BLOCK_MAX_LIMIT.
- * Abaixo de 1 também é clampado para 1. Valor ausente/ inválido → default.
- */
 const normalizeCompaniesLimit = (value: unknown): number => {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return COMPANIES_BLOCK_DEFAULT_LIMIT;
@@ -239,6 +386,15 @@ export const mapPublicPageBlock = (value: unknown): PublicPageBlockDto | null =>
   if (blockType === 'hero') {
     return mapHeroBlock(value);
   }
+  if (blockType === 'institutionalIntro') {
+    return mapInstitutionalIntroBlock(value);
+  }
+  if (blockType === 'missionVision') {
+    return mapMissionVisionBlock(value);
+  }
+  if (blockType === 'values') {
+    return mapValuesBlock(value);
+  }
   if (blockType === 'features') {
     return mapFeaturesBlock(value);
   }
@@ -265,8 +421,7 @@ export const mapPublicPageBlocks = (value: unknown): PublicPageBlockDto[] | null
     }
 
     const blockType = entry.blockType;
-    if (blockType !== 'hero' && blockType !== 'features' && blockType !== 'companies') {
-      // Desconhecido: ignorar de forma determinística (não quebra a página).
+    if (typeof blockType !== 'string' || !KNOWN_BLOCK_TYPES.has(blockType)) {
       continue;
     }
 

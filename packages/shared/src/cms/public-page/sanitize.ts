@@ -24,6 +24,46 @@ export const readOptionalTrimmedString = (value: unknown): string | null => {
 export const readRequiredTrimmedString = (value: unknown): string | null =>
   readOptionalTrimmedString(value);
 
+export const readBoundedTrimmedString = (
+  value: unknown,
+  maxLength: number,
+  required = false,
+): string | null => {
+  const trimmed = readOptionalTrimmedString(value);
+  if (trimmed === null) {
+    return required ? null : null;
+  }
+  if (trimmed.length > maxLength) {
+    return null;
+  }
+  return trimmed;
+};
+
+export const readBoundedStringArray = (
+  value: unknown,
+  maxItems: number,
+  maxItemLength: number,
+): string[] | null => {
+  if (value === null || value === undefined) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    return null;
+  }
+  if (value.length > maxItems) {
+    return null;
+  }
+  const items: string[] = [];
+  for (const entry of value) {
+    const trimmed = readBoundedTrimmedString(entry, maxItemLength, true);
+    if (!trimmed) {
+      return null;
+    }
+    items.push(trimmed);
+  }
+  return items;
+};
+
 const FORBIDDEN_SCHEME_PATTERN = /^(javascript|data|file|ftp|vbscript):/i;
 
 /**

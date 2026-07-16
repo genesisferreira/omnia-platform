@@ -1,6 +1,20 @@
 import type { Block } from 'payload';
 
-import { FEATURES_BLOCK_MAX_ITEMS, FEATURES_ICON_KEYS, HERO_BLOCK_VARIANTS } from '@omnia/shared';
+import {
+  FEATURES_BLOCK_MAX_ITEMS,
+  FEATURES_ICON_KEYS,
+  HERO_BLOCK_VARIANTS,
+  INSTITUTIONAL_INTRO_MAX_BODY,
+  INSTITUTIONAL_INTRO_MAX_EYEBROW,
+  INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS,
+  INSTITUTIONAL_INTRO_MAX_HIGHLIGHT_LENGTH,
+  INSTITUTIONAL_INTRO_MAX_TITLE,
+  MISSION_VISION_MAX_BODY,
+  MISSION_VISION_MAX_TITLE,
+  MISSION_VISION_MAX_YEAR,
+  VALUES_BLOCK_MAX_ITEMS,
+  VALUES_ICON_KEYS,
+} from '@omnia/shared';
 
 const linkActionFields = [
   {
@@ -66,6 +80,151 @@ export const HeroBlock: Block = {
         label: value,
         value,
       })),
+    },
+  ],
+};
+
+export const InstitutionalIntroBlock: Block = {
+  slug: 'institutionalIntro',
+  labels: {
+    singular: 'Intro institucional',
+    plural: 'Intro institucional',
+  },
+  fields: [
+    {
+      name: 'eyebrow',
+      type: 'text',
+      label: 'Eyebrow (opcional)',
+      maxLength: INSTITUTIONAL_INTRO_MAX_EYEBROW,
+    },
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      label: 'Título',
+      maxLength: INSTITUTIONAL_INTRO_MAX_TITLE,
+    },
+    {
+      name: 'body',
+      type: 'textarea',
+      required: true,
+      label: 'Corpo',
+      maxLength: INSTITUTIONAL_INTRO_MAX_BODY,
+    },
+    {
+      name: 'highlights',
+      type: 'array',
+      label: 'Destaques (opcional)',
+      maxRows: INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS,
+      labels: { singular: 'Destaque', plural: 'Destaques' },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+          label: 'Texto',
+          maxLength: INSTITUTIONAL_INTRO_MAX_HIGHLIGHT_LENGTH,
+        },
+      ],
+    },
+  ],
+};
+
+export const MissionVisionBlock: Block = {
+  slug: 'missionVision',
+  labels: {
+    singular: 'Missão e Visão',
+    plural: 'Missão e Visão',
+  },
+  fields: [
+    {
+      name: 'missionTitle',
+      type: 'text',
+      required: true,
+      label: 'Título da missão',
+      maxLength: MISSION_VISION_MAX_TITLE,
+    },
+    {
+      name: 'missionBody',
+      type: 'textarea',
+      required: true,
+      label: 'Corpo da missão',
+      maxLength: MISSION_VISION_MAX_BODY,
+    },
+    {
+      name: 'visionTitle',
+      type: 'text',
+      required: true,
+      label: 'Título da visão',
+      maxLength: MISSION_VISION_MAX_TITLE,
+    },
+    {
+      name: 'visionBody',
+      type: 'textarea',
+      required: true,
+      label: 'Corpo da visão',
+      maxLength: MISSION_VISION_MAX_BODY,
+    },
+    {
+      name: 'visionYear',
+      type: 'text',
+      label: 'Ano da visão (opcional)',
+      maxLength: MISSION_VISION_MAX_YEAR,
+    },
+  ],
+};
+
+export const ValuesBlock: Block = {
+  slug: 'values',
+  labels: {
+    singular: 'Valores',
+    plural: 'Valores',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      label: 'Título da seção',
+      maxLength: INSTITUTIONAL_INTRO_MAX_TITLE,
+    },
+    {
+      name: 'subtitle',
+      type: 'textarea',
+      label: 'Subtítulo',
+      maxLength: INSTITUTIONAL_INTRO_MAX_BODY,
+    },
+    {
+      name: 'items',
+      type: 'array',
+      required: true,
+      minRows: 1,
+      maxRows: VALUES_BLOCK_MAX_ITEMS,
+      label: 'Valores',
+      labels: { singular: 'Valor', plural: 'Valores' },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          label: 'Título',
+          maxLength: INSTITUTIONAL_INTRO_MAX_TITLE,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Descrição (opcional)',
+          maxLength: INSTITUTIONAL_INTRO_MAX_BODY,
+        },
+        {
+          name: 'iconKey',
+          type: 'select',
+          label: 'Ícone (allowlist)',
+          options: VALUES_ICON_KEYS.map((value) => ({
+            label: value,
+            value,
+          })),
+        },
+      ],
     },
   ],
 };
@@ -192,4 +351,11 @@ export const CompaniesBlock: Block = {
   ],
 };
 
-export const pageBlocks = [HeroBlock, FeaturesBlock, CompaniesBlock];
+export const pageBlocks = [
+  HeroBlock,
+  InstitutionalIntroBlock,
+  MissionVisionBlock,
+  ValuesBlock,
+  FeaturesBlock,
+  CompaniesBlock,
+];

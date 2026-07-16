@@ -196,7 +196,7 @@ await test('caminho limpo → cria uma única página published com blocos na or
   const layout = data.layout as Array<{ blockType: string }>;
   assert.deepEqual(
     layout.map((block) => block.blockType),
-    ['hero', 'features', 'companies'],
+    ['hero', 'institutionalIntro', 'missionVision', 'values', 'features', 'companies'],
   );
   assert.equal(formatHoldingHomeSeedLog(outcome), 'holding-home: created');
   assertNoSideCollections(state);

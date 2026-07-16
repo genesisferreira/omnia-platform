@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import {
   COMPANIES_BLOCK_MAX_LIMIT,
   FEATURES_BLOCK_MAX_ITEMS,
+  INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS,
+  VALUES_BLOCK_MAX_ITEMS,
   mapPublicPage,
   mapPublicPageBlock,
   sanitizePublicHref,
@@ -126,6 +128,159 @@ test('Features iconKey desconhecido rejeitado', () => {
     }),
     null,
   );
+});
+
+test('institutionalIntro válido', () => {
+  const dto = mapPublicPageBlock({
+    blockType: 'institutionalIntro',
+    eyebrow: 'Omnia Frigo Holding',
+    title: 'Hub integrador',
+    body: 'Corpo institucional canônico.',
+    highlights: [{ text: 'Tradição' }, { text: 'Educação' }],
+  });
+  assert.ok(dto);
+  if (dto.blockType === 'institutionalIntro') {
+    assert.equal(dto.title, 'Hub integrador');
+    assert.deepEqual(dto.highlights, ['Tradição', 'Educação']);
+  }
+});
+
+test('institutionalIntro sem título ou corpo rejeitado', () => {
+  assert.equal(
+    mapPublicPageBlock({ blockType: 'institutionalIntro', title: 'T', body: '   ' }),
+    null,
+  );
+  assert.equal(mapPublicPageBlock({ blockType: 'institutionalIntro', body: 'B' }), null);
+});
+
+test('institutionalIntro highlights acima do máximo rejeitado', () => {
+  const highlights = Array.from({ length: INSTITUTIONAL_INTRO_MAX_HIGHLIGHTS + 1 }, (_, i) => ({
+    text: `H${i}`,
+  }));
+  assert.equal(
+    mapPublicPageBlock({
+      blockType: 'institutionalIntro',
+      title: 'T',
+      body: 'B',
+      highlights,
+    }),
+    null,
+  );
+});
+
+test('missionVision válido', () => {
+  const dto = mapPublicPageBlock({
+    blockType: 'missionVision',
+    missionTitle: 'Missão',
+    missionBody: 'Transformar a refrigeração brasileira.',
+    visionTitle: 'Visão 2035',
+    visionBody: 'Ser referência na América Latina.',
+    visionYear: '2035',
+  });
+  assert.ok(dto);
+  if (dto.blockType === 'missionVision') {
+    assert.equal(dto.visionYear, '2035');
+  }
+});
+
+test('missionVision campos obrigatórios ausentes rejeitado', () => {
+  assert.equal(
+    mapPublicPageBlock({
+      blockType: 'missionVision',
+      missionTitle: 'Missão',
+      missionBody: 'Corpo',
+      visionTitle: 'Visão',
+    }),
+    null,
+  );
+});
+
+test('values válido com iconKey allowlist', () => {
+  const dto = mapPublicPageBlock({
+    blockType: 'values',
+    title: 'Nossos valores',
+    items: [
+      { title: 'Ética', description: 'Conduta transparente.', iconKey: 'ethics' },
+      { title: 'Parceria', iconKey: 'partnership' },
+    ],
+  });
+  assert.ok(dto);
+  if (dto.blockType === 'values') {
+    assert.equal(dto.items[0]?.iconKey, 'ethics');
+  }
+});
+
+test('values iconKey desconhecido usa fallback null', () => {
+  const dto = mapPublicPageBlock({
+    blockType: 'values',
+    items: [{ title: 'Ética', iconKey: 'unknown-svg' }],
+  });
+  assert.ok(dto);
+  if (dto.blockType === 'values') {
+    assert.equal(dto.items[0]?.iconKey, null);
+  }
+});
+
+test('values itens fora do intervalo rejeitado', () => {
+  const items = Array.from({ length: VALUES_BLOCK_MAX_ITEMS + 1 }, (_, i) => ({
+    title: `V${i}`,
+  }));
+  assert.equal(mapPublicPageBlock({ blockType: 'values', items }), null);
+  assert.equal(mapPublicPageBlock({ blockType: 'values', items: [] }), null);
+});
+
+test('bloco conhecido inválido rejeita o mapa da página', () => {
+  assert.equal(
+    mapPublicPage({
+      ...basePage,
+      blocks: [
+        { blockType: 'hero', title: 'Home' },
+        { blockType: 'values', items: [] },
+      ],
+    }),
+    null,
+  );
+});
+
+test('ordem dos seis blocos institucionais preservada', () => {
+  const dto = mapPublicPage({
+    ...basePage,
+    blocks: [
+      { blockType: 'hero', title: 'Home' },
+      { blockType: 'institutionalIntro', title: 'Intro', body: 'Corpo' },
+      {
+        blockType: 'missionVision',
+        missionTitle: 'M',
+        missionBody: 'MB',
+        visionTitle: 'V',
+        visionBody: 'VB',
+      },
+      { blockType: 'values', items: [{ title: 'Ética' }] },
+      {
+        blockType: 'features',
+        items: [{ title: 'A', description: 'B' }],
+      },
+      { blockType: 'companies' },
+    ],
+  });
+  assert.ok(dto);
+  assert.deepEqual(
+    dto.blocks.map((b) => b.blockType),
+    ['hero', 'institutionalIntro', 'missionVision', 'values', 'features', 'companies'],
+  );
+});
+
+test('sanitização contra conteúdo perigoso em highlights', () => {
+  const dto = mapPublicPageBlock({
+    blockType: 'institutionalIntro',
+    title: 'T',
+    body: 'B',
+    highlights: [{ text: '  javascript:alert(1)  ' }],
+  });
+  assert.ok(dto);
+  if (dto.blockType === 'institutionalIntro') {
+    assert.equal(dto.highlights[0], 'javascript:alert(1)');
+  }
 });
 
 test('Companies válido', () => {

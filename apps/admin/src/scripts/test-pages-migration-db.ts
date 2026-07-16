@@ -1,10 +1,13 @@
 /* eslint-disable no-console -- migration DB probe */
 /**
- * Valida schema Pages no PostgreSQL temporário (F4C.2).
+ * Valida schema Pages + blocos institucionais no PostgreSQL (S04-F6).
  * Requer DATABASE_URL. Não imprime a connection string.
  */
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -26,6 +29,24 @@ const { Client } = require(pgModulePath) as {
   };
 };
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const adminRoot = path.resolve(__dirname, '../..');
+
+const runAdmin = (args: string[]): void => {
+  const result = spawnSync('corepack', ['pnpm', ...args], {
+    cwd: adminRoot,
+    env: process.env,
+    stdio: 'pipe',
+    shell: process.platform === 'win32',
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `command failed: pnpm ${args.join(' ')}\n${result.stderr ?? result.stdout ?? ''}`,
+    );
+  }
+};
+
 const client = new Client({ connectionString: databaseUrl });
 await client.connect();
 
@@ -37,6 +58,9 @@ const test = async (name: string, fn: () => Promise<void>): Promise<void> => {
 };
 
 try {
+  console.log('==> Aplicando migrations (fresh)...');
+  runAdmin(['migrate']);
+
   await test('tabela pages existe com colunas essenciais', async () => {
     const cols = await client.query(`
       SELECT column_name FROM information_schema.columns
@@ -61,7 +85,7 @@ try {
     }
   });
 
-  await test('tabelas de blocks e versions existem', async () => {
+  await test('tabelas de blocks, versions e institucionais existem', async () => {
     const tables = await client.query(`
       SELECT tablename FROM pg_tables
       WHERE schemaname = 'public' AND tablename LIKE '%page%'
@@ -73,16 +97,24 @@ try {
       'pages_blocks_features',
       'pages_blocks_features_items',
       'pages_blocks_companies',
+      'pages_blocks_institutional_intro',
+      'pages_blocks_institutional_intro_highlights',
+      'pages_blocks_mission_vision',
+      'pages_blocks_values',
+      'pages_blocks_values_items',
       '_pages_v',
       '_pages_v_blocks_hero',
       '_pages_v_blocks_features',
       '_pages_v_blocks_companies',
+      '_pages_v_blocks_institutional_intro',
+      '_pages_v_blocks_mission_vision',
+      '_pages_v_blocks_values',
     ]) {
       assert.equal(names.has(t), true, `missing table ${t}`);
     }
   });
 
-  await test('índices unique site+slug e one home', async () => {
+  await test('índices unique site+slug e one home preservados', async () => {
     const indexes = await client.query(`
       SELECT indexname, indexdef FROM pg_indexes
       WHERE schemaname = 'public' AND tablename = 'pages'
@@ -104,6 +136,30 @@ try {
       WHERE conname = 'pages_site_id_sites_id_fk'
     `);
     assert.equal(fks.rows.length, 1);
+  });
+
+  await test('ciclo migrate:down → migrate reaplica última migration institucional', async () => {
+    const before = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
+    `);
+    assert.equal(before.rows.length, 1);
+
+    runAdmin(['exec', 'payload', 'migrate:down']);
+
+    const afterDown = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
+    `);
+    assert.equal(afterDown.rows.length, 0);
+
+    runAdmin(['migrate']);
+
+    const afterUp = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
+    `);
+    assert.equal(afterUp.rows.length, 1);
   });
 
   console.log(`\n${passed} testes DB de migration passaram.`);

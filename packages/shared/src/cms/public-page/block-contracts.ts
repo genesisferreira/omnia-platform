@@ -1,6 +1,5 @@
 /**
- * Contratos estruturais dos blocos MVP (camada CMS → Payload fields futuros).
- * Intencionalmente sem dependência de `payload` — Admin implementará `Block` em F4C.
+ * Contratos estruturais dos blocos (camada CMS → Payload).
  */
 
 import type {
@@ -8,6 +7,7 @@ import type {
   FeaturesBlockColumns,
   FeaturesIconKey,
   HeroBlockVariant,
+  ValuesIconKey,
 } from './constants';
 
 export type HeroBlockContract = {
@@ -18,6 +18,34 @@ export type HeroBlockContract = {
   primaryAction?: { label: string; href: string } | null;
   secondaryAction?: { label: string; href: string } | null;
   variant?: HeroBlockVariant;
+};
+
+export type InstitutionalIntroBlockContract = {
+  blockType: 'institutionalIntro';
+  eyebrow?: string | null;
+  title: string;
+  body: string;
+  highlights?: string[];
+};
+
+export type MissionVisionBlockContract = {
+  blockType: 'missionVision';
+  missionTitle: string;
+  missionBody: string;
+  visionTitle: string;
+  visionBody: string;
+  visionYear?: string | null;
+};
+
+export type ValuesBlockContract = {
+  blockType: 'values';
+  title?: string | null;
+  subtitle?: string | null;
+  items: Array<{
+    title: string;
+    description?: string | null;
+    iconKey?: ValuesIconKey | null;
+  }>;
 };
 
 export type FeaturesBlockContract = {
@@ -42,4 +70,10 @@ export type CompaniesBlockContract = {
   layout?: CompaniesBlockLayout;
 };
 
-export type PageBlockContract = HeroBlockContract | FeaturesBlockContract | CompaniesBlockContract;
+export type PageBlockContract =
+  | HeroBlockContract
+  | InstitutionalIntroBlockContract
+  | MissionVisionBlockContract
+  | ValuesBlockContract
+  | FeaturesBlockContract
+  | CompaniesBlockContract;
