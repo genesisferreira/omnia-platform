@@ -275,6 +275,28 @@ services:
     restart: 'no'
     command: ['holding-blog']
 
+  # Seed páginas estratégicas das empresas do hub
+  admin-seed-holding-strategic-companies:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-strategic-companies
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-strategic-companies']
+
 networks:
   omnia_proxy:
     external: true

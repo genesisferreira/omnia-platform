@@ -116,3 +116,50 @@ export function buildArticleJsonLd(args: {
 
   return record;
 }
+
+export function buildCompanyOrganizationJsonLd(args: {
+  pathname: string;
+  name: string;
+  description?: string | null;
+  url?: string | null;
+  hostname?: string | null;
+}): JsonLdRecord {
+  const pageUrl =
+    resolveCanonicalUrl({
+      pathname: args.pathname,
+      hostname: args.hostname,
+    }) ?? `${getPublicSiteOrigin()}${args.pathname}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: args.name,
+    description: args.description ?? SEO_FALLBACK_DESCRIPTION,
+    url: args.url ?? pageUrl,
+    parentOrganization: {
+      '@type': 'Organization',
+      name: SEO_SITE_NAME,
+      url: resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin(),
+    },
+  };
+}
+
+export function buildBreadcrumbJsonLd(args: {
+  hostname?: string | null;
+  items: Array<{ name: string; pathname: string }>;
+}): JsonLdRecord {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: args.items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item:
+        resolveCanonicalUrl({
+          pathname: item.pathname,
+          hostname: args.hostname,
+        }) ?? `${getPublicSiteOrigin()}${item.pathname === '/' ? '' : item.pathname}`,
+    })),
+  };
+}

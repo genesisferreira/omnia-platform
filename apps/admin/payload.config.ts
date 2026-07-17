@@ -16,7 +16,7 @@ import { Sites } from './src/collections/Sites';
 import { Tags } from './src/collections/Tags';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
-import { publicCompaniesEndpoint } from './src/endpoints/public-companies';
+import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicPageEndpoint } from './src/endpoints/public-page';
 import {
   publicPostCategoriesEndpoint,
@@ -57,6 +57,7 @@ export default buildConfig({
   endpoints: [
     resolveSiteEndpoint,
     publicCompaniesEndpoint,
+    publicCompanyEndpoint,
     publicPageEndpoint,
     publicPostsEndpoint,
     publicPostEndpoint,

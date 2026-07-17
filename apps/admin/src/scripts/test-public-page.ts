@@ -427,6 +427,7 @@ test('snapshot canônico institucional permanece versionado', () => {
   const jsons = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.json'));
   assert.equal(jsons.includes('20260716_172340_pages_institutional.json'), true);
   assert.equal(jsons.includes('20260717_160602_blog_collections.json'), true);
+  assert.equal(jsons.includes('20260717_180310_companies_strategic_pages.json'), true);
 });
 
 test('compatibilidade: página legada com hero → features → companies', () => {

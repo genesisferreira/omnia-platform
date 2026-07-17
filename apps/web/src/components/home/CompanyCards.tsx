@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import type { PublicCompaniesBlockDto } from '@omnia/shared';
 import { Container, SectionTitle } from '@omnia/ui';
 
@@ -25,20 +27,26 @@ const roleTone = (role: string): { badge: string; accent: string } => {
   }
   if (normalized === 'tecnologia') {
     return {
-      badge: 'border-omnia-copper/30 bg-omnia-copper/10 text-omnia-copper',
-      accent: 'from-omnia-copper',
+      badge: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-700',
+      accent: 'from-cyan-600',
     };
   }
   if (normalized === 'engenharia') {
     return {
-      badge: 'border-omnia-emerald/30 bg-omnia-emerald/10 text-omnia-emerald',
-      accent: 'from-omnia-emerald',
+      badge: 'border-teal-700/30 bg-teal-700/10 text-teal-800',
+      accent: 'from-teal-700',
+    };
+  }
+  if (normalized === 'formação técnica' || normalized === 'formacao tecnica') {
+    return {
+      badge: 'border-omnia-graphite/30 bg-omnia-graphite/10 text-omnia-graphite',
+      accent: 'from-omnia-graphite',
     };
   }
   if (normalized === 'educação' || normalized === 'educacao') {
     return {
-      badge: 'border-omnia-copper/25 bg-omnia-deep-blue/[0.04] text-omnia-deep-blue',
-      accent: 'from-omnia-copper',
+      badge: 'border-omnia-emerald/30 bg-omnia-emerald/10 text-omnia-emerald',
+      accent: 'from-omnia-emerald',
     };
   }
   if (normalized === 'serviços' || normalized === 'servicos') {
@@ -57,7 +65,7 @@ const roleTone = (role: string): { badge: string; accent: string } => {
 export function CompanyCards({
   companies,
   title = 'Empresas do ecossistema',
-  subtitle = 'Conheça as marcas que compõem a Omnia Frigo Holding.',
+  subtitle = 'Conheça as frentes complementares da Omnia Frigo Holding.',
   showRole = true,
   showDescription = true,
   layout = 'grid',
@@ -65,7 +73,7 @@ export function CompanyCards({
   const gridClass =
     layout === 'list'
       ? 'mt-12 grid gap-4 md:grid-cols-1'
-      : 'mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3';
+      : 'mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-2';
 
   return (
     <section
@@ -97,6 +105,7 @@ export function CompanyCards({
           <div className={gridClass}>
             {companies.map((company) => {
               const tone = roleTone(company.ecosystemRole);
+              const href = `/empresas/${company.portalSlug || company.slug}`;
 
               return (
                 <article
@@ -111,7 +120,9 @@ export function CompanyCards({
                   <div className="flex flex-1 flex-col p-6">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-heading text-lg font-semibold leading-snug tracking-tight text-omnia-deep-blue">
-                        {company.name}
+                        <Link href={href} className="hover:text-omnia-emerald">
+                          {company.name}
+                        </Link>
                       </h3>
                       {showRole ? (
                         <span
@@ -124,28 +135,30 @@ export function CompanyCards({
 
                     {showDescription ? (
                       <p className="mt-3 flex-1 text-sm leading-relaxed text-omnia-graphite-light">
-                        {company.shortDescription}
+                        {company.positioning ?? company.shortDescription}
                       </p>
                     ) : (
                       <div className="flex-1" />
                     )}
 
-                    <div className="mt-6 border-t border-omnia-deep-blue/10 pt-4">
+                    <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-omnia-deep-blue/10 pt-4">
+                      <Link
+                        href={href}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-omnia-emerald transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2"
+                      >
+                        Ver página
+                        <span aria-hidden="true">→</span>
+                      </Link>
                       {company.externalSite ? (
                         <a
                           href={company.externalSite}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-omnia-emerald transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 motion-reduce:transition-none"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-omnia-copper transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-copper focus-visible:ring-offset-2"
                         >
-                          Visitar site
-                          <span aria-hidden="true">→</span>
+                          Site oficial
                         </a>
-                      ) : (
-                        <span className="text-xs font-medium uppercase tracking-wide text-omnia-graphite-light">
-                          Site em breve
-                        </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </article>
@@ -153,6 +166,15 @@ export function CompanyCards({
             })}
           </div>
         )}
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/contato"
+            className="inline-flex h-11 items-center rounded-md bg-omnia-deep-blue px-5 text-sm font-medium text-omnia-white hover:bg-omnia-deep-blue/90"
+          >
+            Falar com a Holding
+          </Link>
+        </div>
       </Container>
     </section>
   );

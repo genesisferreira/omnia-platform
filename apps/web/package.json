@@ -12,7 +12,8 @@
     "clean": "rimraf .next .turbo dist",
     "test:site-resolver": "tsx src/scripts/test-site-resolver.ts",
     "test:seo": "tsx src/scripts/test-seo.ts",
-    "test:seo-blog": "tsx src/scripts/test-seo-blog.ts"
+    "test:seo-blog": "tsx src/scripts/test-seo-blog.ts",
+    "test:seo-companies": "tsx src/scripts/test-seo-companies.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",

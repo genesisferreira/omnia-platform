@@ -29,11 +29,17 @@ test('fred-do-frio-academy → Educação', () => {
   assert.equal(fred.externalSite, 'https://freddofrio.com.br');
 });
 
-test('cte → Engenharia', () => {
+test('cte → Formação Técnica', () => {
   const cte = bySlug.get('cte');
   assert.ok(cte);
-  assert.equal(cte.ecosystemRole, 'Engenharia');
+  assert.equal(cte.ecosystemRole, 'Formação Técnica');
   assert.equal(cte.externalSite, 'https://escolacte.com.br');
+});
+
+test('renovacao → Engenharia', () => {
+  const renovacao = bySlug.get('renovacao-refrigeracao');
+  assert.ok(renovacao);
+  assert.equal(renovacao.ecosystemRole, 'Engenharia');
 });
 
 test('todas as empresas têm externalSite oficial', () => {

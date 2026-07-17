@@ -10,7 +10,9 @@ export type CmsCompany = {
   id: string;
   name: string;
   slug: string;
+  portalSlug: string;
   shortDescription: string;
+  positioning?: string | null;
   ecosystemRole: string;
   displayOrder: number;
   externalSite: string | null;
@@ -87,15 +89,26 @@ const fetchCompaniesCached = cache(async (): Promise<CmsCompany[]> => {
     const data: unknown = await res.json();
     if (!isPublicCompaniesResponse(data)) return [];
     return data.companies.map((company) => {
-      if (!company.logo) {
-        return company;
+      const portalSlug =
+        typeof (company as { portalSlug?: unknown }).portalSlug === 'string' &&
+        (company as { portalSlug: string }).portalSlug.trim() !== ''
+          ? (company as { portalSlug: string }).portalSlug
+          : company.slug;
+
+      const nextCompany: CmsCompany = {
+        ...company,
+        portalSlug,
+      };
+
+      if (!nextCompany.logo) {
+        return nextCompany;
       }
 
       return {
-        ...company,
+        ...nextCompany,
         logo: {
-          ...company.logo,
-          alt: resolvePublicImageAlt(company.logo.alt, company.name),
+          ...nextCompany.logo,
+          alt: resolvePublicImageAlt(nextCompany.logo.alt, nextCompany.name),
         },
       };
     });

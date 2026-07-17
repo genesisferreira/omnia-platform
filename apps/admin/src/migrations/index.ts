@@ -4,6 +4,7 @@ import * as migration_20260713_174436_domains from './20260713_174436_domains';
 import * as migration_20260716_124305_pages from './20260716_124305_pages';
 import * as migration_20260716_172340_pages_institutional from './20260716_172340_pages_institutional';
 import * as migration_20260717_160602_blog_collections from './20260717_160602_blog_collections';
+import * as migration_20260717_180310_companies_strategic_pages from './20260717_180310_companies_strategic_pages';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260717_160602_blog_collections.up,
     down: migration_20260717_160602_blog_collections.down,
     name: '20260717_160602_blog_collections',
+  },
+  {
+    up: migration_20260717_180310_companies_strategic_pages.up,
+    down: migration_20260717_180310_companies_strategic_pages.down,
+    name: '20260717_180310_companies_strategic_pages',
   },
 ];

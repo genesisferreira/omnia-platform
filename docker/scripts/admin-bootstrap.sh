@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -43,6 +43,12 @@ run_holding_blog() {
   echo "==> Seed holding-blog concluído."
 }
 
+run_holding_strategic_companies() {
+  echo "==> Seed páginas estratégicas das empresas..."
+  pnpm --filter @omnia/admin seed:holding-strategic-companies
+  echo "==> Seed holding-strategic-companies concluído."
+}
+
 case "$MODE" in
   migrate)
     run_migrate
@@ -66,8 +72,11 @@ case "$MODE" in
   holding-blog)
     run_holding_blog
     ;;
+  holding-strategic-companies)
+    run_holding_strategic_companies
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies]"
     exit 1
     ;;
 esac

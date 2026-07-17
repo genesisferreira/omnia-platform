@@ -13,6 +13,8 @@ export {
 export { resolvePublicImageAlt } from './image-alt';
 export {
   buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
+  buildCompanyOrganizationJsonLd,
   buildOrganizationJsonLd,
   buildWebPageJsonLd,
   buildWebSiteJsonLd,

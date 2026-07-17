@@ -49,25 +49,43 @@ async function seed() {
       await payload.update({
         collection: 'companies',
         id: doc.id,
+        overrideAccess: true,
         data: {
+          name: company.name,
+          portalSlug: company.portalSlug,
           ecosystemRole: company.ecosystemRole,
           externalSite: company.externalSite,
           shortDescription: company.shortDescription,
           displayOrder: company.displayOrder,
           status: company.status,
+          isHolding: company.isHolding ?? false,
+          showInEcosystem: company.showInEcosystem ?? true,
+          brandTheme: company.brandTheme ?? 'omnia',
         },
       });
       console.log(`  ✓ Empresa sincronizada: ${company.slug}`);
       continue;
     }
 
+    // Payload tipa create com overloads de draft; seed canônico publica diretamente.
     await payload.create({
       collection: 'companies',
+      overrideAccess: true,
       data: {
-        ...company,
+        name: company.name,
+        slug: company.slug,
+        portalSlug: company.portalSlug,
+        shortDescription: company.shortDescription,
+        ecosystemRole: company.ecosystemRole,
+        displayOrder: company.displayOrder,
+        externalSite: company.externalSite,
+        status: company.status,
         tenant: tenantId,
+        isHolding: company.isHolding ?? false,
+        showInEcosystem: company.showInEcosystem ?? true,
+        brandTheme: company.brandTheme ?? 'omnia',
       },
-    });
+    } as never);
     console.log(`  ✓ Empresa criada: ${company.name}`);
   }
 

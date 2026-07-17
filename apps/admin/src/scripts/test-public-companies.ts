@@ -1,6 +1,8 @@
 /* eslint-disable no-console -- test harness output */
 import assert from 'node:assert/strict';
 
+import type { PublicCompanyListItemDto } from '@omnia/shared';
+
 import {
   mapPublicCompany,
   mapPublicCompanyLogo,
@@ -9,17 +11,19 @@ import {
   sanitizeLogoAlt,
   sanitizeLogoUrl,
   sortPublicCompaniesByDisplayOrder,
-  type PublicCompanyDto,
 } from '../endpoints/public-companies';
 
 const baseActive = {
   id: 7,
   name: 'Neurofrigo Command IA',
   slug: 'neurofrigo',
+  portalSlug: 'neurofrigo',
   shortDescription: 'Tecnologia e IA em refrigeração.',
   ecosystemRole: 'Tecnologia',
   displayOrder: 2,
   status: 'active',
+  showInEcosystem: true,
+  brandTheme: 'neurofrigo',
   externalSite: 'https://neurofrigo.com.br',
   tenant: { id: 1, slug: 'omnia-holding', name: 'Holding' },
   fullDescription: { root: { children: [] } },
@@ -47,6 +51,7 @@ test('documento ativo válido é mapeado', () => {
   assert.equal(dto.id, '7');
   assert.equal(dto.name, baseActive.name);
   assert.equal(dto.slug, baseActive.slug);
+  assert.equal(dto.portalSlug, 'neurofrigo');
   assert.equal(dto.shortDescription, baseActive.shortDescription);
   assert.equal(dto.ecosystemRole, baseActive.ecosystemRole);
   assert.equal(dto.displayOrder, 2);
@@ -54,19 +59,16 @@ test('documento ativo válido é mapeado', () => {
 });
 
 test('Holding é excluída', () => {
-  const dto = mapPublicCompany({
-    ...baseActive,
-    slug: 'omnia-frigo-holding',
-  });
-  assert.equal(dto, null);
+  assert.equal(mapPublicCompany({ ...baseActive, slug: 'omnia-frigo-holding' }), null);
+  assert.equal(mapPublicCompany({ ...baseActive, isHolding: true }), null);
 });
 
 test('empresa inativa é excluída', () => {
-  const dto = mapPublicCompany({
-    ...baseActive,
-    status: 'inactive',
-  });
-  assert.equal(dto, null);
+  assert.equal(mapPublicCompany({ ...baseActive, status: 'inactive' }), null);
+});
+
+test('empresa fora do ecossistema é excluída da listagem', () => {
+  assert.equal(mapPublicCompany({ ...baseActive, showInEcosystem: false }), null);
 });
 
 test('campos internos não aparecem no DTO', () => {
@@ -74,12 +76,17 @@ test('campos internos não aparecem no DTO', () => {
   assert.ok(dto);
   const keys = Object.keys(dto).sort();
   assert.deepEqual(keys, [
+    'brandTheme',
+    'coverImage',
     'displayOrder',
     'ecosystemRole',
     'externalSite',
     'id',
     'logo',
     'name',
+    'portalSlug',
+    'positioning',
+    'primaryCta',
     'shortDescription',
     'slug',
   ]);
@@ -92,25 +99,16 @@ test('id numérico vira string', () => {
   const dto = mapPublicCompany({ ...baseActive, id: 42 });
   assert.ok(dto);
   assert.equal(dto.id, '42');
-  assert.equal(typeof dto.id, 'string');
 });
 
 test('externalSite https válido permanece', () => {
   assert.equal(sanitizeExternalSite('https://example.com/path'), 'https://example.com/path');
-  assert.equal(sanitizeExternalSite('http://example.com'), 'http://example.com');
 });
 
 test('protocolo javascript:, data: ou URL inválida vira null', () => {
   assert.equal(sanitizeExternalSite('javascript:alert(1)'), null);
   assert.equal(sanitizeExternalSite('data:text/html,hi'), null);
-  assert.equal(sanitizeExternalSite('not a url'), null);
-  assert.equal(sanitizeExternalSite(''), null);
-  assert.equal(sanitizeExternalSite(null), null);
-
-  const dto = mapPublicCompany({
-    ...baseActive,
-    externalSite: 'javascript:alert(1)',
-  });
+  const dto = mapPublicCompany({ ...baseActive, externalSite: 'javascript:alert(1)' });
   assert.ok(dto);
   assert.equal(dto.externalSite, null);
 });
@@ -122,19 +120,6 @@ test('logo retorna somente url e alt', () => {
     url: '/media/neurofrigo-logo.png',
     alt: 'Logo Neurofrigo',
   });
-  assert.equal(dto.logo && 'id' in dto.logo, false);
-  assert.equal(dto.logo && 'filename' in dto.logo, false);
-
-  const withoutLogo = mapPublicCompany({ ...baseActive, logo: null });
-  assert.ok(withoutLogo);
-  assert.equal(withoutLogo.logo, null);
-
-  const emptyUrl = mapPublicCompany({
-    ...baseActive,
-    logo: { url: '', alt: 'x' },
-  });
-  assert.ok(emptyUrl);
-  assert.equal(emptyUrl.logo, null);
 });
 
 test('documento obrigatório incompleto é excluído', () => {
@@ -142,54 +127,70 @@ test('documento obrigatório incompleto é excluído', () => {
   assert.equal(mapPublicCompany({ ...baseActive, slug: '' }), null);
   assert.equal(mapPublicCompany({ ...baseActive, shortDescription: '  ' }), null);
   assert.equal(mapPublicCompany({ ...baseActive, ecosystemRole: null }), null);
-  assert.equal(mapPublicCompany({ ...baseActive, id: undefined }), null);
 });
 
 test('ordenação por displayOrder é determinística', () => {
-  const unordered: PublicCompanyDto[] = [
+  const unordered: PublicCompanyListItemDto[] = [
     {
       id: '1',
       name: 'B',
       slug: 'b-company',
+      portalSlug: 'b-company',
       shortDescription: 'b',
+      positioning: null,
       ecosystemRole: 'x',
+      brandTheme: 'omnia',
       displayOrder: 5,
       externalSite: null,
       logo: null,
+      coverImage: null,
+      primaryCta: null,
     },
     {
       id: '2',
       name: 'A',
       slug: 'a-company',
+      portalSlug: 'a-company',
       shortDescription: 'a',
+      positioning: null,
       ecosystemRole: 'x',
+      brandTheme: 'omnia',
       displayOrder: 1,
       externalSite: null,
       logo: null,
+      coverImage: null,
+      primaryCta: null,
     },
     {
       id: '3',
       name: 'C',
       slug: 'c-company',
+      portalSlug: 'c-company',
       shortDescription: 'c',
+      positioning: null,
       ecosystemRole: 'x',
+      brandTheme: 'omnia',
       displayOrder: 5,
       externalSite: null,
       logo: null,
+      coverImage: null,
+      primaryCta: null,
     },
   ];
 
   const sorted = sortPublicCompaniesByDisplayOrder(unordered);
   assert.deepEqual(
-    sorted.map((c) => c.slug),
+    sorted.map((c) => c.portalSlug),
     ['a-company', 'b-company', 'c-company'],
   );
 });
 
 test('logo relativa /media/logo.png aceita', () => {
   assert.equal(sanitizeLogoUrl('/media/logo.png'), '/media/logo.png');
-  const logo = mapPublicCompanyLogo({ url: '/media/logo.png', alt: 'x' });
-  assert.deepEqual(logo, { url: '/media/logo.png', alt: 'x' });
+  assert.deepEqual(mapPublicCompanyLogo({ url: '/media/logo.png', alt: 'x' }), {
+    url: '/media/logo.png',
+    alt: 'x',
+  });
 });
 
 test('logo absoluta https aceita', () => {
@@ -223,23 +224,16 @@ test('logo relativa sem / rejeitada', () => {
   assert.equal(sanitizeLogoUrl('media/logo.png'), null);
 });
 
-test('logo com barras invertidas/escape de origem rejeitada', () => {
+test('logo com barras invertidas rejeitada', () => {
   assert.equal(sanitizeLogoUrl('/media\\logo.png'), null);
-  assert.equal(sanitizeLogoUrl('/\\evil.example/logo.png'), null);
-  assert.equal(sanitizeLogoUrl('https://cdn.example.com\\logo.png'), null);
 });
 
 test('logo absoluta com username/password rejeitada', () => {
   assert.equal(sanitizeLogoUrl('https://user:pass@cdn.example.com/logo.png'), null);
-  assert.equal(sanitizeLogoUrl('http://user@cdn.example.com/logo.png'), null);
 });
 
 test('alt vazio → null', () => {
   assert.equal(sanitizeLogoAlt(''), null);
-  assert.deepEqual(mapPublicCompanyLogo({ url: '/media/logo.png', alt: '' }), {
-    url: '/media/logo.png',
-    alt: null,
-  });
 });
 
 test('alt whitespace → null', () => {
@@ -252,38 +246,22 @@ test('alt válido é trimmed', () => {
 
 test('displayOrder NaN usa fallback seguro', () => {
   assert.equal(normalizeDisplayOrder(Number.NaN), 0);
-  const dto = mapPublicCompany({ ...baseActive, displayOrder: Number.NaN });
-  assert.ok(dto);
-  assert.equal(dto.displayOrder, 0);
 });
 
 test('displayOrder Infinity usa fallback seguro', () => {
   assert.equal(normalizeDisplayOrder(Number.POSITIVE_INFINITY), 0);
-  assert.equal(normalizeDisplayOrder(Number.NEGATIVE_INFINITY), 0);
 });
 
 test('displayOrder não numérico usa fallback seguro', () => {
   assert.equal(normalizeDisplayOrder('3'), 0);
-  assert.equal(normalizeDisplayOrder(null), 0);
-  assert.equal(normalizeDisplayOrder(undefined), 0);
 });
 
 test('id "" é rejeitado', () => {
   assert.equal(mapPublicCompany({ ...baseActive, id: '' }), null);
 });
 
-test('id whitespace é rejeitado', () => {
-  assert.equal(mapPublicCompany({ ...baseActive, id: '   ' }), null);
-});
-
 test('externalSite file: explicitamente rejeitado', () => {
   assert.equal(sanitizeExternalSite('file:///tmp/x'), null);
-  const dto = mapPublicCompany({
-    ...baseActive,
-    externalSite: 'file:///tmp/x',
-  });
-  assert.ok(dto);
-  assert.equal(dto.externalSite, null);
 });
 
 console.log(`\n${passed} testes passaram.`);

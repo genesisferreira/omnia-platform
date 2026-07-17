@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 
 import { fetchPublicPage } from '@/lib/cms';
 import { fetchPublicPostCategories, fetchPublicPosts, fetchPublicPostTags } from '@/lib/cms-blog';
+import { fetchPublicCompanies } from '@/lib/cms-companies';
 import {
   getPublicSiteOrigin,
   resolveCanonicalUrl,
@@ -47,6 +48,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url,
       changeFrequency: candidate.pathname === '/' ? 'weekly' : 'monthly',
       priority: candidate.pathname === '/' ? 1 : 0.8,
+    });
+  }
+
+  const companies = await fetchPublicCompanies();
+  for (const company of companies) {
+    const url =
+      resolveCanonicalUrl({ pathname: `/empresas/${company.portalSlug}`, hostname }) ??
+      `${getPublicSiteOrigin()}/empresas/${company.portalSlug}`;
+    entries.push({
+      url,
+      changeFrequency: 'monthly',
+      priority: 0.75,
     });
   }
 
