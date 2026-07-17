@@ -16,10 +16,12 @@
     "migrate:status": "payload migrate:status",
     "seed": "tsx src/seed/index.ts",
     "seed:holding-home": "tsx src/scripts/seed-holding-home.ts",
+    "seed:holding-institutional-pages": "tsx src/scripts/seed-holding-institutional-pages.ts",
     "upgrade:holding-home": "tsx src/scripts/upgrade-holding-home.ts",
     "test:public-companies": "tsx src/scripts/test-public-companies.ts",
     "test:holding-companies-seed": "tsx src/scripts/test-holding-companies-seed.ts",
     "test:seed-holding-home": "tsx src/scripts/test-seed-holding-home.ts",
+    "test:seed-holding-institutional-pages": "tsx src/scripts/test-seed-holding-institutional-pages.ts",
     "test:upgrade-holding-home": "tsx src/scripts/test-upgrade-holding-home.ts",
     "test:public-page": "tsx src/scripts/test-public-page.ts",
     "test:pages-migration-db": "tsx src/scripts/test-pages-migration-db.ts"

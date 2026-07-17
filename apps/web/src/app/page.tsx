@@ -5,11 +5,16 @@ import { BlockRenderer } from '@/components/home/BlockRenderer';
 import { CompanyCards } from '@/components/home/CompanyCards';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { Hero } from '@/components/home/Hero';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchCompanies, fetchGlobalSettings, fetchPublicPage } from '@/lib/cms';
+import {
+  buildFallbackMetadata,
+  buildPageMetadata,
+  buildWebPageJsonLd,
+  SEO_FALLBACK_DESCRIPTION,
+  SEO_FALLBACK_TITLE,
+} from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
-
-const FALLBACK_TITLE = 'Omnia Frigo Holding';
-const FALLBACK_DESCRIPTION = 'Tradição, Educação e Inteligência Artificial em Refrigeração.';
 
 /**
  * Deduplica resolve-site + public-page entre generateMetadata e a página
@@ -18,30 +23,26 @@ const FALLBACK_DESCRIPTION = 'Tradição, Educação e Inteligência Artificial 
 const loadHomePage = cache(async () => {
   const siteContext = await getSiteContext();
   if (!siteContext.resolution.ok) {
-    return null;
+    return { page: null, hostname: siteContext.hostname };
   }
 
-  return fetchPublicPage(siteContext.resolution.context.site.slug, 'home');
+  const page = await fetchPublicPage(siteContext.resolution.context.site.slug, 'home');
+  return { page, hostname: siteContext.hostname };
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await loadHomePage();
+  const { page, hostname } = await loadHomePage();
   if (!page) {
-    return {
-      title: FALLBACK_TITLE,
-      description: FALLBACK_DESCRIPTION,
-    };
+    return buildFallbackMetadata(hostname);
   }
 
-  const title = page.seo.metaTitle ?? page.title ?? FALLBACK_TITLE;
-  const description = page.seo.metaDescription ?? FALLBACK_DESCRIPTION;
-
-  return {
-    title,
-    description,
-    ...(page.seo.canonicalUrl ? { alternates: { canonical: page.seo.canonicalUrl } } : {}),
-    ...(page.seo.noIndex ? { robots: { index: false, follow: false } } : {}),
-  };
+  return buildPageMetadata({
+    pathname: '/',
+    title: page.title,
+    description: SEO_FALLBACK_DESCRIPTION,
+    seo: page.seo,
+    hostname,
+  });
 }
 
 async function FallbackHome() {
@@ -57,11 +58,28 @@ async function FallbackHome() {
 }
 
 export default async function HomePage() {
-  const page = await loadHomePage();
+  const { page, hostname } = await loadHomePage();
+
+  const webPageLd = buildWebPageJsonLd({
+    pathname: '/',
+    title: page?.seo.metaTitle ?? page?.title ?? SEO_FALLBACK_TITLE,
+    description: page?.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION,
+    hostname,
+  });
 
   if (!page || page.blocks.length === 0) {
-    return <FallbackHome />;
+    return (
+      <>
+        <JsonLd data={webPageLd} />
+        <FallbackHome />
+      </>
+    );
   }
 
-  return <BlockRenderer blocks={page.blocks} />;
+  return (
+    <>
+      <JsonLd data={webPageLd} />
+      <BlockRenderer blocks={page.blocks} />
+    </>
+  );
 }

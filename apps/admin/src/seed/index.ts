@@ -5,6 +5,11 @@ import config from '../../payload.config';
 import { defaultTenantSeed, holdingCompaniesSeed } from './holding-companies';
 import { holdingHomeSeed } from './holding-home';
 import { adaptPayloadForHoldingHomeSeed, runHoldingHomeSeed } from './run-holding-home';
+import {
+  adaptPayloadForInstitutionalPagesSeed,
+  hasInstitutionalPagesSeedAbort,
+  runHoldingInstitutionalPagesSeed,
+} from './run-holding-institutional-pages';
 import { sitesSeed } from './sites';
 
 async function seed() {
@@ -165,6 +170,26 @@ async function seed() {
     console.log(`✓ Home seed ignorado (${homeOutcome.reason})`);
   } else {
     console.log('✓ Home criada para omnia-hub');
+  }
+
+  console.log('🌱 Seed páginas institucionais (omnia-hub)...');
+
+  const institutionalOutcome = await runHoldingInstitutionalPagesSeed(
+    adaptPayloadForInstitutionalPagesSeed(payload),
+  );
+
+  if (hasInstitutionalPagesSeedAbort(institutionalOutcome)) {
+    throw new Error(
+      'Seed páginas institucionais abortado: Site "omnia-hub" não encontrado. Execute o seed de sites antes.',
+    );
+  }
+
+  for (const item of institutionalOutcome.items) {
+    if (item.status === 'created') {
+      console.log(`  ✓ Página criada: ${item.slug}`);
+    } else {
+      console.log(`  · Página já existe: ${item.slug}`);
+    }
   }
 
   console.log('✅ Seed concluído.');

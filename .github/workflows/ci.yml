@@ -47,6 +47,9 @@ jobs:
       - name: Holding home exclusive seed
         run: pnpm --filter @omnia/admin test:seed-holding-home
 
+      - name: Holding institutional pages seed
+        run: pnpm --filter @omnia/admin test:seed-holding-institutional-pages
+
       - name: Holding home institutional upgrade
         run: pnpm --filter @omnia/admin test:upgrade-holding-home
 
@@ -55,6 +58,9 @@ jobs:
 
       - name: Public page endpoint and Pages rules
         run: pnpm --filter @omnia/admin test:public-page
+
+      - name: Portal SEO contracts
+        run: pnpm --filter @omnia/web test:seo
 
   build:
     name: Build

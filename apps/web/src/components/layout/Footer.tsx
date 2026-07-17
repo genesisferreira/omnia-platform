@@ -2,10 +2,7 @@ import Link from 'next/link';
 
 import { Container } from '@omnia/ui';
 
-const NAV_ITEMS = [
-  { href: '#ecossistema', label: 'Ecossistema' },
-  { href: '#empresas', label: 'Empresas' },
-] as const;
+import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -26,7 +23,7 @@ export function Footer() {
           </div>
 
           <nav aria-label="Rodapé" className="flex flex-col gap-2 sm:flex-row sm:gap-6">
-            {NAV_ITEMS.map((item) => (
+            {INSTITUTIONAL_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

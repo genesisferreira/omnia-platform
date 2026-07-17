@@ -4,6 +4,8 @@ import { mapPublicPage, type PublicPageDto } from '@omnia/shared';
 
 import { getConfig } from '@omnia/config';
 
+import { resolvePublicImageAlt } from '@/lib/seo';
+
 export type CmsCompany = {
   id: string;
   name: string;
@@ -84,7 +86,19 @@ const fetchCompaniesCached = cache(async (): Promise<CmsCompany[]> => {
     if (!res.ok) return [];
     const data: unknown = await res.json();
     if (!isPublicCompaniesResponse(data)) return [];
-    return data.companies;
+    return data.companies.map((company) => {
+      if (!company.logo) {
+        return company;
+      }
+
+      return {
+        ...company,
+        logo: {
+          ...company.logo,
+          alt: resolvePublicImageAlt(company.logo.alt, company.name),
+        },
+      };
+    });
   } catch {
     return [];
   }

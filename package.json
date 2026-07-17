@@ -16,6 +16,8 @@
     "dev": "turbo run dev --filter=@omnia/web --filter=@omnia/admin",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "test:ci": "pnpm --filter @omnia/admin test:public-companies && pnpm --filter @omnia/admin test:holding-companies-seed && pnpm --filter @omnia/admin test:seed-holding-home && pnpm --filter @omnia/admin test:seed-holding-institutional-pages && pnpm --filter @omnia/admin test:upgrade-holding-home && pnpm --filter @omnia/shared test:public-page-contracts && pnpm --filter @omnia/admin test:public-page && pnpm --filter @omnia/web test:seo",
+    "validate": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:ci && pnpm build",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,json,md,yml,yaml}\"",
     "clean": "turbo run clean && rimraf node_modules",

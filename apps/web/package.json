@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf .next .turbo dist",
-    "test:site-resolver": "tsx src/scripts/test-site-resolver.ts"
+    "test:site-resolver": "tsx src/scripts/test-site-resolver.ts",
+    "test:seo": "tsx src/scripts/test-seo.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",

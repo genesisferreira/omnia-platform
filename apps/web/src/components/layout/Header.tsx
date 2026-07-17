@@ -6,11 +6,7 @@ import { useEffect, useId, useState } from 'react';
 import { Button, Container } from '@omnia/ui';
 
 import { BrandHomeLink } from './BrandHomeLink';
-
-const NAV_ITEMS = [
-  { href: '#ecossistema', label: 'Ecossistema' },
-  { href: '#empresas', label: 'Empresas' },
-] as const;
+import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 function AdminCta({ className }: { className?: string }) {
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001';
@@ -61,7 +57,7 @@ export function Header() {
         <BrandHomeLink />
 
         <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
-          {NAV_ITEMS.map((item) => (
+          {INSTITUTIONAL_NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -105,7 +101,7 @@ export function Header() {
       >
         <Container className="flex flex-col gap-1 py-3">
           <nav aria-label="Principal mobile" className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => (
+            {INSTITUTIONAL_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

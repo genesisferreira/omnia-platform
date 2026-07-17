@@ -6,6 +6,14 @@ import '@omnia/ui/globals.css';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SkipLink } from '@/components/layout/SkipLink';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+  getPublicSiteOrigin,
+  SEO_FALLBACK_DESCRIPTION,
+  SEO_FALLBACK_TITLE,
+} from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
 
 const inter = Inter({
@@ -21,8 +29,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Omnia Frigo Holding',
-  description: 'Tradição, Educação e Inteligência Artificial em Refrigeração.',
+  metadataBase: new URL(getPublicSiteOrigin()),
+  title: SEO_FALLBACK_TITLE,
+  description: SEO_FALLBACK_DESCRIPTION,
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -41,6 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${inter.variable} ${montserrat.variable}`}
     >
       <body className="font-sans antialiased">
+        <JsonLd data={[buildOrganizationJsonLd({ hostname }), buildWebSiteJsonLd({ hostname })]} />
         <SkipLink />
         <Header />
         <main id="conteudo-principal">{children}</main>

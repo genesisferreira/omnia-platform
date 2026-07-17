@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -31,6 +31,12 @@ run_upgrade_holding_home() {
   echo "==> Upgrade holding-home concluído."
 }
 
+run_holding_institutional_pages() {
+  echo "==> Seed páginas institucionais (omnia-hub)..."
+  pnpm --filter @omnia/admin seed:holding-institutional-pages
+  echo "==> Seed holding-institutional-pages concluído."
+}
+
 case "$MODE" in
   migrate)
     run_migrate
@@ -48,8 +54,11 @@ case "$MODE" in
   upgrade-holding-home)
     run_upgrade_holding_home
     ;;
+  holding-institutional-pages)
+    run_holding_institutional_pages
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages]"
     exit 1
     ;;
 esac
