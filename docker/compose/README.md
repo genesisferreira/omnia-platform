@@ -4,11 +4,11 @@ Arquivos Docker Compose por ambiente.
 
 ## Arquivos
 
-| Arquivo           | Ambiente              | Descrição                            |
-| ----------------- | --------------------- | ------------------------------------ |
-| `development.yml` | Desenvolvimento local | Postgres, Redis, MinIO, n8n, Mailpit |
-| `staging.yml`     | Homologação (VPS)     | Apenas web + admin via Traefik       |
-| `production.yml`  | Produção              | Placeholder — sprint futura          |
+| Arquivo           | Ambiente              | Descrição                             |
+| ----------------- | --------------------- | ------------------------------------- |
+| `development.yml` | Desenvolvimento local | Postgres, Redis, MinIO, n8n, Mailpit  |
+| `staging.yml`     | Homologação (VPS)     | Web + Admin sobre infra compartilhada |
+| `production.yml`  | Produção (VPS)        | Postgres/Redis isolados + Web + Admin |
 
 ## Desenvolvimento local
 
@@ -41,6 +41,26 @@ Documentação:
 - [Deploy staging](../staging/DEPLOY.md)
 - [Checklist homologação](../../docs/09-infrastructure/STAGING_CHECKLIST.md)
 
-## Produção
+## Produção (VPS)
 
-Não utilizar nesta fase. Arquivo reservado para sprint futura.
+```bash
+cp .env.production.example .env.production
+# Preencher placeholders com segredos exclusivos de produção
+
+docker compose -f docker/compose/production.yml --env-file .env.production config
+```
+
+Ou via pnpm:
+
+```bash
+pnpm docker:production:config
+pnpm docker:production:ps
+pnpm docker:production:logs
+```
+
+Documentação:
+
+- [Deploy produção](../production/DEPLOY.md)
+- [README produção](../production/README.md)
+
+Isolamento: banco, Redis e mídia exclusivos; Traefik compartilhado apenas via `omnia_proxy`.

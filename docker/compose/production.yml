@@ -1,11 +1,332 @@
-# Omnia Platform — Produção
+# Omnia Platform — Produção (VPS)
 #
-# Placeholder — será populado em sprint futura.
-# NÃO utilizar para deploy nesta fase.
+# Stack isolada: PostgreSQL, Redis, Admin e Portal.
+# Ingress compartilhado: apenas a rede externa omnia_proxy (Traefik).
+# NÃO reutiliza banco, volumes ou containers de staging.
 #
-# Uso previsto:
+# Uso (a partir da raiz do repositório):
 #   docker compose -f docker/compose/production.yml --env-file .env.production config
+#   docker compose -f docker/compose/production.yml --env-file .env.production up -d
+#
+# Runbook: docker/production/DEPLOY.md
 
 name: omnia-platform-prod
 
-services: {}
+x-app-logging: &app-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+x-bootstrap-environment: &bootstrap-environment
+  NODE_ENV: production
+  DATABASE_URL: ${DATABASE_URL}
+  PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+  NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+  NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+  OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omnia-platform-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - omnia_platform_postgres_prod:/var/lib/postgresql/data
+    networks:
+      - omnia_prod_internal
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    logging: *app-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: omnia-platform-redis-prod
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    volumes:
+      - omnia_platform_redis_prod:/data
+    networks:
+      - omnia_prod_internal
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    mem_limit: 256m
+    cpus: 0.50
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    logging: *app-logging
+
+  web:
+    container_name: omnia-platform-web-prod
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+    image: omnia-platform-web-prod:${APP_VERSION:-1.0.0}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_proxy
+      - omnia_prod_internal
+    extra_hosts:
+      - 'admin.omniafrigo.com.br:host-gateway'
+      - 'omniafrigo.com.br:host-gateway'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      admin:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.regex=(?i)^https://www\\.omniafrigo\\.com\\.br/(.*)
+      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.replacement=https://omniafrigo.com.br/$${1}
+      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.permanent=true
+      - traefik.http.routers.omnia-platform-web-prod.rule=Host(`omniafrigo.com.br`)
+      - traefik.http.routers.omnia-platform-web-prod.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-platform-web-prod.tls=true
+      - traefik.http.routers.omnia-platform-web-prod.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-platform-web-prod.tls.domains[0].main=omniafrigo.com.br
+      - traefik.http.routers.omnia-platform-web-prod.tls.domains[0].sans=www.omniafrigo.com.br
+      - traefik.http.routers.omnia-platform-web-prod.service=omnia-platform-web-prod
+      - traefik.http.services.omnia-platform-web-prod.loadbalancer.server.port=3000
+      - traefik.http.routers.omnia-platform-web-www-prod.rule=Host(`www.omniafrigo.com.br`)
+      - traefik.http.routers.omnia-platform-web-www-prod.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-platform-web-www-prod.tls=true
+      - traefik.http.routers.omnia-platform-web-www-prod.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-platform-web-www-prod.middlewares=omnia-platform-www-redirect
+      - traefik.http.routers.omnia-platform-web-www-prod.service=omnia-platform-web-prod
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    logging: *app-logging
+
+  admin:
+    container_name: omnia-platform-admin-prod
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+        # Placeholders de build — segredos reais somente no runtime
+        DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build
+        PAYLOAD_SECRET: production-build-placeholder-min-32-chars
+    image: omnia-platform-admin-prod:${APP_VERSION:-1.0.0}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    volumes:
+      - omnia_platform_admin_media_prod:/app/media
+    networks:
+      - omnia_proxy
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      - traefik.http.routers.omnia-platform-admin-prod.rule=Host(`admin.omniafrigo.com.br`)
+      - traefik.http.routers.omnia-platform-admin-prod.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-platform-admin-prod.tls=true
+      - traefik.http.routers.omnia-platform-admin-prod.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-platform-admin-prod.service=omnia-platform-admin-prod
+      - traefik.http.services.omnia-platform-admin-prod.loadbalancer.server.port=3000
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    logging: *app-logging
+
+  # ---------------------------------------------------------------------------
+  # Bootstrap one-off — migrations + seeds (profile bootstrap)
+  # ---------------------------------------------------------------------------
+  admin-migrate:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-migrate-prod
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+        DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build
+        PAYLOAD_SECRET: production-build-placeholder-min-32-chars
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    environment:
+      <<: *bootstrap-environment
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['migrate']
+    logging: *app-logging
+
+  admin-seed:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-prod
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    pull_policy: never
+    environment:
+      <<: *bootstrap-environment
+    volumes:
+      - omnia_platform_admin_media_prod:/app/media
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['seed']
+    logging: *app-logging
+
+  admin-upgrade-holding-home:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-upgrade-holding-home-prod
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    pull_policy: never
+    environment:
+      <<: *bootstrap-environment
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['upgrade-holding-home']
+    logging: *app-logging
+
+  admin-seed-holding-institutional-pages:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-institutional-pages-prod
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    pull_policy: never
+    environment:
+      <<: *bootstrap-environment
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['holding-institutional-pages']
+    logging: *app-logging
+
+  admin-seed-holding-blog:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-blog-prod
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    pull_policy: never
+    environment:
+      <<: *bootstrap-environment
+    volumes:
+      - omnia_platform_admin_media_prod:/app/media
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['holding-blog']
+    logging: *app-logging
+
+  admin-seed-holding-strategic-companies:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-strategic-companies-prod
+    image: omnia-platform-admin-bootstrap-prod:${APP_VERSION:-1.0.0}
+    pull_policy: never
+    environment:
+      <<: *bootstrap-environment
+    networks:
+      - omnia_prod_internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+    command: ['holding-strategic-companies']
+    logging: *app-logging
+
+networks:
+  omnia_proxy:
+    external: true
+  omnia_prod_internal:
+    name: omnia_prod_internal
+    driver: bridge
+    internal: true
+
+volumes:
+  omnia_platform_postgres_prod:
+    name: omnia_platform_postgres_prod
+  omnia_platform_redis_prod:
+    name: omnia_platform_redis_prod
+  omnia_platform_admin_media_prod:
+    name: omnia_platform_admin_media_prod

@@ -30,7 +30,14 @@
     "docker:staging:seed": "docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap run --rm admin-seed",
     "docker:staging:bootstrap": "docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap run --rm admin-bootstrap",
     "docker:staging:up": "docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build",
-    "docker:staging:down": "docker compose -f docker/compose/staging.yml --env-file .env.staging down"
+    "docker:staging:down": "docker compose -f docker/compose/staging.yml --env-file .env.staging down",
+    "docker:production:config": "docker compose -f docker/compose/production.yml --env-file .env.production.example config",
+    "docker:production:build": "docker compose -f docker/compose/production.yml --env-file .env.production --profile bootstrap build",
+    "docker:production:migrate": "docker compose -f docker/compose/production.yml --env-file .env.production --profile bootstrap run --rm admin-migrate",
+    "docker:production:up": "docker compose -f docker/compose/production.yml --env-file .env.production up -d",
+    "docker:production:ps": "docker compose -f docker/compose/production.yml --env-file .env.production ps",
+    "docker:production:logs": "docker compose -f docker/compose/production.yml --env-file .env.production logs -f admin web",
+    "docker:production:down": "docker compose -f docker/compose/production.yml --env-file .env.production down"
   },
   "devDependencies": {
     "@omnia/eslint-config": "workspace:*",
