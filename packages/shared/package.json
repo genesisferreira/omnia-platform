@@ -13,6 +13,7 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test:public-page-contracts": "tsx src/cms/public-page/test-public-page-contracts.ts",
+    "test:public-post-contracts": "tsx src/cms/public-post/test-public-post-contracts.ts",
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {

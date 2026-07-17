@@ -61,3 +61,58 @@ export function buildWebPageJsonLd(args: {
     inLanguage: 'pt-BR',
   };
 }
+
+export function buildArticleJsonLd(args: {
+  pathname: string;
+  headline: string;
+  description?: string | null;
+  datePublished?: string | null;
+  dateModified?: string | null;
+  authorName?: string | null;
+  imageUrl?: string | null;
+  hostname?: string | null;
+  schemaType?: string | null;
+}): JsonLdRecord {
+  const url =
+    resolveCanonicalUrl({
+      pathname: args.pathname,
+      hostname: args.hostname,
+    }) ?? `${getPublicSiteOrigin()}${args.pathname}`;
+
+  const type =
+    args.schemaType === 'Article' || args.schemaType === 'BlogPosting'
+      ? args.schemaType
+      : 'BlogPosting';
+
+  const record: JsonLdRecord = {
+    '@context': 'https://schema.org',
+    '@type': type,
+    headline: args.headline,
+    description: args.description ?? SEO_FALLBACK_DESCRIPTION,
+    url,
+    mainEntityOfPage: url,
+    inLanguage: 'pt-BR',
+    publisher: {
+      '@type': 'Organization',
+      name: SEO_SITE_NAME,
+    },
+  };
+
+  if (args.datePublished) {
+    record.datePublished = args.datePublished;
+  }
+  if (args.dateModified) {
+    record.dateModified = args.dateModified;
+  }
+  if (args.authorName) {
+    record.author = {
+      '@type': 'Person',
+      name: args.authorName,
+    };
+  }
+  if (args.imageUrl) {
+    record.image = [args.imageUrl];
+  }
+
+  return record;
+}

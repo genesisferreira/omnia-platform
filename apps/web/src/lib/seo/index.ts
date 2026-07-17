@@ -12,6 +12,7 @@ export {
 } from './build-page-metadata';
 export { resolvePublicImageAlt } from './image-alt';
 export {
+  buildArticleJsonLd,
   buildOrganizationJsonLd,
   buildWebPageJsonLd,
   buildWebSiteJsonLd,

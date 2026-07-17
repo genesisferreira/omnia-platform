@@ -5,15 +5,25 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { Authors } from './src/collections/Authors';
+import { Categories } from './src/collections/Categories';
 import { Companies } from './src/collections/Companies';
 import { Domains } from './src/collections/Domains';
 import { Media } from './src/collections/Media';
 import { Pages } from './src/collections/Pages';
+import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
+import { Tags } from './src/collections/Tags';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { publicCompaniesEndpoint } from './src/endpoints/public-companies';
 import { publicPageEndpoint } from './src/endpoints/public-page';
+import {
+  publicPostCategoriesEndpoint,
+  publicPostEndpoint,
+  publicPostsEndpoint,
+  publicPostTagsEndpoint,
+} from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 
@@ -30,9 +40,29 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users, Tenants, Companies, Sites, Domains, Media, Pages],
+  collections: [
+    Users,
+    Tenants,
+    Companies,
+    Sites,
+    Domains,
+    Media,
+    Pages,
+    Authors,
+    Categories,
+    Tags,
+    Posts,
+  ],
   globals: [GlobalSettings],
-  endpoints: [resolveSiteEndpoint, publicCompaniesEndpoint, publicPageEndpoint],
+  endpoints: [
+    resolveSiteEndpoint,
+    publicCompaniesEndpoint,
+    publicPageEndpoint,
+    publicPostsEndpoint,
+    publicPostEndpoint,
+    publicPostCategoriesEndpoint,
+    publicPostTagsEndpoint,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
   typescript: {

@@ -3,6 +3,7 @@ import * as migration_20260713_142511_sites from './20260713_142511_sites';
 import * as migration_20260713_174436_domains from './20260713_174436_domains';
 import * as migration_20260716_124305_pages from './20260716_124305_pages';
 import * as migration_20260716_172340_pages_institutional from './20260716_172340_pages_institutional';
+import * as migration_20260717_160602_blog_collections from './20260717_160602_blog_collections';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260716_172340_pages_institutional.up,
     down: migration_20260716_172340_pages_institutional.down,
     name: '20260716_172340_pages_institutional',
+  },
+  {
+    up: migration_20260717_160602_blog_collections.up,
+    down: migration_20260717_160602_blog_collections.down,
+    name: '20260717_160602_blog_collections',
   },
 ];

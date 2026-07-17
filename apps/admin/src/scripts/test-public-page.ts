@@ -423,13 +423,10 @@ test('migration Pages baseline preserva índices de integridade no TS oficial', 
   assert.equal(ts.includes('WHERE "page_type" = \'home\''), true);
 });
 
-test('snapshot canônico é o lexicograficamente mais recente (institucional)', () => {
-  const jsons = fs
-    .readdirSync(migrationsDir)
-    .filter((f) => f.endsWith('.json'))
-    .sort()
-    .reverse();
-  assert.equal(jsons[0], '20260716_172340_pages_institutional.json');
+test('snapshot canônico institucional permanece versionado', () => {
+  const jsons = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.json'));
+  assert.equal(jsons.includes('20260716_172340_pages_institutional.json'), true);
+  assert.equal(jsons.includes('20260717_160602_blog_collections.json'), true);
 });
 
 test('compatibilidade: página legada com hero → features → companies', () => {

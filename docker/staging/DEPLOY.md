@@ -38,14 +38,15 @@ docker network inspect omnia_internal --format '{{range .Containers}}{{.Name}} {
 
 ## 3. Operações disponíveis
 
-| Serviço Compose                          | Operação                                                 |
-| ---------------------------------------- | -------------------------------------------------------- |
-| `admin-migrate`                          | Aplica migrations Payload pendentes                      |
-| `admin-upgrade-holding-home`             | Atualiza somente a Home institucional; é idempotente     |
-| `admin-seed-holding-institutional-pages` | Cria Sobre, Empresas e Contato ausentes; não sobrescreve |
-| `admin-bootstrap`                        | Migrations + seed geral; usar apenas em banco novo       |
-| `admin`                                  | Runtime do Admin/Payload                                 |
-| `web`                                    | Runtime do Portal                                        |
+| Serviço Compose                          | Operação                                                      |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `admin-migrate`                          | Aplica migrations Payload pendentes                           |
+| `admin-upgrade-holding-home`             | Atualiza somente a Home institucional; é idempotente          |
+| `admin-seed-holding-institutional-pages` | Cria Sobre, Empresas e Contato ausentes; não sobrescreve      |
+| `admin-seed-holding-blog`                | Cria autor, categorias, tags e posts do Blog; não sobrescreve |
+| `admin-bootstrap`                        | Migrations + seed geral; usar apenas em banco novo            |
+| `admin`                                  | Runtime do Admin/Payload                                      |
+| `web`                                    | Runtime do Portal                                             |
 
 As operações de conteúdo usam o target `bootstrap` do Dockerfile do Admin, não
 dependem de Node/pnpm instalado na VPS e são executadas com `--rm`.
@@ -73,6 +74,7 @@ dependem de Node/pnpm instalado na VPS e são executadas com `--rm`.
 - [ ] Seed/sincronização do catálogo de empresas (papéis e sites externos).
 - [ ] Upgrade institucional da Home concluído.
 - [ ] Seed das páginas institucionais concluído.
+- [ ] Seed do Blog (autor, categorias, tags e posts) concluído.
 - [ ] Web publicado e saudável.
 
 ### Após o deploy
@@ -125,7 +127,8 @@ export DOCKER_BUILDKIT=1
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap build \
   admin web admin-migrate admin-upgrade-holding-home \
-  admin-seed-holding-institutional-pages
+  admin-seed-holding-institutional-pages \
+  admin-seed-holding-blog
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-migrate
@@ -157,6 +160,9 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging \
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-seed-holding-institutional-pages
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-seed-holding-blog
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   up -d --no-build web
@@ -211,6 +217,8 @@ manualmente em viewport menor que 768 px.
 - `admin-seed-holding-institutional-pages` ignora slugs existentes. Se uma
   execução falhar após criar parte das páginas, a reexecução continua pelas
   páginas ausentes.
+- `admin-seed-holding-blog` ignora slugs existentes de autor, categorias, tags
+  e posts. Reexecução segura após falha parcial.
 
 Não executar seed geral, `migrate:down`, reset ou force para este deploy.
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { fetchPublicPage } from '@/lib/cms';
+import { fetchPublicPostCategories, fetchPublicPosts, fetchPublicPostTags } from '@/lib/cms-blog';
 import {
   getPublicSiteOrigin,
   resolveCanonicalUrl,
@@ -46,6 +47,54 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url,
       changeFrequency: candidate.pathname === '/' ? 'weekly' : 'monthly',
       priority: candidate.pathname === '/' ? 1 : 0.8,
+    });
+  }
+
+  const blogUrl =
+    resolveCanonicalUrl({ pathname: '/blog', hostname }) ?? `${getPublicSiteOrigin()}/blog`;
+  entries.push({
+    url: blogUrl,
+    changeFrequency: 'daily',
+    priority: 0.7,
+  });
+
+  const [posts, categories, tags] = await Promise.all([
+    fetchPublicPosts({ siteSlug, page: 1, pageSize: 20 }),
+    fetchPublicPostCategories(siteSlug),
+    fetchPublicPostTags(siteSlug),
+  ]);
+
+  for (const post of posts.items) {
+    const url =
+      resolveCanonicalUrl({ pathname: `/blog/${post.slug}`, hostname }) ??
+      `${getPublicSiteOrigin()}/blog/${post.slug}`;
+    entries.push({
+      url,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+      ...(post.publishedAt ? { lastModified: new Date(post.publishedAt) } : {}),
+    });
+  }
+
+  for (const category of categories) {
+    const url =
+      resolveCanonicalUrl({ pathname: `/blog/categoria/${category.slug}`, hostname }) ??
+      `${getPublicSiteOrigin()}/blog/categoria/${category.slug}`;
+    entries.push({
+      url,
+      changeFrequency: 'weekly',
+      priority: 0.5,
+    });
+  }
+
+  for (const tag of tags) {
+    const url =
+      resolveCanonicalUrl({ pathname: `/blog/tag/${tag.slug}`, hostname }) ??
+      `${getPublicSiteOrigin()}/blog/tag/${tag.slug}`;
+    entries.push({
+      url,
+      changeFrequency: 'weekly',
+      priority: 0.4,
     });
   }
 
