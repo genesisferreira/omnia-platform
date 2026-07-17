@@ -18,6 +18,8 @@ export type BuildPageMetadataArgs = {
   description?: string | null;
   seo?: PublicPageSeoDto | null;
   hostname?: string | null;
+  image?: { url: string; alt?: string | null } | null;
+  openGraphType?: 'website' | 'article';
 };
 
 /**
@@ -33,7 +35,9 @@ export function buildPageMetadata(args: BuildPageMetadataArgs): Metadata {
     hostname: args.hostname,
   });
   const noIndex = args.seo?.noIndex === true;
-  const images = [{ url: SEO_DEFAULT_OG_IMAGE_PATH, alt: SEO_DEFAULT_OG_IMAGE_ALT }];
+  const images = args.image
+    ? [{ url: args.image.url, alt: args.image.alt ?? SEO_DEFAULT_OG_IMAGE_ALT }]
+    : [{ url: SEO_DEFAULT_OG_IMAGE_PATH, alt: SEO_DEFAULT_OG_IMAGE_ALT }];
 
   return {
     title,
@@ -41,7 +45,7 @@ export function buildPageMetadata(args: BuildPageMetadataArgs): Metadata {
     ...(canonical ? { alternates: { canonical } } : {}),
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      type: 'website',
+      type: args.openGraphType ?? 'website',
       locale: SEO_LOCALE,
       siteName: SEO_SITE_NAME,
       title,

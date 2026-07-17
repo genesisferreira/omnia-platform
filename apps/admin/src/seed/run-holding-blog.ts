@@ -26,7 +26,7 @@ export type HoldingBlogSeedOutcome = {
 type FindResult = { docs: Array<{ id: string | number; slug?: unknown }> };
 
 export type BlogSeedFindArgs = {
-  collection: 'sites' | 'authors' | 'categories' | 'tags' | 'posts';
+  collection: 'sites' | 'media' | 'authors' | 'categories' | 'tags' | 'posts';
   where?: unknown;
   limit?: number;
   depth?: number;
@@ -34,7 +34,15 @@ export type BlogSeedFindArgs = {
 };
 
 export type BlogSeedCreateArgs = {
-  collection: 'authors' | 'categories' | 'tags' | 'posts';
+  collection: 'media' | 'authors' | 'categories' | 'tags' | 'posts';
+  overrideAccess?: boolean;
+  filePath?: string;
+  data: Record<string, unknown>;
+};
+
+export type BlogSeedUpdateArgs = {
+  collection: 'posts';
+  id: string | number;
   overrideAccess?: boolean;
   data: Record<string, unknown>;
 };
@@ -42,14 +50,17 @@ export type BlogSeedCreateArgs = {
 export type HoldingBlogSeedPayload = {
   find: (args: BlogSeedFindArgs) => Promise<FindResult>;
   create: (args: BlogSeedCreateArgs) => Promise<{ id: string | number }>;
+  update: (args: BlogSeedUpdateArgs) => Promise<{ id: string | number }>;
 };
 
 export const adaptPayloadForHoldingBlogSeed = (payload: {
   find: unknown;
   create: unknown;
+  update: unknown;
 }): HoldingBlogSeedPayload => ({
   find: (args) => (payload.find as HoldingBlogSeedPayload['find'])(args),
   create: (args) => (payload.create as HoldingBlogSeedPayload['create'])(args),
+  update: (args) => (payload.update as HoldingBlogSeedPayload['update'])(args),
 });
 
 const toProbe = (doc: FindResult['docs'][number] | undefined): ExistingBlogProbe | null => {
@@ -115,6 +126,41 @@ export async function runHoldingBlogSeed(
   }
 
   const siteId = siteDoc.id;
+
+  // Imagem editorial padrão. O asset é copiado para o target bootstrap no Dockerfile.
+  const mediaResult = await payload.find({
+    collection: 'media',
+    where: { filename: { equals: 'blog-featured.png' } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+  let featuredImageId = mediaResult.docs[0]?.id ?? null;
+
+  if (featuredImageId === null) {
+    const media = await payload.create({
+      collection: 'media',
+      overrideAccess: true,
+      filePath: '/app/apps/admin/src/seed/assets/blog-featured.png',
+      data: {
+        alt: 'Omnia Frigo Holding — tradição, educação e tecnologia em refrigeração',
+      },
+    });
+    featuredImageId = media.id;
+    items.push({
+      kind: 'media',
+      slug: 'blog-featured',
+      status: 'created',
+      id: media.id,
+    });
+  } else {
+    items.push({
+      kind: 'media',
+      slug: 'blog-featured',
+      status: 'skipped',
+      reason: 'slug_exists',
+    });
+  }
 
   // Autor
   let authorId: string | number | null = null;
@@ -234,6 +280,7 @@ export async function runHoldingBlogSeed(
 
   // Posts
   const publishedAt = new Date().toISOString();
+  const postIds = new Map<string, string | number>();
   for (const post of holdingBlogPostsSeed) {
     const existing = await findBySlug(payload, 'posts', post.slug, siteId);
     const decision = decideBlogSeedItem({
@@ -244,7 +291,8 @@ export async function runHoldingBlogSeed(
       existingBySlug: existing,
     });
 
-    if (decision.action === 'skip') {
+    if (decision.action === 'skip' && existing) {
+      postIds.set(post.slug, existing.id);
       items.push({ kind: 'post', slug: post.slug, status: 'skipped', reason: 'slug_exists' });
       continue;
     }
@@ -269,13 +317,38 @@ export async function runHoldingBlogSeed(
         author: authorId,
         categories,
         tags,
+        featuredImage: featuredImageId,
         seo: post.seo,
         timezone: 'America/Sao_Paulo',
         publishedAt,
         _status: 'published',
       },
     });
+    postIds.set(post.slug, created.id);
     items.push({ kind: 'post', slug: post.slug, status: 'created', id: created.id });
+  }
+
+  // Sincroniza somente campos necessários à homologação, inclusive em seeds já existentes.
+  for (const post of holdingBlogPostsSeed) {
+    const postId = postIds.get(post.slug);
+    if (postId === undefined) {
+      continue;
+    }
+
+    const relatedPosts = holdingBlogPostsSeed
+      .filter((candidate) => candidate.slug !== post.slug)
+      .map((candidate) => postIds.get(candidate.slug))
+      .filter((id): id is string | number => id !== undefined);
+
+    await payload.update({
+      collection: 'posts',
+      id: postId,
+      overrideAccess: true,
+      data: {
+        featuredImage: featuredImageId,
+        relatedPosts,
+      },
+    });
   }
 
   return { siteSlug: HOLDING_BLOG_SITE_SLUG, items };

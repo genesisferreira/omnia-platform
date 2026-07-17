@@ -30,6 +30,19 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <article className="group flex h-full flex-col border-b border-omnia-deep-blue/10 pb-8 pt-2">
+      {post.featuredImage ? (
+        <Link href={`/blog/${post.slug}`} className="mb-5 block overflow-hidden rounded-lg">
+          {/* A mídia vem do CMS e já é entregue em URL absoluta pelo cliente público. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.featuredImage.url}
+            alt={post.featuredImage.alt ?? post.title}
+            className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+        </Link>
+      ) : null}
+
       <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-omnia-graphite-light">
         {category ? (
           <Link

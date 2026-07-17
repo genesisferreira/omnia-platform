@@ -49,6 +49,8 @@ RUN pnpm turbo build --filter=@omnia/admin
 FROM installer AS bootstrap
 WORKDIR /app
 
+RUN mkdir -p /app/apps/admin/src/seed/assets
+COPY --from=builder /app/apps/web/public/og-default.png /app/apps/admin/src/seed/assets/blog-featured.png
 COPY docker/scripts/admin-bootstrap.sh /usr/local/bin/omnia-admin-bootstrap.sh
 RUN chmod +x /usr/local/bin/omnia-admin-bootstrap.sh
 

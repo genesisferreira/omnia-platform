@@ -14,6 +14,37 @@ function getAdminApiUrl(): string {
   return getConfig().app.adminUrl;
 }
 
+function resolveMediaUrl(url: string): string {
+  try {
+    return new URL(url, `${getAdminApiUrl()}/`).toString();
+  } catch {
+    return url;
+  }
+}
+
+function normalizePostListItem(post: PublicPostListItemDto): PublicPostListItemDto {
+  return {
+    ...post,
+    featuredImage: post.featuredImage
+      ? { ...post.featuredImage, url: resolveMediaUrl(post.featuredImage.url) }
+      : null,
+  };
+}
+
+function normalizePost(post: PublicPostDto): PublicPostDto {
+  return {
+    ...post,
+    ...normalizePostListItem(post),
+    seo: {
+      ...post.seo,
+      openGraphImage: post.seo.openGraphImage
+        ? { ...post.seo.openGraphImage, url: resolveMediaUrl(post.seo.openGraphImage.url) }
+        : null,
+    },
+    relatedPosts: post.relatedPosts.map(normalizePostListItem),
+  };
+}
+
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -160,7 +191,10 @@ const fetchPublicPostsCached = cache(
         return EMPTY_LIST;
       }
 
-      return data.list;
+      return {
+        ...data.list,
+        items: data.list.items.map(normalizePostListItem),
+      };
     } catch {
       return EMPTY_LIST;
     }
@@ -197,7 +231,7 @@ export const fetchPublicPost = cache(
         return null;
       }
 
-      return data.post;
+      return normalizePost(data.post);
     } catch {
       return null;
     }

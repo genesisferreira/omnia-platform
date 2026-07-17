@@ -84,10 +84,14 @@ describe('holding blog seed data', () => {
 describe('runHoldingBlogSeed', () => {
   it('cria itens ausentes e ignora existentes', async () => {
     const created: string[] = [];
+    const updated: string[] = [];
     const payload: HoldingBlogSeedPayload = {
       find: async (args) => {
         if (args.collection === 'sites') {
           return { docs: [{ id: 1, slug: 'omnia-hub' }] };
+        }
+        if (args.collection === 'media') {
+          return { docs: [] };
         }
 
         const where = args.where as {
@@ -112,9 +116,13 @@ describe('runHoldingBlogSeed', () => {
         return { docs: [] };
       },
       create: async (args) => {
-        const slug = String(args.data.slug);
+        const slug = args.collection === 'media' ? 'blog-featured' : String(args.data.slug);
         created.push(`${args.collection}:${slug}`);
         return { id: created.length + 100 };
+      },
+      update: async (args) => {
+        updated.push(`${args.collection}:${args.id}`);
+        return { id: args.id };
       },
     };
 
@@ -147,7 +155,9 @@ describe('runHoldingBlogSeed', () => {
       ),
     );
     assert.ok(created.includes('categories:tecnologia'));
+    assert.ok(created.includes('media:blog-featured'));
     assert.ok(created.some((entry) => entry.startsWith('posts:')));
+    assert.equal(updated.length, holdingBlogPostsSeed.length);
     assert.match(formatHoldingBlogSeedLog(outcome), /author:equipe-omnia:skipped/);
   });
 
@@ -156,6 +166,9 @@ describe('runHoldingBlogSeed', () => {
       find: async () => ({ docs: [] }),
       create: async () => {
         throw new Error('não deve criar');
+      },
+      update: async () => {
+        throw new Error('não deve atualizar');
       },
     };
 

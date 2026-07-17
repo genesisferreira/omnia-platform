@@ -35,6 +35,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      required: true,
       label: 'Texto alternativo',
     },
     {

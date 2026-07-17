@@ -109,6 +109,11 @@ const setPublishedAtOnPublish: CollectionBeforeChangeHook = ({ data, originalDoc
         : null;
 
   if (nextStatus === 'published') {
+    const featuredImage = data.featuredImage ?? originalDoc?.featuredImage;
+    if (!featuredImage) {
+      throw new Error('Uma imagem de destaque com texto alternativo é obrigatória para publicar.');
+    }
+
     const existingPublishedAt =
       data.publishedAt ??
       (typeof originalDoc?.publishedAt === 'string' || originalDoc?.publishedAt instanceof Date
@@ -207,6 +212,9 @@ export const Posts: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       label: 'Imagem de destaque',
+      admin: {
+        description: 'Obrigatória para publicar. O texto alternativo é definido na mídia.',
+      },
     },
     {
       name: 'author',

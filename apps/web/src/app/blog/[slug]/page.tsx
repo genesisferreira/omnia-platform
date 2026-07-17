@@ -57,6 +57,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       noIndex: post.seo.noIndex,
     },
     hostname,
+    image: post.seo.openGraphImage ?? post.featuredImage,
+    openGraphType: 'article',
   });
 }
 
@@ -147,6 +149,17 @@ export default async function BlogPostPage({ params }: PostPageProps) {
 
             <PostShare title={post.title} url={shareUrl} />
           </header>
+
+          {post.featuredImage ? (
+            <figure className="mb-10 overflow-hidden rounded-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.featuredImage.url}
+                alt={post.featuredImage.alt ?? post.title}
+                className="aspect-[16/9] w-full object-cover"
+              />
+            </figure>
+          ) : null}
 
           <div className="mb-10 lg:hidden">
             <TableOfContents headings={headings} />
