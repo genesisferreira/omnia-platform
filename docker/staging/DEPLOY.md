@@ -70,6 +70,7 @@ dependem de Node/pnpm instalado na VPS e são executadas com `--rm`.
 - [ ] Imagens do Admin, Web e operações one-off construídas.
 - [ ] Migrations aplicadas.
 - [ ] Admin publicado e saudável.
+- [ ] Seed/sincronização do catálogo de empresas (papéis e sites externos).
 - [ ] Upgrade institucional da Home concluído.
 - [ ] Seed das páginas institucionais concluído.
 - [ ] Web publicado e saudável.
@@ -150,6 +151,9 @@ wait_healthy omnia-platform-admin-dev
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-upgrade-holding-home
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-seed
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-seed-holding-institutional-pages

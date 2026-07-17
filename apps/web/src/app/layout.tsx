@@ -47,13 +47,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-company-slug={resolution.ok ? (resolution.context.company?.slug ?? '') : undefined}
       data-tenant-slug={resolution.ok ? resolution.context.tenant.slug : undefined}
       data-site-error-code={resolution.ok ? undefined : resolution.error.code}
-      className={`${inter.variable} ${montserrat.variable}`}
+      className={`${inter.variable} ${montserrat.variable} scroll-smooth scroll-pt-20`}
     >
       <body className="font-sans antialiased">
         <JsonLd data={[buildOrganizationJsonLd({ hostname }), buildWebSiteJsonLd({ hostname })]} />
         <SkipLink />
         <Header />
-        <main id="conteudo-principal">{children}</main>
+        <main id="conteudo-principal" tabIndex={-1} className="outline-none">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

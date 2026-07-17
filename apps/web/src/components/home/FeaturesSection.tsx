@@ -50,7 +50,7 @@ export function FeaturesSection({ block }: FeaturesSectionProps = {}) {
   const columns = block?.columns ?? 3;
 
   return (
-    <section id="ecossistema" className="relative bg-omnia-white py-20 md:py-28">
+    <section id="ecossistema" className="relative scroll-mt-20 bg-omnia-white py-20 md:py-28">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-omnia-emerald/25 to-transparent"

@@ -45,7 +45,19 @@ async function seed() {
     });
 
     if (existing.docs.length > 0) {
-      console.log(`  · Empresa já existe: ${company.slug}`);
+      const doc = existing.docs[0]!;
+      await payload.update({
+        collection: 'companies',
+        id: doc.id,
+        data: {
+          ecosystemRole: company.ecosystemRole,
+          externalSite: company.externalSite,
+          shortDescription: company.shortDescription,
+          displayOrder: company.displayOrder,
+          status: company.status,
+        },
+      });
+      console.log(`  ✓ Empresa sincronizada: ${company.slug}`);
       continue;
     }
 

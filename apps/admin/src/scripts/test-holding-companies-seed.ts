@@ -22,16 +22,24 @@ test('holding oficial permanece no seed', () => {
   assert.ok(bySlug.has('omnia-frigo-holding'));
 });
 
-test('fred-do-frio-academy → Engenharia', () => {
+test('fred-do-frio-academy → Educação', () => {
   const fred = bySlug.get('fred-do-frio-academy');
   assert.ok(fred);
-  assert.equal(fred.ecosystemRole, 'Engenharia');
+  assert.equal(fred.ecosystemRole, 'Educação');
+  assert.equal(fred.externalSite, 'https://freddofrio.com.br');
 });
 
-test('cte → Educação', () => {
+test('cte → Engenharia', () => {
   const cte = bySlug.get('cte');
   assert.ok(cte);
-  assert.equal(cte.ecosystemRole, 'Educação');
+  assert.equal(cte.ecosystemRole, 'Engenharia');
+  assert.equal(cte.externalSite, 'https://escolacte.com.br');
+});
+
+test('todas as empresas têm externalSite oficial', () => {
+  for (const company of holdingCompaniesSeed) {
+    assert.ok(company.externalSite.startsWith('https://'), company.slug);
+  }
 });
 
 console.log(`\n${passed} testes passaram.`);

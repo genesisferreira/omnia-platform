@@ -1,7 +1,6 @@
-import Link from 'next/link';
-
 import { Container } from '@omnia/ui';
 
+import { InstitutionalNavLink } from './InstitutionalNavLink';
 import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 export function Footer() {
@@ -24,13 +23,13 @@ export function Footer() {
 
           <nav aria-label="Rodapé" className="flex flex-col gap-2 sm:flex-row sm:gap-6">
             {INSTITUTIONAL_NAV_ITEMS.map((item) => (
-              <Link
+              <InstitutionalNavLink
                 key={item.href}
                 href={item.href}
                 className="text-sm text-omnia-white/80 transition-colors hover:text-omnia-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-copper focus-visible:ring-offset-2 focus-visible:ring-offset-omnia-graphite motion-reduce:transition-none"
               >
                 {item.label}
-              </Link>
+              </InstitutionalNavLink>
             ))}
           </nav>
         </div>

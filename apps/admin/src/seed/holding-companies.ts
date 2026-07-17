@@ -1,6 +1,7 @@
 /**
  * Dados iniciais das empresas da Holding — Sprint 2.
  * Executar via: pnpm --filter @omnia/admin seed
+ * Papéis e URLs alinhados a S03_MULTISITE_BRANDING.
  */
 export const holdingCompaniesSeed = [
   {
@@ -9,7 +10,7 @@ export const holdingCompaniesSeed = [
     shortDescription: 'Holding estratégica do ecossistema Omnia Frigo.',
     ecosystemRole: 'Holding',
     displayOrder: 1,
-    externalSite: '',
+    externalSite: 'https://omniafrigo.com.br',
     status: 'active' as const,
   },
   {
@@ -18,7 +19,7 @@ export const holdingCompaniesSeed = [
     shortDescription: 'Serviços especializados em refrigeração comercial e industrial.',
     ecosystemRole: 'Serviços',
     displayOrder: 2,
-    externalSite: '',
+    externalSite: 'https://renovacaorefrigeracao.com.br',
     status: 'active' as const,
   },
   {
@@ -27,25 +28,25 @@ export const holdingCompaniesSeed = [
     shortDescription: 'Soluções inteligentes em refrigeração e tecnologia aplicada.',
     ecosystemRole: 'Tecnologia',
     displayOrder: 3,
-    externalSite: '',
+    externalSite: 'https://neurofrigo.com.br',
     status: 'active' as const,
   },
   {
     name: 'Fred do Frio Academy',
     slug: 'fred-do-frio-academy',
     shortDescription: 'Academy de formação e capacitação no setor de refrigeração.',
-    ecosystemRole: 'Engenharia',
+    ecosystemRole: 'Educação',
     displayOrder: 4,
-    externalSite: '',
+    externalSite: 'https://freddofrio.com.br',
     status: 'active' as const,
   },
   {
     name: 'CTE',
     slug: 'cte',
     shortDescription: 'Centro de tecnologia e engenharia do ecossistema.',
-    ecosystemRole: 'Educação',
+    ecosystemRole: 'Engenharia',
     displayOrder: 5,
-    externalSite: '',
+    externalSite: 'https://escolacte.com.br',
     status: 'active' as const,
   },
   {
@@ -54,7 +55,7 @@ export const holdingCompaniesSeed = [
     shortDescription: 'Instituição educacional parceira do ecossistema Omnia.',
     ecosystemRole: 'Educação',
     displayOrder: 6,
-    externalSite: '',
+    externalSite: 'https://centroeducacionalsapientia.com.br',
     status: 'active' as const,
   },
 ];

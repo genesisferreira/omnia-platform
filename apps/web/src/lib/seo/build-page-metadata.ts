@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import type { PublicPageSeoDto } from '@omnia/shared';
 
 import {
+  SEO_DEFAULT_OG_IMAGE_ALT,
+  SEO_DEFAULT_OG_IMAGE_PATH,
   SEO_FALLBACK_DESCRIPTION,
   SEO_FALLBACK_TITLE,
   SEO_LOCALE,
@@ -31,6 +33,7 @@ export function buildPageMetadata(args: BuildPageMetadataArgs): Metadata {
     hostname: args.hostname,
   });
   const noIndex = args.seo?.noIndex === true;
+  const images = [{ url: SEO_DEFAULT_OG_IMAGE_PATH, alt: SEO_DEFAULT_OG_IMAGE_ALT }];
 
   return {
     title,
@@ -44,11 +47,13 @@ export function buildPageMetadata(args: BuildPageMetadataArgs): Metadata {
       title,
       description,
       ...(canonical ? { url: canonical } : {}),
+      images,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [SEO_DEFAULT_OG_IMAGE_PATH],
     },
   };
 }
@@ -58,4 +63,13 @@ export function buildFallbackMetadata(hostname?: string | null): Metadata {
     pathname: '/',
     hostname,
   });
+}
+
+/** Metadata para rotas que renderizam 404 institucional. */
+export function buildNotFoundMetadata(): Metadata {
+  return {
+    title: `Página não encontrada | ${SEO_SITE_NAME}`,
+    description: SEO_FALLBACK_DESCRIPTION,
+    robots: { index: false, follow: false },
+  };
 }

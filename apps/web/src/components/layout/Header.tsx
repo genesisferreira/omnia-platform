@@ -1,11 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useId, useState } from 'react';
 
 import { Button, Container } from '@omnia/ui';
 
 import { BrandHomeLink } from './BrandHomeLink';
+import { InstitutionalNavLink } from './InstitutionalNavLink';
 import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 function AdminCta({ className }: { className?: string }) {
@@ -58,13 +58,13 @@ export function Header() {
 
         <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
           {INSTITUTIONAL_NAV_ITEMS.map((item) => (
-            <Link
+            <InstitutionalNavLink
               key={item.href}
               href={item.href}
               className="text-sm font-medium text-omnia-graphite-light transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               {item.label}
-            </Link>
+            </InstitutionalNavLink>
           ))}
         </nav>
 
@@ -102,14 +102,14 @@ export function Header() {
         <Container className="flex flex-col gap-1 py-3">
           <nav aria-label="Principal mobile" className="flex flex-col gap-1">
             {INSTITUTIONAL_NAV_ITEMS.map((item) => (
-              <Link
+              <InstitutionalNavLink
                 key={item.href}
                 href={item.href}
                 onClick={closeMenu}
                 className="rounded-md px-3 py-3 text-sm font-medium text-omnia-deep-blue hover:bg-omnia-emerald/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald"
               >
                 {item.label}
-              </Link>
+              </InstitutionalNavLink>
             ))}
           </nav>
           <div className="px-3 pt-2">

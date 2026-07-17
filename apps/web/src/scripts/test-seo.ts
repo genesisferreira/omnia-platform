@@ -69,11 +69,30 @@ describe('buildPageMetadata', () => {
     assert.deepEqual(metadata.robots, { index: true, follow: true });
     assert.equal(metadata.openGraph?.title, 'Sobre | Omnia Frigo Holding');
     assert.equal(metadata.openGraph?.url, 'https://dev.omniafrigo.com.br/sobre');
+    assert.ok(metadata.openGraph?.images);
+    const ogImages = metadata.openGraph.images;
+    const firstOgImage = Array.isArray(ogImages) ? ogImages[0] : ogImages;
+    assert.equal(
+      typeof firstOgImage === 'object' && firstOgImage && 'url' in firstOgImage
+        ? firstOgImage.url
+        : firstOgImage,
+      '/og-default.png',
+    );
     assert.ok(metadata.twitter);
     assert.equal(
       'card' in metadata.twitter ? metadata.twitter.card : undefined,
       'summary_large_image',
     );
+    assert.deepEqual('images' in metadata.twitter ? metadata.twitter.images : undefined, [
+      '/og-default.png',
+    ]);
+  });
+
+  it('metadata de 404 é noindex', async () => {
+    const { buildNotFoundMetadata } = await import('../lib/seo/build-page-metadata');
+    const metadata = buildNotFoundMetadata();
+    assert.deepEqual(metadata.robots, { index: false, follow: false });
+    assert.match(String(metadata.title), /não encontrada/i);
   });
 
   it('respeita noIndex editorial', () => {

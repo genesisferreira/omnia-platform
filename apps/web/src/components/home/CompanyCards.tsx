@@ -70,7 +70,7 @@ export function CompanyCards({
   return (
     <section
       id="empresas"
-      className="relative border-t border-omnia-deep-blue/10 bg-omnia-graphite/[0.03] py-20 md:py-28"
+      className="relative scroll-mt-20 border-t border-omnia-deep-blue/10 bg-omnia-graphite/[0.03] py-20 md:py-28"
     >
       <div
         aria-hidden="true"

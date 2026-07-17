@@ -7,6 +7,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchPublicPage } from '@/lib/cms';
 import {
   buildFallbackMetadata,
+  buildNotFoundMetadata,
   buildPageMetadata,
   buildWebPageJsonLd,
   SEO_FALLBACK_DESCRIPTION,
@@ -34,13 +35,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug: rawSlug } = await params;
   const slug = rawSlug.trim().toLowerCase();
 
-  if (!slug || RESERVED_SLUGS.has(slug) || slug === 'home') {
+  if (!slug || RESERVED_SLUGS.has(slug)) {
+    return buildNotFoundMetadata();
+  }
+
+  if (slug === 'home') {
     return buildFallbackMetadata();
   }
 
   const { page, hostname } = await loadPage(slug);
-  if (!page || page.pageType === 'home') {
-    return buildFallbackMetadata(hostname);
+  if (!page || page.pageType === 'home' || page.blocks.length === 0) {
+    return buildNotFoundMetadata();
   }
 
   return buildPageMetadata({
