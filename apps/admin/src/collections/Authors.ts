@@ -5,9 +5,10 @@ import type {
   TextFieldSingleValidation,
 } from 'payload';
 
+import { staffOnly } from '../access/rbac';
 import { isValidBlogSlug, normalizeBlogSlug } from './blog-rules';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+const authenticated: Access = staffOnly;
 
 const validateSlug: TextFieldSingleValidation = (value) => {
   if (!value) {

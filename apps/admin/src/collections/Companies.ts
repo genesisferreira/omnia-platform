@@ -1,5 +1,4 @@
 import type {
-  Access,
   CollectionBeforeChangeHook,
   CollectionBeforeValidateHook,
   CollectionConfig,
@@ -8,8 +7,10 @@ import type {
 
 import { createPublishingFields } from '../fields/publishing';
 import { createSeoFields } from '../fields/seo';
+import { companyScopedRead, companyScopedWrite } from '../access/rbac';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+const companyRead = companyScopedRead;
+const companyWrite = companyScopedWrite;
 
 const PORTAL_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -107,10 +108,10 @@ export const Companies: CollectionConfig = {
   },
   timestamps: true,
   access: {
-    read: authenticated,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    read: companyRead,
+    create: companyWrite,
+    update: companyWrite,
+    delete: companyWrite,
   },
   hooks: {
     beforeValidate: [normalizePortalSlugHook],

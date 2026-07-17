@@ -10,10 +10,11 @@ import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 function AdminCta({ className }: { className?: string }) {
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001';
+  const loginUrl = `${adminUrl.replace(/\/+$/, '')}/login`;
 
   return (
     <Button asChild size="sm" variant="outline" className={className}>
-      <a href={adminUrl}>Área Admin</a>
+      <a href={loginUrl}>Entrar na plataforma</a>
     </Button>
   );
 }

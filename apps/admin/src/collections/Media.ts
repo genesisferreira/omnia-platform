@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
+import { staffOnly } from '../access/rbac';
+
 /**
  * Media Library — upload local no Sprint 2.
  * Integração MinIO documentada em src/storage/README.md
@@ -29,7 +31,11 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
   },
   access: {
+    // Leitura pública necessária para URLs de mídia no Portal.
     read: () => true,
+    create: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   fields: [
     {

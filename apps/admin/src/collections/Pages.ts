@@ -9,10 +9,11 @@ import type {
 
 import { PUBLIC_PAGE_MAX_BLOCKS, PUBLIC_PAGE_TYPES } from '@omnia/shared';
 
+import { staffOnly } from '../access/rbac';
 import { pageBlocks } from '../blocks/pageBlocks';
 import { isValidPageSlug, normalizePageSlug } from './pages-rules';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+const authenticated: Access = staffOnly;
 
 const validateSlug: TextFieldSingleValidation = (value) => {
   if (!value) {

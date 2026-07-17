@@ -29,10 +29,12 @@
     "test:upgrade-holding-home": "tsx src/scripts/test-upgrade-holding-home.ts",
     "test:public-page": "tsx src/scripts/test-public-page.ts",
     "test:public-posts": "tsx src/scripts/test-public-posts.ts",
-    "test:pages-migration-db": "tsx src/scripts/test-pages-migration-db.ts"
+    "test:pages-migration-db": "tsx src/scripts/test-pages-migration-db.ts",
+    "test:rbac": "tsx --test src/scripts/test-rbac.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
+    "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",

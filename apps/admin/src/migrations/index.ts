@@ -5,6 +5,7 @@ import * as migration_20260716_124305_pages from './20260716_124305_pages';
 import * as migration_20260716_172340_pages_institutional from './20260716_172340_pages_institutional';
 import * as migration_20260717_160602_blog_collections from './20260717_160602_blog_collections';
 import * as migration_20260717_180310_companies_strategic_pages from './20260717_180310_companies_strategic_pages';
+import * as migration_20260717_194500_users_rbac from './20260717_194500_users_rbac';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260717_180310_companies_strategic_pages.up,
     down: migration_20260717_180310_companies_strategic_pages.down,
     name: '20260717_180310_companies_strategic_pages',
+  },
+  {
+    up: migration_20260717_194500_users_rbac.up,
+    down: migration_20260717_194500_users_rbac.down,
+    name: '20260717_194500_users_rbac',
   },
 ];

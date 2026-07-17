@@ -11,7 +11,9 @@ import { createPublishingFields } from '../fields/publishing';
 import { createSeoFields } from '../fields/seo';
 import { isValidBlogSlug, normalizeBlogSlug, PUBLIC_POST_TYPES } from './blog-rules';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+import { staffOnly } from '../access/rbac';
+
+const authenticated: Access = staffOnly;
 
 const validateSlug: TextFieldSingleValidation = (value) => {
   if (!value) {
