@@ -108,8 +108,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=omnia_proxy
-      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.regex=(?i)^https://www\\.omniafrigo\\.com\\.br/(.*)
-      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.replacement=https://omniafrigo.com.br/$${1}
+      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.regex=^https?://[^/]+(.*)
+      - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.replacement=https://omniafrigo.com.br$${1}
       - traefik.http.middlewares.omnia-platform-www-redirect.redirectregex.permanent=true
       - traefik.http.routers.omnia-platform-web-prod.rule=Host(`omniafrigo.com.br`)
       - traefik.http.routers.omnia-platform-web-prod.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
@@ -169,7 +169,7 @@ services:
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     volumes:
-      - omnia_platform_admin_media_prod:/app/media
+      - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_proxy
       - omnia_prod_internal
@@ -239,7 +239,7 @@ services:
     environment:
       <<: *bootstrap-environment
     volumes:
-      - omnia_platform_admin_media_prod:/app/media
+      - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_prod_internal
     depends_on:
@@ -289,7 +289,7 @@ services:
     environment:
       <<: *bootstrap-environment
     volumes:
-      - omnia_platform_admin_media_prod:/app/media
+      - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_prod_internal
     depends_on:

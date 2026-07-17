@@ -77,7 +77,9 @@ test "$(grep -c ' TABLE ' /tmp/omnia-prod-dump-list.txt || true)" -gt 0
 echo "BACKUP_OK=$BACKUP_FILE bytes=$BYTES"
 ```
 
-Backup de mídia:
+- Persistir uploads no volume exclusivo `omnia_platform_admin_media_prod` montado em
+  `/app/apps/admin/media` (caminho esperado pelo Payload).
+- Backup de mídia:
 
 ```bash
 MEDIA_BACKUP="/opt/omnia/backups/production/media-$(date +%Y%m%d-%H%M%S).tgz"
