@@ -44,6 +44,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const adminRoot = path.resolve(__dirname, '../..');
 
 const INSTITUTIONAL_MIGRATION_NAME = '20260716_172340_pages_institutional';
+const PAGES_BASE_MIGRATION_NAME = '20260716_124305_pages';
+/** Migration posterior não relacionada — deve sobreviver a rollback só institucional. */
+const IDENTITY_CRM_MIGRATION_NAME = '20260720_120000_identity_crm_foundation';
 
 const runAdmin = (args: string[]): void => {
   const command = process.platform === 'win32' ? 'corepack' : 'pnpm';
@@ -62,13 +65,37 @@ const runAdmin = (args: string[]): void => {
   }
 };
 
-const rollbackInstitutionalOnly = async (): Promise<void> => {
-  const latest = await client.query(`
+const listMigrationNames = async (): Promise<string[]> => {
+  const result = await client.query(`
     SELECT name FROM payload_migrations
-    ORDER BY created_at DESC, id DESC
-    LIMIT 1
+    ORDER BY created_at ASC, id ASC
   `);
-  assert.equal(String(latest.rows[0]?.name), INSTITUTIONAL_MIGRATION_NAME);
+  return result.rows.map((row) => String(row.name));
+};
+
+const assertMigrationPresent = async (name: string): Promise<void> => {
+  const names = await listMigrationNames();
+  assert.equal(names.includes(name), true, `migration ausente: ${name}`);
+};
+
+const assertMigrationAbsent = async (name: string): Promise<void> => {
+  const names = await listMigrationNames();
+  assert.equal(names.includes(name), false, `migration ainda presente: ${name}`);
+};
+
+/**
+ * Executa o `down` apenas da migration institucional e remove o registro correspondente.
+ * Não exige que ela seja a última migration global (podem existir migrations posteriores).
+ */
+const rollbackInstitutionalOnly = async (): Promise<void> => {
+  const before = await listMigrationNames();
+  assert.equal(
+    before.includes(INSTITUTIONAL_MIGRATION_NAME),
+    true,
+    'migration institucional deve estar aplicada antes do rollback direcionado',
+  );
+
+  const unrelatedBefore = before.filter((name) => name !== INSTITUTIONAL_MIGRATION_NAME);
 
   const migrationDb = drizzle(client);
   await rollbackInstitutionalMigration({
@@ -80,6 +107,17 @@ const rollbackInstitutionalOnly = async (): Promise<void> => {
   await client.query(
     `DELETE FROM payload_migrations WHERE name = '${INSTITUTIONAL_MIGRATION_NAME}'`,
   );
+
+  await assertMigrationAbsent(INSTITUTIONAL_MIGRATION_NAME);
+
+  const after = await listMigrationNames();
+  for (const name of unrelatedBefore) {
+    assert.equal(
+      after.includes(name),
+      true,
+      `rollback institucional removeu migration não relacionada: ${name}`,
+    );
+  }
 };
 
 const client = new Client({ connectionString: databaseUrl });
@@ -173,12 +211,20 @@ try {
     assert.equal(fks.rows.length, 1);
   });
 
-  await test('ciclo rollback institucional → migrate reaplica última migration', async () => {
+  await test('ciclo rollback institucional → migrate reaplica sem afetar migrations não relacionadas', async () => {
+    await assertMigrationPresent(INSTITUTIONAL_MIGRATION_NAME);
+    await assertMigrationPresent(PAGES_BASE_MIGRATION_NAME);
+    await assertMigrationPresent(IDENTITY_CRM_MIGRATION_NAME);
+
     const before = await client.query(`
       SELECT tablename FROM pg_tables
       WHERE schemaname = 'public' AND tablename = 'pages_blocks_values'
     `);
     assert.equal(before.rows.length, 1);
+
+    const unrelatedBefore = (await listMigrationNames()).filter(
+      (name) => name !== INSTITUTIONAL_MIGRATION_NAME,
+    );
 
     await rollbackInstitutionalOnly();
 
@@ -188,10 +234,38 @@ try {
     `);
     assert.equal(afterDown.rows.length, 0);
 
-    const remaining = await client.query(`
-      SELECT name FROM payload_migrations ORDER BY created_at DESC, id DESC LIMIT 1
+    await assertMigrationAbsent(INSTITUTIONAL_MIGRATION_NAME);
+    await assertMigrationPresent(PAGES_BASE_MIGRATION_NAME);
+    await assertMigrationPresent(IDENTITY_CRM_MIGRATION_NAME);
+
+    const remaining = await listMigrationNames();
+    for (const name of unrelatedBefore) {
+      assert.equal(
+        remaining.includes(name),
+        true,
+        `migration não relacionada perdida após rollback: ${name}`,
+      );
+    }
+
+    // Base Pages e demais schema não institucional devem continuar intactos.
+    const pagesStill = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public' AND tablename = 'pages'
     `);
-    assert.equal(String(remaining.rows[0]?.name), '20260716_124305_pages');
+    assert.equal(pagesStill.rows.length, 1);
+
+    const indexesStill = await client.query(`
+      SELECT indexname FROM pg_indexes
+      WHERE schemaname = 'public' AND tablename = 'pages'
+        AND indexname IN ('pages_site_slug_unique', 'pages_one_home_per_site')
+    `);
+    assert.equal(indexesStill.rows.length, 2);
+
+    const fkStill = await client.query(`
+      SELECT conname FROM pg_constraint
+      WHERE conname = 'pages_site_id_sites_id_fk'
+    `);
+    assert.equal(fkStill.rows.length, 1);
 
     runAdmin(['migrate']);
 
@@ -201,10 +275,17 @@ try {
     `);
     assert.equal(afterUp.rows.length, 1);
 
-    const restored = await client.query(
-      `SELECT name FROM payload_migrations WHERE name = '${INSTITUTIONAL_MIGRATION_NAME}'`,
-    );
-    assert.equal(restored.rows.length, 1);
+    await assertMigrationPresent(INSTITUTIONAL_MIGRATION_NAME);
+    await assertMigrationPresent(IDENTITY_CRM_MIGRATION_NAME);
+
+    const restoredUnrelated = await listMigrationNames();
+    for (const name of unrelatedBefore) {
+      assert.equal(
+        restoredUnrelated.includes(name),
+        true,
+        `migration não relacionada perdida após re-migrate: ${name}`,
+      );
+    }
   });
 
   console.log(`\n${passed} testes DB de migration passaram.`);
