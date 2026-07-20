@@ -32,6 +32,7 @@ export const Activities: CollectionConfig = {
         { label: 'Atualização', value: 'update' },
         { label: 'Mudança de status', value: 'status_change' },
         { label: 'Comentário', value: 'comment' },
+        { label: 'Lead capturado', value: 'lead_captured' },
       ],
       label: 'Tipo',
     },

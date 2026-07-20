@@ -23,6 +23,7 @@ import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
+import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
 import { publicPageEndpoint } from './src/endpoints/public-page';
 import {
   publicPostCategoriesEndpoint,
@@ -70,6 +71,7 @@ export default buildConfig({
     publicCompaniesEndpoint,
     publicCompanyEndpoint,
     publicOrganizationsEndpoint,
+    leadCaptureEndpoint,
     publicPageEndpoint,
     publicPostsEndpoint,
     publicPostEndpoint,

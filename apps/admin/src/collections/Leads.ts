@@ -15,17 +15,34 @@ export const LEAD_STATUSES = [
 
 export const LEAD_TEMPERATURES = ['frio', 'morno', 'quente'] as const;
 
-const logLeadActivity: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+const logLeadActivity: CollectionAfterChangeHook = async ({
+  doc,
+  previousDoc,
+  operation,
+  req,
+  context,
+}) => {
+  // Evita Activity duplicada quando o endpoint de captação já registrou lead_captured.
+  if (context?.skipLeadActivityLog === true) {
+    return doc;
+  }
+
   const payload = req.payload;
   const authorId = req.user?.id ?? null;
 
   try {
     if (operation === 'create') {
+      const isLanding = doc.origin === 'landing_page';
+      const interest =
+        typeof doc.interest === 'string' && doc.interest.trim() ? doc.interest.trim() : 'n/d';
       await payload.create({
         collection: 'activities',
         data: {
-          type: 'create',
-          message: `Lead criado: ${doc.name ?? doc.id}`,
+          type: (isLanding ? 'lead_captured' : 'create') as
+            'create' | 'update' | 'status_change' | 'comment',
+          message: isLanding
+            ? `Lead capturado via landing_page · interesse=${interest} · actor=system/public-form`
+            : `Lead criado: ${doc.id}`,
           relatedTo: { relationTo: 'leads', value: doc.id },
           author: authorId,
         },
@@ -54,7 +71,7 @@ const logLeadActivity: CollectionAfterChangeHook = async ({ doc, previousDoc, op
         collection: 'activities',
         data: {
           type: 'update',
-          message: `Lead atualizado: ${doc.name ?? doc.id}`,
+          message: `Lead atualizado: ${doc.id}`,
           relatedTo: { relationTo: 'leads', value: doc.id },
           author: authorId,
         },
