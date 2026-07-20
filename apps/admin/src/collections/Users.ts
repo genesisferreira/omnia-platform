@@ -6,6 +6,7 @@ import {
   ACCOUNT_STATUSES,
   PLATFORM_ROLE_LABELS,
   PLATFORM_ROLES,
+  validatePasswordPolicy,
   type PlatformRole,
 } from '@omnia/constants';
 
@@ -109,6 +110,19 @@ const preventSelfRoleEscalation: CollectionBeforeChangeHook = ({
   return data;
 };
 
+const enforcePasswordPolicy: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data || typeof data.password !== 'string' || data.password.length === 0) {
+    return data;
+  }
+
+  const policy = validatePasswordPolicy(data.password);
+  if (!policy.ok) {
+    throw new APIError(policy.error, 400);
+  }
+
+  return data;
+};
+
 const roleAdminAccess: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);
 const accountStatusAdminAccess: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);
 
@@ -140,7 +154,7 @@ export const Users: CollectionConfig = {
     unlock: adminsOnly,
   },
   hooks: {
-    beforeChange: [preventSelfRoleEscalation],
+    beforeChange: [preventSelfRoleEscalation, enforcePasswordPolicy],
   },
   fields: [
     {

@@ -2,8 +2,8 @@ import { getAdminBaseUrl } from './admin-url';
 import type {
   AuthFailure,
   AuthSuccess,
-  ChangePasswordBody,
   LoginResult,
+  PayloadPasswordUpdate,
   PortalOrganization,
   PortalUser,
   RegisterBody,
@@ -193,9 +193,10 @@ export async function fetchMe(token: string): Promise<AuthSuccess<PortalUser> | 
       return parsePayloadError(response);
     }
 
+    // Payload pode responder 200 com user:null para sessão inválida.
     const user = mapPortalUser(payload?.user ?? payload);
     if (!user) {
-      return genericFailure(502, 'Não foi possível carregar o perfil.');
+      return genericFailure(401, 'Sessão inválida ou expirada.');
     }
 
     return { ok: true, data: user };
@@ -245,7 +246,7 @@ export async function updateMe(
 export async function changePassword(
   token: string,
   userId: string,
-  body: ChangePasswordBody,
+  body: PayloadPasswordUpdate,
 ): Promise<AuthSuccess<PortalUser> | AuthFailure> {
   try {
     const response = await fetch(`${getAdminBaseUrl()}/api/users/${userId}`, {
@@ -274,24 +275,19 @@ export async function changePassword(
 
 export async function fetchOrganizations(): Promise<PortalOrganization[]> {
   try {
-    const params = new URLSearchParams({
-      limit: '100',
-      depth: '0',
-      'where[active][equals]': 'true',
-    });
-
-    const response = await fetch(`${getAdminBaseUrl()}/api/organizations?${params.toString()}`, {
+    const response = await fetch(`${getAdminBaseUrl()}/api/omnia/public-organizations`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
 
     const payload = (await response.json().catch(() => null)) as PayloadRecord | null;
-    if (!response.ok || !payload || !Array.isArray(payload.docs)) {
+    const docs = Array.isArray(payload?.docs) ? payload.docs : null;
+    if (!response.ok || !payload?.ok || !docs) {
       return [];
     }
 
-    return payload.docs
+    return docs
       .map((doc) => {
         if (!isRecord(doc)) {
           return null;

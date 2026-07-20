@@ -13,9 +13,12 @@ import {
   CardTitle,
   Input,
 } from '@omnia/ui';
+import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
+
+import { getAdminLoginUrl } from '@/lib/auth/admin-url';
 
 export function ChangePasswordForm() {
-  const router = useRouter();
+  const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +30,14 @@ export function ChangePasswordForm() {
     setError(null);
     setSuccess(null);
 
-    if (password.length < 8) {
-      setError('A senha deve ter pelo menos 8 caracteres.');
+    if (!currentPassword) {
+      setError('Informe a senha atual.');
+      return;
+    }
+
+    const policy = validatePasswordPolicy(password);
+    if (!policy.ok) {
+      setError(policy.error);
       return;
     }
 
@@ -44,10 +53,13 @@ export function ChangePasswordForm() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ currentPassword, password, confirmPassword }),
       });
 
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+        message?: string;
+      } | null;
 
       if (!response.ok) {
         setError(payload?.error ?? 'Não foi possível alterar a senha.');
@@ -55,11 +67,14 @@ export function ChangePasswordForm() {
         return;
       }
 
+      setCurrentPassword('');
       setPassword('');
       setConfirmPassword('');
-      setSuccess('Senha alterada com sucesso.');
-      router.refresh();
+      setSuccess(payload?.message ?? 'Senha alterada. Faça login novamente.');
       setPending(false);
+      window.setTimeout(() => {
+        window.location.assign(getAdminLoginUrl('/minha-conta'));
+      }, 1200);
     } catch {
       setError('Falha temporária. Tente novamente.');
       setPending(false);
@@ -70,10 +85,25 @@ export function ChangePasswordForm() {
     <Card className="border-omnia-deep-blue/10">
       <CardHeader>
         <CardTitle>Nova senha</CardTitle>
-        <CardDescription>Escolha uma senha forte com pelo menos 8 caracteres.</CardDescription>
+        <CardDescription>{PASSWORD_POLICY_HINT}</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
+          <div className="space-y-2">
+            <label htmlFor="currentPassword" className="text-sm font-medium">
+              Senha atual
+            </label>
+            <Input
+              id="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+              disabled={pending}
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
               Nova senha
@@ -82,7 +112,7 @@ export function ChangePasswordForm() {
               id="password"
               type="password"
               autoComplete="new-password"
-              minLength={8}
+              minLength={10}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -98,7 +128,7 @@ export function ChangePasswordForm() {
               id="confirmPassword"
               type="password"
               autoComplete="new-password"
-              minLength={8}
+              minLength={10}
               required
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}

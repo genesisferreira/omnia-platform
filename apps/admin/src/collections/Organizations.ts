@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { adminsOnly } from '../access/rbac';
+import { adminsOnly, authenticated } from '../access/rbac';
 
 export const Organizations: CollectionConfig = {
   slug: 'organizations',
@@ -16,7 +16,8 @@ export const Organizations: CollectionConfig = {
   },
   timestamps: true,
   access: {
-    read: () => true,
+    // Lista pública via /api/omnia/public-organizations (overrideAccess).
+    read: authenticated,
     create: adminsOnly,
     update: adminsOnly,
     delete: adminsOnly,

@@ -14,6 +14,7 @@ import {
   CardTitle,
   Input,
 } from '@omnia/ui';
+import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
 
 import { getAdminLoginUrl } from '@/lib/auth/admin-url';
 
@@ -31,6 +32,13 @@ export function RegisterForm() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    const policy = validatePasswordPolicy(password);
+    if (!policy.ok) {
+      setError(policy.error);
+      return;
+    }
+
     setPending(true);
 
     try {
@@ -148,12 +156,13 @@ export function RegisterForm() {
               name="password"
               type="password"
               autoComplete="new-password"
-              minLength={8}
+              minLength={10}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               disabled={pending}
             />
+            <p className="text-xs text-omnia-graphite-light">{PASSWORD_POLICY_HINT}</p>
           </div>
 
           <label className="flex items-start gap-3 text-sm">

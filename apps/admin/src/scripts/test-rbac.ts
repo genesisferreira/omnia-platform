@@ -65,3 +65,16 @@ describe('rbac helpers', () => {
     assert.equal(getRelationId(null), null);
   });
 });
+
+describe('password policy', () => {
+  it('exige complexidade mínima', async () => {
+    const { validatePasswordPolicy, PASSWORD_MIN_LENGTH } = await import('@omnia/constants');
+    assert.equal(PASSWORD_MIN_LENGTH, 10);
+    assert.equal(validatePasswordPolicy('short').ok, false);
+    assert.equal(validatePasswordPolicy('alllowercase1!').ok, false);
+    assert.equal(validatePasswordPolicy('ALLUPPERCASE1!').ok, false);
+    assert.equal(validatePasswordPolicy('NoNumbers!!').ok, false);
+    assert.equal(validatePasswordPolicy('NoSpecial12').ok, false);
+    assert.equal(validatePasswordPolicy('ValidPass1!').ok, true);
+  });
+});

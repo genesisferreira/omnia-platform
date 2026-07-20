@@ -13,14 +13,23 @@ import {
   Input,
 } from '@omnia/ui';
 
-function isSafeNext(path: string | null): string {
-  if (!path || !path.startsWith('/') || path.startsWith('//') || path.includes('\\')) {
-    return '/';
+import { safeRedirectPath } from '@/lib/safe-redirect';
+
+function mapLoginError(status: number, payloadMessage?: string): string {
+  if (status === 429) {
+    return 'Muitas tentativas. Aguarde um minuto e tente novamente.';
   }
-  if (path.startsWith('/login') || path.startsWith('/api/')) {
-    return '/';
+  if (status >= 500) {
+    return 'Falha temporária de autenticação. Tente novamente.';
   }
-  return path;
+  if (status === 403) {
+    return payloadMessage?.trim() || 'Acesso não autorizado para esta conta.';
+  }
+  return 'Não foi possível autenticar. Verifique suas credenciais.';
+}
+
+function portalBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL || 'https://omniafrigo.com.br').replace(/\/$/, '');
 }
 
 export function LoginForm() {
@@ -45,18 +54,35 @@ export function LoginForm() {
       });
 
       const payload = (await response.json().catch(() => null)) as {
-        user?: { role?: string };
+        user?: { role?: string; accountStatus?: string };
         errors?: Array<{ message?: string }>;
         message?: string;
       } | null;
 
       if (!response.ok) {
-        setError('Não foi possível autenticar. Verifique suas credenciais.');
+        const technical = payload?.errors?.[0]?.message || payload?.message;
+        // Mensagem neutra ao usuário; status técnico permanece no Network/logs.
+        setError(mapLoginError(response.status, technical));
+        setPending(false);
+        return;
+      }
+
+      const accountStatus = payload?.user?.accountStatus;
+      if (accountStatus === 'blocked') {
+        await fetch('/api/users/logout', { method: 'POST', credentials: 'include' }).catch(
+          () => undefined,
+        );
+        setError('Esta conta está bloqueada. Entre em contato com o suporte.');
         setPending(false);
         return;
       }
 
       const role = payload?.user?.role;
+      if (role === 'client') {
+        window.location.assign(`${portalBaseUrl()}/minha-conta`);
+        return;
+      }
+
       if (role === 'partner' || role === 'instructor' || role === 'student') {
         router.replace(`/area/${role}`);
         router.refresh();
@@ -64,7 +90,7 @@ export function LoginForm() {
       }
 
       if (role === 'super_admin' || role === 'admin' || role === 'editor') {
-        router.replace(isSafeNext(searchParams.get('next')));
+        router.replace(safeRedirectPath(searchParams.get('next')));
         router.refresh();
         return;
       }

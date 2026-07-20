@@ -24,6 +24,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
+  if (result.data.user.accountStatus === 'blocked') {
+    return NextResponse.json(
+      { error: 'Esta conta está bloqueada. Entre em contato com o suporte.' },
+      { status: 403 },
+    );
+  }
+
   const response = NextResponse.json({ user: result.data.user });
   setSessionCookie(response, result.data.token);
   return response;

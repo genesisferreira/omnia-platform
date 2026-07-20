@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { loginUser, registerUser } from '@/lib/auth/payload-client';
 import { setSessionCookie } from '@/lib/auth/session';
 import type { RegisterBody } from '@/lib/auth/types';
+import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
 
 export async function POST(request: Request) {
   let body: Partial<RegisterBody>;
@@ -30,6 +31,14 @@ export async function POST(request: Request) {
   if (!lgpdAccepted) {
     return NextResponse.json(
       { error: 'É necessário aceitar a política de privacidade.' },
+      { status: 400 },
+    );
+  }
+
+  const policy = validatePasswordPolicy(password);
+  if (!policy.ok) {
+    return NextResponse.json(
+      { error: policy.error, policyHint: PASSWORD_POLICY_HINT },
       { status: 400 },
     );
   }

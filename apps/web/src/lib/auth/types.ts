@@ -63,5 +63,12 @@ export type UpdateProfileBody = Partial<
 >;
 
 export type ChangePasswordBody = {
+  currentPassword: string;
+  password: string;
+  confirmPassword: string;
+};
+
+/** Payload PATCH — apenas a nova senha. */
+export type PayloadPasswordUpdate = {
   password: string;
 };
