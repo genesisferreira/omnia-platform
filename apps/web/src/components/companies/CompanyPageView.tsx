@@ -51,17 +51,48 @@ export function CompanyPageView({ company }: CompanyPageViewProps) {
               {company.positioning ?? company.shortDescription}
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              {primary ? (
-                <a
-                  href={primary.href}
-                  className={`inline-flex h-11 items-center rounded-md px-5 text-sm font-medium transition-colors ${theme.cta}`}
-                  {...(primary.href.startsWith('http')
-                    ? { target: '_blank', rel: 'noopener noreferrer' }
-                    : {})}
-                >
-                  {primary.label}
-                </a>
-              ) : null}
+              {(() => {
+                const appOnly =
+                  Boolean(company.applicationUrl) || company.portalSlug === 'neurofrigo-carga';
+                if (company.applicationUrl) {
+                  return (
+                    <a
+                      href={company.applicationUrl}
+                      className={`inline-flex h-11 items-center rounded-md px-5 text-sm font-medium transition-colors ${theme.cta}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {primary?.label ?? 'Abrir aplicativo'}
+                    </a>
+                  );
+                }
+                if (appOnly) {
+                  return (
+                    <button
+                      type="button"
+                      disabled
+                      className={`inline-flex h-11 cursor-not-allowed items-center rounded-md px-5 text-sm font-medium opacity-50 ${theme.cta}`}
+                      title="Aplicativo ainda não disponível"
+                    >
+                      {primary?.label ?? 'Abrir aplicativo'}
+                    </button>
+                  );
+                }
+                if (primary) {
+                  return (
+                    <a
+                      href={primary.href}
+                      className={`inline-flex h-11 items-center rounded-md px-5 text-sm font-medium transition-colors ${theme.cta}`}
+                      {...(primary.href.startsWith('http')
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                    >
+                      {primary.label}
+                    </a>
+                  );
+                }
+                return null;
+              })()}
               {secondary ? (
                 <Link
                   href={secondary.href}

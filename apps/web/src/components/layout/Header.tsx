@@ -2,22 +2,12 @@
 
 import { useEffect, useId, useState } from 'react';
 
-import { Button, Container } from '@omnia/ui';
+import { Container } from '@omnia/ui';
 
+import { AccountNav } from './AccountNav';
 import { BrandHomeLink } from './BrandHomeLink';
 import { InstitutionalNavLink } from './InstitutionalNavLink';
 import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
-
-function AdminCta({ className }: { className?: string }) {
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001';
-  const loginUrl = `${adminUrl.replace(/\/+$/, '')}/login`;
-
-  return (
-    <Button asChild size="sm" variant="outline" className={className}>
-      <a href={loginUrl}>Entrar na plataforma</a>
-    </Button>
-  );
-}
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -70,7 +60,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <AdminCta className="hidden border-omnia-deep-blue/20 text-omnia-deep-blue hover:bg-omnia-deep-blue/5 md:inline-flex" />
+          <AccountNav className="hidden border-omnia-deep-blue/20 text-omnia-deep-blue hover:bg-omnia-deep-blue/5 md:inline-flex" />
 
           <button
             type="button"
@@ -114,7 +104,7 @@ export function Header() {
             ))}
           </nav>
           <div className="px-3 pt-2">
-            <AdminCta className="w-full border-omnia-deep-blue/20 text-omnia-deep-blue" />
+            <AccountNav className="w-full border-omnia-deep-blue/20 text-omnia-deep-blue" />
           </div>
         </Container>
       </div>

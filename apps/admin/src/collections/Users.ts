@@ -1,7 +1,13 @@
 import type { Access, CollectionBeforeChangeHook, CollectionConfig, FieldAccess } from 'payload';
 import { APIError } from 'payload';
 
-import { PLATFORM_ROLE_LABELS, PLATFORM_ROLES, type PlatformRole } from '@omnia/constants';
+import {
+  ACCOUNT_STATUS_LABELS,
+  ACCOUNT_STATUSES,
+  PLATFORM_ROLE_LABELS,
+  PLATFORM_ROLES,
+  type PlatformRole,
+} from '@omnia/constants';
 
 import {
   adminsOnly,
@@ -11,6 +17,16 @@ import {
   isSuperAdmin,
   roleFieldUpdateAccess,
 } from '../access/rbac';
+
+const INTEREST_AREA_OPTIONS = [
+  { label: 'Refrigeração', value: 'refrigeracao' },
+  { label: 'Automação / IA', value: 'automacao' },
+  { label: 'Educação', value: 'educacao' },
+  { label: 'Logística / Carga', value: 'carga' },
+  { label: 'Engenharia', value: 'engenharia' },
+  { label: 'Parcerias', value: 'parcerias' },
+];
+
 const usersReadAccess: Access = ({ req: { user } }) => {
   if (!user) {
     return false;
@@ -18,11 +34,11 @@ const usersReadAccess: Access = ({ req: { user } }) => {
   if (isPlatformAdmin(user)) {
     return true;
   }
-  // Usuário autenticado lê apenas o próprio documento
   return { id: { equals: user.id } };
 };
 
-const usersCreateAccess: Access = ({ req: { user } }) => isPlatformAdmin(user);
+/** Cadastro público (sem sessão) ou criação por admin. */
+const usersCreateAccess: Access = ({ req: { user } }) => !user || isPlatformAdmin(user);
 
 const usersDeleteAccess: Access = ({ req: { user } }) => isSuperAdmin(user);
 
@@ -30,24 +46,55 @@ const usersUpdateAccess: Access = ({ req: { user }, id }) => {
   if (!user) {
     return false;
   }
-  if (isSuperAdmin(user)) {
+  if (isSuperAdmin(user) || isPlatformAdmin(user)) {
     return true;
   }
-  if (isPlatformAdmin(user)) {
-    return true;
-  }
-  // Demais: somente o próprio perfil (sem alterar role — field access)
   return { id: { equals: user.id } };
 };
 
-const preventSelfRoleEscalation: CollectionBeforeChangeHook = ({ data, req, originalDoc }) => {
-  if (!data || !('role' in data)) {
+const preventSelfRoleEscalation: CollectionBeforeChangeHook = ({
+  data,
+  req,
+  originalDoc,
+  operation,
+}) => {
+  if (!data) {
+    return data;
+  }
+
+  // Self-registration / create sem sessão: força papel e status seguros.
+  if (operation === 'create' && !req.user) {
+    data.role = 'client';
+    data.accountStatus = 'pending';
+    delete data.company;
+    delete data.tenant;
+  }
+
+  if (data.firstName || data.lastName) {
+    const first = typeof data.firstName === 'string' ? data.firstName.trim() : '';
+    const last = typeof data.lastName === 'string' ? data.lastName.trim() : '';
+    const composed = [first, last].filter(Boolean).join(' ');
+    if (composed) {
+      data.name = composed;
+    }
+  }
+
+  if (data.lgpdAccepted === true && !data.lgpdAcceptedAt && !originalDoc?.lgpdAcceptedAt) {
+    data.lgpdAcceptedAt = new Date().toISOString();
+  }
+
+  if (!('role' in data)) {
     return data;
   }
 
   const nextRole = data.role;
   const currentRole = originalDoc?.role;
   if (nextRole === currentRole) {
+    return data;
+  }
+
+  if (!req.user) {
+    data.role = 'client';
     return data;
   }
 
@@ -63,11 +110,12 @@ const preventSelfRoleEscalation: CollectionBeforeChangeHook = ({ data, req, orig
 };
 
 const roleAdminAccess: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);
+const accountStatusAdminAccess: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);
 
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: {
-    tokenExpiration: 60 * 60 * 8, // 8h
+    tokenExpiration: 60 * 60 * 8,
     cookies: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
@@ -78,7 +126,7 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
     group: 'Sistema',
-    defaultColumns: ['email', 'name', 'role', 'company', 'updatedAt'],
+    defaultColumns: ['email', 'name', 'role', 'accountStatus', 'updatedAt'],
   },
   access: {
     admin: ({ req: { user } }) => {
@@ -96,15 +144,143 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
-      name: 'name',
-      type: 'text',
-      label: 'Nome',
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Identidade',
+          fields: [
+            {
+              name: 'firstName',
+              type: 'text',
+              label: 'Nome',
+            },
+            {
+              name: 'lastName',
+              type: 'text',
+              label: 'Sobrenome',
+            },
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Nome completo',
+              admin: {
+                readOnly: true,
+                description: 'Gerado a partir de nome e sobrenome.',
+              },
+            },
+            {
+              name: 'phone',
+              type: 'text',
+              label: 'Telefone',
+            },
+            {
+              name: 'whatsapp',
+              type: 'text',
+              label: 'WhatsApp',
+            },
+            {
+              name: 'cpf',
+              type: 'text',
+              label: 'CPF',
+            },
+            {
+              name: 'photo',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Foto',
+            },
+          ],
+        },
+        {
+          label: 'Empresa',
+          fields: [
+            {
+              name: 'employerName',
+              type: 'text',
+              label: 'Empresa',
+            },
+            {
+              name: 'jobTitle',
+              type: 'text',
+              label: 'Cargo',
+            },
+            {
+              name: 'segment',
+              type: 'text',
+              label: 'Segmento',
+            },
+          ],
+        },
+        {
+          label: 'Localização',
+          fields: [
+            {
+              name: 'country',
+              type: 'text',
+              label: 'País',
+              defaultValue: 'Brasil',
+            },
+            {
+              name: 'state',
+              type: 'text',
+              label: 'Estado',
+            },
+            {
+              name: 'city',
+              type: 'text',
+              label: 'Cidade',
+            },
+          ],
+        },
+        {
+          label: 'Preferências',
+          fields: [
+            {
+              name: 'interestAreas',
+              type: 'select',
+              hasMany: true,
+              label: 'Áreas de interesse',
+              options: INTEREST_AREA_OPTIONS,
+            },
+            {
+              name: 'groupOrganizations',
+              type: 'relationship',
+              relationTo: 'organizations',
+              hasMany: true,
+              label: 'Empresas do grupo',
+              admin: {
+                description: 'Organizações do ecossistema Omnia de interesse do usuário.',
+              },
+            },
+          ],
+        },
+        {
+          label: 'LGPD',
+          fields: [
+            {
+              name: 'lgpdAccepted',
+              type: 'checkbox',
+              label: 'Aceite LGPD',
+              defaultValue: false,
+            },
+            {
+              name: 'lgpdAcceptedAt',
+              type: 'date',
+              label: 'Data do aceite',
+              admin: {
+                date: { pickerAppearance: 'dayAndTime' },
+                readOnly: true,
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'role',
       type: 'select',
       required: true,
-      defaultValue: 'editor',
+      defaultValue: 'client',
       options: PLATFORM_ROLES.map((value) => ({
         label: PLATFORM_ROLE_LABELS[value as PlatformRole],
         value,
@@ -115,17 +291,35 @@ export const Users: CollectionConfig = {
         create: roleAdminAccess,
       },
       admin: {
+        position: 'sidebar',
         description:
-          'super_admin/admin/editor: painel global. partner/instructor/student: áreas próprias (sem CMS global).',
+          'super_admin/admin/editor: painel global. Demais papéis: Portal / áreas próprias.',
+      },
+    },
+    {
+      name: 'accountStatus',
+      type: 'select',
+      required: true,
+      defaultValue: 'pending',
+      options: ACCOUNT_STATUSES.map((value) => ({
+        label: ACCOUNT_STATUS_LABELS[value],
+        value,
+      })),
+      label: 'Status da conta',
+      access: {
+        update: accountStatusAdminAccess,
+      },
+      admin: {
+        position: 'sidebar',
       },
     },
     {
       name: 'company',
       type: 'relationship',
       relationTo: 'companies',
-      label: 'Empresa (escopo)',
+      label: 'Empresa portal (escopo)',
       admin: {
-        description: 'Restringe o usuário a uma empresa do ecossistema quando aplicável.',
+        description: 'Empresa do ecossistema (Portal) quando aplicável.',
         position: 'sidebar',
       },
       access: {
@@ -138,7 +332,7 @@ export const Users: CollectionConfig = {
       relationTo: 'tenants',
       label: 'Tenant (escopo)',
       admin: {
-        description: 'Organização/tenant ao qual o usuário pertence.',
+        description: 'Tenant ao qual o usuário pertence.',
         position: 'sidebar',
       },
       access: {

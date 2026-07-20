@@ -54,14 +54,16 @@ async function seed() {
           name: company.name,
           portalSlug: company.portalSlug,
           ecosystemRole: company.ecosystemRole,
-          externalSite: company.externalSite,
+          externalSite: company.externalSite ?? undefined,
+          applicationUrl:
+            'applicationUrl' in company ? (company.applicationUrl ?? undefined) : undefined,
           shortDescription: company.shortDescription,
           displayOrder: company.displayOrder,
           status: company.status,
           isHolding: company.isHolding ?? false,
           showInEcosystem: company.showInEcosystem ?? true,
           brandTheme: company.brandTheme ?? 'omnia',
-        },
+        } as never,
       });
       console.log(`  ✓ Empresa sincronizada: ${company.slug}`);
       continue;
@@ -78,7 +80,9 @@ async function seed() {
         shortDescription: company.shortDescription,
         ecosystemRole: company.ecosystemRole,
         displayOrder: company.displayOrder,
-        externalSite: company.externalSite,
+        externalSite: company.externalSite ?? undefined,
+        applicationUrl:
+          'applicationUrl' in company ? (company.applicationUrl ?? undefined) : undefined,
         status: company.status,
         tenant: tenantId,
         isHolding: company.isHolding ?? false,
@@ -221,6 +225,11 @@ async function seed() {
       console.log(`  · Página já existe: ${item.slug}`);
     }
   }
+
+  console.log('🌱 Seed Organizations (grupo Omnia)...');
+  const { seedOrganizations } = await import('./run-organizations');
+  const orgResult = await seedOrganizations(payload);
+  console.log(`  ✓ Organizations: created=${orgResult.created} updated=${orgResult.updated}`);
 
   console.log('✅ Seed concluído.');
   process.exit(0);

@@ -76,6 +76,7 @@ test('campos internos não aparecem no DTO', () => {
   assert.ok(dto);
   const keys = Object.keys(dto).sort();
   assert.deepEqual(keys, [
+    'applicationUrl',
     'brandTheme',
     'coverImage',
     'displayOrder',
@@ -142,6 +143,7 @@ test('ordenação por displayOrder é determinística', () => {
       brandTheme: 'omnia',
       displayOrder: 5,
       externalSite: null,
+      applicationUrl: null,
       logo: null,
       coverImage: null,
       primaryCta: null,
@@ -157,6 +159,7 @@ test('ordenação por displayOrder é determinística', () => {
       brandTheme: 'omnia',
       displayOrder: 1,
       externalSite: null,
+      applicationUrl: null,
       logo: null,
       coverImage: null,
       primaryCta: null,
@@ -172,6 +175,7 @@ test('ordenação por displayOrder é determinística', () => {
       brandTheme: 'omnia',
       displayOrder: 5,
       externalSite: null,
+      applicationUrl: null,
       logo: null,
       coverImage: null,
       primaryCta: null,

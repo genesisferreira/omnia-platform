@@ -13,6 +13,7 @@ export type StrategicCompanySeed = {
   brandTheme: 'renovacao' | 'fred' | 'cte' | 'neurofrigo';
   displayOrder: number;
   externalSite: string;
+  applicationUrl?: string | null;
   institutionalText: string;
   mission: string;
   vision: string;
@@ -369,6 +370,60 @@ export const strategicCompaniesSeed: readonly StrategicCompanySeed[] = [
       metaTitle: 'Neurofrigo Command IA | Automação e IA em refrigeração',
       metaDescription:
         'Braço de tecnologia, dados e inteligência artificial do ecossistema Omnia Frigo.',
+      schemaType: 'Organization',
+    },
+  },
+  {
+    slug: 'neurofrigo-carga',
+    portalSlug: 'neurofrigo-carga',
+    name: 'Neurofrigo Carga',
+    shortDescription: 'Aplicativo de carga e logística para a cadeia do frio.',
+    positioning: 'Produto digital do ecossistema Omnia para gestão de carga refrigerada.',
+    ecosystemRole: 'Produto',
+    brandTheme: 'neurofrigo',
+    displayOrder: 5,
+    externalSite: '',
+    applicationUrl: null,
+    institutionalText:
+      'A Neurofrigo Carga é o aplicativo do ecossistema Omnia focado em carga e logística da cadeia do frio. O acesso principal é pelo aplicativo — não por um site institucional.',
+    mission: 'Simplificar a operação de carga refrigerada com um aplicativo dedicado.',
+    vision: 'Ser a referência em app de carga para o ecossistema Omnia Frigo.',
+    values: [
+      {
+        title: 'App first',
+        description: 'Experiência centrada no aplicativo, não em site institucional.',
+      },
+      {
+        title: 'Cadeia do frio',
+        description: 'Fluxos pensados para refrigeração e logística.',
+      },
+    ],
+    differentiators: [
+      {
+        title: 'CTA de aplicativo',
+        description: 'O botão principal abre o app quando a URL estiver cadastrada.',
+      },
+    ],
+    authorityStats: [
+      { value: 'App', label: 'acesso principal' },
+      { value: 'IoT', label: 'integração futura' },
+    ],
+    offerings: [
+      { title: 'Gestão de carga', kind: 'product' },
+      { title: 'Acompanhamento logístico', kind: 'solution' },
+    ],
+    audiences: [
+      {
+        title: 'Operadores logísticos',
+        description: 'Times que movem carga refrigerada.',
+      },
+    ],
+    primaryCta: { label: 'Abrir aplicativo', href: '#' },
+    secondaryCta: { label: 'Ver ecossistema Omnia', href: '/empresas' },
+    seo: {
+      metaTitle: 'Neurofrigo Carga | Aplicativo de carga refrigerada',
+      metaDescription:
+        'Produto do ecossistema Omnia Frigo para carga e logística da cadeia do frio.',
       schemaType: 'Organization',
     },
   },

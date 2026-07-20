@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
+    "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",

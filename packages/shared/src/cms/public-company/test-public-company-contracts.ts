@@ -21,6 +21,7 @@ const base = {
   _status: 'published',
   showInEcosystem: true,
   externalSite: 'https://renovacaorefrigeracao.com.br',
+  applicationUrl: null,
   offerings: [{ title: 'Retrofit', kind: 'service' }],
   authorityStats: [{ value: '+30', label: 'anos' }],
   seo: {
@@ -31,6 +32,7 @@ const base = {
 };
 
 assert.equal(mapPublicCompanyListItem(base)?.portalSlug, 'renovacao');
+assert.equal(mapPublicCompanyListItem(base)?.applicationUrl, null);
 assert.equal(mapPublicCompanyListItem({ ...base, showInEcosystem: false }), null);
 assert.equal(mapPublicCompanyDetail(base)?.offerings[0]?.title, 'Retrofit');
 assert.deepEqual(

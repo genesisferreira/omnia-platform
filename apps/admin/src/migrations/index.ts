@@ -6,6 +6,7 @@ import * as migration_20260716_172340_pages_institutional from './20260716_17234
 import * as migration_20260717_160602_blog_collections from './20260717_160602_blog_collections';
 import * as migration_20260717_180310_companies_strategic_pages from './20260717_180310_companies_strategic_pages';
 import * as migration_20260717_194500_users_rbac from './20260717_194500_users_rbac';
+import * as migration_20260720_120000_identity_crm_foundation from './20260720_120000_identity_crm_foundation';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260717_194500_users_rbac.up,
     down: migration_20260717_194500_users_rbac.down,
     name: '20260717_194500_users_rbac',
+  },
+  {
+    up: migration_20260720_120000_identity_crm_foundation.up,
+    down: migration_20260720_120000_identity_crm_foundation.down,
+    name: '20260720_120000_identity_crm_foundation',
   },
 ];

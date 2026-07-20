@@ -5,11 +5,16 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { Activities } from './src/collections/Activities';
 import { Authors } from './src/collections/Authors';
 import { Categories } from './src/collections/Categories';
 import { Companies } from './src/collections/Companies';
+import { Contacts } from './src/collections/Contacts';
+import { CrmCompanies } from './src/collections/CrmCompanies';
 import { Domains } from './src/collections/Domains';
+import { Leads } from './src/collections/Leads';
 import { Media } from './src/collections/Media';
+import { Organizations } from './src/collections/Organizations';
 import { Pages } from './src/collections/Pages';
 import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
@@ -17,6 +22,7 @@ import { Tags } from './src/collections/Tags';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
+import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { publicPageEndpoint } from './src/endpoints/public-page';
 import {
   publicPostCategoriesEndpoint,
@@ -43,7 +49,12 @@ export default buildConfig({
   collections: [
     Users,
     Tenants,
+    Organizations,
     Companies,
+    CrmCompanies,
+    Contacts,
+    Leads,
+    Activities,
     Sites,
     Domains,
     Media,
@@ -58,6 +69,7 @@ export default buildConfig({
     resolveSiteEndpoint,
     publicCompaniesEndpoint,
     publicCompanyEndpoint,
+    publicOrganizationsEndpoint,
     publicPageEndpoint,
     publicPostsEndpoint,
     publicPostEndpoint,
@@ -74,5 +86,8 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  cors: [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'],
+  cors: [
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001',
+  ].filter(Boolean),
 });

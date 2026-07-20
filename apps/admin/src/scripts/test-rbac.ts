@@ -21,10 +21,10 @@ import {
 } from '../access/rbac';
 
 describe('platform roles', () => {
-  it('define os seis papéis obrigatórios', () => {
+  it('define os sete papéis da plataforma', () => {
     assert.deepEqual(
       [...PLATFORM_ROLES],
-      ['super_admin', 'admin', 'editor', 'partner', 'instructor', 'student'],
+      ['super_admin', 'admin', 'editor', 'partner', 'instructor', 'student', 'client'],
     );
   });
 
@@ -33,7 +33,7 @@ describe('platform roles', () => {
       assert.equal(isStaffRole(role), true);
       assert.equal(isScopedPortalRole(role), false);
     }
-    for (const role of ['partner', 'instructor', 'student'] as const) {
+    for (const role of ['partner', 'instructor', 'student', 'client'] as const) {
       assert.equal(isScopedPortalRole(role), true);
       assert.equal(isStaffRole(role), false);
     }
@@ -48,6 +48,7 @@ describe('rbac helpers', () => {
     assert.equal(canAccessGlobalAdmin({ role: 'editor' }), true);
     assert.equal(canAccessGlobalAdmin({ role: 'partner' }), false);
     assert.equal(canAccessGlobalAdmin({ role: 'student' }), false);
+    assert.equal(canAccessGlobalAdmin({ role: 'client' }), false);
     assert.equal(hasStaffAccess(null), false);
   });
 

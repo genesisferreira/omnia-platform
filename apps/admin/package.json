@@ -19,6 +19,7 @@
     "seed:holding-institutional-pages": "tsx src/scripts/seed-holding-institutional-pages.ts",
     "seed:holding-blog": "tsx src/scripts/seed-holding-blog.ts",
     "seed:holding-strategic-companies": "tsx src/scripts/seed-holding-strategic-companies.ts",
+    "seed:organizations": "tsx src/scripts/seed-organizations.ts",
     "upgrade:holding-home": "tsx src/scripts/upgrade-holding-home.ts",
     "test:public-companies": "tsx src/scripts/test-public-companies.ts",
     "test:holding-companies-seed": "tsx src/scripts/test-holding-companies-seed.ts",

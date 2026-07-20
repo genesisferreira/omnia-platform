@@ -231,6 +231,15 @@ export const Companies: CollectionConfig = {
               type: 'text',
               label: 'Site externo',
             },
+            {
+              name: 'applicationUrl',
+              type: 'text',
+              label: 'URL do aplicativo',
+              admin: {
+                description:
+                  'CTA principal abre o aplicativo. Se vazio, o botão principal fica desabilitado (não usar site externo).',
+              },
+            },
           ],
         },
         {

@@ -10,6 +10,7 @@ export const PLATFORM_ROLES = [
   'partner',
   'instructor',
   'student',
+  'client',
 ] as const;
 
 export type PlatformRole = (typeof PLATFORM_ROLES)[number];
@@ -18,8 +19,8 @@ export type PlatformRole = (typeof PLATFORM_ROLES)[number];
 export const STAFF_ROLES = ['super_admin', 'admin', 'editor'] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
-/** Papéis sem painel global — áreas próprias futuras. */
-export const SCOPED_PORTAL_ROLES = ['partner', 'instructor', 'student'] as const;
+/** Papéis sem painel global — áreas próprias futuras + Portal. */
+export const SCOPED_PORTAL_ROLES = ['partner', 'instructor', 'student', 'client'] as const;
 export type ScopedPortalRole = (typeof SCOPED_PORTAL_ROLES)[number];
 
 export const PLATFORM_ROLE_LABELS: Record<PlatformRole, string> = {
@@ -29,6 +30,16 @@ export const PLATFORM_ROLE_LABELS: Record<PlatformRole, string> = {
   partner: 'Parceiro',
   instructor: 'Instrutor',
   student: 'Aluno',
+  client: 'Cliente',
+};
+
+export const ACCOUNT_STATUSES = ['active', 'pending', 'blocked'] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
+
+export const ACCOUNT_STATUS_LABELS: Record<AccountStatus, string> = {
+  active: 'Ativo',
+  pending: 'Pendente',
+  blocked: 'Bloqueado',
 };
 
 export function isPlatformRole(value: unknown): value is PlatformRole {
@@ -43,7 +54,7 @@ export function isScopedPortalRole(value: unknown): value is ScopedPortalRole {
   return typeof value === 'string' && (SCOPED_PORTAL_ROLES as readonly string[]).includes(value);
 }
 
-/** Caminho stub da área própria (partner / instructor / student). */
+/** Caminho stub da área própria (partner / instructor / student / client). */
 export function getScopedAreaPath(role: PlatformRole): string | null {
   if (!isScopedPortalRole(role)) {
     return null;

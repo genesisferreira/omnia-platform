@@ -77,6 +77,19 @@ export const holdingCompaniesSeed = [
     showInEcosystem: false,
     brandTheme: 'omnia' as const,
   },
+  {
+    name: 'Neurofrigo Carga',
+    slug: 'neurofrigo-carga',
+    portalSlug: 'neurofrigo-carga',
+    shortDescription: 'Aplicativo de carga e logística para a cadeia do frio.',
+    ecosystemRole: 'Produto',
+    displayOrder: 7,
+    externalSite: null,
+    applicationUrl: null,
+    status: 'active' as const,
+    showInEcosystem: true,
+    brandTheme: 'neurofrigo' as const,
+  },
 ];
 
 export const defaultTenantSeed = {

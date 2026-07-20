@@ -49,6 +49,7 @@ export type PublicCompanyListItemDto = {
   brandTheme: PublicCompanyBrandTheme;
   displayOrder: number;
   externalSite: string | null;
+  applicationUrl: string | null;
   logo: PublicCompanyMediaDto | null;
   coverImage: PublicCompanyMediaDto | null;
   primaryCta: PublicCompanyCtaDto | null;

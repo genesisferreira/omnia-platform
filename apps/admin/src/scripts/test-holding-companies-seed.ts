@@ -44,7 +44,10 @@ test('renovacao → Engenharia', () => {
 
 test('todas as empresas têm externalSite oficial', () => {
   for (const company of holdingCompaniesSeed) {
-    assert.ok(company.externalSite.startsWith('https://'), company.slug);
+    assert.ok(
+      company.externalSite == null || company.externalSite.startsWith('https://'),
+      company.slug,
+    );
   }
 });
 
