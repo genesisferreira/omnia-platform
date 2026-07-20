@@ -8,6 +8,8 @@ import * as migration_20260717_180310_companies_strategic_pages from './20260717
 import * as migration_20260717_194500_users_rbac from './20260717_194500_users_rbac';
 import * as migration_20260720_120000_identity_crm_foundation from './20260720_120000_identity_crm_foundation';
 import * as migration_20260720_180000_lead_capture_activity from './20260720_180000_lead_capture_activity';
+import * as migration_20260720_190000_crm_companies_texts from './20260720_190000_crm_companies_texts';
+import * as migration_20260720_191000_locked_documents_crm_rels from './20260720_191000_locked_documents_crm_rels';
 
 export const migrations = [
   {
@@ -59,5 +61,15 @@ export const migrations = [
     up: migration_20260720_180000_lead_capture_activity.up,
     down: migration_20260720_180000_lead_capture_activity.down,
     name: '20260720_180000_lead_capture_activity',
+  },
+  {
+    up: migration_20260720_190000_crm_companies_texts.up,
+    down: migration_20260720_190000_crm_companies_texts.down,
+    name: '20260720_190000_crm_companies_texts',
+  },
+  {
+    up: migration_20260720_191000_locked_documents_crm_rels.up,
+    down: migration_20260720_191000_locked_documents_crm_rels.down,
+    name: '20260720_191000_locked_documents_crm_rels',
   },
 ];
