@@ -5,6 +5,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { wrapJwtStrategyRejectBlocked } from './src/auth/account-status';
 import { Activities } from './src/collections/Activities';
 import { Authors } from './src/collections/Authors';
 import { Categories } from './src/collections/Categories';
@@ -92,4 +93,7 @@ export default buildConfig({
     process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001',
   ].filter(Boolean),
+  onInit: (payload) => {
+    wrapJwtStrategyRejectBlocked(payload);
+  },
 });

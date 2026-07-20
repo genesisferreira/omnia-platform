@@ -2,3 +2,4 @@ export { buildCanonicalUrl, getRootDomain, isValidHostname, normalizeHostname } 
 export * from './cms/public-page';
 export * from './cms/public-post';
 export * from './cms/public-company';
+export * from './rate-limit';

@@ -18,7 +18,9 @@ Nova campanha ou novo interesse → novo Lead.
 
 **5** tentativas / **15 minutos** por IP (`X-Real-IP` preferido), e-mail e WhatsApp.
 
-Implementação atual: **in-memory por processo** (não distribuída). Redis compartilhado é dívida antes de produção multi-réplica.
+Implementação: **Redis compartilhado** (`@omnia/shared` rate-limit), chaves namespaced por ambiente, e-mail/WhatsApp hasheados (SHA-256), TTL via Lua `INCR`+`PEXPIRE`.
+
+**Fail-closed** em produção quando `REDIS_URL` está configurado e Redis falha → 503 (sem criação parcial). Sem Redis em desenvolvimento: fallback in-memory local (não multi-réplica).
 
 ## LGPD
 

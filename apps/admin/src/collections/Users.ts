@@ -18,6 +18,11 @@ import {
   isSuperAdmin,
   roleFieldUpdateAccess,
 } from '../access/rbac';
+import {
+  rejectBlockedBeforeLogin,
+  rejectBlockedMe,
+  rejectBlockedRefresh,
+} from '../auth/account-status';
 
 const INTEREST_AREA_OPTIONS = [
   { label: 'Refrigeração', value: 'refrigeracao' },
@@ -155,6 +160,9 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     beforeChange: [preventSelfRoleEscalation, enforcePasswordPolicy],
+    beforeLogin: [rejectBlockedBeforeLogin],
+    me: [rejectBlockedMe],
+    refresh: [rejectBlockedRefresh],
   },
   fields: [
     {

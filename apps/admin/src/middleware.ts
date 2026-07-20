@@ -1,47 +1,45 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const WINDOW_MS = 60_000;
-const MAX_ATTEMPTS = 20;
+import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared';
 
-type Bucket = { count: number; resetAt: number };
-
-const buckets = new Map<string, Bucket>();
-
-function clientKey(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) {
-    return forwarded.split(',')[0]?.trim() || 'unknown';
-  }
-  return request.headers.get('x-real-ip') || 'unknown';
-}
-
-function allow(key: string): boolean {
-  const now = Date.now();
-  const current = buckets.get(key);
-  if (!current || current.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return true;
-  }
-  current.count += 1;
-  return current.count <= MAX_ATTEMPTS;
-}
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX = 20;
 
 /**
  * Middleware complementar (não é a única proteção).
  * - Redireciona visitante de rotas de painel para /login
- * - Rate limit básico em POST /api/users/login
+ * - Rate limit Redis em POST /api/users/login (fail-closed)
  *
  * A autorização definitiva ocorre no servidor (layouts/páginas + Payload access).
+ * Bloqueio accountStatus=blocked: hooks Users + JWT wrap (account-status).
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === '/api/users/login' && request.method === 'POST') {
-    if (!allow(`login:${clientKey(request)}`)) {
+    const ip = clientIpFromHeaders(request.headers);
+    const decision = await checkRateLimit({
+      scope: 'login',
+      subjects: [{ value: `ip:${ip}` }],
+      max: LOGIN_MAX,
+      windowMs: LOGIN_WINDOW_MS,
+      onRedisUnavailable: 'fail-closed',
+    });
+
+    if (!decision.allowed) {
       return NextResponse.json(
-        { errors: [{ message: 'Muitas tentativas. Aguarde e tente novamente.' }] },
-        { status: 429 },
+        {
+          errors: [
+            {
+              message:
+                decision.reason === 'redis_unavailable'
+                  ? 'Serviço temporariamente indisponível. Tente novamente em instantes.'
+                  : 'Muitas tentativas. Aguarde e tente novamente.',
+            },
+          ],
+        },
+        { status: decision.reason === 'redis_unavailable' ? 503 : 429 },
       );
     }
     return NextResponse.next();

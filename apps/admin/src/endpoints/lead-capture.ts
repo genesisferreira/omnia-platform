@@ -290,14 +290,24 @@ export const leadCaptureEndpoint: Endpoint = {
 
       const data = validated.data;
       const ip = clientIpFromHeaders(req.headers);
-      const rateKeys = [`lead:ip:${ip}`, `lead:email:${data.email}`, `lead:wa:${data.whatsapp}`];
+      const rate = await allowLeadCaptureRequest({
+        ip,
+        email: data.email,
+        whatsapp: data.whatsapp,
+      });
 
-      if (!allowLeadCaptureRequest(rateKeys)) {
-        req.payload.logger.warn({ msg: 'lead-capture: rate limited', code: 'RATE_LIMITED' });
+      if (!rate.allowed) {
+        req.payload.logger.warn({
+          msg: 'lead-capture: rate limited',
+          code: 'RATE_LIMITED',
+          reason: rate.reason,
+        });
         return errorResponse(
-          429,
-          'RATE_LIMITED',
-          'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+          rate.reason === 'redis_unavailable' ? 503 : 429,
+          rate.reason === 'redis_unavailable' ? 'INTERNAL_ERROR' : 'RATE_LIMITED',
+          rate.reason === 'redis_unavailable'
+            ? 'Serviço temporariamente indisponível. Tente novamente em instantes.'
+            : 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
         );
       }
 

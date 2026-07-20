@@ -9,8 +9,8 @@
  * Contact: lookup por e-mail normalizado, depois WhatsApp; upsert sem duplicar.
  * CRM Company: match por nome normalizado (caixa/espaços); cria prospect se ausente.
  *
- * Rate limit: in-memory por processo (5 / 15 min por IP, e-mail e WhatsApp).
- * NÃO é distribuído entre réplicas — dívida até @omnia/integrations/redis.
+ * Rate limit: Redis compartilhado (5 / 15 min por IP, e-mail e WhatsApp).
+ * Fail-closed se Redis indisponível em produção. Dev/test: memory via RATE_LIMIT_BACKEND.
  * IP: preferir X-Real-IP (proxy); X-Forwarded-For só como fallback do primeiro hop.
  *
  * UTMs/LGPD: persistidos em notes estruturados ([lead_capture] / [lgpd]) até
@@ -25,6 +25,11 @@ import {
   isLeadInterestArea,
   type LeadInterestArea,
 } from '@omnia/constants';
+import {
+  checkRateLimit,
+  clientIpFromHeaders,
+  resetRateLimitMemoryForTests,
+} from '@omnia/shared';
 
 export type LeadCapturePublicDto = {
   nome: string;
@@ -259,33 +264,32 @@ export function sameCampaignAndInterest(
   return notedCampaign === campaign;
 }
 
-type RateBucket = { count: number; resetAt: number };
-
-const rateBuckets = new Map<string, RateBucket>();
-
 export function resetLeadCaptureRateLimitForTests(): void {
-  rateBuckets.clear();
+  resetRateLimitMemoryForTests();
 }
 
 /**
- * Rate limit em memória (fallback). Preferência operacional: Redis compartilhado
- * quando o conector @omnia/integrations/redis estiver disponível.
- * Limite: 5 / 15 min por IP, e-mail e WhatsApp.
+ * Rate limit Redis (fail-closed em produção).
+ * Limite: 5 / 15 min por IP, e-mail e WhatsApp (e-mail/WhatsApp hasheados na chave).
  */
-export function allowLeadCaptureRequest(keys: string[]): boolean {
-  const now = Date.now();
-  for (const key of keys) {
-    const bucket = rateBuckets.get(key);
-    if (!bucket || bucket.resetAt <= now) {
-      rateBuckets.set(key, { count: 1, resetAt: now + LEAD_CAPTURE_RATE_LIMIT_WINDOW_MS });
-      continue;
-    }
-    bucket.count += 1;
-    if (bucket.count > LEAD_CAPTURE_RATE_LIMIT_MAX) {
-      return false;
-    }
-  }
-  return true;
+export async function allowLeadCaptureRequest(keys: {
+  ip: string;
+  email: string;
+  whatsapp: string;
+}): Promise<{ allowed: boolean; reason: string }> {
+  const decision = await checkRateLimit({
+    scope: 'lead-capture',
+    subjects: [
+      { value: `ip:${keys.ip}` },
+      { value: keys.email, hash: true },
+      { value: keys.whatsapp, hash: true },
+    ],
+    max: LEAD_CAPTURE_RATE_LIMIT_MAX,
+    windowMs: LEAD_CAPTURE_RATE_LIMIT_WINDOW_MS,
+    onRedisUnavailable: 'fail-closed',
+  });
+
+  return { allowed: decision.allowed, reason: decision.reason };
 }
 
 /**
@@ -293,22 +297,7 @@ export function allowLeadCaptureRequest(keys: string[]): boolean {
  * Preferência: X-Real-IP (definido pelo reverse proxy).
  * X-Forwarded-For: usa apenas o primeiro hop e não confia cegamente em cadeia spoofável.
  */
-export function clientIpFromHeaders(headers: Headers): string {
-  const realIp = headers.get('x-real-ip')?.trim();
-  if (realIp && realIp.length <= 64 && !realIp.includes(',')) {
-    return realIp;
-  }
-
-  const forwarded = headers.get('x-forwarded-for');
-  if (forwarded) {
-    const first = forwarded.split(',')[0]?.trim() || '';
-    if (first && first.length <= 64) {
-      return first;
-    }
-  }
-
-  return 'unknown';
-}
+export { clientIpFromHeaders };
 
 export function isTrustedOrigin(origin: string | null, trusted: string[]): boolean {
   if (!origin) {

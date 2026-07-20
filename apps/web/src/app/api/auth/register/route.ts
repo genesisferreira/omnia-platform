@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 
+import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
+import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared';
+
 import { loginUser, registerUser } from '@/lib/auth/payload-client';
 import { setSessionCookie } from '@/lib/auth/session';
 import type { RegisterBody } from '@/lib/auth/types';
-import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
+
+const REGISTER_WINDOW_MS = 15 * 60 * 1000;
+const REGISTER_MAX = 10;
 
 export async function POST(request: Request) {
   let body: Partial<RegisterBody>;
@@ -40,6 +45,27 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: policy.error, policyHint: PASSWORD_POLICY_HINT },
       { status: 400 },
+    );
+  }
+
+  const ip = clientIpFromHeaders(request.headers);
+  const rate = await checkRateLimit({
+    scope: 'register',
+    subjects: [{ value: `ip:${ip}` }, { value: email, hash: true }],
+    max: REGISTER_MAX,
+    windowMs: REGISTER_WINDOW_MS,
+    onRedisUnavailable: 'fail-closed',
+  });
+
+  if (!rate.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          rate.reason === 'redis_unavailable'
+            ? 'Serviço temporariamente indisponível. Tente novamente em instantes.'
+            : 'Muitas tentativas. Aguarde e tente novamente.',
+      },
+      { status: rate.reason === 'redis_unavailable' ? 503 : 429 },
     );
   }
 
