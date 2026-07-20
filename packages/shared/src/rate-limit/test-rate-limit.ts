@@ -31,7 +31,11 @@ const run = async (): Promise<void> => {
   await test('hash de e-mail é estável e sem plaintext na chave', () => {
     const hash = hashRateLimitSubject('Gen@Example.COM');
     assert.equal(hash, createHash('sha256').update('gen@example.com').digest('hex'));
-    const key = buildRateLimitKey('login', { value: 'Gen@Example.COM', hash: true }, 'omnia:test:rl');
+    const key = buildRateLimitKey(
+      'login',
+      { value: 'Gen@Example.COM', hash: true },
+      'omnia:test:rl',
+    );
     assert.match(key, /^omnia:test:rl:login:[a-f0-9]{64}$/);
     assert.equal(key.includes('@'), false);
   });

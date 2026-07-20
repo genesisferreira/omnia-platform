@@ -184,10 +184,7 @@ const run = async (): Promise<void> => {
       isTrustedOrigin('https://dev.omniafrigo.com.br', ['https://dev.omniafrigo.com.br']),
       true,
     );
-    assert.equal(
-      isTrustedOrigin('https://evil.example', ['https://dev.omniafrigo.com.br']),
-      false,
-    );
+    assert.equal(isTrustedOrigin('https://evil.example', ['https://dev.omniafrigo.com.br']), false);
   });
 
   await test('não cria User — contrato público não inclui role/status administrativo', () => {

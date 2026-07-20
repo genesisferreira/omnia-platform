@@ -1,4 +1,10 @@
-import type { AuthStrategyFunction, CollectionBeforeLoginHook, CollectionMeHook, CollectionRefreshHook, Payload } from 'payload';
+import type {
+  AuthStrategyFunction,
+  CollectionBeforeLoginHook,
+  CollectionMeHook,
+  CollectionRefreshHook,
+  Payload,
+} from 'payload';
 import { AuthenticationError, Forbidden } from 'payload';
 
 type AccountStatusUser = {
@@ -64,10 +70,7 @@ export function wrapJwtStrategyRejectBlocked(payload: Payload): void {
       const headers = new Headers(result.responseHeaders);
       if (args.canSetHeaders) {
         const prefix = payload.config?.cookiePrefix || 'payload';
-        headers.append(
-          'Set-Cookie',
-          `${prefix}-token=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`,
-        );
+        headers.append('Set-Cookie', `${prefix}-token=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`);
       }
       return { user: null, responseHeaders: headers };
     }

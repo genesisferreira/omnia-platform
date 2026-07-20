@@ -55,11 +55,7 @@ return current
 `;
 
 export function rateLimitNamespace(): string {
-  const env =
-    process.env.APP_ENV ||
-    process.env.OMNIA_ENV ||
-    process.env.NODE_ENV ||
-    'development';
+  const env = process.env.APP_ENV || process.env.OMNIA_ENV || process.env.NODE_ENV || 'development';
   return `omnia:${env}:rl`;
 }
 

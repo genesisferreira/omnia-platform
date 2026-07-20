@@ -54,7 +54,11 @@ const main = async (): Promise<void> => {
   await client.connect();
 
   assert.equal(await tableExists('crm_companies_texts'), true, 'crm_companies_texts deve existir');
-  assert.equal(await tableExists('crm_companies_tags'), false, 'crm_companies_tags deve ter sido removida');
+  assert.equal(
+    await tableExists('crm_companies_tags'),
+    false,
+    'crm_companies_tags deve ter sido removida',
+  );
 
   for (const col of ['id', 'order', 'parent_id', 'path', 'text']) {
     assert.equal(await columnExists('crm_companies_texts', col), true, `coluna ${col}`);

@@ -24,14 +24,13 @@ const fakeReq = {
 };
 
 test('beforeLogin rejeita blocked', () => {
-  assert.throws(
-    () =>
-      rejectBlockedBeforeLogin({
-        user: { id: 1, accountStatus: 'blocked' } as never,
-        req: fakeReq as never,
-        collection: {} as never,
-        context: {},
-      }),
+  assert.throws(() =>
+    rejectBlockedBeforeLogin({
+      user: { id: 1, accountStatus: 'blocked' } as never,
+      req: fakeReq as never,
+      collection: {} as never,
+      context: {},
+    }),
   );
 });
 
