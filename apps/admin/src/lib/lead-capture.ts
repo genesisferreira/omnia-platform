@@ -25,7 +25,11 @@ import {
   isLeadInterestArea,
   type LeadInterestArea,
 } from '@omnia/constants';
-import { checkRateLimit, clientIpFromHeaders, resetRateLimitMemoryForTests } from '@omnia/shared';
+import {
+  checkRateLimit,
+  clientIpFromHeaders,
+  resetRateLimitMemoryForTests,
+} from '@omnia/shared/rate-limit';
 
 export type LeadCapturePublicDto = {
   nome: string;

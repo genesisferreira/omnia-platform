@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { PASSWORD_POLICY_HINT, validatePasswordPolicy } from '@omnia/constants';
-import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared';
+import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared/rate-limit';
 
 import { loginUser, registerUser } from '@/lib/auth/payload-client';
 import { setSessionCookie } from '@/lib/auth/session';

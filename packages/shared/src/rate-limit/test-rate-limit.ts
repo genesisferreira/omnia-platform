@@ -13,7 +13,7 @@ import {
   resetRateLimitMemoryForTests,
   resetRateLimitRedisClientForTests,
   setRateLimitRedisClientForTests,
-} from '@omnia/shared';
+} from '@omnia/shared/rate-limit';
 
 let passed = 0;
 

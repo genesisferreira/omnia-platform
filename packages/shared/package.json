@@ -5,7 +5,8 @@
   "description": "Tipos, constantes e utilitários compartilhados",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./rate-limit": "./src/rate-limit/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

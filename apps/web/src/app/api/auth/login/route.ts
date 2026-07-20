@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared';
+import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared/rate-limit';
 
 import { loginUser } from '@/lib/auth/payload-client';
 import { getSessionToken, setSessionCookie } from '@/lib/auth/session';

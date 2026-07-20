@@ -23,6 +23,7 @@ import {
   rejectBlockedMe,
   rejectBlockedRefresh,
 } from '../auth/account-status';
+import { rateLimitNativeLogin } from '../auth/rate-limit-login';
 
 const INTEREST_AREA_OPTIONS = [
   { label: 'Refrigeração', value: 'refrigeracao' },
@@ -159,6 +160,7 @@ export const Users: CollectionConfig = {
     unlock: adminsOnly,
   },
   hooks: {
+    beforeOperation: [rateLimitNativeLogin],
     beforeChange: [preventSelfRoleEscalation, enforcePasswordPolicy],
     beforeLogin: [rejectBlockedBeforeLogin],
     me: [rejectBlockedMe],
