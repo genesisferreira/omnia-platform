@@ -14,6 +14,7 @@ import {
   validateLeadCaptureBody,
   type NormalizedLeadCapture,
 } from '../lib/lead-capture';
+import { getAllowedCorsOrigins } from '../lib/allowed-origins';
 
 type ErrorCode = 'BAD_REQUEST' | 'FORBIDDEN' | 'RATE_LIMITED' | 'UNPROCESSABLE' | 'INTERNAL_ERROR';
 
@@ -38,14 +39,7 @@ const successResponse = (deduped: boolean): Response =>
   );
 
 function trustedOrigins(): string[] {
-  return [
-    process.env.NEXT_PUBLIC_APP_URL,
-    process.env.NEXT_PUBLIC_PORTAL_URL,
-    process.env.PAYLOAD_PUBLIC_SERVER_URL,
-    process.env.NEXT_PUBLIC_ADMIN_URL,
-    'http://localhost:3000',
-    'http://localhost:3001',
-  ].filter((value): value is string => typeof value === 'string' && value.length > 0);
+  return getAllowedCorsOrigins();
 }
 
 function interestLabel(area: string): string {
