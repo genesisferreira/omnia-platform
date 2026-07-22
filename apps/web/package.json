@@ -13,7 +13,11 @@
     "test:site-resolver": "tsx src/scripts/test-site-resolver.ts",
     "test:seo": "tsx src/scripts/test-seo.ts",
     "test:seo-blog": "tsx src/scripts/test-seo-blog.ts",
-    "test:seo-companies": "tsx src/scripts/test-seo-companies.ts"
+    "test:seo-companies": "tsx src/scripts/test-seo-companies.ts",
+    "test:sitemap": "tsx --test src/scripts/test-sitemap.ts",
+    "test:rss": "tsx --test src/scripts/test-rss.ts",
+    "test:cms-fetch-timeout": "tsx --test src/scripts/test-cms-fetch-timeout.ts",
+    "test:feed-log": "tsx --test src/scripts/test-feed-log.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
