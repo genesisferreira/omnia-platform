@@ -1,0 +1,45 @@
+dominio,modulo,funcionalidade,evidencia_codigo,evidencia_dev,evidencia_producao,status,pendencia,risco,recomendacao
+Arquitetura,Monorepo,Apps web+admin,apps/web apps/admin,health OK,health OK,HOMOLOGADO,CHANGELOG desatualizado,Baixo,Sincronizar docs de versão
+Arquitetura,Packages scaffold,ai-core queue automation mail etc,packages/*/src export vazio,N/A,N/A,ESTRUTURA CRIADA,Implementação futura,Baixo,Não tratar como pronto
+Infra,PostgreSQL,Banco Payload,compose production/staging,health up,health up,HOMOLOGADO,,,Manter backups pré-deploy
+Infra,Redis,Rate limit,packages/shared/rate-limit,homolog R2.1,homolog R2.1,HOMOLOGADO,,,Monitorar chaves omnia:production:rl
+Infra,Filas n8n,@omnia/queue + compose,README,INDETERMINADO,INDETERMINADO,ESTRUTURA CRIADA,Sem uso app,Baixo,Adiar
+Infra,MinIO,Object storage,docs + Media local,N/A,upload local volume,ESTRUTURA CRIADA / IMPLEMENTADO local,Migrar mídia cloud,Médio,Planejar storage prod
+Infra,SMTP,E-mail Payload,sem adapter,N/A,N/A,NÃO INICIADO,Reset senha por e-mail,Alto,Priorizar ou documentar procedimento manual
+Infra,CI,GitHub Actions,.github/workflows/ci.yml,CI feature branches,N/A,IMPLEMENTADO / VALIDADO CI,,,Manter gate validate
+Auth,Users RBAC,Roles+accountStatus,Users.ts constants/roles,homolog staging,admin ativo,HOMOLOGADO,Conta única admin,Alto,Criar segundo admin autorizado
+Auth,Login nativo,Payload /api/users/login,Users hooks,OK staging,OK pós-reset,HOMOLOGADO,,,
+Auth,Login BFF,web /api/auth/*,route.ts rate-limit,OK staging,INDETERMINADO sessão atual,VALIDADO + HOMOLOGADO staging,,,
+Auth,Blocked,beforeLogin JWT wrap,account-status.ts,homolog,INDET. prod smoke,HOMOLOGADO staging,,,
+Auth,Password reset e-mail,forgot password,ausente,N/A,N/A,NÃO INICIADO,Dependência SMTP,Alto,Fluxo operacional documentado
+CMS,Sites Domains,Multisite S2S,Sites.ts Domains.ts resolve-site,OK,OK,HOMOLOGADO,,,
+CMS,Pages,Páginas institucionais,Pages.ts public-page,OK,home/sobre/contato OK,HOMOLOGADO,Contato placeholder,Baixo,Enriquecer contato
+CMS,Companies,Empresas portal,Companies.ts public-companies,hub 5 marcas,hub 4+ (sem carga),HOMOLOGADO,neurofrigo-carga 404 prod,Médio,Publicar página/empresa prod
+CMS,Media,Upload local,Media.ts,INDET.,volume prod,IMPLEMENTADO,Sem MinIO,Médio,Backup volume media
+Blog,Posts,Listagem+detalhe,Posts.ts blog pages,INDET.,3+ posts 200,HOMOLOGADO,,,
+Blog,Categorias Tags Authors,Taxonomia,collections+endpoints,INDET.,INDET. HTTP,IMPLEMENTADO / VALIDADO contratos,,,
+Blog,RSS,Feed,/blog/rss.xml + rss-feed.ts + timeout CMS,VALIDADO testes locais 2.1.1,HTTP 500 até deploy 2.1.1,CORRIGIDO EM CÓDIGO (2.1.1),Homologar/deploy smoke 200,Médio (até deploy),Publicar fix/release-2.1.1-seo-feeds
+SEO,Sitemap,sitemap.ts + sitemap-entries + CMS_FETCH_TIMEOUT_MS,VALIDADO testes+build fallback,HTTP 500 até deploy 2.1.1,CORRIGIDO EM CÓDIGO (2.1.1),Homologar/deploy smoke 200,Médio (até deploy),Publicar fix/release-2.1.1-seo-feeds
+SEO,CMS fetch timeout,cms-fetch.ts CMS_FETCH_TIMEOUT_MS,test:cms-fetch-timeout OK,N/A,VALIDADO LOCAL,Documentar env em deploys,Baixo,Default 5000 ms
+Release,v2.1.1,SEO feeds resilientes,branch fix/release-2.1.1-seo-feeds,lint/typecheck/test/build OK,Pendente deploy,VALIDADO LOCAL,Push/merge/deploy sob autorização,Baixo,Homologar DEV/staging depois prod
+SEO,Robots,robots.ts,Allow /,INDET.,200,HOMOLOGADO,,,
+SEO,Metadata OG,lib/seo + tests,test:seo CI,CI,páginas OK,VALIDADO,,,
+CRM,Organizations,Grupo Omnia,Organizations.ts public-orgs,7 docs,5 docs,HOMOLOGADO,Gap vs DEV (carga/sapientia),Baixo,Decidir seed prod completo
+CRM,CrmCompanies,Contas,CrmCompanies.ts,homolog,vazio pós-smoke,HOMOLOGADO (código),Dados comerciais vazios,Baixo,Operação comercial
+CRM,Contacts,Contatos,Contacts.ts,homolog,vazio,HOMOLOGADO (código),,,
+CRM,Leads,Pipeline select,Leads.ts statuses,homolog,vazio,HOMOLOGADO (código),Sem Kanban,Baixo,Não confundir com CRM avançado
+CRM,Activities,Auditoria,Activities.ts hooks,homolog,vazio,HOMOLOGADO (código),,,
+CRM,Lead capture,POST lead-capture,endpoint+interesse,homolog,form+orgs OK,HOMOLOGADO,,,
+CRM,Dedupe,15min window,lead-capture lib+tests,homolog,homolog R2.1,HOMOLOGADO,,,
+CRM,Kanban,Board visual,ausente,N/A,N/A,NÃO INICIADO,Roadmap,Baixo,Backlog futuro
+CRM,Opportunities,Entidade,ausente,N/A,N/A,NÃO INICIADO,Roadmap,Baixo,Backlog futuro
+CRM,Tasks Calendar Reports,Operação avançada,ausente,N/A,N/A,NÃO INICIADO,Roadmap,Baixo,Backlog futuro
+CRM,Automations,n8n/event bus,packages scaffold,N/A,N/A,ESTRUTURA CRIADA,,,Adiar
+Educação,LMS,Courses lessons enrollments,só docs,N/A,N/A,NÃO INICIADO,Roadmap S8+,Médio,Não vender como pronto
+Educação,Área aluno,stubs role pages,area/[role],N/A,N/A,ESTRUTURA CRIADA,,,
+IA,ai-core RAG agents,packages/ai-core,export vazio,N/A,N/A,ESTRUTURA CRIADA,Roadmap S12,Médio,Separar marca Neurofrigo de produto IA
+IA,Neurofrigo IoT,devices telemetria,ausente,N/A,N/A,NÃO INICIADO,Roadmap S13,Baixo,
+Portal,Interesse,Landing lead,/interesse,OK,OK orgs,HOMOLOGADO,,,
+Portal,Cadastro Login área,auth pages,cadastro minha-conta,INDET.,200,IMPLEMENTADO,,,
+Observabilidade,Health, /api/health,web+admin,OK admin.dev,OK prod,HOMOLOGADO,APM ausente,Baixo,Considerar APM
+Release,v2.1.0,Identity CRM,migrations 20260720*,homolog staging,deploy 68863ed,HOMOLOGADO,CHANGELOG/package version drift,Médio,Alinhar versionamento

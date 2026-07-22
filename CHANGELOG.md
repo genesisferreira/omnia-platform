@@ -4,6 +4,30 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.1] — 2026-07-22
+
+### Corrigido — SEO feeds (Sitemap + RSS)
+
+Hotfix sobre a base `68863ed` (Release 2.1), branch `fix/release-2.1.1-seo-feeds`.
+
+#### Causa raiz
+
+Consultas CMS do portal para `/sitemap.xml` e `/blog/rss.xml` usavam `fetch` **sem timeout**. Em hang do Admin/Payload a Promise nunca encerrava → HTTP 500. O soft-fail das páginas não garantia rejeição explícita no timeout nem fallback global nos feeds.
+
+#### Solução
+
+- Timeout configurável via `CMS_FETCH_TIMEOUT_MS` (default seguro **5000** ms; faixa 100–60000) em `apps/web/src/lib/cms/cms-fetch.ts` (`fetchWithCmsTimeout`).
+- `AbortError` / timeout tratados como fallback (não erro fatal); helper rejeita no abort mesmo se o `fetchImpl` ignorar o signal.
+- Sitemap resiliente: sempre retorna lista válida para Metadata API; sob falha CMS devolve ao menos rotas estáticas absolutas; exclui noIndex / slugs inválidos; dedupe; datas inválidas ignoradas sem `RangeError`.
+- RSS resiliente: sempre HTTP **200** com XML válido e `Content-Type: application/rss+xml; charset=utf-8`; sob falha CMS canal institucional com lista vazia; escape XML; ordenação por data.
+- Logs estruturados seguros (`cms_feed_fallback`): módulo, endpoint, tipo da falha, duração, siteSlug, fallback — sem secrets, headers, cookies, tokens, bodies ou stack para o cliente.
+
+#### Validação local
+
+- lint, typecheck, testes SEO/feeds e build `@omnia/web` OK.
+- Fallback do sitemap observado no build (`cms_feed_fallback` / network).
+- **Nota de ambiente:** o build local nesta máquina usou `NODE_USE_SYSTEM_CA=1` para o Node confiar na CA do Windows (TLS/`next/font`). Isso é **requisito do ambiente Windows local**, não da aplicação Omnia nem do runtime de produção.
+
 ### Sprint 2 — Platform Base (em revisão)
 
 #### Adicionado
