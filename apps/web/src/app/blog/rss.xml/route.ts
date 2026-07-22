@@ -1,22 +1,10 @@
-import { fetchPublicPosts } from '@/lib/cms-blog';
-import {
-  getPublicSiteOrigin,
-  resolveCanonicalUrl,
-  resolveSeoHostname,
-  SEO_SITE_NAME,
-} from '@/lib/seo';
+import { classifyFetchFailure, logFeedFailure } from '@/lib/seo/feed-log';
+import { fetchFeedPosts } from '@/lib/seo/cms-feed-client';
+import { buildRssXml, RSS_CONTENT_TYPE } from '@/lib/seo/rss-feed';
+import { getPublicSiteOrigin, resolveCanonicalUrl, resolveSeoHostname } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
 
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-export async function GET(): Promise<Response> {
+async function resolveFeedSite(): Promise<{ hostname: string; siteSlug: string }> {
   let hostname = resolveSeoHostname(null);
   let siteSlug = 'omnia-hub';
 
@@ -24,53 +12,90 @@ export async function GET(): Promise<Response> {
     const siteContext = await getSiteContext();
     hostname = resolveSeoHostname(siteContext.hostname || null);
     if (siteContext.resolution.ok) {
-      siteSlug = siteContext.resolution.context.site.slug;
+      const slug = siteContext.resolution.context.site.slug;
+      if (typeof slug === 'string' && slug.trim()) {
+        siteSlug = slug.trim().toLowerCase();
+      }
     }
   } catch {
-    // Build/runtime sem request headers.
+    // Sem headers / S2S — usa defaults públicos.
   }
 
-  const list = await fetchPublicPosts({ siteSlug, page: 1, pageSize: 20 });
-  const channelLink =
-    resolveCanonicalUrl({ pathname: '/blog', hostname }) ?? `${getPublicSiteOrigin()}/blog`;
+  return { hostname, siteSlug };
+}
 
-  const itemsXml = list.items
-    .map((post) => {
-      const link =
-        resolveCanonicalUrl({ pathname: `/blog/${post.slug}`, hostname }) ??
-        `${getPublicSiteOrigin()}/blog/${post.slug}`;
-      const pubDate = post.publishedAt
-        ? new Date(post.publishedAt).toUTCString()
-        : new Date().toUTCString();
-      const description = escapeXml(post.excerpt ?? post.title);
-
-      return `    <item>
-      <title>${escapeXml(post.title)}</title>
-      <link>${escapeXml(link)}</link>
-      <guid isPermaLink="true">${escapeXml(link)}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <description>${description}</description>
-    </item>`;
-    })
-    .join('\n');
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>${escapeXml(`${SEO_SITE_NAME} — Blog`)}</title>
-    <link>${escapeXml(channelLink)}</link>
-    <description>${escapeXml('Artigos e novidades do ecossistema Omnia Frigo Holding.')}</description>
-    <language>pt-BR</language>
-${itemsXml}
-  </channel>
-</rss>
-`;
-
+function emptyFeedResponse(origin: string): Response {
+  const xml = buildRssXml({ origin, posts: [] });
   return new Response(xml, {
     status: 200,
     headers: {
-      'Content-Type': 'application/rss+xml; charset=utf-8',
+      'Content-Type': RSS_CONTENT_TYPE,
       'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
     },
   });
+}
+
+/**
+ * RSS resiliente (Release 2.1.1).
+ * Sempre HTTP 200 com XML válido; sob falha CMS → canal vazio.
+ */
+export async function GET(): Promise<Response> {
+  const started = Date.now();
+  let siteSlug = 'omnia-hub';
+  let origin = getPublicSiteOrigin();
+
+  try {
+    const resolved = await resolveFeedSite();
+    siteSlug = resolved.siteSlug;
+    origin =
+      resolveCanonicalUrl({ pathname: '/', hostname: resolved.hostname })?.replace(/\/$/, '') ??
+      getPublicSiteOrigin();
+
+    let posts: {
+      title: string;
+      slug: string;
+      excerpt?: string | null;
+      publishedAt?: string | null;
+      authorName?: string | null;
+      imageUrl?: string | null;
+      categoryName?: string | null;
+    }[] = [];
+
+    try {
+      posts = await fetchFeedPosts(siteSlug, 20);
+    } catch (error) {
+      logFeedFailure({
+        module: 'rss',
+        endpoint: 'public-posts',
+        failureType: classifyFetchFailure(error),
+        durationMs: Date.now() - started,
+        siteSlug,
+        fallbackApplied: true,
+      });
+      return emptyFeedResponse(origin);
+    }
+
+    const xml = buildRssXml({ origin, posts });
+    return new Response(xml, {
+      status: 200,
+      headers: {
+        'Content-Type': RSS_CONTENT_TYPE,
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+      },
+    });
+  } catch (error) {
+    logFeedFailure({
+      module: 'rss',
+      endpoint: 'rss',
+      failureType: classifyFetchFailure(error),
+      durationMs: Date.now() - started,
+      siteSlug,
+      fallbackApplied: true,
+    });
+    try {
+      return emptyFeedResponse(origin || getPublicSiteOrigin());
+    } catch {
+      return emptyFeedResponse('https://omniafrigo.com.br');
+    }
+  }
 }
