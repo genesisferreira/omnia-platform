@@ -21,3 +21,10 @@ export {
   type JsonLdRecord,
 } from './json-ld';
 export { getPublicSiteOrigin, resolveCanonicalUrl, resolveSeoHostname } from './site-url';
+export {
+  buildSitemapEntries,
+  buildStaticSitemapEntries,
+  parseSafeLastModified,
+} from './sitemap-entries';
+export { buildRssXml, escapeXml, RSS_CONTENT_TYPE } from './rss-feed';
+export { logFeedFailure } from './feed-log';

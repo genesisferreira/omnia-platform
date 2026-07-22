@@ -10,6 +10,8 @@ import type {
 } from '@omnia/shared';
 import { getConfig } from '@omnia/config';
 
+import { fetchWithCmsTimeout } from '@/lib/cms/cms-fetch';
+
 function getAdminApiUrl(): string {
   return getConfig().app.adminUrl;
 }
@@ -179,7 +181,7 @@ const fetchPublicPostsCached = cache(
         url.searchParams.set('q', q);
       }
 
-      const res = await fetch(url.toString(), {
+      const res = await fetchWithCmsTimeout(url.toString(), {
         next: { revalidate: 60 },
       });
       if (!res.ok) {
@@ -219,7 +221,7 @@ export const fetchPublicPost = cache(
       url.searchParams.set('site', site);
       url.searchParams.set('slug', slug);
 
-      const res = await fetch(url.toString(), {
+      const res = await fetchWithCmsTimeout(url.toString(), {
         next: { revalidate: 60 },
       });
       if (!res.ok) {
@@ -250,7 +252,7 @@ export const fetchPublicPostCategories = cache(
       const url = new URL(`${base}/api/omnia/public-post-categories`);
       url.searchParams.set('site', site);
 
-      const res = await fetch(url.toString(), {
+      const res = await fetchWithCmsTimeout(url.toString(), {
         next: { revalidate: 60 },
       });
       if (!res.ok) {
@@ -280,7 +282,7 @@ export const fetchPublicPostTags = cache(async (siteSlug: string): Promise<Publi
     const url = new URL(`${base}/api/omnia/public-post-tags`);
     url.searchParams.set('site', site);
 
-    const res = await fetch(url.toString(), {
+    const res = await fetchWithCmsTimeout(url.toString(), {
       next: { revalidate: 60 },
     });
     if (!res.ok) {

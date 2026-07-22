@@ -3,6 +3,8 @@ import { cache } from 'react';
 import type { PublicCompanyDto, PublicCompanyListItemDto } from '@omnia/shared';
 import { getConfig } from '@omnia/config';
 
+import { fetchWithCmsTimeout } from '@/lib/cms/cms-fetch';
+
 function getAdminApiUrl(): string {
   return getConfig().app.adminUrl;
 }
@@ -65,7 +67,7 @@ function isListItem(value: unknown): value is PublicCompanyListItemDto {
 
 export const fetchPublicCompanies = cache(async (): Promise<PublicCompanyListItemDto[]> => {
   try {
-    const res = await fetch(`${getAdminApiUrl()}/api/omnia/public-companies`, {
+    const res = await fetchWithCmsTimeout(`${getAdminApiUrl()}/api/omnia/public-companies`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) {
@@ -90,7 +92,7 @@ export const fetchPublicCompany = cache(
       }
       const url = new URL(`${getAdminApiUrl()}/api/omnia/public-company`);
       url.searchParams.set('slug', slug);
-      const res = await fetch(url.toString(), {
+      const res = await fetchWithCmsTimeout(url.toString(), {
         next: { revalidate: 60 },
       });
       if (!res.ok) {

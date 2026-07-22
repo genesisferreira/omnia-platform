@@ -4,6 +4,7 @@ import { mapPublicPage, type PublicPageDto } from '@omnia/shared';
 
 import { getConfig } from '@omnia/config';
 
+import { fetchWithCmsTimeout } from '@/lib/cms/cms-fetch';
 import { resolvePublicImageAlt } from '@/lib/seo';
 
 export type CmsCompany = {
@@ -82,7 +83,7 @@ export async function fetchCompanies(limit?: number): Promise<CmsCompany[]> {
 const fetchCompaniesCached = cache(async (): Promise<CmsCompany[]> => {
   try {
     const base = getAdminApiUrl();
-    const res = await fetch(`${base}/api/omnia/public-companies`, {
+    const res = await fetchWithCmsTimeout(`${base}/api/omnia/public-companies`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return [];
@@ -136,7 +137,7 @@ export const fetchPublicPage = cache(
       url.searchParams.set('site', trimmedSite);
       url.searchParams.set('slug', trimmedSlug);
 
-      const res = await fetch(url.toString(), {
+      const res = await fetchWithCmsTimeout(url.toString(), {
         next: { revalidate: 60 },
       });
       if (!res.ok) return null;
@@ -154,7 +155,7 @@ export const fetchPublicPage = cache(
 export async function fetchGlobalSettings(): Promise<CmsGlobalSettings | null> {
   try {
     const base = getAdminApiUrl();
-    const res = await fetch(`${base}/api/globals/global-settings`, {
+    const res = await fetchWithCmsTimeout(`${base}/api/globals/global-settings`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
