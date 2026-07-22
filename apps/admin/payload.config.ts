@@ -2,10 +2,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { postgresAdapter } from '@payloadcms/db-postgres';
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
 import { wrapJwtStrategyRejectBlocked } from './src/auth/account-status';
+import { loadRootEnvFile, resolveSmtpConfig, smtpConfigForLog } from './src/email/smtp-config';
 import { Activities } from './src/collections/Activities';
 import { Authors } from './src/collections/Authors';
 import { Categories } from './src/collections/Categories';
@@ -38,7 +40,11 @@ import { GlobalSettings } from './src/globals/GlobalSettings';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+loadRootEnvFile();
+const smtp = resolveSmtpConfig();
+
 export default buildConfig({
+  serverURL: smtp.serverURL,
   admin: {
     user: Users.slug,
     importMap: {
@@ -48,6 +54,23 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
+  email: nodemailerAdapter({
+    defaultFromAddress: smtp.from.address,
+    defaultFromName: smtp.from.name,
+    transportOptions: {
+      host: smtp.transport.host,
+      port: smtp.transport.port,
+      secure: smtp.transport.secure,
+      ...(smtp.transport.auth
+        ? {
+            auth: {
+              user: smtp.transport.auth.user,
+              pass: smtp.transport.auth.pass,
+            },
+          }
+        : {}),
+    },
+  }),
   collections: [
     Users,
     Tenants,
@@ -95,5 +118,9 @@ export default buildConfig({
   ].filter(Boolean),
   onInit: (payload) => {
     wrapJwtStrategyRejectBlocked(payload);
+    payload.logger.info({
+      msg: 'SMTP configurado',
+      smtp: smtpConfigForLog(smtp),
+    });
   },
 });

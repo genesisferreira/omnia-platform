@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
@@ -151,6 +152,12 @@ export function LoginForm() {
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? 'Entrando…' : 'Entrar'}
           </Button>
+          <Link
+            href="/esqueci-senha"
+            className="block text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
         </form>
       </CardContent>
     </Card>

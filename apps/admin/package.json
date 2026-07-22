@@ -34,7 +34,8 @@
     "test:p04-schema-db": "tsx src/scripts/test-p04-schema-db.ts",
     "test:rbac": "tsx --test src/scripts/test-rbac.ts",
     "test:lead-capture": "tsx src/scripts/test-lead-capture.ts",
-    "test:account-status": "tsx src/scripts/test-account-status.ts"
+    "test:account-status": "tsx src/scripts/test-account-status.ts",
+    "test:smtp-auth": "tsx --test src/scripts/test-smtp-auth.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
@@ -44,11 +45,13 @@
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",
+    "@payloadcms/email-nodemailer": "^3.85.2",
     "@payloadcms/next": "catalog:",
     "@payloadcms/richtext-lexical": "catalog:",
     "@payloadcms/ui": "catalog:",
     "graphql": "catalog:",
     "next": "catalog:",
+    "nodemailer": "^9.0.3",
     "payload": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -57,6 +60,7 @@
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
     "@types/node": "^22.10.2",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "catalog:",

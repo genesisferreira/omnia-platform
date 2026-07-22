@@ -25,6 +25,7 @@ catalog:
   '@payloadcms/next': ^3.14.0
   '@payloadcms/richtext-lexical': ^3.14.0
   '@payloadcms/ui': ^3.14.0
+  '@payloadcms/email-nodemailer': ^3.85.2
   sharp: ^0.33.5
   graphql: ^16.10.0
   class-variance-authority: ^0.7.1

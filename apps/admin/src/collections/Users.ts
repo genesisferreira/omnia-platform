@@ -24,6 +24,11 @@ import {
   rejectBlockedRefresh,
 } from '../auth/account-status';
 import { rateLimitNativeLogin } from '../auth/rate-limit-login';
+import {
+  generateForgotPasswordHTML,
+  generateForgotPasswordSubject,
+} from '../email/forgot-password-email';
+import { resolveAdminServerURL } from '../email/smtp-config';
 
 const INTEREST_AREA_OPTIONS = [
   { label: 'Refrigeração', value: 'refrigeracao' },
@@ -142,6 +147,15 @@ export const Users: CollectionConfig = {
     },
     maxLoginAttempts: 8,
     lockTime: 10 * 60 * 1000,
+    forgotPassword: {
+      // 1 hora
+      expiration: 60 * 60 * 1000,
+      generateEmailSubject: () => generateForgotPasswordSubject(),
+      generateEmailHTML: (args) =>
+        generateForgotPasswordHTML(args ?? {}, {
+          serverURL: resolveAdminServerURL(),
+        }),
+    },
   },
   admin: {
     useAsTitle: 'email',
