@@ -32,9 +32,24 @@ describe('getCmsFetchTimeoutMs', () => {
 
 describe('fetchWithCmsTimeout', () => {
   it('propaga AbortError quando a conexão nunca responde', async () => {
-    const hangingFetch: typeof fetch = () =>
-      new Promise(() => {
-        /* nunca resolve */
+    // Simula hang de rede: não resolve sozinho; só rejeita se o signal abortar.
+    // (Sem isso, sobra Promise zumbi e o node:test cancela a suite.)
+    const hangingFetch: typeof fetch = (_input, init) =>
+      new Promise((_resolve, reject) => {
+        const signal = init?.signal;
+        if (!signal) {
+          return;
+        }
+        const onAbort = () => {
+          const err = new Error('Aborted');
+          err.name = 'AbortError';
+          reject(err);
+        };
+        if (signal.aborted) {
+          onAbort();
+          return;
+        }
+        signal.addEventListener('abort', onAbort, { once: true });
       });
 
     await assert.rejects(

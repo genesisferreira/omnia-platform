@@ -42,6 +42,15 @@ export function isAbortError(error: unknown): boolean {
   );
 }
 
+function createAbortError(): Error {
+  if (typeof DOMException === 'function') {
+    return new DOMException('The operation was aborted.', 'AbortError');
+  }
+  const error = new Error('The operation was aborted.');
+  error.name = 'AbortError';
+  return error;
+}
+
 export type CmsFetchInit = RequestInit & {
   /** Override do timeout (ms). Default: getCmsFetchTimeoutMs(). */
   timeoutMs?: number;
@@ -50,6 +59,8 @@ export type CmsFetchInit = RequestInit & {
 
 /**
  * `fetch` com AbortController + timeout.
+ * Rejeita com AbortError no timeout ou abort externo mesmo se `fetchImpl`
+ * ignorar `signal` (ex.: conexão que nunca responde).
  * Propaga AbortError (e outras falhas de rede) para o caller tratar como soft-fail.
  */
 export async function fetchWithCmsTimeout(
@@ -68,24 +79,80 @@ export async function fetchWithCmsTimeout(
   const onUpstreamAbort = () => {
     controller.abort();
   };
+
   if (upstream) {
     if (upstream.aborted) {
-      clearTimeout(timeoutId);
       controller.abort();
     } else {
-      upstream.addEventListener('abort', onUpstreamAbort, { once: true });
+      upstream.addEventListener('abort', onUpstreamAbort);
     }
   }
 
+  let onAbort: (() => void) | undefined;
+
   try {
-    return await fetchImpl(input, {
-      ...rest,
-      signal: controller.signal,
+    if (controller.signal.aborted) {
+      throw createAbortError();
+    }
+
+    return await new Promise<Response>((resolve, reject) => {
+      let settled = false;
+
+      const settleResolve = (response: Response) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (onAbort) {
+          controller.signal.removeEventListener('abort', onAbort);
+          onAbort = undefined;
+        }
+        resolve(response);
+      };
+
+      const settleReject = (error: unknown) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (onAbort) {
+          controller.signal.removeEventListener('abort', onAbort);
+          onAbort = undefined;
+        }
+        reject(error);
+      };
+
+      onAbort = () => {
+        settleReject(createAbortError());
+      };
+      controller.signal.addEventListener('abort', onAbort);
+
+      Promise.resolve(
+        fetchImpl(input, {
+          ...rest,
+          signal: controller.signal,
+        }),
+      ).then(
+        (response) => {
+          settleResolve(response);
+        },
+        (error: unknown) => {
+          if (controller.signal.aborted || isAbortError(error)) {
+            settleReject(createAbortError());
+            return;
+          }
+          settleReject(error);
+        },
+      );
     });
   } finally {
     clearTimeout(timeoutId);
     if (upstream) {
       upstream.removeEventListener('abort', onUpstreamAbort);
+    }
+    if (onAbort) {
+      controller.signal.removeEventListener('abort', onAbort);
+      onAbort = undefined;
     }
   }
 }
