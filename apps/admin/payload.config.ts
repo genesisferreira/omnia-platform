@@ -36,6 +36,7 @@ import {
 } from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { GlobalSettings } from './src/globals/GlobalSettings';
+import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -112,10 +113,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  cors: [
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3001',
-  ].filter(Boolean),
+  cors: getAllowedCorsOrigins(),
   onInit: (payload) => {
     wrapJwtStrategyRejectBlocked(payload);
     payload.logger.info({
