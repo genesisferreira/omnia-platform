@@ -10,6 +10,7 @@ import * as migration_20260720_120000_identity_crm_foundation from './20260720_1
 import * as migration_20260720_180000_lead_capture_activity from './20260720_180000_lead_capture_activity';
 import * as migration_20260720_190000_crm_companies_texts from './20260720_190000_crm_companies_texts';
 import * as migration_20260720_191000_locked_documents_crm_rels from './20260720_191000_locked_documents_crm_rels';
+import * as migration_20260724_120000_partner_network from './20260724_120000_partner_network';
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260720_191000_locked_documents_crm_rels.up,
     down: migration_20260720_191000_locked_documents_crm_rels.down,
     name: '20260720_191000_locked_documents_crm_rels',
+  },
+  {
+    up: migration_20260724_120000_partner_network.up,
+    down: migration_20260724_120000_partner_network.down,
+    name: '20260724_120000_partner_network',
   },
 ];

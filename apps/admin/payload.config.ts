@@ -23,6 +23,8 @@ import { Leads } from './src/collections/Leads';
 import { Media } from './src/collections/Media';
 import { Organizations } from './src/collections/Organizations';
 import { Pages } from './src/collections/Pages';
+import { PartnerCategories } from './src/collections/PartnerCategories';
+import { Partners } from './src/collections/Partners';
 import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
 import { Tags } from './src/collections/Tags';
@@ -40,6 +42,7 @@ import {
 } from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { GlobalSettings } from './src/globals/GlobalSettings';
+import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 
 const filename = fileURLToPath(import.meta.url);
@@ -83,8 +86,10 @@ export default buildConfig({
     Categories,
     Tags,
     Posts,
+    PartnerCategories,
+    Partners,
   ],
-  globals: [GlobalSettings],
+  globals: [GlobalSettings, PartnerNetworkDashboard],
   endpoints: [
     resolveSiteEndpoint,
     publicCompaniesEndpoint,
