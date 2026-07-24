@@ -6,6 +6,12 @@ import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 export function Footer() {
   const year = new Date().getFullYear();
 
+  const footerLinks = INSTITUTIONAL_NAV_ITEMS.flatMap((item) =>
+    item.children
+      ? item.children.map((child) => ({ href: child.href, label: child.label }))
+      : [{ href: item.href, label: item.label }],
+  );
+
   return (
     <footer className="relative border-t border-omnia-deep-blue/50 bg-omnia-graphite text-omnia-white">
       <div
@@ -21,10 +27,10 @@ export function Footer() {
             </p>
           </div>
 
-          <nav aria-label="Rodapé" className="flex flex-col gap-2 sm:flex-row sm:gap-6">
-            {INSTITUTIONAL_NAV_ITEMS.map((item) => (
+          <nav aria-label="Rodapé" className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-6">
+            {footerLinks.map((item) => (
               <InstitutionalNavLink
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 href={item.href}
                 className="text-sm text-omnia-white/80 transition-colors hover:text-omnia-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-copper focus-visible:ring-offset-2 focus-visible:ring-offset-omnia-graphite motion-reduce:transition-none"
               >

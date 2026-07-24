@@ -5,6 +5,7 @@ import { BlockRenderer } from '@/components/home/BlockRenderer';
 import { CompanyCards } from '@/components/home/CompanyCards';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { Hero } from '@/components/home/Hero';
+import { NearbyPartnersSection } from '@/components/partners/NearbyPartnersSection';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { fetchCompanies, fetchGlobalSettings, fetchPublicPage } from '@/lib/cms';
 import {
@@ -53,6 +54,7 @@ async function FallbackHome() {
       <Hero settings={settings} />
       <FeaturesSection />
       <CompanyCards companies={companies} />
+      <NearbyPartnersSection />
     </>
   );
 }
@@ -80,6 +82,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={webPageLd} />
       <BlockRenderer blocks={page.blocks} />
+      <NearbyPartnersSection />
     </>
   );
 }

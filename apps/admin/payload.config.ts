@@ -25,6 +25,7 @@ import { Organizations } from './src/collections/Organizations';
 import { Pages } from './src/collections/Pages';
 import { PartnerCategories } from './src/collections/PartnerCategories';
 import { Partners } from './src/collections/Partners';
+import { PartnerSpecialties } from './src/collections/PartnerSpecialties';
 import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
 import { Tags } from './src/collections/Tags';
@@ -33,7 +34,14 @@ import { Users } from './src/collections/Users';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
+import { partnerRegisterEndpoint } from './src/endpoints/partner-register';
 import { publicPageEndpoint } from './src/endpoints/public-page';
+import {
+  publicPartnerCategoriesEndpoint,
+  publicPartnerEndpoint,
+  publicPartnersEndpoint,
+  publicPartnerSpecialtiesEndpoint,
+} from './src/endpoints/public-partners';
 import {
   publicPostCategoriesEndpoint,
   publicPostEndpoint,
@@ -87,6 +95,7 @@ export default buildConfig({
     Tags,
     Posts,
     PartnerCategories,
+    PartnerSpecialties,
     Partners,
   ],
   globals: [GlobalSettings, PartnerNetworkDashboard],
@@ -101,6 +110,11 @@ export default buildConfig({
     publicPostEndpoint,
     publicPostCategoriesEndpoint,
     publicPostTagsEndpoint,
+    publicPartnersEndpoint,
+    publicPartnerEndpoint,
+    publicPartnerCategoriesEndpoint,
+    publicPartnerSpecialtiesEndpoint,
+    partnerRegisterEndpoint,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

@@ -493,7 +493,18 @@ Implementação admin (sem Portal público / geo / CRM / IA):
 
 **Permissões nesta fase:** Admin CRUD; Moderador (`editor`) somente leitura; Parceiro sem acesso. Campos de governança (status, featured, verified, plan, approvalNotes, approvedAt, approvedBy, publishedAt) com `access.update` restrito a admin.
 
-Detalhes: `docs/releases/PARTNER_NETWORK_CHECKPOINT_01.md`.
+### 14.2 Macroentrega 02 — experiência pública (2026-07-24)
+
+Entregue no Portal (`apps/web`) e APIs públicas (`/api/omnia/public-partners*`, `partner-register`):
+
+- Rotas `/parceiros`, `/parceiros/cadastro`, `/parceiros/[slug]`
+- Collection `partner-specialties` (N:N)
+- Geolocalização GPS + fallback manual; Haversine; GeocodingProvider opcional
+- Home: seção condicional “Parceiros próximos de você”
+- Cadastro público com rate limit, honeypot e mass-assignment block
+- WhatsApp como CTA de orçamento (PartnerLead = próxima evolução)
+
+Detalhes: `docs/releases/PARTNER_NETWORK_MACRO_02.md`.
 
 **Próximo passo:** Portal público e geolocalização (fases seguintes), sem remodelagem dos campos acima.
 

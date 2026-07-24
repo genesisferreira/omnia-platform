@@ -36,7 +36,8 @@
     "test:lead-capture": "tsx src/scripts/test-lead-capture.ts",
     "test:account-status": "tsx src/scripts/test-account-status.ts",
     "test:smtp-auth": "tsx --test src/scripts/test-smtp-auth.ts",
-    "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts"
+    "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts",
+    "test:partner-register": "tsx --test src/scripts/test-partner-register.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",

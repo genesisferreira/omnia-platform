@@ -118,9 +118,38 @@ export const Partners: CollectionConfig = {
               },
             },
             {
+              name: 'specialties',
+              type: 'relationship',
+              relationTo: 'partner-specialties',
+              hasMany: true,
+              label: 'Especialidades',
+              admin: {
+                description: 'Capacidades técnicas (N:N com partner-specialties).',
+              },
+            },
+            {
               name: 'description',
               type: 'textarea',
               label: 'Descrição',
+            },
+            {
+              name: 'servicesDescription',
+              type: 'textarea',
+              label: 'Descrição dos serviços',
+            },
+            {
+              name: 'brandsServed',
+              type: 'array',
+              label: 'Marcas atendidas',
+              labels: { singular: 'Marca', plural: 'Marcas' },
+              fields: [
+                {
+                  name: 'name',
+                  type: 'text',
+                  required: true,
+                  label: 'Marca',
+                },
+              ],
             },
             {
               name: 'ownerUser',
@@ -226,6 +255,21 @@ export const Partners: CollectionConfig = {
               label: 'Endereço',
             },
             {
+              name: 'addressNumber',
+              type: 'text',
+              label: 'Número',
+            },
+            {
+              name: 'addressComplement',
+              type: 'text',
+              label: 'Complemento',
+            },
+            {
+              name: 'neighborhood',
+              type: 'text',
+              label: 'Bairro',
+            },
+            {
               name: 'zipCode',
               type: 'text',
               label: 'CEP',
@@ -234,11 +278,13 @@ export const Partners: CollectionConfig = {
               name: 'city',
               type: 'text',
               label: 'Cidade',
+              index: true,
             },
             {
               name: 'state',
               type: 'text',
               label: 'Estado',
+              index: true,
               admin: {
                 description: 'UF (ex.: SP, RJ).',
               },
@@ -253,9 +299,10 @@ export const Partners: CollectionConfig = {
               name: 'latitude',
               type: 'number',
               label: 'Latitude',
+              index: true,
               admin: {
                 description:
-                  'Campo preparado para geolocalização futura — sem geocode automático nesta fase.',
+                  'Campo preparado para geolocalização — preenchido via geocode quando provedor configurado.',
                 step: 0.000001,
               },
             },
@@ -263,9 +310,10 @@ export const Partners: CollectionConfig = {
               name: 'longitude',
               type: 'number',
               label: 'Longitude',
+              index: true,
               admin: {
                 description:
-                  'Campo preparado para geolocalização futura — sem geocode automático nesta fase.',
+                  'Campo preparado para geolocalização — preenchido via geocode quando provedor configurado.',
                 step: 0.000001,
               },
             },
@@ -385,7 +433,11 @@ export const Partners: CollectionConfig = {
               name: 'active',
               type: 'checkbox',
               label: 'Ativo',
-              defaultValue: true,
+              defaultValue: false,
+              admin: {
+                description:
+                  'Cadastros públicos iniciam inativos. Ative junto com a aprovação para publicar.',
+              },
             },
             {
               name: 'approvalNotes',

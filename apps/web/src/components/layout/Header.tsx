@@ -11,7 +11,9 @@ import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [partnersOpen, setPartnersOpen] = useState(false);
   const menuId = useId();
+  const partnersId = useId();
 
   useEffect(() => {
     if (!menuOpen) {
@@ -21,6 +23,7 @@ export function Header() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setMenuOpen(false);
+        setPartnersOpen(false);
       }
     };
 
@@ -40,7 +43,10 @@ export function Header() {
     return () => media.removeEventListener('change', onChange);
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setPartnersOpen(false);
+  };
 
   return (
     <header className="relative sticky top-0 z-50 border-b border-omnia-deep-blue/10 bg-omnia-white/95 backdrop-blur supports-[backdrop-filter]:bg-omnia-white/90">
@@ -48,15 +54,49 @@ export function Header() {
         <BrandHomeLink />
 
         <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
-          {INSTITUTIONAL_NAV_ITEMS.map((item) => (
-            <InstitutionalNavLink
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-omnia-graphite-light transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              {item.label}
-            </InstitutionalNavLink>
-          ))}
+          {INSTITUTIONAL_NAV_ITEMS.map((item) =>
+            item.children ? (
+              <div key={item.href} className="relative">
+                <button
+                  type="button"
+                  className="text-sm font-medium text-omnia-graphite-light transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2"
+                  aria-expanded={partnersOpen}
+                  aria-controls={partnersId}
+                  onClick={() => setPartnersOpen((open) => !open)}
+                  onBlur={() => {
+                    window.setTimeout(() => setPartnersOpen(false), 150);
+                  }}
+                >
+                  {item.label}
+                </button>
+                {partnersOpen ? (
+                  <div
+                    id={partnersId}
+                    className="absolute left-0 top-full z-50 mt-2 min-w-[12rem] border border-omnia-deep-blue/10 bg-omnia-white py-2 shadow-md"
+                  >
+                    {item.children.map((child) => (
+                      <InstitutionalNavLink
+                        key={child.href}
+                        href={child.href}
+                        className="block px-4 py-2 text-sm text-omnia-deep-blue hover:bg-omnia-emerald/5"
+                        onClick={() => setPartnersOpen(false)}
+                      >
+                        {child.label}
+                      </InstitutionalNavLink>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <InstitutionalNavLink
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-omnia-graphite-light transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 motion-reduce:transition-none"
+              >
+                {item.label}
+              </InstitutionalNavLink>
+            ),
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -92,16 +132,34 @@ export function Header() {
       >
         <Container className="flex flex-col gap-1 py-3">
           <nav aria-label="Principal mobile" className="flex flex-col gap-1">
-            {INSTITUTIONAL_NAV_ITEMS.map((item) => (
-              <InstitutionalNavLink
-                key={item.href}
-                href={item.href}
-                onClick={closeMenu}
-                className="rounded-md px-3 py-3 text-sm font-medium text-omnia-deep-blue hover:bg-omnia-emerald/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald"
-              >
-                {item.label}
-              </InstitutionalNavLink>
-            ))}
+            {INSTITUTIONAL_NAV_ITEMS.map((item) =>
+              item.children ? (
+                <div key={item.href} className="flex flex-col">
+                  <span className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-omnia-graphite-light">
+                    {item.label}
+                  </span>
+                  {item.children.map((child) => (
+                    <InstitutionalNavLink
+                      key={child.href}
+                      href={child.href}
+                      onClick={closeMenu}
+                      className="rounded-md px-3 py-3 text-sm font-medium text-omnia-deep-blue hover:bg-omnia-emerald/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald"
+                    >
+                      {child.label}
+                    </InstitutionalNavLink>
+                  ))}
+                </div>
+              ) : (
+                <InstitutionalNavLink
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className="rounded-md px-3 py-3 text-sm font-medium text-omnia-deep-blue hover:bg-omnia-emerald/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald"
+                >
+                  {item.label}
+                </InstitutionalNavLink>
+              ),
+            )}
           </nav>
           <div className="px-3 pt-2">
             <AccountNav className="w-full border-omnia-deep-blue/20 text-omnia-deep-blue" />

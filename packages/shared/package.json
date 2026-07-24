@@ -17,6 +17,7 @@
     "test:public-post-contracts": "tsx src/cms/public-post/test-public-post-contracts.ts",
     "test:public-company-contracts": "tsx src/cms/public-company/test-public-company-contracts.ts",
     "test:rate-limit": "tsx src/rate-limit/test-rate-limit.ts",
+    "test:partners": "tsx src/partners/test-partners.ts",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {

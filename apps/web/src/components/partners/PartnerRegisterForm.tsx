@@ -1,0 +1,315 @@
+'use client';
+
+import { useState, type FormEvent } from 'react';
+
+import { Button, Input } from '@omnia/ui';
+
+import { getPublicAdminUrl } from '@/lib/auth/admin-url';
+
+type Taxonomy = { id: string; name: string; slug: string };
+
+type PartnerRegisterFormProps = {
+  categories: Taxonomy[];
+  specialties: Taxonomy[];
+};
+
+type FormState = 'idle' | 'submitting' | 'success' | 'error';
+
+export function PartnerRegisterForm({ categories, specialties }: PartnerRegisterFormProps) {
+  const [state, setState] = useState<FormState>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [specialtyIds, setSpecialtyIds] = useState<string[]>([]);
+
+  const toggleId = (list: string[], id: string) =>
+    list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setState('submitting');
+
+    const fd = new FormData(event.currentTarget);
+    const payload = {
+      companyName: String(fd.get('companyName') || ''),
+      tradeName: String(fd.get('tradeName') || ''),
+      partnerType: String(fd.get('partnerType') || 'company'),
+      document: String(fd.get('document') || ''),
+      description: String(fd.get('description') || ''),
+      servicesDescription: String(fd.get('servicesDescription') || ''),
+      email: String(fd.get('email') || ''),
+      phone: String(fd.get('phone') || ''),
+      whatsapp: String(fd.get('whatsapp') || ''),
+      website: String(fd.get('website') || ''),
+      instagram: String(fd.get('instagram') || ''),
+      linkedin: String(fd.get('linkedin') || ''),
+      zipCode: String(fd.get('zipCode') || ''),
+      address: String(fd.get('address') || ''),
+      addressNumber: String(fd.get('addressNumber') || ''),
+      addressComplement: String(fd.get('addressComplement') || ''),
+      neighborhood: String(fd.get('neighborhood') || ''),
+      city: String(fd.get('city') || ''),
+      state: String(fd.get('state') || ''),
+      country: String(fd.get('country') || 'Brasil'),
+      coverageRadius: fd.get('coverageRadius') ? Number(fd.get('coverageRadius')) : undefined,
+      categoryIds: categoryIds.map(Number),
+      specialtyIds: specialtyIds.map(Number),
+      brandsServed: String(fd.get('brandsServed') || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      privacyAccepted: fd.get('privacyAccepted') === 'on',
+      analysisAuthorized: fd.get('analysisAuthorized') === 'on',
+      truthfulnessConfirmed: fd.get('truthfulnessConfirmed') === 'on',
+      companyWebsite: String(fd.get('companyWebsite') || ''),
+    };
+
+    try {
+      const res = await fetch(`${getPublicAdminUrl()}/api/omnia/partner-register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        error?: { message?: string };
+      };
+      if (!res.ok || !data.ok) {
+        setState('error');
+        setError(data.error?.message || 'Não foi possível enviar o cadastro.');
+        return;
+      }
+      setSuccessMessage(
+        data.message ||
+          'Cadastro recebido. Nossa equipe analisará as informações antes da publicação.',
+      );
+      setState('success');
+      event.currentTarget.reset();
+      setCategoryIds([]);
+      setSpecialtyIds([]);
+    } catch {
+      setState('error');
+      setError('Falha de conexão. Tente novamente.');
+    }
+  }
+
+  if (state === 'success') {
+    return (
+      <div
+        role="status"
+        className="border border-omnia-emerald/30 bg-omnia-emerald/5 p-6 text-omnia-deep-blue"
+      >
+        <h2 className="font-heading text-xl font-semibold">Cadastro recebido</h2>
+        <p className="mt-2 text-sm leading-relaxed">{successMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-10" noValidate>
+      <fieldset className="space-y-4">
+        <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">
+          Identificação
+        </legend>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block text-sm md:col-span-2">
+            <span className="mb-1 block font-medium">
+              Razão social / nome profissional <span aria-hidden="true">*</span>
+            </span>
+            <Input name="companyName" required autoComplete="organization" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Nome fantasia</span>
+            <Input name="tradeName" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Tipo *</span>
+            <select
+              name="partnerType"
+              required
+              className="w-full rounded-md border border-omnia-deep-blue/20 bg-white px-3 py-2 text-sm"
+              defaultValue="company"
+            >
+              <option value="company">Empresa</option>
+              <option value="professional">Profissional</option>
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">CPF ou CNPJ *</span>
+            <Input name="document" required inputMode="numeric" />
+          </label>
+          <label className="block text-sm md:col-span-2">
+            <span className="mb-1 block font-medium">Descrição</span>
+            <textarea
+              name="description"
+              rows={4}
+              className="w-full rounded-md border border-omnia-deep-blue/20 px-3 py-2 text-sm"
+            />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-4">
+        <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">Contato</legend>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">E-mail *</span>
+            <Input name="email" type="email" required autoComplete="email" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Telefone</span>
+            <Input name="phone" autoComplete="tel" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">WhatsApp</span>
+            <Input name="whatsapp" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Site</span>
+            <Input name="website" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Instagram</span>
+            <Input name="instagram" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">LinkedIn</span>
+            <Input name="linkedin" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-4">
+        <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">
+          Localização
+        </legend>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">CEP</span>
+            <Input name="zipCode" inputMode="numeric" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Raio de atendimento (km)</span>
+            <Input name="coverageRadius" type="number" min={0} />
+          </label>
+          <label className="block text-sm md:col-span-2">
+            <span className="mb-1 block font-medium">Endereço</span>
+            <Input name="address" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Número</span>
+            <Input name="addressNumber" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Complemento</span>
+            <Input name="addressComplement" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Bairro</span>
+            <Input name="neighborhood" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">Cidade *</span>
+            <Input name="city" required />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">UF *</span>
+            <Input name="state" required maxLength={2} />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">País</span>
+            <Input name="country" defaultValue="Brasil" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-4">
+        <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">Atuação</legend>
+        <div>
+          <p className="mb-2 text-sm font-medium">Categorias</p>
+          <div className="flex flex-wrap gap-3">
+            {categories.map((c) => (
+              <label key={c.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={categoryIds.includes(c.id)}
+                  onChange={() => setCategoryIds((list) => toggleId(list, c.id))}
+                />
+                {c.name}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-sm font-medium">Especialidades</p>
+          <div className="flex max-h-48 flex-wrap gap-3 overflow-y-auto">
+            {specialties.map((s) => (
+              <label key={s.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={specialtyIds.includes(s.id)}
+                  onChange={() => setSpecialtyIds((list) => toggleId(list, s.id))}
+                />
+                {s.name}
+              </label>
+            ))}
+          </div>
+        </div>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium">Descrição dos serviços</span>
+          <textarea
+            name="servicesDescription"
+            rows={3}
+            className="w-full rounded-md border border-omnia-deep-blue/20 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium">Marcas atendidas (separadas por vírgula)</span>
+          <Input name="brandsServed" placeholder="Bitzer, Danfoss…" />
+        </label>
+        <p className="text-xs text-omnia-graphite-light">
+          Logotipo e galeria podem ser complementados pela equipe Omnia após a análise (upload
+          público direto não habilitado nesta fase por segurança).
+        </p>
+      </fieldset>
+
+      <fieldset className="space-y-3">
+        <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">
+          Consentimentos
+        </legend>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="privacyAccepted" required className="mt-1" />
+          <span>Li e aceito a política de privacidade. *</span>
+        </label>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="analysisAuthorized" required className="mt-1" />
+          <span>Autorizo a análise cadastral pela Omnia Frigo. *</span>
+        </label>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="truthfulnessConfirmed" required className="mt-1" />
+          <span>Declaro que as informações são verdadeiras. *</span>
+        </label>
+      </fieldset>
+
+      {/* Honeypot */}
+      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        <label>
+          Website da empresa
+          <input name="companyWebsite" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
+      {error ? (
+        <p role="alert" className="text-sm text-red-700">
+          {error}
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={state === 'submitting'}>
+        {state === 'submitting' ? 'Enviando…' : 'Enviar cadastro'}
+      </Button>
+    </form>
+  );
+}

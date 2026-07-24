@@ -100,23 +100,22 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
   }
 
   if (operation === 'create') {
-    // Novo parceiro inicia sempre como Pending.
+    // Novo parceiro inicia sempre como Pending / não publicado.
     data.status = 'pending';
+    data.active = false;
+    data.featured = false;
+    data.verified = false;
+    data.plan = 'free';
     data.approvedAt = null;
     data.approvedBy = null;
     data.publishedAt = null;
-    if (data.featured !== true) {
-      data.featured = false;
-    }
-    if (data.verified !== true) {
-      data.verified = false;
-    }
-    if (!data.plan) {
-      data.plan = 'free';
-    }
-    // Responsável pelo cadastro (não confundir com approvedBy).
-    if (data.ownerUser == null && req.user?.id != null) {
+    data.approvalNotes = null;
+    // ownerUser: só staff autenticado; cadastro público deixa null (endpoint).
+    if (req.user?.id != null && data.ownerUser == null && req.context?.publicPartnerRegister !== true) {
       data.ownerUser = req.user.id;
+    }
+    if (req.context?.publicPartnerRegister === true) {
+      data.ownerUser = null;
     }
     return data;
   }
