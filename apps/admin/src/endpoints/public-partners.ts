@@ -29,8 +29,13 @@ function publicVisibilityWhere(): Where {
 }
 
 function parseOrigin(url: URL): { lat: number; lng: number } | null {
-  const lat = Number(url.searchParams.get('lat'));
-  const lng = Number(url.searchParams.get('lng'));
+  const latRaw = url.searchParams.get('lat');
+  const lngRaw = url.searchParams.get('lng');
+  if (latRaw == null || lngRaw == null || latRaw.trim() === '' || lngRaw.trim() === '') {
+    return null;
+  }
+  const lat = Number(latRaw);
+  const lng = Number(lngRaw);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return null;
   }
