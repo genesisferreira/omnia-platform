@@ -506,8 +506,6 @@ Entregue no Portal (`apps/web`) e APIs públicas (`/api/omnia/public-partners*`,
 
 Detalhes: `docs/releases/PARTNER_NETWORK_MACRO_02.md`.
 
-**Próximo passo:** Portal público e geolocalização (fases seguintes), sem remodelagem dos campos acima.
-
 ---
 
 ## 15. Resumo executivo
