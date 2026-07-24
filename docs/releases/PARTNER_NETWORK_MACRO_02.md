@@ -146,7 +146,7 @@ pnpm --filter @omnia/admin test:partner-register
 
 Relatório operacional: [`PARTNER_NETWORK_DEV_HOMOLOGATION.md`](./PARTNER_NETWORK_DEV_HOMOLOGATION.md).
 
-Em 2026-07-24 a publicação no DEV ficou **bloqueada** (branch ausente no remote + sem SSH à VPS). Portal DEV ainda retorna 404 em `/parceiros` até o deploy da branch.
+Em 2026-07-24 a Sprint 2.3 foi **publicada e homologada** no DEV (`3408937`): migration aplicada, Admin/Web healthy, fluxo cadastro→aprovação→público OK.
 
 ---
 
