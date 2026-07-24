@@ -1,71 +1,90 @@
 # Partner Network — Homologação DEV (Sprint 2.3)
 
-**Data:** 2026-07-24  
+**Data (última atualização):** 2026-07-24  
 **Branch:** `feature/2.3-partner-network`  
-**HEAD auditado:** `e44315633fd705d89f69950dc1e58c271a473169` (`docs(partners): document development validation`)  
+**HEAD remoto:** `fe28432dad6190e3b978e5092636be07759e5c10` (`docs(partners): homologation report`)  
 **Ambiente alvo:** DEV / staging oficial (não produção)
 
 | Portal | Admin |
 |--------|-------|
 | https://dev.omniafrigo.com.br | https://admin.dev.omniafrigo.com.br |
 
-**Status final desta sessão:** 🔴 **BLOQUEADA** — Sprint 2.3 **não publicada** no DEV. Homologação E2E no ambiente remoto **não executável** sem desbloqueio operacional.
+**Status final desta sessão:** 🟡 **PARCIAL** — branch **publicada no GitHub**; deploy + homologação E2E na VPS **bloqueados por ausência de SSH** nesta workstation.
 
 ---
 
-## 1. Auditoria inicial
+## 1. Fase repositório (concluída)
 
 | Item | Resultado |
 |------|-----------|
-| Branch | `feature/2.3-partner-network` (local) |
-| Commit | `e443156` |
-| Working tree (código Sprint) | Limpa; untracked irrelevantes (`docs/adr`, `docs/roadmap`, `.validation-seo-211/`, etc.) |
-| Branch no `origin` | **Ausente** (`git ls-remote` sem ref) |
-| Docker local | **Ausente** (CLI não instalada) |
-| `gh` CLI | **Ausente** |
-| SSH VPS `191.101.234.156` | **Permission denied** (root / ubuntu / omnia, BatchMode) |
-| `.env.staging` local | **Ausente** (só na VPS) |
-| `.env.production` local | **Ausente** / **não usado** |
+| Branch local | `feature/2.3-partner-network` |
+| `git push -u origin feature/2.3-partner-network` | **OK** (branch nova no origin) |
+| Tracking | `origin/feature/2.3-partner-network` |
+| HEAD local = remoto | `fe28432` |
+| Merge main/develop | **Não realizado** (proibido) |
+| Produção | **Não alterada** |
 
-### Variáveis locais (`.env`) — proteção vs produção
+Commits da Sprint na branch (resumo):
 
-| Variável / área | Confirmação |
-|-----------------|-------------|
-| `DATABASE_URL` | `localhost:5432/omnia_platform` — **não produção** |
-| `REDIS_URL` | `localhost:6379` — **não produção** |
-| `PAYLOAD_SECRET` | Presente (48 chars) — local |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` |
-| `NEXT_PUBLIC_ADMIN_URL` | `http://localhost:3001` |
-| SMTP | Duplicado: Mailpit (`localhost`) + Titan (`smtp.titan.email`); em loaders típicos **vence o último** (Titan). Observação operacional local; **não** aponta DB/Redis para prod |
-| CORS / origins | Código Partner Register usa allowlist de origins confiáveis (mesmo padrão lead-capture) |
-| Compose produção | **Não alterado** nesta sessão |
-
-### Estado atual do DEV remoto (antes de qualquer publish)
-
-| Check | HTTP / resultado |
-|-------|------------------|
-| Portal `/` | 200 — Home institucional ativa |
-| Portal `/parceiros` | **404** — código Sprint 2.3 **não implantado** |
-| Admin health | `healthy`, `database: up`, `payload: configured` |
-| `GET /api/omnia/public-partners` | **404** — endpoints Partner **não implantados** |
-
-Conclusão: DEV roda build **anterior** à Sprint 2.3.
+| Commit | Mensagem |
+|--------|----------|
+| `7f9b69d` | `feat(partners): create partner network admin structure` |
+| `33955c9` | `feat(partners): consolidate partner network data model` |
+| `fcc1310` | `feat(partners): deliver public partner network experience` |
+| `e443156` | `docs(partners): document development validation` |
+| `fe28432` | `docs(partners): homologation report` |
 
 ---
 
-## 2. Publicação no DEV — tentativa e bloqueio
+## 2. Fase VPS DEV (bloqueada)
 
-### Runbook previsto
+| Item | Resultado |
+|------|-----------|
+| Host tentado | `191.101.234.156` / `dev.omniafrigo.com.br` |
+| Usuários tentados | `root`, `ubuntu`, `omnia` (sessões anteriores + esta) |
+| SSH | **Permission denied (publickey,password)** |
+| Chaves em `~/.ssh` | Somente `known_hosts` — **sem IdentityFile** |
+| WSL | Não instalado |
+| Docker local | Ausente |
+| `.env.staging` local | Ausente |
 
-Seguir `docker/staging/DEPLOY.md` com:
+Diretório canônico documentado (não verificado nesta sessão por falta de SSH): `/opt/omnia/platform`  
+Compose canônico: `docker/compose/staging.yml` + `.env.staging`  
+Containers esperados: `omnia-platform-admin-dev`, `omnia-platform-web-dev`
+
+### Evidência pública atual (pré-deploy)
+
+| Check | Resultado |
+|-------|-----------|
+| Portal `/` | 200 |
+| Portal `/parceiros` | **404** (código 2.3 ainda não no container) |
+| Admin `/api/health` | `healthy` / `database: up` |
+| `GET /api/omnia/public-partners` | **404** |
+
+---
+
+## 3. Runbook VPS (executar com SSH)
+
+Quando houver acesso SSH à VPS DEV:
 
 ```bash
+set -euo pipefail
+cd /opt/omnia/platform   # confirmar path real se diferente
+
 export DEPLOY_BRANCH=feature/2.3-partner-network
-# em /opt/omnia/platform na VPS
+export PREVIOUS_HEAD="$(git rev-parse HEAD)"
+
+test -z "$(git status --porcelain | grep -v '^.env' || true)" || {
+  echo "ATENÇÃO: revisar working tree antes de continuar"
+}
+
 git fetch --prune origin
 git checkout "$DEPLOY_BRANCH"
 git pull --ff-only origin "$DEPLOY_BRANCH"
+test "$(git rev-parse HEAD)" = "fe28432dad6190e3b978e5092636be07759e5c10" \
+  || test "$(git rev-parse --short HEAD)" = "fe28432"
 
+export DOCKER_BUILDKIT=1
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap build admin web admin-migrate
 
@@ -73,138 +92,60 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-migrate
 
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
-  up -d --no-build admin web
+  up -d --no-build admin
+# aguardar healthy: omnia-platform-admin-dev
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  up -d --no-build web
+# aguardar healthy: omnia-platform-web-dev
+
+# Smoke
+curl -sS -o /dev/null -w '%{http_code}\n' https://dev.omniafrigo.com.br/parceiros
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  'https://admin.dev.omniafrigo.com.br/api/omnia/public-partners'
+curl -sS https://admin.dev.omniafrigo.com.br/api/health
 ```
 
-Migration esperada: `20260724_120000_partner_network`.
+**Não executar** seeds institucionais, bootstrap completo ou qualquer operação de produção nesta release.
 
-### Por que não executou
-
-1. **Sem SSH** à VPS DEV (chave/senha não disponíveis nesta máquina).  
-2. **Sem push** da branch (instrução explícita da sessão + branch inexistente no remote). O runbook oficial depende de `git pull` na VPS.  
-3. **Sem Docker local** para homologar stack completa nesta workstation.  
-4. Conflito operacional: publicar no DEV sem push exige acesso SSH + cópia de artefato; com push proibido e SSH negado, **não há caminho seguro**.
-
-**Nenhuma alteração em produção.** Nenhum serviço DEV remoto foi reiniciado nesta sessão.
+Migration obrigatória: `20260724_120000_partner_network`.
 
 ---
 
-## 3–8. Homologação funcional (DEV remoto)
+## 4–8. Homologação E2E / correções
 
-| Etapa | Status |
-|-------|--------|
-| 3. Collections (Partner, Categories, Specialties, Dashboard) | ⏸ Pendente — Admin DEV sem código 2.3 |
-| 4. Fluxo cadastro → pending → approve → active → published → busca → Home → perfil | ⏸ Pendente |
-| 5. Portal rotas / nav / SEO / 404 | ⏸ Pendente (`/parceiros` = 404 hoje) |
-| 6. Geolocalização (GPS / cidade / UF / CEP / Haversine / fallback) | ⏸ Pendente |
-| 7. Segurança E2E no DEV | ⏸ Pendente (revisão de código OK — ver §7) |
-| 8. UX / dark mode / responsividade no DEV | ⏸ Pendente |
-
----
-
-## 7. Revisão de segurança (código — offline)
-
-Revisão estática dos artefatos da Sprint 2.3 (não substitui teste E2E no DEV):
-
-| Controle | Evidência |
-|----------|-----------|
-| Sem CPF/CNPJ no DTO público | `mapPublicPartner*` em `@omnia/shared` — testes privacy OK |
-| Sem e-mail no detalhe público | Cobertura em `test:partners` |
-| Sem `approvalNotes` / `ownerUser` / `approvedBy` / `plan` / `status` no map | Whitelist explícita no map |
-| Mass assignment bloqueado no register | `test:partner-register` — campos admin ignorados |
-| Rate limit | Redis `partner-register` (padrão lead-capture) |
-| Honeypot | `companyWebsite` → 200 fake success |
-| Origin allowlist | `isTrustedPartnerOrigin` |
-| Upload público de mídia | **Não habilitado** (documentado Macro 02) |
+| Área | Status |
+|------|--------|
+| Collections Admin | ⏸ Aguarda deploy |
+| Cadastro → aprovação → publicação | ⏸ |
+| Portal / busca / Home / geo / SEO | ⏸ |
+| Privacidade APIs | Revisada offline (testes) — E2E ⏸ |
+| Bugs de código corrigidos nesta release | Nenhum (bloqueio de acesso) |
 
 ---
 
-## 9. Revisão geral / inconsistências
-
-| Item | Resultado |
-|------|-----------|
-| Menus duplicados | Não detectado no código da Sprint (nav com item Parceiros + submenu) |
-| Collections órfãs | `partners`, `partner-categories`, `partner-specialties`, global dashboard — coerentes |
-| Rotas no DEV | Quebradas **porque o código não está publicado** (esperado) |
-| Typecheck shared/admin/web | **OK** (esta sessão) |
-| Lint shared | 1 warning histórico `no-console` em `test-partners.ts` |
-| Lint admin | Warnings históricos em migrations antigas (fora do escopo 2.3) |
-| Build Docker / EPERM Windows | Já conhecido; build oficial é Linux na VPS |
-
-**Nenhum bug de código da Sprint 2.3 corrigido nesta sessão** — o bloqueio é operacional (acesso DEV), não um defeito de implementação identificado offline.
-
----
-
-## 11. Testes executados nesta sessão
+## 9. Testes (workstation)
 
 | Suite | Resultado |
 |-------|-----------|
-| `pnpm --filter @omnia/shared test:partners` | **13/13 pass** |
-| `pnpm --filter @omnia/admin test:partner-register` | **3/3 pass** |
-| `pnpm --filter @omnia/shared typecheck` | **OK** |
-| `pnpm --filter @omnia/admin typecheck` | **OK** |
-| `pnpm --filter @omnia/web typecheck` | **OK** |
-| Lint shared/admin/web | Sem erros novos bloqueantes (warnings históricos) |
-| E2E Portal / Admin / APIs no DEV | **Não executado** (código ausente no DEV) |
-| Migrations no banco DEV | **Não aplicadas** |
+| `@omnia/shared` `test:partners` | **13/13 pass** |
+| `@omnia/admin` `test:partner-register` | **3/3 pass** |
+| Typecheck / lint (sessão anterior) | OK / warnings históricos |
+| E2E DEV | **Não executado** |
 
 ---
 
-## 12. Performance
+## 10. Desbloqueio necessário
 
-Não mensurada no DEV (endpoints 404). Código já prevê:
+1. Instalar chave SSH privada em `~/.ssh` (ou `ssh-agent`) com acesso a `root@191.101.234.156`, **ou**  
+2. Executar o runbook da §3 na VPS e colar evidências (HEAD, migrate exit 0, HTTP 200 em `/parceiros` e public-partners).
 
-- `Cache-Control: public, s-maxage=60, stale-while-revalidate=30` nas listagens públicas  
-- Limites de página (`PUBLIC_PARTNER_LIST_*`)  
-- Soft-fail na Home  
-- Fetch com depth controlado  
-
-Validar após publish: payloads, imagens (logo/galeria), paginação com origem GPS.
+Após isso, o agente pode completar healthcheck, homologação e atualizar este documento para 🟢.
 
 ---
 
-## 13. Migrations
+## Limitações
 
-| Migration | Estado |
-|-----------|--------|
-| `20260724_120000_partner_network` | Registrada em `apps/admin/src/migrations/index.ts` |
-| Aplicada no DEV | **Não** (deploy não ocorreu) |
-| Aplicada em produção | **Não** (fora de escopo; proibido) |
-
----
-
-## Bugs
-
-### Encontrados (operacionais)
-
-1. **BLOQUEIO CRÍTICO:** impossível publicar Sprint 2.3 no DEV sem SSH e/ou push da branch.  
-2. **DEV desatualizado:** `/parceiros` e APIs públicas Partner retornam 404.  
-3. **Workstation:** Docker e `pnpm` global ausentes; testes via `npx pnpm@9.15.0`.  
-4. **SMTP local duplicado** (Mailpit + Titan) — observação; não bloqueia DEV remoto.
-
-### Corrigidos
-
-Nenhum (sem alteração de código de produto nesta sessão).
-
-### Pendências para desbloquear homologação
-
-1. Autorizar **push** de `feature/2.3-partner-network` para `origin` **ou** fornecer acesso SSH à VPS DEV com permissão de deploy em `/opt/omnia/platform`.  
-2. Na VPS: checkout da branch, build `admin`+`web`+`admin-migrate`, rodar migrate, up com healthcheck.  
-3. Reexecutar checklist Etapas 3–8 e 11 E2E.  
-4. Atualizar este documento com evidências (URLs 200, IDs de parceiro de teste, screenshots opcionais).  
-5. Só então marcar Sprint 2.3 como **homologada no DEV**.
-
----
-
-## Arquivos desta entrega documental
-
-- `docs/releases/PARTNER_NETWORK_DEV_HOMOLOGATION.md` (este arquivo)  
-- Referência: `docs/releases/PARTNER_NETWORK_MACRO_02.md`  
-- Referência: `docs/releases/PARTNER_NETWORK_DEV_VALIDATION.md`  
-- Runbook: `docker/staging/DEPLOY.md`
-
----
-
-## Commit previsto
-
-`docs(partners): homologation report` — sem push, sem merge.
+- Sem SSH, o agente **não** pode confirmar path real, branch atual da VPS, containers nem aplicar migration.
+- Produção não foi tocada.
+- Sem merge para `main`/`develop`.
