@@ -11,6 +11,7 @@ import * as migration_20260720_180000_lead_capture_activity from './20260720_180
 import * as migration_20260720_190000_crm_companies_texts from './20260720_190000_crm_companies_texts';
 import * as migration_20260720_191000_locked_documents_crm_rels from './20260720_191000_locked_documents_crm_rels';
 import * as migration_20260724_120000_partner_network from './20260724_120000_partner_network';
+import * as migration_20260724_180000_partner_geocoding_meta from './20260724_180000_partner_geocoding_meta';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260724_120000_partner_network.up,
     down: migration_20260724_120000_partner_network.down,
     name: '20260724_120000_partner_network',
+  },
+  {
+    up: migration_20260724_180000_partner_geocoding_meta.up,
+    down: migration_20260724_180000_partner_geocoding_meta.down,
+    name: '20260724_180000_partner_geocoding_meta',
   },
 ];

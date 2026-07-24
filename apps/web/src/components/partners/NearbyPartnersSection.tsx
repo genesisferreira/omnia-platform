@@ -27,10 +27,11 @@ export async function NearbyPartnersSection() {
               id="nearby-partners-heading"
               className="font-heading text-2xl font-semibold tracking-tight text-omnia-deep-blue md:text-3xl"
             >
-              Parceiros próximos de você
+              Parceiros aprovados
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-omnia-graphite-light md:text-base">
-              Rede de empresas e profissionais de refrigeração aprovados pela Omnia Frigo.
+              Rede de empresas e profissionais de refrigeração. Use localização na página de
+              parceiros para ordenar por proximidade.
             </p>
           </div>
           <Link

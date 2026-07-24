@@ -39,13 +39,25 @@ export default async function ParceirosPage({ searchParams }: PageProps) {
   const q = first(sp.q);
   const city = first(sp.city);
   const state = first(sp.state);
+  const postalCode = first(sp.postalCode) || first(sp.zipCode);
+  const nearCity = first(sp.nearCity);
+  const nearState = first(sp.nearState);
   const category = first(sp.category);
   const specialty = first(sp.specialty);
   const partnerType = first(sp.partnerType);
   const lat = first(sp.lat);
   const lng = first(sp.lng);
   const radiusKm = first(sp.radiusKm);
+  const includeOutside = first(sp.includeOutsideRadius) === '1';
   const page = Number(first(sp.page) || 1) || 1;
+
+  const hasCoords =
+    lat != null &&
+    lng != null &&
+    Number.isFinite(Number(lat)) &&
+    Number.isFinite(Number(lng)) &&
+    !(Number(lat) === 0 && Number(lng) === 0);
+  const hasLocationOrigin = hasCoords || Boolean(postalCode) || Boolean(nearCity && nearState);
 
   const [categories, specialties, data] = await Promise.all([
     fetchPartnerCategories(),
@@ -55,17 +67,22 @@ export default async function ParceirosPage({ searchParams }: PageProps) {
       q,
       city,
       state,
+      postalCode,
+      nearCity,
+      nearState,
       category,
       specialty,
       partnerType,
-      lat: lat != null ? Number(lat) : undefined,
-      lng: lng != null ? Number(lng) : undefined,
+      lat: hasCoords ? Number(lat) : undefined,
+      lng: hasCoords ? Number(lng) : undefined,
       radiusKm: radiusKm != null ? Number(radiusKm) : undefined,
+      includeOutsideRadius: includeOutside,
     }),
   ]);
 
   const partners = data?.partners ?? [];
   const pagination = data?.pagination;
+  const originSource = data?.meta?.originSource ?? null;
 
   return (
     <main className="bg-omnia-white py-10 md:py-14">
@@ -91,20 +108,69 @@ export default async function ParceirosPage({ searchParams }: PageProps) {
           <PartnerSearchForm categories={categories} specialties={specialties} />
         </Suspense>
 
+        {!hasLocationOrigin ? (
+          <p className="text-sm text-omnia-graphite-light" role="status">
+            Sem localização: resultados por destaque e nome. Informe CEP, cidade/UF ou permita GPS
+            para ordenar por proximidade.
+          </p>
+        ) : originSource ? (
+          <p className="text-sm text-omnia-graphite-light" role="status">
+            Ordenando por proximidade
+            {originSource === 'gps'
+              ? ' (GPS)'
+              : originSource === 'postalCode'
+                ? ' (CEP)'
+                : ' (cidade)'}
+            .
+          </p>
+        ) : null}
+
         {!data ? (
           <p role="alert" className="text-sm text-omnia-graphite-light">
             Não foi possível carregar os parceiros no momento. Tente novamente em instantes.
           </p>
         ) : partners.length === 0 ? (
-          <p className="text-sm text-omnia-graphite-light">
-            Nenhum parceiro encontrado com os filtros atuais.
-          </p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {partners.map((partner) => (
-              <PartnerCard key={partner.id} partner={partner} />
-            ))}
+          <div className="space-y-2 text-sm text-omnia-graphite-light">
+            <p>
+              {hasLocationOrigin
+                ? 'Nenhum parceiro próximo encontrado com o raio atual.'
+                : 'Nenhum parceiro encontrado com os filtros atuais.'}
+            </p>
+            {hasLocationOrigin && !includeOutside ? (
+              <p>
+                <Link
+                  href={`/parceiros?${new URLSearchParams({
+                    ...(q ? { q } : {}),
+                    ...(postalCode ? { postalCode } : {}),
+                    ...(nearCity ? { nearCity } : {}),
+                    ...(nearState ? { nearState } : {}),
+                    ...(hasCoords && lat && lng ? { lat, lng } : {}),
+                    ...(radiusKm ? { radiusKm } : {}),
+                    ...(category ? { category } : {}),
+                    ...(specialty ? { specialty } : {}),
+                    ...(partnerType ? { partnerType } : {}),
+                    includeOutsideRadius: '1',
+                  }).toString()}`}
+                  className="font-medium text-omnia-deep-blue underline-offset-4 hover:underline"
+                >
+                  Ver parceiros de outras regiões
+                </Link>
+              </p>
+            ) : null}
           </div>
+        ) : (
+          <>
+            {includeOutside && hasLocationOrigin ? (
+              <p className="text-sm text-omnia-copper" role="status">
+                Exibindo também parceiros de outras regiões (fora do raio ou sem coordenadas).
+              </p>
+            ) : null}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {partners.map((partner) => (
+                <PartnerCard key={partner.id} partner={partner} />
+              ))}
+            </div>
+          </>
         )}
 
         {pagination && pagination.totalPages > 1 ? (

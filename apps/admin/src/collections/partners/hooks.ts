@@ -7,6 +7,7 @@ import type {
 import { APIError } from 'payload';
 
 import { isPlatformAdmin } from '../../access/rbac';
+import { applyPartnerLocationResolution } from '../../lib/partners/resolve-partner-location';
 import {
   isValidPartnerSlug,
   normalizePartnerSlug,
@@ -38,13 +39,7 @@ export const partnerBeforeValidate: CollectionBeforeValidateHook = ({
 };
 
 /**
- * beforeChange — slug, status, cobertura e preparação para integrações futuras.
- *
- * Futuro:
- * - geocode (CEP → lat/lng) quando endereço mudar
- * - sincronização parcial com CRM (CrmCompanies / Contacts)
- * - invalidação de cache de busca geográfica
- * - notificação de fila de moderação
+ * beforeChange — slug, status, cobertura, CEP e geocodificação.
  */
 export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
   data,
@@ -56,7 +51,6 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
     return data;
   }
 
-  // --- Slug (URL pública futura) ---
   const slugCandidate =
     normalizePartnerSlug(data.slug) ??
     (typeof originalDoc?.slug === 'string'
@@ -94,13 +88,57 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
     throw new APIError(`Já existe um parceiro com o slug "${slugCandidate}".`, 400);
   }
 
-  // --- coverageRadius: não negativo ---
   if (typeof data.coverageRadius === 'number' && data.coverageRadius < 0) {
     throw new APIError('O raio de cobertura não pode ser negativo.', 400);
   }
 
+  if (req.context?.skipPartnerGeocode !== true) {
+    const force =
+      req.context?.forcePartnerGeocode === true || data.geocodingStatus === 'pending';
+    const previous = originalDoc
+      ? {
+          zipCode: originalDoc.zipCode as string | null | undefined,
+          address: originalDoc.address as string | null | undefined,
+          addressNumber: originalDoc.addressNumber as string | null | undefined,
+          neighborhood: originalDoc.neighborhood as string | null | undefined,
+          city: originalDoc.city as string | null | undefined,
+          state: originalDoc.state as string | null | undefined,
+          country: originalDoc.country as string | null | undefined,
+          geocodingStatus: originalDoc.geocodingStatus as
+            | 'pending'
+            | 'success'
+            | 'failed'
+            | 'manual'
+            | null
+            | undefined,
+        }
+      : null;
+
+    const resolved = await applyPartnerLocationResolution(
+      {
+        zipCode: data.zipCode as string | null | undefined,
+        address: data.address as string | null | undefined,
+        addressNumber: data.addressNumber as string | null | undefined,
+        neighborhood: data.neighborhood as string | null | undefined,
+        city: data.city as string | null | undefined,
+        state: data.state as string | null | undefined,
+        country: data.country as string | null | undefined,
+        geocodingStatus: data.geocodingStatus as
+          | 'pending'
+          | 'success'
+          | 'failed'
+          | 'manual'
+          | null
+          | undefined,
+      },
+      previous,
+      { force: force || operation === 'create' },
+    );
+
+    Object.assign(data, resolved);
+  }
+
   if (operation === 'create') {
-    // Novo parceiro inicia sempre como Pending / não publicado.
     data.status = 'pending';
     data.active = false;
     data.featured = false;
@@ -110,8 +148,11 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
     data.approvedBy = null;
     data.publishedAt = null;
     data.approvalNotes = null;
-    // ownerUser: só staff autenticado; cadastro público deixa null (endpoint).
-    if (req.user?.id != null && data.ownerUser == null && req.context?.publicPartnerRegister !== true) {
+    if (
+      req.user?.id != null &&
+      data.ownerUser == null &&
+      req.context?.publicPartnerRegister !== true
+    ) {
       data.ownerUser = req.user.id;
     }
     if (req.context?.publicPartnerRegister === true) {
@@ -137,34 +178,20 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
 
     if (data.status === 'approved' && previousStatus !== 'approved') {
       const now = new Date().toISOString();
-      // Última aprovação — rastreabilidade operacional.
       data.approvedAt = now;
       if (req.user?.id != null) {
         data.approvedBy = req.user.id;
       }
-      // Primeira publicação pública: não sobrescreve se já existir.
       const previousPublishedAt = originalDoc?.publishedAt;
       if (previousPublishedAt == null && data.publishedAt == null) {
         data.publishedAt = now;
       }
     }
-
-    // Saída de approved: mantém approvedAt / approvedBy / publishedAt (rastreabilidade).
   }
 
   return data;
 };
 
-/**
- * afterChange — hooks preparados para integrações futuras.
- *
- * Futuro:
- * - espelho de PartnerLead / Activity no CRM
- * - indexação geoespacial / fila de reindex
- * - e-mail de aprovação / rejeição ao parceiro
- * - publicação condicional no diretório público
- * - webhooks / Neurofrigo IA (enriquecimento de perfil)
- */
 export const partnerAfterChange: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,

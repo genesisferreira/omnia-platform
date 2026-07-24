@@ -14,6 +14,7 @@ type PartnerRegisterFormProps = {
 };
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
+type CepState = 'idle' | 'loading' | 'found' | 'not_found' | 'error';
 
 export function PartnerRegisterForm({ categories, specialties }: PartnerRegisterFormProps) {
   const [state, setState] = useState<FormState>('idle');
@@ -21,9 +22,61 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [specialtyIds, setSpecialtyIds] = useState<string[]>([]);
+  const [cepState, setCepState] = useState<CepState>('idle');
+  const [cepMessage, setCepMessage] = useState<string | null>(null);
+  const [zipCode, setZipCode] = useState('');
+  const [address, setAddress] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [city, setCity] = useState('');
+  const [uf, setUf] = useState('');
+  const [country, setCountry] = useState('Brasil');
 
   const toggleId = (list: string[], id: string) =>
     list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+
+  async function lookupCep(raw: string) {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 8) {
+      setCepState('error');
+      setCepMessage('Informe um CEP com 8 dígitos.');
+      return;
+    }
+    setCepState('loading');
+    setCepMessage('Buscando CEP…');
+    try {
+      const res = await fetch(
+        `${getPublicAdminUrl()}/api/omnia/postal-code?cep=${encodeURIComponent(digits)}`,
+      );
+      const data = (await res.json()) as {
+        ok?: boolean;
+        address?: {
+          address?: string | null;
+          neighborhood?: string | null;
+          city?: string;
+          state?: string;
+          country?: string;
+          zipCode?: string;
+        };
+        error?: { message?: string };
+      };
+      if (!res.ok || !data.ok || !data.address) {
+        setCepState(res.status === 404 ? 'not_found' : 'error');
+        setCepMessage(data.error?.message || 'CEP não encontrado.');
+        return;
+      }
+      setZipCode(data.address.zipCode || digits);
+      if (data.address.address) setAddress(data.address.address);
+      if (data.address.neighborhood) setNeighborhood(data.address.neighborhood);
+      if (data.address.city) setCity(data.address.city);
+      if (data.address.state) setUf(data.address.state);
+      if (data.address.country) setCountry(data.address.country);
+      setCepState('found');
+      setCepMessage('CEP encontrado. Confira o endereço e informe o número.');
+    } catch {
+      setCepState('error');
+      setCepMessage('Erro temporário ao consultar o CEP. Tente novamente.');
+    }
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,14 +97,14 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       website: String(fd.get('website') || ''),
       instagram: String(fd.get('instagram') || ''),
       linkedin: String(fd.get('linkedin') || ''),
-      zipCode: String(fd.get('zipCode') || ''),
-      address: String(fd.get('address') || ''),
+      zipCode,
+      address,
       addressNumber: String(fd.get('addressNumber') || ''),
       addressComplement: String(fd.get('addressComplement') || ''),
-      neighborhood: String(fd.get('neighborhood') || ''),
-      city: String(fd.get('city') || ''),
-      state: String(fd.get('state') || ''),
-      country: String(fd.get('country') || 'Brasil'),
+      neighborhood,
+      city,
+      state: uf,
+      country,
       coverageRadius: fd.get('coverageRadius') ? Number(fd.get('coverageRadius')) : undefined,
       categoryIds: categoryIds.map(Number),
       specialtyIds: specialtyIds.map(Number),
@@ -89,6 +142,14 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       event.currentTarget.reset();
       setCategoryIds([]);
       setSpecialtyIds([]);
+      setZipCode('');
+      setAddress('');
+      setNeighborhood('');
+      setCity('');
+      setUf('');
+      setCountry('Brasil');
+      setCepState('idle');
+      setCepMessage(null);
     } catch {
       setState('error');
       setError('Falha de conexão. Tente novamente.');
@@ -128,15 +189,15 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
             <span className="mb-1 block font-medium">Tipo *</span>
             <select
               name="partnerType"
-              required
               className="w-full rounded-md border border-omnia-deep-blue/20 bg-white px-3 py-2 text-sm"
               defaultValue="company"
+              required
             >
               <option value="company">Empresa</option>
               <option value="professional">Profissional</option>
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="block text-sm md:col-span-2">
             <span className="mb-1 block font-medium">CPF ou CNPJ *</span>
             <Input name="document" required inputMode="numeric" />
           </label>
@@ -144,7 +205,15 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
             <span className="mb-1 block font-medium">Descrição</span>
             <textarea
               name="description"
-              rows={4}
+              rows={3}
+              className="w-full rounded-md border border-omnia-deep-blue/20 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block text-sm md:col-span-2">
+            <span className="mb-1 block font-medium">Serviços</span>
+            <textarea
+              name="servicesDescription"
+              rows={3}
               className="w-full rounded-md border border-omnia-deep-blue/20 px-3 py-2 text-sm"
             />
           </label>
@@ -154,7 +223,7 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       <fieldset className="space-y-4">
         <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">Contato</legend>
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="block text-sm">
+          <label className="block text-sm md:col-span-2">
             <span className="mb-1 block font-medium">E-mail *</span>
             <Input name="email" type="email" required autoComplete="email" />
           </label>
@@ -186,17 +255,55 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
           Localização
         </legend>
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">CEP</span>
-            <Input name="zipCode" inputMode="numeric" />
-          </label>
+          <div className="md:col-span-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <label className="block flex-1 text-sm">
+              <span className="mb-1 block font-medium">CEP *</span>
+              <Input
+                name="zipCode"
+                inputMode="numeric"
+                value={zipCode}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setZipCode(v);
+                  const digits = v.replace(/\D/g, '');
+                  if (digits.length === 8) {
+                    void lookupCep(digits);
+                  }
+                }}
+                placeholder="30110-012"
+                required
+              />
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={cepState === 'loading'}
+              onClick={() => void lookupCep(zipCode)}
+            >
+              {cepState === 'loading' ? 'Buscando…' : 'Buscar CEP'}
+            </Button>
+          </div>
+          {cepMessage ? (
+            <p
+              className={`md:col-span-2 text-sm ${
+                cepState === 'found' ? 'text-omnia-emerald' : 'text-omnia-graphite-light'
+              }`}
+              role="status"
+            >
+              {cepMessage}
+            </p>
+          ) : null}
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Raio de atendimento (km)</span>
             <Input name="coverageRadius" type="number" min={0} />
           </label>
           <label className="block text-sm md:col-span-2">
             <span className="mb-1 block font-medium">Endereço</span>
-            <Input name="address" />
+            <Input
+              name="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Número</span>
@@ -208,19 +315,33 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Bairro</span>
-            <Input name="neighborhood" />
+            <Input
+              name="neighborhood"
+              value={neighborhood}
+              onChange={(e) => setNeighborhood(e.target.value)}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Cidade *</span>
-            <Input name="city" required />
+            <Input name="city" required value={city} onChange={(e) => setCity(e.target.value)} />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">UF *</span>
-            <Input name="state" required maxLength={2} />
+            <Input
+              name="state"
+              required
+              maxLength={2}
+              value={uf}
+              onChange={(e) => setUf(e.target.value.toUpperCase())}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">País</span>
-            <Input name="country" defaultValue="Brasil" />
+            <Input
+              name="country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
           </label>
         </div>
       </fieldset>
@@ -258,21 +379,9 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
           </div>
         </div>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium">Descrição dos serviços</span>
-          <textarea
-            name="servicesDescription"
-            rows={3}
-            className="w-full rounded-md border border-omnia-deep-blue/20 px-3 py-2 text-sm"
-          />
-        </label>
-        <label className="block text-sm">
           <span className="mb-1 block font-medium">Marcas atendidas (separadas por vírgula)</span>
-          <Input name="brandsServed" placeholder="Bitzer, Danfoss…" />
+          <Input name="brandsServed" />
         </label>
-        <p className="text-xs text-omnia-graphite-light">
-          Logotipo e galeria podem ser complementados pela equipe Omnia após a análise (upload
-          público direto não habilitado nesta fase por segurança).
-        </p>
       </fieldset>
 
       <fieldset className="space-y-3">
@@ -281,25 +390,21 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
         </legend>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="privacyAccepted" required className="mt-1" />
-          <span>Li e aceito a política de privacidade. *</span>
+          <span>Aceito a política de privacidade *</span>
         </label>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="analysisAuthorized" required className="mt-1" />
-          <span>Autorizo a análise cadastral pela Omnia Frigo. *</span>
+          <span>Autorizo a análise do cadastro pela equipe Omnia *</span>
         </label>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="truthfulnessConfirmed" required className="mt-1" />
-          <span>Declaro que as informações são verdadeiras. *</span>
+          <span>Declaro que as informações são verdadeiras *</span>
         </label>
-      </fieldset>
-
-      {/* Honeypot */}
-      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-        <label>
-          Website da empresa
+        <label className="sr-only" aria-hidden="true">
+          Website
           <input name="companyWebsite" tabIndex={-1} autoComplete="off" />
         </label>
-      </div>
+      </fieldset>
 
       {error ? (
         <p role="alert" className="text-sm text-red-700">

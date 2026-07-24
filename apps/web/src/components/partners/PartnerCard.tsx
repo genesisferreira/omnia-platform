@@ -46,9 +46,11 @@ export function PartnerCard({ partner }: PartnerCardProps) {
             {partner.partnerType === 'professional' ? 'Profissional' : 'Empresa'}
             {location ? ` · ${location}` : ''}
           </p>
-          {partner.distanceKm != null ? (
+          {partner.distanceKm != null && Number.isFinite(partner.distanceKm) ? (
             <p className="mt-1 text-sm text-omnia-deep-blue">
-              A {partner.distanceKm.toFixed(1).replace('.', ',')} km
+              {partner.distanceKm < 1
+                ? `${Math.max(1, Math.round(partner.distanceKm * 1000))} m de distância`
+                : `${partner.distanceKm.toFixed(1).replace('.', ',')} km de distância`}
             </p>
           ) : null}
         </div>

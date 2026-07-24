@@ -37,7 +37,9 @@
     "test:account-status": "tsx src/scripts/test-account-status.ts",
     "test:smtp-auth": "tsx --test src/scripts/test-smtp-auth.ts",
     "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts",
-    "test:partner-register": "tsx --test src/scripts/test-partner-register.ts"
+    "test:partner-register": "tsx --test src/scripts/test-partner-register.ts",
+    "test:postal-geocode": "tsx --test src/scripts/test-postal-geocode.ts",
+    "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",

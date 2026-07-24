@@ -9,7 +9,8 @@
 |--------|-------|
 | https://dev.omniafrigo.com.br | https://admin.dev.omniafrigo.com.br |
 
-**Status:** 🟢 **PUBLICADA E HOMOLOGADA NO AMBIENTE DEV**
+**Status (base Sprint 2.3):** 🟢 publicada no DEV  
+**Status (geo CEP/proximidade):** ver `PARTNER_NETWORK_GEOLOCATION_FIX.md`
 
 ---
 

@@ -1,3 +1,4 @@
+import { isUsableCoordinatePair, normalizeCoordinatePair } from './coordinates';
 import { haversineDistanceKm, roundDistanceKm } from './haversine';
 import { isPartnerPubliclyVisible } from './publication';
 import type {
@@ -127,9 +128,10 @@ export const mapPublicPartnerListItem = (
   const partnerType = doc.partnerType === 'professional' ? 'professional' : 'company';
   const lat = asNumber(doc.latitude);
   const lng = asNumber(doc.longitude);
+  const usableCoords = isUsableCoordinatePair(lat, lng);
   let distanceKm: number | null = null;
-  if (origin && lat != null && lng != null) {
-    const d = haversineDistanceKm(origin.lat, origin.lng, lat, lng);
+  if (origin && usableCoords) {
+    const d = haversineDistanceKm(origin.lat, origin.lng, lat!, lng!);
     distanceKm = d == null ? null : roundDistanceKm(d);
   }
 
@@ -191,6 +193,8 @@ export const mapPublicPartnerDetail = (
         .filter((b): b is string => Boolean(b))
     : [];
 
+  const coords = normalizeCoordinatePair(doc.latitude, doc.longitude);
+
   return {
     ...base,
     description: asString(doc.description),
@@ -207,8 +211,8 @@ export const mapPublicPartnerDetail = (
       youtube: asString(social.youtube),
     },
     gallery,
-    latitude: asNumber(doc.latitude),
-    longitude: asNumber(doc.longitude),
+    latitude: coords?.latitude ?? null,
+    longitude: coords?.longitude ?? null,
     showFullAddress,
     addressLine: addressParts.length > 0 ? addressParts.join(', ') : null,
   };
@@ -217,18 +221,32 @@ export const mapPublicPartnerDetail = (
 export type SortablePartner = PublicPartnerListItemDto;
 
 /**
- * Ordenação: com distância → dentro do raio, menor distância, featured, verified.
+ * Ordenação: com distância → dentro do raio, menor distância, featured, verified, nome.
  * Sem distância → featured, verified, publishedAt desc.
  * Sem coordenadas ficam depois dos que têm distância.
+ *
+ * `withinRadiusOnly`: remove quem está fora do raio ou sem distância (quando há origem).
  */
 export function sortPublicPartners(
   items: SortablePartner[],
-  options?: { radiusKm?: number | null; hasOrigin?: boolean },
+  options?: {
+    radiusKm?: number | null;
+    hasOrigin?: boolean;
+    withinRadiusOnly?: boolean;
+  },
 ): SortablePartner[] {
   const radiusKm = options?.radiusKm ?? null;
   const hasOrigin = options?.hasOrigin === true;
+  const withinRadiusOnly = options?.withinRadiusOnly === true;
 
-  return [...items].sort((a, b) => {
+  let list = [...items];
+  if (hasOrigin && withinRadiusOnly && radiusKm != null) {
+    list = list.filter((p) => p.distanceKm != null && p.distanceKm <= radiusKm);
+  } else if (hasOrigin && withinRadiusOnly) {
+    list = list.filter((p) => p.distanceKm != null);
+  }
+
+  return list.sort((a, b) => {
     if (hasOrigin) {
       const aHas = a.distanceKm != null;
       const bHas = b.distanceKm != null;
@@ -251,6 +269,10 @@ export function sortPublicPartners(
     }
     if (a.verified !== b.verified) {
       return a.verified ? -1 : 1;
+    }
+    const nameCmp = a.displayName.localeCompare(b.displayName, 'pt-BR');
+    if (nameCmp !== 0) {
+      return nameCmp;
     }
     const ap = a.publishedAt ?? '';
     const bp = b.publishedAt ?? '';

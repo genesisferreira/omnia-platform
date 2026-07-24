@@ -273,6 +273,13 @@ export const Partners: CollectionConfig = {
               name: 'zipCode',
               type: 'text',
               label: 'CEP',
+              admin: {
+                description:
+                  'Use Buscar CEP ou salve o documento: o sistema preenche o endereço (se vazio) e geocodifica latitude/longitude. Para nova tentativa, defina Status=Pending e salve.',
+                components: {
+                  Field: '@/components/partners/PartnerZipCodeField#PartnerZipCodeField',
+                },
+              },
             },
             {
               name: 'city',
@@ -296,26 +303,66 @@ export const Partners: CollectionConfig = {
               defaultValue: 'Brasil',
             },
             {
-              name: 'latitude',
-              type: 'number',
-              label: 'Latitude',
-              index: true,
+              type: 'collapsible',
+              label: 'Geolocalização (técnico)',
               admin: {
+                initCollapsed: true,
                 description:
-                  'Campo preparado para geolocalização — preenchido via geocode quando provedor configurado.',
-                step: 0.000001,
+                  'Coordenadas calculadas automaticamente. Não preencha 0,0. Use geocodingStatus=pending e salve para nova tentativa.',
               },
-            },
-            {
-              name: 'longitude',
-              type: 'number',
-              label: 'Longitude',
-              index: true,
-              admin: {
-                description:
-                  'Campo preparado para geolocalização — preenchido via geocode quando provedor configurado.',
-                step: 0.000001,
-              },
+              fields: [
+                {
+                  name: 'latitude',
+                  type: 'number',
+                  label: 'Latitude',
+                  index: true,
+                  admin: {
+                    readOnly: true,
+                    step: 0.000001,
+                  },
+                },
+                {
+                  name: 'longitude',
+                  type: 'number',
+                  label: 'Longitude',
+                  index: true,
+                  admin: {
+                    readOnly: true,
+                    step: 0.000001,
+                  },
+                },
+                {
+                  name: 'geocodingStatus',
+                  type: 'select',
+                  label: 'Status da geocodificação',
+                  defaultValue: 'pending',
+                  options: [
+                    { label: 'Pending', value: 'pending' },
+                    { label: 'Success', value: 'success' },
+                    { label: 'Failed', value: 'failed' },
+                    { label: 'Manual', value: 'manual' },
+                  ],
+                  admin: {
+                    description:
+                      'Defina Pending e salve para forçar nova geocodificação. Manual preserva coordenadas editadas.',
+                  },
+                },
+                {
+                  name: 'geocodingProvider',
+                  type: 'text',
+                  label: 'Provedor',
+                  admin: { readOnly: true },
+                },
+                {
+                  name: 'geocodedAt',
+                  type: 'date',
+                  label: 'Geocodificado em',
+                  admin: {
+                    readOnly: true,
+                    date: { pickerAppearance: 'dayAndTime' },
+                  },
+                },
+              ],
             },
             {
               name: 'coverageRadius',

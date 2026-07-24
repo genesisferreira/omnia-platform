@@ -1,3 +1,5 @@
+import { isUsableCoordinatePair } from './coordinates';
+
 const EARTH_RADIUS_KM = 6371;
 
 function toRad(deg: number): number {
@@ -6,7 +8,7 @@ function toRad(deg: number): number {
 
 /**
  * Distância Haversine em quilômetros entre dois pontos WGS84.
- * Retorna null se alguma coordenada for inválida.
+ * Retorna null se alguma coordenada for inválida (inclui 0,0 / Null Island).
  */
 export function haversineDistanceKm(
   lat1: number,
@@ -14,13 +16,7 @@ export function haversineDistanceKm(
   lat2: number,
   lon2: number,
 ): number | null {
-  if (![lat1, lon1, lat2, lon2].every((n) => typeof n === 'number' && Number.isFinite(n))) {
-    return null;
-  }
-  if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90) {
-    return null;
-  }
-  if (lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
+  if (!isUsableCoordinatePair(lat1, lon1) || !isUsableCoordinatePair(lat2, lon2)) {
     return null;
   }
 

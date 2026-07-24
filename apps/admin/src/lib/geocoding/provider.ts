@@ -1,25 +1,42 @@
 /**
- * Abstração de geocodificação — sem acoplar a um provedor.
+ * Abstração de geocodificação — Nominatim com cascata de queries.
  *
  * Env:
- * - GEOCODING_PROVIDER=none|nominatim (default: none)
- * - GEOCODING_API_KEY (reservado; não obrigatório para nominatim público)
- * - GEOCODING_USER_AGENT (obrigatório para Nominatim — política de uso)
- *
- * Sem provedor: retorna null; cadastro e busca por cidade/estado seguem OK.
+ * - GEOCODING_PROVIDER=none|nominatim (default: nominatim em staging se setado; senão none)
+ * - GEOCODING_USER_AGENT
+ * - GEOCODING_TIMEOUT_MS=8000
  */
+
+import { normalizeCoordinatePair } from '@omnia/shared';
 
 export type GeocodeResult = {
   latitude: number;
   longitude: number;
   label?: string;
+  provider: string;
+};
+
+export type GeocodeAddressInput = {
+  postalCode?: string | null;
+  street?: string | null;
+  number?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
 };
 
 export type GeocodingProvider = {
   readonly name: string;
   geocodeByPostalCode(postalCode: string, country?: string): Promise<GeocodeResult | null>;
   geocodeByAddress(address: string): Promise<GeocodeResult | null>;
+  geocodeStructured(input: GeocodeAddressInput): Promise<GeocodeResult | null>;
 };
+
+function timeoutMs(): number {
+  const n = Number(process.env.GEOCODING_TIMEOUT_MS || 8000);
+  return Number.isFinite(n) && n >= 1000 ? Math.min(n, 20000) : 8000;
+}
 
 class NoneGeocodingProvider implements GeocodingProvider {
   readonly name = 'none';
@@ -29,9 +46,11 @@ class NoneGeocodingProvider implements GeocodingProvider {
   async geocodeByAddress(): Promise<GeocodeResult | null> {
     return null;
   }
+  async geocodeStructured(): Promise<GeocodeResult | null> {
+    return null;
+  }
 }
 
-/** Nominatim (OpenStreetMap) — uso leve; exige User-Agent identificável. */
 class NominatimGeocodingProvider implements GeocodingProvider {
   readonly name = 'nominatim';
   private readonly userAgent: string;
@@ -41,48 +60,99 @@ class NominatimGeocodingProvider implements GeocodingProvider {
   }
 
   private async search(query: string): Promise<GeocodeResult | null> {
+    const q = query.trim();
+    if (q.length < 3) {
+      return null;
+    }
     const url = new URL('https://nominatim.openstreetmap.org/search');
-    url.searchParams.set('q', query);
+    url.searchParams.set('q', q);
     url.searchParams.set('format', 'json');
     url.searchParams.set('limit', '1');
+    url.searchParams.set('countrycodes', 'br');
 
-    const res = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': this.userAgent,
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': this.userAgent,
+        },
+        signal: AbortSignal.timeout(timeoutMs()),
+      });
+      if (!res.ok) {
+        return null;
+      }
+      const data = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
+      const first = data[0];
+      if (!first?.lat || !first?.lon) {
+        return null;
+      }
+      const pair = normalizeCoordinatePair(first.lat, first.lon);
+      if (!pair) {
+        return null;
+      }
+      return {
+        latitude: pair.latitude,
+        longitude: pair.longitude,
+        label: first.display_name,
+        provider: this.name,
+      };
+    } catch {
       return null;
     }
-    const data = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
-    const first = data[0];
-    if (!first?.lat || !first?.lon) {
-      return null;
-    }
-    const latitude = Number(first.lat);
-    const longitude = Number(first.lon);
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      return null;
-    }
-    return { latitude, longitude, label: first.display_name };
   }
 
   async geocodeByPostalCode(postalCode: string, country = 'Brasil'): Promise<GeocodeResult | null> {
     const cep = postalCode.replace(/\D/g, '');
-    if (cep.length < 8) {
+    if (cep.length !== 8) {
       return null;
     }
     return this.search(`${cep}, ${country}`);
   }
 
   async geocodeByAddress(address: string): Promise<GeocodeResult | null> {
-    const q = address.trim();
-    if (q.length < 5) {
-      return null;
+    return this.search(address);
+  }
+
+  async geocodeStructured(input: GeocodeAddressInput): Promise<GeocodeResult | null> {
+    const country = (input.country || 'Brasil').trim() || 'Brasil';
+    const cep = (input.postalCode || '').replace(/\D/g, '');
+    const street = (input.street || '').trim();
+    const number = (input.number || '').trim();
+    const neighborhood = (input.neighborhood || '').trim();
+    const city = (input.city || '').trim();
+    const state = (input.state || '').trim().toUpperCase();
+
+    const attempts: string[] = [];
+    if (street && number && city) {
+      attempts.push(
+        [street, number, neighborhood, city, state, cep, country].filter(Boolean).join(', '),
+      );
     }
-    return this.search(q);
+    if (street && city) {
+      attempts.push([street, neighborhood, city, state, cep, country].filter(Boolean).join(', '));
+    }
+    if (cep.length === 8 && city) {
+      attempts.push([cep, city, state, country].filter(Boolean).join(', '));
+    } else if (cep.length === 8) {
+      attempts.push(`${cep}, ${country}`);
+    }
+    if (city && state) {
+      attempts.push([city, state, country].filter(Boolean).join(', '));
+    }
+
+    const seen = new Set<string>();
+    for (const q of attempts) {
+      const key = q.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const result = await this.search(q);
+      if (result) {
+        return result;
+      }
+      // Nominatim: 1 req/s de cortesia
+      await new Promise((r) => setTimeout(r, 1100));
+    }
+    return null;
   }
 }
 
@@ -97,7 +167,7 @@ export function getGeocodingProvider(): GeocodingProvider {
     const ua =
       process.env.GEOCODING_USER_AGENT?.trim() ||
       process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-      'OmniaPlatform/1.0 (partner-network; contact=dev@localhost)';
+      'OmniaPlatform/1.0 (partner-network; contact=platform@omniafrigo.com.br)';
     cached = new NominatimGeocodingProvider(ua);
     return cached;
   }
@@ -105,7 +175,6 @@ export function getGeocodingProvider(): GeocodingProvider {
   return cached;
 }
 
-/** Apenas testes. */
 export function resetGeocodingProviderForTests(): void {
   cached = null;
 }

@@ -13,7 +13,12 @@ type PartnersListResponse = {
     totalPages: number;
     hasNextPage: boolean;
   };
-  meta: { origin: { lat: number; lng: number } | null; radiusKm: number | null };
+  meta: {
+    origin: { lat: number; lng: number } | null;
+    originSource?: 'gps' | 'postalCode' | 'city' | null;
+    radiusKm: number | null;
+    withinRadiusOnly?: boolean;
+  };
 };
 
 type TaxonomyResponse = { ok: true; items: Array<{ id: string; name: string; slug: string }> };
@@ -64,6 +69,10 @@ export type FetchPartnersQuery = {
   limit?: number;
   city?: string;
   state?: string;
+  postalCode?: string;
+  zipCode?: string;
+  nearCity?: string;
+  nearState?: string;
   category?: string;
   specialty?: string;
   partnerType?: string;
@@ -74,6 +83,7 @@ export type FetchPartnersQuery = {
   featured?: boolean;
   verified?: boolean;
   home?: boolean;
+  includeOutsideRadius?: boolean;
 };
 
 export async function fetchPublicPartners(
@@ -85,6 +95,10 @@ export async function fetchPublicPartners(
     if (query.limit) params.set('limit', String(query.limit));
     if (query.city) params.set('city', query.city);
     if (query.state) params.set('state', query.state);
+    if (query.postalCode) params.set('postalCode', query.postalCode);
+    if (query.zipCode) params.set('zipCode', query.zipCode);
+    if (query.nearCity) params.set('nearCity', query.nearCity);
+    if (query.nearState) params.set('nearState', query.nearState);
     if (query.category) params.set('category', query.category);
     if (query.specialty) params.set('specialty', query.specialty);
     if (query.partnerType) params.set('partnerType', query.partnerType);
@@ -95,6 +109,7 @@ export async function fetchPublicPartners(
     if (query.featured) params.set('featured', '1');
     if (query.verified) params.set('verified', '1');
     if (query.home) params.set('home', '1');
+    if (query.includeOutsideRadius) params.set('includeOutsideRadius', '1');
 
     const res = await fetch(`${adminBase()}/api/omnia/public-partners?${params}`, {
       next: { revalidate: 60 },

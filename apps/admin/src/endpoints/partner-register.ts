@@ -8,7 +8,7 @@ import {
   isTrustedPartnerOrigin,
   validatePartnerRegisterBody,
 } from '../lib/partner-register';
-import { getGeocodingProvider } from '../lib/geocoding/provider';
+import { applyPartnerLocationResolution } from '../lib/partners/resolve-partner-location';
 
 const json = (status: number, body: unknown): Response =>
   Response.json(body, {
@@ -92,30 +92,42 @@ export const partnerRegisterEndpoint: Endpoint = {
 
       let latitude: number | undefined;
       let longitude: number | undefined;
-      try {
-        const geo = getGeocodingProvider();
-        const result = validated.data.zipCode
-          ? await geo.geocodeByPostalCode(validated.data.zipCode, validated.data.country)
-          : await geo.geocodeByAddress(
-              [
-                validated.data.address,
-                validated.data.addressNumber,
-                validated.data.city,
-                validated.data.state,
-                validated.data.country,
-              ]
-                .filter(Boolean)
-                .join(', '),
-            );
-        if (result) {
-          latitude = result.latitude;
-          longitude = result.longitude;
-        }
-      } catch {
-        req.payload.logger.warn('partner-register: geocode skipped');
-      }
+      let geocodingStatus: 'pending' | 'success' | 'failed' | 'manual' = 'pending';
+      let geocodingProvider: string | undefined;
+      let geocodedAt: string | undefined;
 
       const d = validated.data;
+      try {
+        const resolved = await applyPartnerLocationResolution(
+          {
+            zipCode: d.zipCode,
+            address: d.address,
+            addressNumber: d.addressNumber,
+            neighborhood: d.neighborhood,
+            city: d.city,
+            state: d.state,
+            country: d.country,
+          },
+          null,
+          { force: true },
+        );
+        if (resolved.zipCode) d.zipCode = resolved.zipCode;
+        if (resolved.address) d.address = resolved.address ?? d.address;
+        if (resolved.neighborhood) d.neighborhood = resolved.neighborhood ?? d.neighborhood;
+        if (resolved.city) d.city = resolved.city;
+        if (resolved.state) d.state = resolved.state;
+        if (resolved.country) d.country = resolved.country;
+        if (resolved.latitude != null && resolved.longitude != null) {
+          latitude = resolved.latitude;
+          longitude = resolved.longitude;
+        }
+        if (resolved.geocodingStatus) geocodingStatus = resolved.geocodingStatus;
+        if (resolved.geocodingProvider) geocodingProvider = resolved.geocodingProvider;
+        if (resolved.geocodedAt) geocodedAt = resolved.geocodedAt;
+      } catch {
+        req.payload.logger.warn('partner-register: location resolve skipped');
+      }
+
       const createData = {
         companyName: d.companyName,
         tradeName: d.tradeName ?? undefined,
@@ -145,12 +157,14 @@ export const partnerRegisterEndpoint: Endpoint = {
         serviceCities: d.serviceCities,
         categories: d.categoryIds,
         specialties: d.specialtyIds,
-        // Hooks reforçam; valores explícitos satisfazem GeneratedTypes.
         status: 'pending' as const,
         plan: 'free' as const,
         active: false,
         featured: false,
         verified: false,
+        geocodingStatus,
+        geocodingProvider,
+        geocodedAt,
         ...(latitude != null && longitude != null ? { latitude, longitude } : {}),
       };
 
@@ -158,7 +172,7 @@ export const partnerRegisterEndpoint: Endpoint = {
         collection: 'partners',
         data: createData,
         overrideAccess: true,
-        context: { publicPartnerRegister: true },
+        context: { publicPartnerRegister: true, skipPartnerGeocode: true },
         req,
       });
 

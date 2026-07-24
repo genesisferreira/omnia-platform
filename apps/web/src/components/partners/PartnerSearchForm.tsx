@@ -18,12 +18,14 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
   const [pending, startTransition] = useTransition();
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [geoStatus, setGeoStatus] = useState<string | null>(null);
 
   const initial = useMemo(
     () => ({
       q: searchParams.get('q') || '',
-      city: searchParams.get('city') || '',
-      state: searchParams.get('state') || '',
+      postalCode: searchParams.get('postalCode') || searchParams.get('zipCode') || '',
+      nearCity: searchParams.get('nearCity') || '',
+      nearState: searchParams.get('nearState') || '',
       category: searchParams.get('category') || '',
       specialty: searchParams.get('specialty') || '',
       partnerType: searchParams.get('partnerType') || '',
@@ -52,33 +54,51 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
   const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setGeoError(null);
+    setGeoStatus(null);
+
+    const hasCep = form.postalCode.replace(/\D/g, '').length === 8;
+    const hasCity = Boolean(form.nearCity.trim() && form.nearState.trim());
+
+    if (hasCep) {
+      setGeoStatus('Buscando por CEP…');
+    } else if (hasCity) {
+      setGeoStatus('Localizando por cidade…');
+    } else if (!searchParams.get('lat')) {
+      setGeoStatus(
+        'Sem localização: resultados por destaque e nome. Informe CEP, cidade ou use GPS.',
+      );
+    }
+
     applyParams({
       q: form.q,
-      city: form.city,
-      state: form.state,
+      postalCode: hasCep ? form.postalCode.replace(/\D/g, '') : undefined,
+      nearCity: !hasCep && hasCity ? form.nearCity : undefined,
+      nearState: !hasCep && hasCity ? form.nearState : undefined,
       category: form.category,
       specialty: form.specialty,
       partnerType: form.partnerType,
       radiusKm: form.radiusKm,
-      lat: searchParams.get('lat') || undefined,
-      lng: searchParams.get('lng') || undefined,
+      // Limpa GPS se usuário buscou por CEP/cidade
+      lat: hasCep || hasCity ? undefined : searchParams.get('lat') || undefined,
+      lng: hasCep || hasCity ? undefined : searchParams.get('lng') || undefined,
     });
   };
 
   const useLocation = () => {
     setGeoError(null);
+    setGeoStatus(null);
     if (!navigator.geolocation) {
-      setGeoError('Seu navegador não suporta geolocalização. Use cidade, UF ou CEP.');
+      setGeoError('Seu navegador não suporta geolocalização. Use CEP ou cidade/UF.');
       return;
     }
     setGeoLoading(true);
+    setGeoStatus('Obtendo localização…');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGeoLoading(false);
+        setGeoStatus('Localização permitida');
         applyParams({
           q: form.q,
-          city: form.city,
-          state: form.state,
           category: form.category,
           specialty: form.specialty,
           partnerType: form.partnerType,
@@ -89,8 +109,9 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
       },
       () => {
         setGeoLoading(false);
+        setGeoStatus('Localização negada');
         setGeoError(
-          'Não foi possível obter sua localização. Você pode buscar por cidade, UF ou CEP.',
+          'Não foi possível obter sua localização. Busque por CEP ou cidade/UF.',
         );
       },
       { enableHighAccuracy: false, timeout: 10000 },
@@ -98,34 +119,38 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 border border-omnia-deep-blue/10 bg-omnia-white p-5 md:p-6">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4 border border-omnia-deep-blue/10 bg-omnia-white p-5 md:p-6"
+    >
+      <div>
+        <h2 className="font-heading text-lg font-semibold text-omnia-deep-blue">
+          Encontre parceiros próximos
+        </h2>
+        <p className="mt-1 text-sm text-omnia-graphite-light">
+          Use GPS, CEP ou cidade. Sem localização, listamos por destaque — sem assumir São Paulo.
+        </p>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-omnia-deep-blue">Busca</span>
+        <label className="block text-sm md:col-span-2">
+          <span className="mb-1 block font-medium text-omnia-deep-blue">Busca por nome</span>
           <Input
             name="q"
             value={form.q}
             onChange={(e) => setForm((f) => ({ ...f, q: e.target.value }))}
-            placeholder="Nome, cidade, CEP…"
-            aria-label="Busca por nome, cidade ou CEP"
+            placeholder="Nome fantasia ou razão social"
+            aria-label="Busca por nome"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-omnia-deep-blue">Cidade</span>
+          <span className="mb-1 block font-medium text-omnia-deep-blue">CEP (sua localização)</span>
           <Input
-            name="city"
-            value={form.city}
-            onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-omnia-deep-blue">UF</span>
-          <Input
-            name="state"
-            maxLength={2}
-            value={form.state}
-            onChange={(e) => setForm((f) => ({ ...f, state: e.target.value.toUpperCase() }))}
-            placeholder="SP"
+            name="postalCode"
+            inputMode="numeric"
+            value={form.postalCode}
+            onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+            placeholder="30110-012"
           />
         </label>
         <label className="block text-sm">
@@ -134,8 +159,28 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
             name="radiusKm"
             type="number"
             min={1}
+            max={500}
             value={form.radiusKm}
             onChange={(e) => setForm((f) => ({ ...f, radiusKm: e.target.value }))}
+          />
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium text-omnia-deep-blue">Cidade (sua localização)</span>
+          <Input
+            name="nearCity"
+            value={form.nearCity}
+            onChange={(e) => setForm((f) => ({ ...f, nearCity: e.target.value }))}
+            placeholder="Belo Horizonte"
+          />
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium text-omnia-deep-blue">UF</span>
+          <Input
+            name="nearState"
+            maxLength={2}
+            value={form.nearState}
+            onChange={(e) => setForm((f) => ({ ...f, nearState: e.target.value.toUpperCase() }))}
+            placeholder="MG"
           />
         </label>
         <label className="block text-sm">
@@ -182,11 +227,7 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
         </label>
       </div>
 
-      <p className="text-xs text-omnia-graphite-light">
-        Usamos sua localização apenas para ordenar parceiros próximos. Nada é armazenado no servidor
-        sem necessidade.
-      </p>
-
+      {geoStatus ? <p className="text-sm text-omnia-graphite-light">{geoStatus}</p> : null}
       {geoError ? (
         <p role="alert" className="text-sm text-red-700">
           {geoError}

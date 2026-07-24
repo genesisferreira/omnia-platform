@@ -7,8 +7,15 @@ import {
   PUBLIC_PARTNER_HOME_LIMIT,
   PUBLIC_PARTNER_LIST_DEFAULT_LIMIT,
   PUBLIC_PARTNER_LIST_MAX_LIMIT,
+  PUBLIC_PARTNER_MAX_RADIUS_KM,
   sortPublicPartners,
 } from '@omnia/shared';
+
+import { getGeocodingProvider } from '../lib/geocoding/provider';
+import {
+  lookupPostalCode,
+  normalizeBrazilianPostalCode,
+} from '../lib/postal-code/provider';
 
 const CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=30';
 
@@ -42,7 +49,76 @@ function parseOrigin(url: URL): { lat: number; lng: number } | null {
   if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
     return null;
   }
+  if (lat === 0 && lng === 0) {
+    return null;
+  }
   return { lat, lng };
+}
+
+function clampRadiusKm(raw: string | null, hasOrigin: boolean): number | null {
+  if (raw == null || raw === '') {
+    return hasOrigin ? PUBLIC_PARTNER_DEFAULT_RADIUS_KM : null;
+  }
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 1) {
+    return PUBLIC_PARTNER_DEFAULT_RADIUS_KM;
+  }
+  return Math.min(n, PUBLIC_PARTNER_MAX_RADIUS_KM);
+}
+
+async function resolveOriginFromQuery(
+  url: URL,
+): Promise<{
+  origin: { lat: number; lng: number } | null;
+  originSource: 'gps' | 'postalCode' | 'city' | null;
+}> {
+  const gps = parseOrigin(url);
+  if (gps) {
+    return { origin: gps, originSource: 'gps' };
+  }
+
+  const cep = normalizeBrazilianPostalCode(
+    url.searchParams.get('postalCode') || url.searchParams.get('zipCode') || '',
+  );
+  if (cep) {
+    const lookup = await lookupPostalCode(cep);
+    if (lookup) {
+      const geo = await getGeocodingProvider().geocodeStructured({
+        postalCode: lookup.postalCode,
+        street: lookup.street,
+        neighborhood: lookup.neighborhood,
+        city: lookup.city,
+        state: lookup.state,
+        country: lookup.country,
+      });
+      if (geo) {
+        return { origin: { lat: geo.latitude, lng: geo.longitude }, originSource: 'postalCode' };
+      }
+    }
+  }
+
+  const city = url.searchParams.get('city')?.trim();
+  const state = url.searchParams.get('state')?.trim()?.toUpperCase();
+  // Só geocodifica cidade como origem se o usuário pediu explicitamente (originCity=1)
+  // ou se não há filtro de cidade nos parceiros e há nearCity.
+  const nearCity = url.searchParams.get('nearCity')?.trim() || city;
+  const nearState = url.searchParams.get('nearState')?.trim()?.toUpperCase() || state;
+  const useCityOrigin =
+    url.searchParams.get('locateByCity') === '1' ||
+    Boolean(url.searchParams.get('nearCity')?.trim());
+
+  if (useCityOrigin && nearCity && nearState) {
+    const geo = await getGeocodingProvider().geocodeStructured({
+      city: nearCity,
+      state: nearState,
+      country: 'Brasil',
+    });
+    if (geo) {
+      return { origin: { lat: geo.latitude, lng: geo.longitude }, originSource: 'city' };
+    }
+  }
+
+  return { origin: null, originSource: null };
 }
 
 export const publicPartnersEndpoint: Endpoint = {
@@ -71,21 +147,22 @@ export const publicPartnersEndpoint: Endpoint = {
       const featured = url.searchParams.get('featured');
       const verified = url.searchParams.get('verified');
       const q = url.searchParams.get('q')?.trim();
-      const origin = parseOrigin(url);
-      const radiusParam = url.searchParams.get('radiusKm');
-      const radiusKm =
-        radiusParam != null && radiusParam !== ''
-          ? Number(radiusParam)
-          : origin
-            ? PUBLIC_PARTNER_DEFAULT_RADIUS_KM
-            : null;
+      const includeOutside =
+        url.searchParams.get('includeOutsideRadius') === '1' ||
+        url.searchParams.get('withinRadiusOnly') === '0';
+
+      const { origin, originSource } = await resolveOriginFromQuery(url);
+      const radiusKm = clampRadiusKm(url.searchParams.get('radiusKm'), Boolean(origin));
 
       const and: Where[] = [publicVisibilityWhere()];
 
-      if (city) {
+      // Filtro de cidade/UF do parceiro (quando não usado só como origem).
+      const nearCity = url.searchParams.get('nearCity')?.trim();
+      const nearState = url.searchParams.get('nearState')?.trim()?.toUpperCase();
+      if (city && !nearCity) {
         and.push({ city: { contains: city } });
       }
-      if (state) {
+      if (state && !nearState && url.searchParams.get('locateByCity') !== '1') {
         and.push({ state: { equals: state } });
       }
       if (partnerType === 'company' || partnerType === 'professional') {
@@ -111,7 +188,7 @@ export const publicPartnersEndpoint: Endpoint = {
             ok: true,
             partners: [],
             pagination: { page, limit, totalDocs: 0, totalPages: 1, hasNextPage: false },
-            meta: { origin, radiusKm: null },
+            meta: { origin, originSource, radiusKm: null, withinRadiusOnly: false },
           });
         }
         and.push({ categories: { contains: catId } });
@@ -130,7 +207,7 @@ export const publicPartnersEndpoint: Endpoint = {
             ok: true,
             partners: [],
             pagination: { page, limit, totalDocs: 0, totalPages: 1, hasNextPage: false },
-            meta: { origin, radiusKm: null },
+            meta: { origin, originSource, radiusKm: null, withinRadiusOnly: false },
           });
         }
         and.push({ specialties: { contains: specId } });
@@ -147,7 +224,6 @@ export const publicPartnersEndpoint: Endpoint = {
         });
       }
 
-      // Busca generosa para ordenar por distância no servidor; pagina depois.
       const fetchLimit = origin ? Math.min(200, PUBLIC_PARTNER_LIST_MAX_LIMIT * 4) : limit;
       const fetchPage = origin ? 1 : page;
 
@@ -165,10 +241,18 @@ export const publicPartnersEndpoint: Endpoint = {
         .map((doc) => mapPublicPartnerListItem(doc, origin))
         .filter((item): item is NonNullable<typeof item> => item !== null);
 
+      const withinRadiusOnly = Boolean(origin) && !includeOutside && !home;
+
       items = sortPublicPartners(items, {
         hasOrigin: Boolean(origin),
-        radiusKm: Number.isFinite(radiusKm as number) ? (radiusKm as number) : null,
+        radiusKm,
+        withinRadiusOnly,
       });
+
+      // Home: só com distância válida quando origin presente; sem origin não inventa proximidade.
+      if (home && origin) {
+        items = items.filter((p) => p.distanceKm != null);
+      }
 
       const total = origin ? items.length : result.totalDocs;
       if (origin) {
@@ -188,7 +272,9 @@ export const publicPartnersEndpoint: Endpoint = {
         },
         meta: {
           origin,
-          radiusKm: Number.isFinite(radiusKm as number) ? radiusKm : null,
+          originSource,
+          radiusKm,
+          withinRadiusOnly,
         },
       });
     } catch {

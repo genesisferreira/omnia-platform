@@ -42,6 +42,7 @@ import {
   publicPartnersEndpoint,
   publicPartnerSpecialtiesEndpoint,
 } from './src/endpoints/public-partners';
+import { publicPostalCodeEndpoint } from './src/endpoints/public-postal-code';
 import {
   publicPostCategoriesEndpoint,
   publicPostEndpoint,
@@ -114,6 +115,7 @@ export default buildConfig({
     publicPartnerEndpoint,
     publicPartnerCategoriesEndpoint,
     publicPartnerSpecialtiesEndpoint,
+    publicPostalCodeEndpoint,
     partnerRegisterEndpoint,
   ],
   editor: lexicalEditor(),
