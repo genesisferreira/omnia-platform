@@ -2,7 +2,7 @@
 
 **Data (última atualização):** 2026-07-24  
 **Branch:** `feature/2.3-partner-network`  
-**HEAD remoto:** `fe28432dad6190e3b978e5092636be07759e5c10` (`docs(partners): homologation report`)  
+**HEAD remoto:** `2a169a9a3a66737785cc2cb031e2f12d3330f7ee` (`docs(partners): record branch push and VPS SSH blocker`)  
 **Ambiente alvo:** DEV / staging oficial (não produção)
 
 | Portal | Admin |
@@ -20,7 +20,7 @@
 | Branch local | `feature/2.3-partner-network` |
 | `git push -u origin feature/2.3-partner-network` | **OK** (branch nova no origin) |
 | Tracking | `origin/feature/2.3-partner-network` |
-| HEAD local = remoto | `fe28432` |
+| HEAD local = remoto | `2a169a9` |
 | Merge main/develop | **Não realizado** (proibido) |
 | Produção | **Não alterada** |
 
@@ -33,6 +33,7 @@ Commits da Sprint na branch (resumo):
 | `fcc1310` | `feat(partners): deliver public partner network experience` |
 | `e443156` | `docs(partners): document development validation` |
 | `fe28432` | `docs(partners): homologation report` |
+| `2a169a9` | `docs(partners): record branch push and VPS SSH blocker` |
 
 ---
 
@@ -81,8 +82,8 @@ test -z "$(git status --porcelain | grep -v '^.env' || true)" || {
 git fetch --prune origin
 git checkout "$DEPLOY_BRANCH"
 git pull --ff-only origin "$DEPLOY_BRANCH"
-test "$(git rev-parse HEAD)" = "fe28432dad6190e3b978e5092636be07759e5c10" \
-  || test "$(git rev-parse --short HEAD)" = "fe28432"
+git rev-parse --short HEAD
+# esperado: 2a169a9 (ou tip atual de origin/feature/2.3-partner-network)
 
 export DOCKER_BUILDKIT=1
 docker compose -f docker/compose/staging.yml --env-file .env.staging \
