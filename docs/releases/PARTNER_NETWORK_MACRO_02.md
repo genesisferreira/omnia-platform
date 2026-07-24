@@ -142,6 +142,12 @@ pnpm --filter @omnia/admin test:partner-register
 5. Aprovar + ativar + confirmar publishedAt
 6. Conferir busca, perfil, Home, GPS ok/negado, mobile, ausência de documento/e-mail
 
+## Homologação DEV
+
+Relatório operacional: [`PARTNER_NETWORK_DEV_HOMOLOGATION.md`](./PARTNER_NETWORK_DEV_HOMOLOGATION.md).
+
+Em 2026-07-24 a publicação no DEV ficou **bloqueada** (branch ausente no remote + sem SSH à VPS). Portal DEV ainda retorna 404 em `/parceiros` até o deploy da branch.
+
 ---
 
 ## Próxima evolução
