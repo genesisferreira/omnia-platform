@@ -80,10 +80,14 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (state === 'submitting') {
+      return;
+    }
     setError(null);
     setState('submitting');
 
-    const fd = new FormData(event.currentTarget);
+    const formEl = event.currentTarget;
+    const fd = new FormData(formEl);
     const payload = {
       companyName: String(fd.get('companyName') || ''),
       tradeName: String(fd.get('tradeName') || ''),
@@ -118,28 +122,76 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       companyWebsite: String(fd.get('companyWebsite') || ''),
     };
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45_000);
+
     try {
       const res = await fetch(`${getPublicAdminUrl()}/api/omnia/partner-register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
-      const data = (await res.json()) as {
+
+      let data: {
+        success?: boolean;
         ok?: boolean;
+        code?: string;
         message?: string;
-        error?: { message?: string };
-      };
-      if (!res.ok || !data.ok) {
+        retryAfter?: number;
+        error?: { code?: string; message?: string };
+      } = {};
+      const raw = await res.text();
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as typeof data;
+        } catch {
+          setState('error');
+          setError(
+            'Não foi possível concluir agora. Seus dados foram preservados. Tente novamente.',
+          );
+          return;
+        }
+      }
+
+      const apiMessage = data.message || data.error?.message;
+      const code = data.code || data.error?.code;
+      const success = data.success === true || data.ok === true;
+
+      if (res.status === 429 || code === 'RATE_LIMITED') {
+        const retryAfter = data.retryAfter;
+        const minutes =
+          retryAfter && retryAfter > 0 ? Math.max(1, Math.ceil(retryAfter / 60)) : null;
         setState('error');
-        setError(data.error?.message || 'Não foi possível enviar o cadastro.');
+        setError(
+          apiMessage ||
+            (minutes
+              ? `Muitas tentativas. Tente novamente em ${minutes} minuto${minutes === 1 ? '' : 's'}.`
+              : 'Muitas tentativas. Tente novamente em alguns minutos.'),
+        );
         return;
       }
+
+      if (res.status >= 500 || code === 'INTERNAL_ERROR' || code === 'SERVICE_UNAVAILABLE') {
+        setState('error');
+        setError(
+          apiMessage ||
+            'Não foi possível concluir agora. Seus dados foram preservados. Tente novamente.',
+        );
+        return;
+      }
+
+      if (!res.ok || !success) {
+        setState('error');
+        setError(apiMessage || 'Não foi possível enviar o cadastro.');
+        return;
+      }
+
       setSuccessMessage(
-        data.message ||
-          'Cadastro recebido. Nossa equipe analisará as informações antes da publicação.',
+        apiMessage || 'Cadastro enviado com sucesso. Nossa equipe fará a análise.',
       );
       setState('success');
-      event.currentTarget.reset();
+      formEl.reset();
       setCategoryIds([]);
       setSpecialtyIds([]);
       setZipCode('');
@@ -150,9 +202,16 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       setCountry('Brasil');
       setCepState('idle');
       setCepMessage(null);
-    } catch {
+    } catch (err) {
       setState('error');
-      setError('Falha de conexão. Tente novamente.');
+      const aborted = err instanceof DOMException && err.name === 'AbortError';
+      setError(
+        aborted
+          ? 'A solicitação demorou demais. Seus dados foram preservados. Verifique se o cadastro já aparece ou tente novamente.'
+          : 'Não foi possível concluir agora. Seus dados foram preservados. Tente novamente.',
+      );
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -413,7 +472,7 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       ) : null}
 
       <Button type="submit" disabled={state === 'submitting'}>
-        {state === 'submitting' ? 'Enviando…' : 'Enviar cadastro'}
+        {state === 'submitting' ? 'Enviando cadastro...' : 'Enviar cadastro'}
       </Button>
     </form>
   );

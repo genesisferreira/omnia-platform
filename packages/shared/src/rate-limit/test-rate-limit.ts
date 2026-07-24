@@ -129,6 +129,30 @@ const run = async (): Promise<void> => {
     process.env.RATE_LIMIT_BACKEND = 'memory';
   });
 
+  await test('peek não incrementa e respeita max', async () => {
+    const { peekRateLimit } = await import('@omnia/shared/rate-limit');
+    process.env.RATE_LIMIT_BACKEND = 'memory';
+    resetRateLimitMemoryForTests();
+    const subjects = [{ value: 'ip:peek-1' }];
+    const open = await peekRateLimit({
+      scope: 'peek',
+      subjects,
+      max: 2,
+      windowMs: 60_000,
+    });
+    assert.equal(open.allowed, true);
+    await checkRateLimit({ scope: 'peek', subjects, max: 2, windowMs: 60_000 });
+    await checkRateLimit({ scope: 'peek', subjects, max: 2, windowMs: 60_000 });
+    const blocked = await peekRateLimit({
+      scope: 'peek',
+      subjects,
+      max: 2,
+      windowMs: 60_000,
+    });
+    assert.equal(blocked.allowed, false);
+    assert.ok((blocked.retryAfterSeconds ?? 0) >= 1);
+  });
+
   console.log(`\n${passed} testes OK (rate-limit)`);
 };
 

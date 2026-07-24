@@ -1,4 +1,5 @@
 import {
+  PARTNER_REGISTER_ABUSE_RATE_LIMIT_MAX,
   PARTNER_REGISTER_MAX_BODY_BYTES,
   PARTNER_REGISTER_RATE_LIMIT_MAX,
   PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
@@ -6,7 +7,7 @@ import {
   slugSourceFromPartner,
   validateBrazilianDocument,
 } from '@omnia/shared';
-import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared/rate-limit';
+import { checkRateLimit, clientIpFromHeaders, peekRateLimit } from '@omnia/shared/rate-limit';
 
 import { getAllowedCorsOrigins } from './allowed-origins';
 
@@ -144,10 +145,54 @@ export function isPartnerRegisterBodyTooLarge(contentLength: string | null): boo
   return Number.isFinite(n) && n > PARTNER_REGISTER_MAX_BODY_BYTES;
 }
 
-export async function allowPartnerRegisterRequest(args: {
+function partnerRegisterRedisMode(): 'fail-closed' | 'memory-fallback' {
+  const deployEnv = (process.env.APP_ENV || process.env.OMNIA_ENV || '').toLowerCase();
+  if (deployEnv === 'staging' || deployEnv === 'development' || deployEnv === 'dev') {
+    return 'memory-fallback';
+  }
+  if (deployEnv === 'production') {
+    return 'fail-closed';
+  }
+  // Sem APP_ENV: imagem Next com NODE_ENV=production mas Redis presente → fallback seguro em homolog.
+  return 'memory-fallback';
+}
+
+export type PartnerRegisterRateResult = {
+  allowed: boolean;
+  reason: string;
+  retryAfterSeconds?: number;
+};
+
+/** Pré-checagem sem incrementar (cadastros bem-sucedidos na janela). */
+export async function peekPartnerRegisterQuota(args: {
   ip: string;
   email: string;
-}): Promise<{ allowed: boolean; reason: string }> {
+}): Promise<PartnerRegisterRateResult> {
+  const decision = await peekRateLimit({
+    scope: 'partner-register',
+    subjects: [
+      { value: args.ip },
+      { value: args.email, hash: true },
+    ],
+    max: PARTNER_REGISTER_RATE_LIMIT_MAX,
+    windowMs: PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
+    onRedisUnavailable: partnerRegisterRedisMode(),
+  });
+  return {
+    allowed: decision.allowed,
+    reason: decision.reason,
+    retryAfterSeconds: decision.retryAfterSeconds,
+  };
+}
+
+/**
+ * Incrementa após create OK (IP + e-mail hasheado).
+ * Não chamar em falha de geo/SMTP/infra.
+ */
+export async function recordPartnerRegisterSuccess(args: {
+  ip: string;
+  email: string;
+}): Promise<PartnerRegisterRateResult> {
   const decision = await checkRateLimit({
     scope: 'partner-register',
     subjects: [
@@ -156,10 +201,46 @@ export async function allowPartnerRegisterRequest(args: {
     ],
     max: PARTNER_REGISTER_RATE_LIMIT_MAX,
     windowMs: PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
-    onRedisUnavailable:
-      process.env.NODE_ENV === 'production' ? 'fail-closed' : 'memory-fallback',
+    onRedisUnavailable: partnerRegisterRedisMode(),
   });
-  return { allowed: decision.allowed, reason: decision.reason };
+  return {
+    allowed: decision.allowed,
+    reason: decision.reason,
+    retryAfterSeconds: decision.retryAfterSeconds,
+  };
+}
+
+/** @deprecated Preferir peek + record pós-sucesso. Mantido para compatibilidade de testes. */
+export async function allowPartnerRegisterRequest(args: {
+  ip: string;
+  email: string;
+}): Promise<PartnerRegisterRateResult> {
+  return peekPartnerRegisterQuota(args);
+}
+
+/** Honeypot / payload inválido reiterado — escopo separado, limite maior. */
+export async function recordPartnerRegisterAbuse(args: {
+  ip: string;
+}): Promise<PartnerRegisterRateResult> {
+  const decision = await checkRateLimit({
+    scope: 'partner-register-abuse',
+    subjects: [{ value: args.ip }],
+    max: PARTNER_REGISTER_ABUSE_RATE_LIMIT_MAX,
+    windowMs: PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
+    onRedisUnavailable: partnerRegisterRedisMode(),
+  });
+  return {
+    allowed: decision.allowed,
+    reason: decision.reason,
+    retryAfterSeconds: decision.retryAfterSeconds,
+  };
+}
+
+export function formatRetryAfterMinutes(seconds: number | undefined): string {
+  const s =
+    seconds && seconds > 0 ? seconds : Math.ceil(PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS / 1000);
+  const minutes = Math.max(1, Math.ceil(s / 60));
+  return minutes === 1 ? '1 minuto' : `${minutes} minutos`;
 }
 
 export type ValidatePartnerRegisterResult =
