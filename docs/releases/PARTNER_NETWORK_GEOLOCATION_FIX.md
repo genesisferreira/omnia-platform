@@ -2,7 +2,9 @@
 
 **Data:** 2026-07-24  
 **Branch:** `feature/2.3-partner-network`  
-**Ambiente:** DEV / staging (`omnia_staging`) — **produção não alterada**
+**HEAD implantado no DEV:** `35cbe93`  
+**Ambiente:** DEV / staging (`omnia_staging`) — **produção não alterada**  
+**Status:** 🟢 CEP, geocodificação e busca por proximidade homologados no DEV
 
 ---
 
@@ -115,7 +117,40 @@ pnpm --filter @omnia/admin test:postal-geocode
 3. Restaurar backup `omnia_staging` se migration precisar reverter
 4. Down migration `20260724_180000_partner_geocoding_meta` só se seguro e com backup
 
-## 13. Pendências conhecidas
+## 13. Deploy DEV (2026-07-24)
+
+| Item | Valor |
+|------|-------|
+| Commit anterior (rollback) | `3408937` |
+| Commit atual | `35cbe93` |
+| Backup | `/opt/omnia/platform/backups/omnia_staging_pre_geo_20260724T183849Z.sql.gz` (~49K) |
+| Banco | `omnia_staging` (container `omnia-postgres`) |
+| Migration | `20260724_180000_partner_geocoding_meta` (colunas presentes) |
+| Env | `GEOCODING_PROVIDER=nominatim`, `POSTAL_CODE_PROVIDER=auto` |
+| Containers | `omnia-platform-admin-dev`, `omnia-platform-web-dev` (healthy) |
+| Produção | **não alterada** |
+
+### Backfill
+
+Script Payload (`getPayload`) tentou schema push interativo no bootstrap image — **não usado**.  
+Backfill seguro no DEV: Nominatim + `UPDATE` SQL em parceiros sem coordenadas (3 registros → `geocoding_status=success`).  
+Parceiro BH de homologação: `homolog-bh-frio` (aprovado, coords BH).
+
+### Evidência BH × SP
+
+| Cenário | Resultado |
+|---------|----------|
+| GPS BH (`-19.932,-43.938`, raio 50) | 1º `homolog-bh-frio` (~2,1 km); SP **fora do raio** |
+| CEP `30110012` | 1º BH |
+| `nearCity=Belo Horizonte&nearState=MG` | 1º BH |
+| GPS SP (`-23.55,-46.63`, raio 100) | 1º `homolog-frio` (Campinas) |
+| Sem origem | featured/nome; sem inventar SP como origem |
+| `includeOutsideRadius=1` a partir de BH | BH 2,1 km → SP ~462 km (ordem por distância) |
+| CEP API `30110012` | ViaCEP → Av. Contorno / Floresta / BH / MG |
+| Páginas `/parceiros`, cadastro, perfis | 200 |
+
+## 14. Pendências conhecidas
 
 - Cache Redis dedicado por CEP/endereço (hoje HTTP Cache-Control + rate limit)
-- E2E automatizado browser (homologação manual GPS)
+- E2E automatizado browser (GPS do navegador)
+- Endurecer `backfill-partner-geocoding.ts` para não acionar schema push (`PAYLOAD` push off / flag)
