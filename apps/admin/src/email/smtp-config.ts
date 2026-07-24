@@ -40,6 +40,10 @@ const LOCAL_SMTP_HOSTS = new Set(['localhost', '127.0.0.1', 'mailpit', '::1']);
  * Não registra valores.
  */
 export function loadRootEnvFile(): void {
+  // Build Docker / simulação de importmap: não injetar .env do host.
+  if (process.env.DOCKER_BUILD === 'true' || process.env.OMNIA_SKIP_ROOT_ENV === '1') {
+    return;
+  }
   try {
     const here = path.dirname(fileURLToPath(import.meta.url));
     const rootEnvPath = path.resolve(here, '../../../../.env');
@@ -159,12 +163,51 @@ export type ResolveSmtpOptions = {
   nodeEnv?: string;
 };
 
-export function isCompileOrBuildPhase(env: Record<string, string | undefined> = process.env): boolean {
-  return (
-    env.NEXT_PHASE === 'phase-production-build' ||
-    env.npm_lifecycle_event === 'build' ||
-    env.OMNIA_SMTP_ALLOW_BUILD === '1'
-  );
+/**
+ * Ferramentas de build/codegen (importmap, next build, docker build).
+ * Não implica liberar SMTP inválido em runtime.
+ */
+export function isBuildToolingPhase(
+  env: Record<string, string | undefined> = process.env,
+  argv: readonly string[] = process.argv,
+): boolean {
+  if (env.OMNIA_SMTP_ALLOW_BUILD === '1') {
+    return true;
+  }
+  if (env.DOCKER_BUILD === 'true') {
+    return true;
+  }
+  if (env.NEXT_PHASE === 'phase-production-build') {
+    return true;
+  }
+  const lifecycle = env.npm_lifecycle_event || '';
+  if (lifecycle === 'build' || lifecycle === 'generate:importmap') {
+    return true;
+  }
+  return argv.some((arg) => String(arg).includes('generate:importmap'));
+}
+
+/** @deprecated Use isBuildToolingPhase — mantido para testes existentes. */
+export function isCompileOrBuildPhase(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return isBuildToolingPhase(env);
+}
+
+/**
+ * Adia a resolução SMTP quando NÃO há SMTP_HOST e estamos em tooling de build.
+ * Com SMTP_HOST presente (runtime Docker), nunca adia — evita inlining de build.
+ * Sem SMTP_HOST e fora de tooling → não adia (resolveSmtpConfig falha ao subir).
+ */
+export function isSmtpConfigDeferred(
+  env: Record<string, string | undefined> = process.env,
+  argv: readonly string[] = process.argv,
+): boolean {
+  const hasHost = Boolean((env.SMTP_HOST || '').trim());
+  if (hasHost) {
+    return false;
+  }
+  return isBuildToolingPhase(env, argv);
 }
 
 /**
@@ -176,7 +219,7 @@ export function isCompileOrBuildPhase(env: Record<string, string | undefined> = 
 export function resolveSmtpConfig(options: ResolveSmtpOptions = {}): ResolvedSmtpConfig {
   const env = options.env ?? process.env;
   const nodeEnv = options.nodeEnv ?? env.NODE_ENV ?? 'development';
-  const buildPhase = isCompileOrBuildPhase(env);
+  const buildPhase = isBuildToolingPhase(env);
   const isProdLike =
     (nodeEnv === 'production' || nodeEnv === 'staging') && !buildPhase;
 

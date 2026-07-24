@@ -14,6 +14,7 @@ import {
 import {
   FORGOT_PASSWORD_NEUTRAL_MESSAGE,
   buildResetPasswordURL,
+  isSmtpConfigDeferred,
   parseSmtpFrom,
   parseSmtpPort,
   parseSmtpSecure,
@@ -114,6 +115,42 @@ describe('SMTP parsing', () => {
     });
     assert.equal(config.transport.host, 'localhost');
     assert.equal(config.transport.auth, undefined);
+  });
+
+  it('importmap/build sem SMTP_HOST adia a config', () => {
+    assert.equal(
+      isSmtpConfigDeferred(
+        { DOCKER_BUILD: 'true', NODE_ENV: 'production' },
+        ['node', 'payload', 'generate:importmap'],
+      ),
+      true,
+    );
+    assert.equal(
+      isSmtpConfigDeferred(
+        {
+          SMTP_HOST: 'smtp.titan.email',
+          DOCKER_BUILD: 'true',
+          NODE_ENV: 'production',
+        },
+        ['node', 'payload', 'generate:importmap'],
+      ),
+      false,
+    );
+  });
+
+  it('runtime sem SMTP_HOST não adia (falha na resolução)', () => {
+    assert.equal(isSmtpConfigDeferred({ NODE_ENV: 'production' }, ['node', 'server.js']), false);
+    assert.throws(
+      () =>
+        resolveSmtpConfig({
+          nodeEnv: 'production',
+          env: {
+            NODE_ENV: 'production',
+            NEXT_PUBLIC_ADMIN_URL: 'https://admin.omniafrigo.com.br',
+          },
+        }),
+      /SMTP_HOST/,
+    );
   });
 
   it('smtpConfigForLog não vaza SMTP_PASS', () => {

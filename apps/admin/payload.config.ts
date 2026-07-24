@@ -2,12 +2,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { postgresAdapter } from '@payloadcms/db-postgres';
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
 import { wrapJwtStrategyRejectBlocked } from './src/auth/account-status';
-import { loadRootEnvFile, resolveSmtpConfig, smtpConfigForLog } from './src/email/smtp-config';
+import { buildNodemailerEmailAdapter } from './src/email/build-email-adapter';
+import {
+  isSmtpConfigDeferred,
+  loadRootEnvFile,
+  smtpConfigForLog,
+} from './src/email/smtp-config';
 import { Activities } from './src/collections/Activities';
 import { Authors } from './src/collections/Authors';
 import { Categories } from './src/collections/Categories';
@@ -42,10 +46,16 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 loadRootEnvFile();
-const smtp = resolveSmtpConfig();
+
+/**
+ * generate:importmap / docker build: sem SMTP_HOST → adia adapter.
+ * Runtime (compose com SMTP_*): resolve e exige config válida.
+ */
+const smtpDeferred = isSmtpConfigDeferred();
+const runtimeEmail = smtpDeferred ? null : buildNodemailerEmailAdapter();
 
 export default buildConfig({
-  serverURL: smtp.serverURL,
+  serverURL: (process.env.NEXT_PUBLIC_ADMIN_URL || '').replace(/\/$/, '') || undefined,
   admin: {
     user: Users.slug,
     importMap: {
@@ -55,23 +65,7 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  email: nodemailerAdapter({
-    defaultFromAddress: smtp.from.address,
-    defaultFromName: smtp.from.name,
-    transportOptions: {
-      host: smtp.transport.host,
-      port: smtp.transport.port,
-      secure: smtp.transport.secure,
-      ...(smtp.transport.auth
-        ? {
-            auth: {
-              user: smtp.transport.auth.user,
-              pass: smtp.transport.auth.pass,
-            },
-          }
-        : {}),
-    },
-  }),
+  ...(runtimeEmail ? { email: runtimeEmail.adapter } : {}),
   collections: [
     Users,
     Tenants,
@@ -116,6 +110,8 @@ export default buildConfig({
   cors: getAllowedCorsOrigins(),
   onInit: (payload) => {
     wrapJwtStrategyRejectBlocked(payload);
+    // onInit só corre em runtime — reforça falha clara se SMTP estiver ausente.
+    const smtp = runtimeEmail?.smtp ?? buildNodemailerEmailAdapter().smtp;
     payload.logger.info({
       msg: 'SMTP configurado',
       smtp: smtpConfigForLog(smtp),
