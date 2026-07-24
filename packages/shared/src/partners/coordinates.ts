@@ -33,7 +33,7 @@ export function isValidLongitude(lng: number): boolean {
 export function isUsableCoordinatePair(
   lat: number | null | undefined,
   lng: number | null | undefined,
-): lat is number {
+): boolean {
   if (lat == null || lng == null) {
     return false;
   }
@@ -52,6 +52,9 @@ export function normalizeCoordinatePair(
 ): { latitude: number; longitude: number } | null {
   const latitude = parseOptionalCoordinate(lat);
   const longitude = parseOptionalCoordinate(lng);
+  if (latitude == null || longitude == null) {
+    return null;
+  }
   if (!isUsableCoordinatePair(latitude, longitude)) {
     return null;
   }
