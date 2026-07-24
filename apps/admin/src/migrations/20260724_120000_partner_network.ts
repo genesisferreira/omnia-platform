@@ -2,11 +2,14 @@ import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-postgres';
 import { sql } from '@payloadcms/db-postgres';
 
 /**
- * Sprint 2.3 — Partner Network (estrutura admin):
+ * Sprint 2.3 — Partner Network (estrutura admin + Checkpoint 01):
  * - partner-categories
- * - partners (+ gallery + categories rels)
+ * - partners (campos estruturais consolidados: slug, plan, verified,
+ *   coverageRadius, serviceCities, approvalNotes, ownerUser, publishedAt)
  * - global partner-network-dashboard
  * - colunas locked/preferences para as novas collections
+ *
+ * Nunca aplicada em produção/local até o Checkpoint 01 — schema atualizado in-place.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -17,6 +20,12 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       'approved',
       'rejected',
       'suspended'
+    );
+    CREATE TYPE "public"."enum_partners_plan" AS ENUM(
+      'free',
+      'professional',
+      'premium',
+      'enterprise'
     );
 
     CREATE TABLE IF NOT EXISTS "partner_categories" (
@@ -40,9 +49,11 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "id" serial PRIMARY KEY NOT NULL,
       "company_name" varchar NOT NULL,
       "trade_name" varchar,
+      "slug" varchar NOT NULL,
       "partner_type" "public"."enum_partners_partner_type" DEFAULT 'company' NOT NULL,
       "document" varchar,
       "description" varchar,
+      "owner_user_id" integer,
       "email" varchar,
       "phone" varchar,
       "whatsapp" varchar,
@@ -59,14 +70,26 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "country" varchar DEFAULT 'Brasil',
       "latitude" numeric,
       "longitude" numeric,
-      "service_radius" numeric,
+      "coverage_radius" numeric,
       "status" "public"."enum_partners_status" DEFAULT 'pending' NOT NULL,
+      "plan" "public"."enum_partners_plan" DEFAULT 'free' NOT NULL,
       "featured" boolean DEFAULT false,
+      "verified" boolean DEFAULT false,
       "active" boolean DEFAULT true,
+      "approval_notes" varchar,
       "approved_at" timestamp(3) with time zone,
       "approved_by_id" integer,
+      "published_at" timestamp(3) with time zone,
       "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
       "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS "partners_service_cities" (
+      "_order" integer NOT NULL,
+      "_parent_id" integer NOT NULL,
+      "id" varchar PRIMARY KEY NOT NULL,
+      "city" varchar NOT NULL,
+      "state" varchar
     );
 
     CREATE TABLE IF NOT EXISTS "partners_gallery" (
@@ -87,6 +110,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
 
     DO $$ BEGIN
       ALTER TABLE "partners"
+        ADD CONSTRAINT "partners_owner_user_id_users_id_fk"
+        FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("id")
+        ON DELETE set null ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE "partners"
         ADD CONSTRAINT "partners_logo_id_media_id_fk"
         FOREIGN KEY ("logo_id") REFERENCES "public"."media"("id")
         ON DELETE set null ON UPDATE no action;
@@ -98,6 +129,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         ADD CONSTRAINT "partners_approved_by_id_users_id_fk"
         FOREIGN KEY ("approved_by_id") REFERENCES "public"."users"("id")
         ON DELETE set null ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE "partners_service_cities"
+        ADD CONSTRAINT "partners_service_cities_parent_id_fk"
+        FOREIGN KEY ("_parent_id") REFERENCES "public"."partners"("id")
+        ON DELETE cascade ON UPDATE no action;
     EXCEPTION WHEN duplicate_object THEN NULL;
     END $$;
 
@@ -133,10 +172,17 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     EXCEPTION WHEN duplicate_object THEN NULL;
     END $$;
 
+    CREATE UNIQUE INDEX IF NOT EXISTS "partners_slug_idx" ON "partners" USING btree ("slug");
+    CREATE INDEX IF NOT EXISTS "partners_owner_user_idx" ON "partners" USING btree ("owner_user_id");
     CREATE INDEX IF NOT EXISTS "partners_logo_idx" ON "partners" USING btree ("logo_id");
     CREATE INDEX IF NOT EXISTS "partners_approved_by_idx" ON "partners" USING btree ("approved_by_id");
     CREATE INDEX IF NOT EXISTS "partners_updated_at_idx" ON "partners" USING btree ("updated_at");
     CREATE INDEX IF NOT EXISTS "partners_created_at_idx" ON "partners" USING btree ("created_at");
+
+    CREATE INDEX IF NOT EXISTS "partners_service_cities_order_idx"
+      ON "partners_service_cities" USING btree ("_order");
+    CREATE INDEX IF NOT EXISTS "partners_service_cities_parent_id_idx"
+      ON "partners_service_cities" USING btree ("_parent_id");
 
     CREATE INDEX IF NOT EXISTS "partners_gallery_order_idx" ON "partners_gallery" USING btree ("_order");
     CREATE INDEX IF NOT EXISTS "partners_gallery_parent_id_idx" ON "partners_gallery" USING btree ("_parent_id");
@@ -232,9 +278,11 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
     DROP TABLE IF EXISTS "partner_network_dashboard" CASCADE;
     DROP TABLE IF EXISTS "partners_rels" CASCADE;
     DROP TABLE IF EXISTS "partners_gallery" CASCADE;
+    DROP TABLE IF EXISTS "partners_service_cities" CASCADE;
     DROP TABLE IF EXISTS "partners" CASCADE;
     DROP TABLE IF EXISTS "partner_categories" CASCADE;
 
+    DROP TYPE IF EXISTS "public"."enum_partners_plan";
     DROP TYPE IF EXISTS "public"."enum_partners_status";
     DROP TYPE IF EXISTS "public"."enum_partners_partner_type";
   `);

@@ -1,13 +1,21 @@
 import type { CollectionConfig, FieldAccess } from 'payload';
 
 import { adminsOnly, isPlatformAdmin, staffOnly } from '../access/rbac';
-import { partnerAfterChange, partnerBeforeChange } from './partners/hooks';
+import {
+  partnerAfterChange,
+  partnerBeforeChange,
+  partnerBeforeValidate,
+} from './partners/hooks';
 
+/** Campos de governança: somente admin altera (moderador = leitura via access da collection). */
 const adminFieldUpdate: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);
 
 /**
- * Collection Partner — núcleo do Partner Network (estrutura admin / Fase 2).
+ * Collection Partner — núcleo do Partner Network (Checkpoint 01 / modelagem consolidada).
  * Sem geolocalização operacional, página pública, CRM, reviews ou IA nesta fase.
+ *
+ * Campos internos (approvalNotes, approvedAt, approvedBy, etc.) NÃO devem ser
+ * expostos por padrão em API pública futura sem decisão explícita de produto.
  */
 export const Partners: CollectionConfig = {
   slug: 'partners',
@@ -20,11 +28,14 @@ export const Partners: CollectionConfig = {
     defaultColumns: [
       'companyName',
       'tradeName',
+      'slug',
       'partnerType',
       'status',
+      'plan',
       'city',
       'state',
       'featured',
+      'verified',
       'active',
       'updatedAt',
     ],
@@ -40,6 +51,7 @@ export const Partners: CollectionConfig = {
     delete: adminsOnly,
   },
   hooks: {
+    beforeValidate: [partnerBeforeValidate],
     beforeChange: [partnerBeforeChange],
     afterChange: [partnerAfterChange],
   },
@@ -60,6 +72,21 @@ export const Partners: CollectionConfig = {
               name: 'tradeName',
               type: 'text',
               label: 'Nome fantasia',
+              admin: {
+                description: 'Preferencial para geração do slug da URL pública.',
+              },
+            },
+            {
+              name: 'slug',
+              type: 'text',
+              required: true,
+              unique: true,
+              index: true,
+              label: 'Slug',
+              admin: {
+                description:
+                  'URL pública futura (/parceiros/{slug}). Gerado a partir do nome fantasia; editável e único.',
+              },
             },
             {
               name: 'partnerType',
@@ -94,6 +121,16 @@ export const Partners: CollectionConfig = {
               name: 'description',
               type: 'textarea',
               label: 'Descrição',
+            },
+            {
+              name: 'ownerUser',
+              type: 'relationship',
+              relationTo: 'users',
+              label: 'Usuário responsável pelo cadastro',
+              admin: {
+                description:
+                  'Owner do perfil (não confundir com o aprovador). Preenchido automaticamente na criação se omitido.',
+              },
             },
           ],
         },
@@ -233,13 +270,42 @@ export const Partners: CollectionConfig = {
               },
             },
             {
-              name: 'serviceRadius',
+              name: 'coverageRadius',
               type: 'number',
-              label: 'Raio de atendimento (km)',
+              label: 'Raio de cobertura (km)',
+              min: 0,
               admin: {
-                description: 'Raio em quilômetros para matching futuro por proximidade.',
+                description:
+                  'Raio em quilômetros para matching futuro por proximidade. Opcional; não pode ser negativo.',
                 step: 1,
               },
+            },
+            {
+              name: 'serviceCities',
+              type: 'array',
+              label: 'Cidades atendidas',
+              labels: { singular: 'Cidade', plural: 'Cidades' },
+              admin: {
+                description:
+                  'Lista estruturada de cidades/UF de atendimento (além da sede). Preparado para filtros futuros.',
+              },
+              fields: [
+                {
+                  name: 'city',
+                  type: 'text',
+                  required: true,
+                  label: 'Cidade',
+                },
+                {
+                  name: 'state',
+                  type: 'text',
+                  label: 'UF',
+                  admin: {
+                    description: 'Sigla do estado (ex.: SP).',
+                    width: '30%',
+                  },
+                },
+              ],
             },
           ],
         },
@@ -253,19 +319,41 @@ export const Partners: CollectionConfig = {
               defaultValue: 'pending',
               label: 'Status',
               options: [
-                { label: 'Draft', value: 'draft' },
+                {
+                  label: 'Draft',
+                  value: 'draft',
+                },
                 { label: 'Pending', value: 'pending' },
                 { label: 'Approved', value: 'approved' },
                 { label: 'Rejected', value: 'rejected' },
                 { label: 'Suspended', value: 'suspended' },
               ],
               access: {
-                // Somente admin altera status (Approved / Rejected / Suspended).
                 update: adminFieldUpdate,
               },
               admin: {
                 description:
-                  'Novos parceiros iniciam como Pending. Approved / Rejected / Suspended: somente Administrador.',
+                  'Novos parceiros iniciam como Pending. Draft = rascunho interno (arquitetura). Transições: somente Administrador. Arquivado (futuro) não modelado nesta fase.',
+              },
+            },
+            {
+              name: 'plan',
+              type: 'select',
+              required: true,
+              defaultValue: 'free',
+              label: 'Plano',
+              options: [
+                { label: 'Free', value: 'free' },
+                { label: 'Professional', value: 'professional' },
+                { label: 'Premium', value: 'premium' },
+                { label: 'Enterprise', value: 'enterprise' },
+              ],
+              access: {
+                update: adminFieldUpdate,
+              },
+              admin: {
+                description:
+                  'Programa comercial (sem cobrança/limites nesta fase). Somente admin altera.',
               },
             },
             {
@@ -276,12 +364,40 @@ export const Partners: CollectionConfig = {
               access: {
                 update: adminFieldUpdate,
               },
+              admin: {
+                description: 'Peso futuro na ordenação / destaque. Somente admin.',
+              },
+            },
+            {
+              name: 'verified',
+              type: 'checkbox',
+              label: 'Verificado',
+              defaultValue: false,
+              access: {
+                update: adminFieldUpdate,
+              },
+              admin: {
+                description:
+                  'Documentação/homologação conferida. Independente do status de aprovação. Somente admin.',
+              },
             },
             {
               name: 'active',
               type: 'checkbox',
               label: 'Ativo',
               defaultValue: true,
+            },
+            {
+              name: 'approvalNotes',
+              type: 'textarea',
+              label: 'Notas de aprovação (interno)',
+              access: {
+                update: adminFieldUpdate,
+              },
+              admin: {
+                description:
+                  'Campo interno para aprovação/rejeição/suspensão. NÃO expor em API ou página pública sem decisão explícita.',
+              },
             },
             {
               name: 'approvedAt',
@@ -292,6 +408,7 @@ export const Partners: CollectionConfig = {
                   pickerAppearance: 'dayAndTime',
                 },
                 readOnly: true,
+                description: 'Preenchido automaticamente na transição para Approved.',
               },
               access: {
                 update: adminFieldUpdate,
@@ -304,6 +421,22 @@ export const Partners: CollectionConfig = {
               label: 'Usuário responsável pela aprovação',
               admin: {
                 readOnly: true,
+                description: 'Não confundir com ownerUser (responsável pelo cadastro).',
+              },
+              access: {
+                update: adminFieldUpdate,
+              },
+            },
+            {
+              name: 'publishedAt',
+              type: 'date',
+              label: 'Publicado em',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+                description:
+                  'Primeira publicação pública. Preenchido na primeira aprovação; não sobrescrito em reaprovações.',
               },
               access: {
                 update: adminFieldUpdate,
