@@ -20,11 +20,24 @@ x-app-logging: &app-logging
 
 x-bootstrap-environment: &bootstrap-environment
   NODE_ENV: production
+  APP_ENV: ${APP_ENV:-production}
   DATABASE_URL: ${DATABASE_URL}
   PAYLOAD_SECRET: ${PAYLOAD_SECRET}
   NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
   NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
   OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+  REDIS_URL: ${REDIS_URL}
+  SMTP_HOST: ${SMTP_HOST}
+  SMTP_PORT: ${SMTP_PORT}
+  SMTP_SECURE: ${SMTP_SECURE}
+  SMTP_USER: ${SMTP_USER}
+  SMTP_PASS: ${SMTP_PASS}
+  SMTP_FROM: ${SMTP_FROM}
+  GEOCODING_PROVIDER: ${GEOCODING_PROVIDER:-nominatim}
+  GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-OmniaPlatform/2.3.0 (https://omniafrigo.com.br; contact=platform@omniafrigo.com.br)}
+  GEOCODING_TIMEOUT_MS: ${GEOCODING_TIMEOUT_MS:-8000}
+  POSTAL_CODE_PROVIDER: ${POSTAL_CODE_PROVIDER:-auto}
+  POSTAL_CODE_API_TIMEOUT_MS: ${POSTAL_CODE_API_TIMEOUT_MS:-5000}
 
 services:
   postgres:
@@ -159,6 +172,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      APP_ENV: ${APP_ENV:-production}
       PORT: 3000
       HOSTNAME: 0.0.0.0
       APP_VERSION: ${APP_VERSION:-1.0.0}
@@ -168,6 +182,17 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+      GEOCODING_PROVIDER: ${GEOCODING_PROVIDER:-nominatim}
+      GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-OmniaPlatform/2.3.0 (https://omniafrigo.com.br; contact=platform@omniafrigo.com.br)}
+      GEOCODING_TIMEOUT_MS: ${GEOCODING_TIMEOUT_MS:-8000}
+      POSTAL_CODE_PROVIDER: ${POSTAL_CODE_PROVIDER:-auto}
+      POSTAL_CODE_API_TIMEOUT_MS: ${POSTAL_CODE_API_TIMEOUT_MS:-5000}
     volumes:
       - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
