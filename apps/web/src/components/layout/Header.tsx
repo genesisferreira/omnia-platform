@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { Container } from '@omnia/ui';
 
@@ -8,15 +8,17 @@ import { AccountNav } from './AccountNav';
 import { BrandHomeLink } from './BrandHomeLink';
 import { InstitutionalNavLink } from './InstitutionalNavLink';
 import { INSTITUTIONAL_NAV_ITEMS } from './nav-items';
+import { isFocusLeavingContainer, isPointerOutsideContainer } from './partners-menu';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [partnersOpen, setPartnersOpen] = useState(false);
   const menuId = useId();
   const partnersId = useId();
+  const partnersDesktopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuOpen) {
+    if (!menuOpen && !partnersOpen) {
       return;
     }
 
@@ -29,7 +31,22 @@ export function Header() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [menuOpen]);
+  }, [menuOpen, partnersOpen]);
+
+  useEffect(() => {
+    if (!partnersOpen) {
+      return;
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (isPointerOutsideContainer(partnersDesktopRef.current, event.target)) {
+        setPartnersOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [partnersOpen]);
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 768px)');
@@ -56,29 +73,38 @@ export function Header() {
         <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
           {INSTITUTIONAL_NAV_ITEMS.map((item) =>
             item.children ? (
-              <div key={item.href} className="relative">
+              <div
+                key={item.href}
+                ref={partnersDesktopRef}
+                className="relative"
+                onBlur={(event) => {
+                  if (isFocusLeavingContainer(partnersDesktopRef.current, event.relatedTarget)) {
+                    setPartnersOpen(false);
+                  }
+                }}
+              >
                 <button
                   type="button"
                   className="text-sm font-medium text-omnia-graphite-light transition-colors hover:text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2"
                   aria-expanded={partnersOpen}
                   aria-controls={partnersId}
+                  aria-haspopup="true"
                   onClick={() => setPartnersOpen((open) => !open)}
-                  onBlur={() => {
-                    window.setTimeout(() => setPartnersOpen(false), 150);
-                  }}
                 >
                   {item.label}
                 </button>
                 {partnersOpen ? (
                   <div
                     id={partnersId}
+                    role="group"
+                    aria-label={item.label}
                     className="absolute left-0 top-full z-50 mt-2 min-w-[12rem] border border-omnia-deep-blue/10 bg-omnia-white py-2 shadow-md"
                   >
                     {item.children.map((child) => (
                       <InstitutionalNavLink
                         key={child.href}
                         href={child.href}
-                        className="block px-4 py-2 text-sm text-omnia-deep-blue hover:bg-omnia-emerald/5"
+                        className="block px-4 py-2 text-sm text-omnia-deep-blue hover:bg-omnia-emerald/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-inset"
                         onClick={() => setPartnersOpen(false)}
                       >
                         {child.label}
