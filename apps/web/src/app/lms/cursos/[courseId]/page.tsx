@@ -18,6 +18,7 @@ import { TrackLastSeen } from '@/components/lms/TrackLastSeen';
 import { requirePortalSession } from '@/lib/auth/require-session';
 import { fetchLmsConnector } from '@/lib/lms/connector';
 import { computeProgressPercent } from '@/lib/lms/continue';
+import { sanitizeLmsHtml } from '@/lib/lms/sanitize';
 
 export const dynamic = 'force-dynamic';
 
@@ -186,7 +187,7 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
           <div
             className="prose prose-sm max-w-none text-muted-foreground"
             dangerouslySetInnerHTML={{
-              __html: course.summary.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ''),
+              __html: sanitizeLmsHtml(course.summary),
             }}
           />
         ) : null}

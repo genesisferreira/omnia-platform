@@ -59,8 +59,10 @@ Sem endpoint `/continue` no Connector. Agregação client:
 ## Segurança
 
 - Zero links `moodle.*` no client.
-- HTML de summary sanitizado (strip `<script>`).
+- HTML de summary sanitizado (`sanitizeLmsHtml`).
+- Proxy `/api/lms/*` aplica `scrubMoodleLeakage` antes de responder ao browser (URLs Moodle / `wstoken`).
 - Path traversal bloqueado no proxy (`..`).
+- `OMNIA_INTERNAL_API_SECRET` só no server.
 
 ## Testes
 

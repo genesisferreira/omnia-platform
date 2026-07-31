@@ -16,7 +16,7 @@
     "test:seo-companies": "tsx src/scripts/test-seo-companies.ts",
     "test:partners-nav": "tsx --test src/scripts/test-partners-nav.ts",
     "test:lms-continue": "tsx --test src/scripts/test-lms-continue.ts",
-    "test:lms-smoke": "tsx --test src/scripts/test-lms-smoke.ts src/scripts/test-lms-course-card.ts"
+    "test:lms-smoke": "tsx --test src/scripts/test-lms-smoke.ts src/scripts/test-lms-course-card.ts src/scripts/test-lms-sanitize.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",

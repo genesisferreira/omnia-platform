@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { fetchLmsConnector } from '@/lib/lms/connector';
+import { scrubMoodleLeakage } from '@/lib/lms/sanitize';
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 
@@ -27,7 +28,9 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
     search: url.search,
   });
 
-  return NextResponse.json(result.data ?? { ok: false }, {
+  const payload = scrubMoodleLeakage(result.data ?? { ok: false });
+
+  return NextResponse.json(payload, {
     status: result.status,
     headers: { 'Cache-Control': 'no-store' },
   });
