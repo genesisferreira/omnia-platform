@@ -80,6 +80,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+      APP_ENV: ${APP_ENV:-staging}
       APP_VERSION: ${APP_VERSION}
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
@@ -93,6 +94,10 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      METRICS_SCRAPE_TOKEN: ${METRICS_SCRAPE_TOKEN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-omnia-admin}
+      OTEL_LOG_SPANS: ${OTEL_LOG_SPANS:-false}
     volumes:
       - omnia_platform_admin_media_dev:/app/media
     networks:
