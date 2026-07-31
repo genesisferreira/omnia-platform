@@ -37,12 +37,12 @@ mkdir -p /opt/omnia/secrets
 TOKEN_FILE=/opt/omnia/secrets/metrics_scrape_token.txt
 if [ ! -s "${TOKEN_FILE}" ]; then
   openssl rand -hex 32 >"${TOKEN_FILE}"
-  chmod 600 "${TOKEN_FILE}"
   echo "TOKEN_FILE=created"
 else
   echo "TOKEN_FILE=present"
-  chmod 600 "${TOKEN_FILE}" || true
 fi
+# Prometheus (usuário non-root) precisa ler o arquivo montado.
+chmod 644 "${TOKEN_FILE}"
 TOKEN="$(tr -d '\n\r' <"${TOKEN_FILE}")"
 if grep -q '^METRICS_SCRAPE_TOKEN=' .env.staging; then
   # shellcheck disable=SC2016

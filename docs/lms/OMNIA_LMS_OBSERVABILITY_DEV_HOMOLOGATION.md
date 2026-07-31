@@ -1,99 +1,128 @@
 # Omnia LMS — Observability DEV Homologation
 
-**Status:** 🔴 **BLOQUEADO POR ACESSO VPS** (senha root recusada em 2026-07-31)  
+**Status:** 🟢 **HOMOLOGADA NO DEV**  
+**Data:** 2026-07-31  
 **Branch:** `feature/omnia-lms-observability`  
-**Tip remoto no momento do bloqueio:** `b53ed21` (`fix(observability): complete LMS DEV homologation`)  
-**Commits base:** `cd69053`, `81a3573`, + `b53ed21` (proteção metrics)  
+**Commit implantado:** `a5bad91`  
+**Commits da sprint:** `cd69053`, `81a3573`, `b53ed21`, `e49a36f`, `a5bad91`  
 **Produção:** intocada
 
-## Objetivo
+## Rollback registrado
 
-Implantar Admin instrumentado + stack Prometheus/Grafana/OTel no DEV e validar critérios de GO da Sprint 2.5.3.
-
-## O que já está pronto (código / remoto Git)
-
-| Item | Estado |
+| Item | Valor |
 |------|--------|
-| Branch publicada | ✅ `origin/feature/omnia-lms-observability` |
-| `/api/metrics` com fail-closed em staging | ✅ exige `METRICS_SCRAPE_TOKEN` |
-| Ports Grafana/Prometheus/OTLP em `127.0.0.1` | ✅ |
-| Prometheus Bearer scrape via arquivo | ✅ |
-| Script VPS | ✅ `scripts/deploy/deploy-observability-dev.sh` |
-| Testes locais | ✅ monitoring 7/7, logger 2/2, connector 30/30, BFF 3/3 |
-
-## Evidência pública atual (pré-deploy)
-
-| Check | Resultado |
-|-------|-----------|
-| `GET /api/omnia/lms/health` | 200 — contrato **legado** (sem campos expandidos do tip) |
-| `GET /api/metrics` | **404** Route not found |
-| Admin DEV | saudável no build **anterior** |
-
-## Bloqueio
-
-Tentativa `plink` → `root@191.101.234.156` com hostkey conhecida: **Configured password was not accepted**.  
-`OMNIA_VPS_PASSWORD` ausente no ambiente do agente. Sem chave SSH local.
-
-## Como desbloquear
-
-1. Definir senha atual / `OMNIA_VPS_PASSWORD`, **ou**
-2. Executar na VPS:
+| Commit anterior | `5589092` (`feature/omnia-lms-connector`) |
+| Imagem Admin anterior | `sha256:5e58630e17b1809c575b9552062bba83700f58621409ae3f70a5ccfda45120f8` |
+| Imagem Admin nova | `sha256:fc7d77dc29ff726bdd965f9aa1b4b24962d964e7423921358a2bfdb425effe0e` |
 
 ```bash
 cd /opt/omnia/platform
-# opcional: baixar tip se o script ainda não estiver no server
-git fetch origin feature/omnia-lms-observability
-git checkout feature/omnia-lms-observability
-git pull --ff-only origin feature/omnia-lms-observability
-chmod +x scripts/deploy/deploy-observability-dev.sh
-./scripts/deploy/deploy-observability-dev.sh b53ed21
-```
-
-3. Colar o output (sem secrets) para fechar a homologação.
-
-## Rollback (preparado)
-
-Após o deploy, o script imprime:
-
-- `ROLLBACK_HEAD`
-- `ROLLBACK_ADMIN_IMAGE`
-
-Comandos típicos (somente Admin; sem Moodle/Redis/Postgres):
-
-```bash
-cd /opt/omnia/platform
-git checkout <ROLLBACK_HEAD>
+git checkout 5589092
 docker compose -f docker/compose/staging.yml --env-file .env.staging build admin
 docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --no-build --force-recreate admin
-# opcional: derrubar só observabilidade
 docker compose -f docker/observability/compose.yml --env-file .env.staging down
 ```
 
-Volumes `omnia_prometheus_dev` / `omnia_grafana_dev` preservam série temporal se não forem removidos.
+## Backup
 
-## Sem migration
+**sem migration nesta etapa** — backup de `omnia_staging` não executado (não obrigatório).
 
-**sem migration nesta etapa** — backup de `omnia_staging` não obrigatório para esta entrega.
+## Serviços atualizados
 
-## Critérios de GO (checklist)
+| Serviço | Resultado |
+|---------|-----------|
+| `omnia-platform-admin-dev` | healthy (imagem nova) |
+| `omnia-prometheus-dev` | up — ports `127.0.0.1:9090` |
+| `omnia-grafana-dev` | up — ports `127.0.0.1:3005` |
+| `omnia-otel-collector-dev` | up — OTLP `127.0.0.1:4318` |
+| Web / Moodle / MariaDB / Redis / Traefik / Postgres | não rebuildados |
 
-| # | Critério | Estado |
+## Proteção `/api/metrics`
+
+| Check | Resultado |
+|-------|-----------|
+| Público sem token | **401** |
+| Interno com Bearer `METRICS_SCRAPE_TOKEN` | **200** Prometheus text |
+| Token em URL | não usado |
+| Arquivo secret | `/opt/omnia/secrets/metrics_scrape_token.txt` (mode `644` para scrape non-root) |
+
+## Health expandido
+
+`GET /api/omnia/lms/health` → **200**
+
+Campos observados (sanitizados): `status`, `version`, `readOnly`, `connector`, `moodle`, `redis`, `database`, `identity`, `cache`, `sessions`, `policies`, `latency`, + legado `sessionStore`/`cacheStore`/`mode`.
+
+Sem tokens / secrets no JSON.
+
+## Prometheus
+
+| Check | Resultado |
+|-------|-----------|
+| Target `omnia-admin-lms` | **UP** (`up=1`) |
+| `connector_health_status` | **1** |
+| Alert rules (`promtool check rules`) | **9 rules SUCCESS** |
+| Retenção | 15d (compose) |
+| Volumes | `omnia_prometheus_dev` |
+
+## Grafana
+
+| Check | Resultado |
+|-------|-----------|
+| Health API | ok (11.3.1) |
+| Datasource Prometheus | conectado |
+| Query `connector_health_status` | HTTP 200 |
+| Dashboards | Infraestrutura, Connector, Sessões, Acadêmico, Segurança |
+| Exposição | apenas `127.0.0.1:3005` + login |
+
+## Tracing / Logs
+
+| Check | Resultado |
+|-------|-----------|
+| Headers `traceparent`, `x-request-id`, `x-trace-id` | presentes |
+| Logs JSON com `traceId`/`spanId`/`requestId` | observados no Admin |
+| Correlação moodle.request ↔ lms.http | ok |
+| OTLP endpoint | configurado (`omnia-otel-collector-dev:4318`) — fail-open |
+| Scrape self-metrics do collector | opcional / DNS overlay instável — **não bloqueante** |
+
+## SLOs
+
+Definidos em código/docs; coleta iniciada; **baseline ainda em formação** (sem cumprimento histórico declarado).
+
+## Segurança
+
+- Metrics protegido (401 público)
+- Grafana/Prometheus bind loopback
+- Sem PII em labels de métricas (amostra interna sem secrets)
+- Produção não alterada
+- Rate limit LMS preservado
+
+## Testes automatizados (pré-deploy)
+
+monitoring 7/7 · logger 2/2 · lms-connector 30/30 · BFF helpers 3/3
+
+## Bugs / correções durante homologação
+
+1. `test-logger.ts` quebrava Docker build → exclude em tsconfig (`a5bad91`)
+2. Token metrics `chmod 600` → Prometheus non-root sem leitura → `chmod 644`
+3. Senha root anterior inválida → nova senha operacional
+
+## Pendências não bloqueantes
+
+- Scrape self-metrics OTel Collector (DNS overlay)
+- Baseline SLO com histórico ≥ 7–14 dias
+- Wiring fino `lms_policy_changes` em updates de policy
+- Error tracking externo (Sentry) — fora do escopo
+
+## Critérios de GO
+
+| # | Critério | Status |
 |---|----------|--------|
-| 1 | Admin healthy | ⏳ pós-deploy |
-| 2 | Health expandido 200 | ⏳ |
-| 3 | `/api/metrics` Prometheus | ⏳ |
-| 4 | Metrics protegido | ⏳ (código pronto) |
-| 5 | Prometheus target UP | ⏳ |
-| 6 | 5 dashboards Grafana | ⏳ |
-| 7 | Alert rules válidas | ⏳ |
-| 8–12 | Logs / tracing / OTLP fail-open | ⏳ |
-| 13–15 | Métricas connector/sessão/acadêmicas | ⏳ |
-| 16 | Testes automatizados | ✅ locais |
-| 17 | DEV estável | ⏳ |
-| 18 | Produção intacta | ✅ |
+| 1–4 | Admin healthy, health expandido, metrics Prometheus, protegido | ✅ |
+| 5–7 | Prometheus target UP, Grafana 5 dashboards, alert rules | ✅ |
+| 8–12 | Logs JSON, redaction, trace IDs, W3C, OTLP fail-open | ✅ |
+| 13–15 | Métricas connector/sessão/acadêmicas expostas | ✅ |
+| 16–18 | Testes, DEV estável, PROD intacta | ✅ |
 
-## Veredito atual
+## Veredito
 
-🔴 **OMNIA LMS OBSERVABILITY NÃO HOMOLOGADA — VER PENDÊNCIAS**
-
-Pendência bloqueante: acesso SSH à VPS DEV para executar o deploy do tip `b53ed21`.
+🟢 **OMNIA LMS OBSERVABILITY HOMOLOGADA NO DEV — GO PARA SPRINT 2.6**
