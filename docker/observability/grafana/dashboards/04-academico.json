@@ -1,0 +1,36 @@
+{
+  "uid": "omnia-lms-academico",
+  "title": "Omnia LMS — Acadêmico",
+  "tags": ["omnia", "lms", "academic"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Courses opened",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(lms_courses_opened[5m]))", "legendFormat": "courses" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Lessons started / completed",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(lms_lessons_started[5m]))", "legendFormat": "started" },
+        { "expr": "sum(rate(lms_lessons_completed[5m]))", "legendFormat": "completed" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Progress / Grades / Completion",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(lms_progress_requests[5m]))", "legendFormat": "progress" },
+        { "expr": "sum(rate(lms_grade_requests[5m]))", "legendFormat": "grades" },
+        { "expr": "sum(rate(lms_completion_requests[5m]))", "legendFormat": "completion" }
+      ]
+    }
+  ]
+}

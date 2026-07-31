@@ -1,4 +1,4 @@
-import { recordCacheHit, recordCacheMiss } from '../observability/metrics';
+import { recordCacheHit, recordCacheMiss, recordRedisOp } from '../observability/metrics';
 import type { RedisLike } from '../session/session-manager';
 
 export type LmsCacheTtl = {
@@ -79,7 +79,15 @@ export class LmsCache {
 
   private async getRaw(key: string): Promise<string | null> {
     if (this.redis) {
-      return this.redis.get(key);
+      const started = Date.now();
+      try {
+        const value = await this.redis.get(key);
+        recordRedisOp('get', Date.now() - started, true);
+        return value;
+      } catch (err) {
+        recordRedisOp('get', Date.now() - started, false);
+        throw err;
+      }
     }
     const hit = this.memory.get(key);
     if (!hit) return null;

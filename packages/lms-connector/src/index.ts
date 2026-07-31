@@ -42,6 +42,10 @@ export {
   recordCacheHit,
   recordCacheMiss,
   recordMoodleCall,
+  recordRedisOp,
+  recordSessionCreate,
   recordSessionRevocation,
   resetLmsMetricsForTests,
+  setActiveSessionsGauge,
+  setConnectorHealthGauge,
 } from './observability/metrics';

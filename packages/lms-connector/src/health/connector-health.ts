@@ -6,12 +6,22 @@ import { MOODLE_READ_FUNCTIONS } from '../client/moodle-functions';
 import type { LmsCache } from '../cache/lms-cache';
 import type { LmsSessionManager } from '../session/session-manager';
 import { lmsLog } from '../observability/log';
+import {
+  getLmsMetricsSnapshot,
+  recordRedisOp,
+  setActiveSessionsGauge,
+  setConnectorHealthGauge,
+} from '../observability/metrics';
 
 export type HealthDeps = {
   config: LmsConnectorConfig;
   client: MoodleClient | null;
   sessions: LmsSessionManager | null;
   cache: LmsCache | null;
+  /** Checks opcionais injetados pelo Admin BFF. */
+  database?: { reachable: boolean; latencyMs: number | null };
+  identityLinksActive?: number | null;
+  platformVersion?: string | null;
 };
 
 /**
@@ -19,10 +29,17 @@ export type HealthDeps = {
  */
 export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnectorHealth> {
   const checkedAt = new Date().toISOString();
+  const totalStarted = Date.now();
+  const version = deps.platformVersion ?? process.env.APP_VERSION ?? null;
+  const readOnly = deps.config.connectorReadOnly !== false;
 
   if (!deps.config.connectorEnabled) {
+    setConnectorHealthGauge('disabled');
     return {
       status: 'disabled',
+      version,
+      readOnly,
+      connector: { enabled: false, status: 'disabled' },
       moodle: {
         reachable: false,
         authenticated: false,
@@ -30,6 +47,13 @@ export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnect
         latencyMs: null,
         serviceName: null,
       },
+      redis: { reachable: false, latencyMs: null },
+      database: deps.database ?? { reachable: false, latencyMs: null },
+      identity: { engine: 'ok', activeLinks: deps.identityLinksActive ?? null },
+      cache: { reachable: false, hitRate: null },
+      sessions: { storeReachable: false, activeApprox: null },
+      policies: { engine: 'ok' },
+      latency: { moodleMs: null, redisMs: null, totalMs: Date.now() - totalStarted },
       sessionStore: { reachable: false },
       cacheStore: { reachable: false },
       mode: 'disabled',
@@ -37,14 +61,40 @@ export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnect
     };
   }
 
-  const sessionReachable = deps.sessions ? await deps.sessions.ping() : false;
-  const cacheReachable = deps.cache ? await deps.cache.ping() : false;
+  let redisLatencyMs: number | null = null;
+  let sessionReachable = false;
+  if (deps.sessions) {
+    const started = Date.now();
+    try {
+      sessionReachable = await deps.sessions.ping();
+      redisLatencyMs = Date.now() - started;
+      recordRedisOp('session_ping', redisLatencyMs, sessionReachable);
+    } catch {
+      redisLatencyMs = Date.now() - started;
+      recordRedisOp('session_ping', redisLatencyMs, false);
+      sessionReachable = false;
+    }
+  }
+
+  let cacheReachable = false;
+  if (deps.cache) {
+    const started = Date.now();
+    try {
+      cacheReachable = await deps.cache.ping();
+      const ms = Date.now() - started;
+      if (redisLatencyMs == null) redisLatencyMs = ms;
+      recordRedisOp('cache_ping', ms, cacheReachable);
+    } catch {
+      recordRedisOp('cache_ping', Date.now() - started, false);
+      cacheReachable = false;
+    }
+  }
 
   let moodleReachable = false;
   let authenticated = false;
-  let version: string | null = null;
-  let latencyMs: number | null = null;
-  let serviceName: string | null = deps.config.moodleServiceName || null;
+  let moodleVersion: string | null = null;
+  let moodleLatencyMs: number | null = null;
+  const serviceName: string | null = deps.config.moodleServiceName || null;
 
   if (deps.client) {
     const started = Date.now();
@@ -54,15 +104,15 @@ export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnect
         version?: string;
         sitename?: string;
       }>(MOODLE_READ_FUNCTIONS.siteInfo, {}, { skipRetry: true });
-      latencyMs = Date.now() - started;
+      moodleLatencyMs = Date.now() - started;
       moodleReachable = true;
       authenticated = true;
-      version =
+      moodleVersion =
         (typeof info.release === 'string' && info.release) ||
         (typeof info.version === 'string' && info.version) ||
         null;
     } catch (err) {
-      latencyMs = Date.now() - started;
+      moodleLatencyMs = Date.now() - started;
       moodleReachable = false;
       authenticated = false;
       lmsLog('warn', 'lms.health.moodle_failed', {
@@ -74,16 +124,36 @@ export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnect
   const mode = deps.config.connectorReadOnly ? 'read_only' : 'read_write';
   let status: LmsConnectorHealth['status'] = 'healthy';
   if (!moodleReachable || !authenticated) status = 'unhealthy';
-  else if (!sessionReachable) status = 'degraded';
+  else if (!sessionReachable || !(deps.database?.reachable ?? true)) status = 'degraded';
+
+  const snapshot = getLmsMetricsSnapshot();
+  setConnectorHealthGauge(status);
+  if (typeof deps.identityLinksActive === 'number') {
+    // gauge atualizado no Admin via monitoring; aqui só health payload
+  }
 
   return {
     status,
+    version,
+    readOnly,
+    connector: { enabled: true, status },
     moodle: {
       reachable: moodleReachable,
       authenticated,
-      version,
-      latencyMs,
+      version: moodleVersion,
+      latencyMs: moodleLatencyMs,
       serviceName,
+    },
+    redis: { reachable: sessionReachable || cacheReachable, latencyMs: redisLatencyMs },
+    database: deps.database ?? { reachable: true, latencyMs: null },
+    identity: { engine: 'ok', activeLinks: deps.identityLinksActive ?? null },
+    cache: { reachable: cacheReachable, hitRate: snapshot.cacheHitRate },
+    sessions: { storeReachable: sessionReachable, activeApprox: null },
+    policies: { engine: 'ok' },
+    latency: {
+      moodleMs: moodleLatencyMs,
+      redisMs: redisLatencyMs,
+      totalMs: Date.now() - totalStarted,
     },
     sessionStore: { reachable: sessionReachable },
     cacheStore: { reachable: cacheReachable },
@@ -91,3 +161,5 @@ export async function checkConnectorHealth(deps: HealthDeps): Promise<LmsConnect
     checkedAt,
   };
 }
+
+export { setActiveSessionsGauge };

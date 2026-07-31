@@ -1,26 +1,13 @@
+/**
+ * Logging estruturado do LMS connector — sanitizado + correlation/trace.
+ */
+
+import { createLogger } from '@omnia/logger';
+import { getTraceContext } from '@omnia/monitoring/tracing';
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-const SECRET_KEYS = /token|password|cookie|authorization|secret|wstoken/i;
-
-function sanitizeValue(key: string, value: unknown): unknown {
-  if (SECRET_KEYS.test(key)) return '[redacted]';
-  if (typeof value === 'string' && value.length > 500) {
-    return `${value.slice(0, 120)}…[truncated]`;
-  }
-  return value;
-}
-
-function sanitizeFields(fields: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(fields)) {
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      out[k] = sanitizeFields(v as Record<string, unknown>);
-    } else {
-      out[k] = sanitizeValue(k, v);
-    }
-  }
-  return out;
-}
+const base = createLogger({ service: 'lms-connector' });
 
 /** Log estruturado sanitizado do LMS connector. */
 export function lmsLog(
@@ -28,19 +15,17 @@ export function lmsLog(
   event: string,
   fields: Record<string, unknown> = {},
 ): void {
-  const payload = {
-    ts: new Date().toISOString(),
-    level,
-    module: 'lms-connector',
-    event,
-    ...sanitizeFields(fields),
+  const trace = getTraceContext();
+  const enriched = {
+    ...fields,
+    ...(trace
+      ? {
+          requestId: fields.requestId ?? trace.requestId,
+          traceId: fields.traceId ?? trace.traceId,
+          spanId: fields.spanId ?? trace.spanId,
+          parentSpanId: fields.parentSpanId ?? trace.parentSpanId,
+        }
+      : {}),
   };
-  const line = JSON.stringify(payload);
-  if (level === 'error') {
-    console.error(line);
-  } else if (level === 'warn') {
-    console.warn(line);
-  } else {
-    console.info(line);
-  }
+  base[level](event, enriched);
 }

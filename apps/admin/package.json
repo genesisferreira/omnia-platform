@@ -48,6 +48,7 @@
     "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",
     "@omnia/lms-connector": "workspace:*",
+    "@omnia/logger": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",

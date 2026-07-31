@@ -1,0 +1,39 @@
+{
+  "uid": "omnia-lms-security",
+  "title": "Omnia LMS — Segurança",
+  "tags": ["omnia", "lms", "security"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP 4xx / 5xx",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_errors_total{status=~\"4..\"}[5m]))", "legendFormat": "4xx" },
+        { "expr": "sum(rate(http_errors_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "401 / 403",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_errors_total{status=\"401\"}[5m]))", "legendFormat": "401" },
+        { "expr": "sum(rate(http_errors_total{status=\"403\"}[5m]))", "legendFormat": "403" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "API errors + login failures",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "sum by (status_class) (rate(lms_api_errors[5m]))", "legendFormat": "{{status_class}}" },
+        { "expr": "sum(rate(lms_login_failure[5m]))", "legendFormat": "login_failure" },
+        { "expr": "sum(rate(http_errors_total{status=\"429\"}[5m]))", "legendFormat": "rate_limit" }
+      ]
+    }
+  ]
+}

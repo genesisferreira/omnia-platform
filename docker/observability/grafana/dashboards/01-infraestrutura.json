@@ -1,0 +1,51 @@
+{
+  "uid": "omnia-lms-infra",
+  "title": "Omnia LMS — Infraestrutura",
+  "tags": ["omnia", "lms", "infra"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "rps" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP errors",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "sum(rate(http_errors_total[5m]))", "legendFormat": "errors/s" }]
+    },
+    {
+      "type": "gauge",
+      "title": "Connector health",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [{ "expr": "connector_health_status", "legendFormat": "health" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Moodle latency",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(moodle_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis latency",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(redis_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    }
+  ]
+}

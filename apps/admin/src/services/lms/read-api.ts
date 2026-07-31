@@ -12,6 +12,11 @@ import {
   mapUserCourseEnrollments,
   checkConnectorHealth,
 } from '@omnia/lms-connector';
+import {
+  connectorIdentityLinks,
+  lmsIdentityLinksMetric,
+} from '@omnia/monitoring/metrics';
+import { checkDatabaseConnection } from '@omnia/database';
 import type { PayloadRequest } from 'payload';
 
 import { findIdentityLink, notLinkedBody } from './identity';
@@ -112,6 +117,29 @@ export async function buildHealthResponse(req: PayloadRequest): Promise<Response
   const client = effectiveEnabled ? await getMoodleClient() : null;
   const sessions = await getLmsSessionManager();
   const cache = await getLmsCache();
+
+  const dbStarted = Date.now();
+  const dbOk = await checkDatabaseConnection();
+  const database = { reachable: dbOk, latencyMs: Date.now() - dbStarted };
+
+  let identityLinksActive: number | null = null;
+  try {
+    const links = await req.payload.find({
+      collection: 'lms-identity-links',
+      where: { status: { equals: 'active' } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    identityLinksActive = typeof links.totalDocs === 'number' ? links.totalDocs : null;
+    if (identityLinksActive != null) {
+      connectorIdentityLinks.set({}, identityLinksActive);
+      lmsIdentityLinksMetric.set({}, identityLinksActive);
+    }
+  } catch {
+    identityLinksActive = null;
+  }
+
   const health = await checkConnectorHealth({
     config: {
       ...config,
@@ -121,6 +149,9 @@ export async function buildHealthResponse(req: PayloadRequest): Promise<Response
     client,
     sessions,
     cache,
+    database,
+    identityLinksActive,
+    platformVersion: process.env.APP_VERSION ?? null,
   });
   return jsonOk({ ok: true, ...health });
 }

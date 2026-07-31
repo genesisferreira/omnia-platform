@@ -27,6 +27,8 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
+    "@omnia/logger": "workspace:*",
+    "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",
     "ioredis": "catalog:"
   },

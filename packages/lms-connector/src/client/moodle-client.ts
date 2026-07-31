@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
+import {
+  formatTraceparent,
+  getTraceContext,
+  withSpan,
+} from '@omnia/monitoring/tracing';
+
 import type { LmsConnectorConfig } from '../config/load-lms-config';
 import { redactToken } from '../config/load-lms-config';
 import {
@@ -93,6 +99,18 @@ export class MoodleClient {
     params: Record<string, unknown> = {},
     options: MoodleCallOptions = {},
   ): Promise<T> {
+    return withSpan(
+      `moodle.${wsfunction}`,
+      async () => this.callInner(wsfunction, params, options),
+      { component: 'moodle-client' },
+    );
+  }
+
+  private async callInner<T = unknown>(
+    wsfunction: MoodleReadFunction | string,
+    params: Record<string, unknown> = {},
+    options: MoodleCallOptions = {},
+  ): Promise<T> {
     this.assertEnabled();
 
     if (!MOODLE_READ_FUNCTION_SET.has(wsfunction)) {
@@ -104,7 +122,8 @@ export class MoodleClient {
       throw new MoodleUnavailableError('Moodle circuit breaker is open');
     }
 
-    const correlationId = options.correlationId || randomUUID();
+    const trace = getTraceContext();
+    const correlationId = options.correlationId || trace?.requestId || randomUUID();
     const idempotent = IDEMPOTENT_MOODLE_FUNCTIONS.has(wsfunction);
     const attempts =
       options.skipRetry || !idempotent ? 1 : Math.max(1, this.maxRetries + 1);
@@ -192,13 +211,19 @@ export class MoodleClient {
     }
 
     try {
+      const trace = getTraceContext();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+        'X-Request-Id': options.correlationId,
+      };
+      if (trace) {
+        headers.traceparent = formatTraceparent(trace);
+      }
+
       const response = await this.fetchImpl(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
-          'X-Request-Id': options.correlationId,
-        },
+        headers,
         body: body.toString(),
         signal: controller.signal,
       });

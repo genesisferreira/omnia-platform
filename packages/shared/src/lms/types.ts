@@ -108,6 +108,13 @@ export type LmsConnectedUser = {
 
 export type LmsConnectorHealth = {
   status: 'healthy' | 'degraded' | 'unhealthy' | 'disabled';
+  /** Versão da plataforma / connector (sem secrets). */
+  version: string | null;
+  readOnly: boolean;
+  connector: {
+    enabled: boolean;
+    status: 'healthy' | 'degraded' | 'unhealthy' | 'disabled';
+  };
   moodle: {
     reachable: boolean;
     authenticated: boolean;
@@ -115,9 +122,40 @@ export type LmsConnectorHealth = {
     latencyMs: number | null;
     serviceName: string | null;
   };
+  redis: {
+    reachable: boolean;
+    latencyMs: number | null;
+  };
+  database: {
+    reachable: boolean;
+    latencyMs: number | null;
+  };
+  identity: {
+    engine: 'ok' | 'degraded';
+    /** Contagem agregada — nunca IDs. */
+    activeLinks: number | null;
+  };
+  cache: {
+    reachable: boolean;
+    hitRate: number | null;
+  };
+  sessions: {
+    storeReachable: boolean;
+    activeApprox: number | null;
+  };
+  policies: {
+    engine: 'ok';
+  };
+  latency: {
+    moodleMs: number | null;
+    redisMs: number | null;
+    totalMs: number | null;
+  };
+  /** @deprecated Preferir `sessions.storeReachable` — mantido por compatibilidade. */
   sessionStore: {
     reachable: boolean;
   };
+  /** @deprecated Preferir `cache.reachable`. */
   cacheStore: {
     reachable: boolean;
   };

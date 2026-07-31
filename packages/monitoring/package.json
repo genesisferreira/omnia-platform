@@ -6,12 +6,16 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./health": "./src/health/index.ts"
+    "./health": "./src/health/index.ts",
+    "./metrics": "./src/metrics/index.ts",
+    "./tracing": "./src/tracing/index.ts",
+    "./alerts": "./src/alerts/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/metrics/test-prometheus.ts src/tracing/test-tracing.ts",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
@@ -22,6 +26,7 @@
     "@types/node": "^22.10.2",
     "eslint": "catalog:",
     "rimraf": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

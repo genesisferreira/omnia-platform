@@ -4,7 +4,7 @@ import type { LmsProfileRole, LmsSessionRecord } from '@omnia/shared/lms';
 
 import { LmsConnectorError } from '../errors';
 import { lmsLog } from '../observability/log';
-import { recordSessionRevocation } from '../observability/metrics';
+import { recordSessionCreate, recordSessionRevocation } from '../observability/metrics';
 import type { LmsResolvedPolicy } from '../policy/resolve-lms-policy';
 
 export type RedisLike = {
@@ -194,6 +194,7 @@ export class LmsSessionManager {
     if (existingFamily) {
       existingFamily.lastSeenAt = now.toISOString();
       await this.saveSession(existingFamily, input.policy.sessionTtlSeconds);
+      recordSessionCreate(true);
       return { session: existingFamily, revokedSessionIds: [] };
     }
 
@@ -222,10 +223,12 @@ export class LmsSessionManager {
         sessionId,
         revokedCount: revoked.length,
       });
+      recordSessionCreate(true);
       return { session, revokedSessionIds: revoked };
     }
 
     if (!this.memory) {
+      recordSessionCreate(false);
       throw new LmsConnectorError(
         'SESSION_STORE_UNAVAILABLE',
         'LMS session store unavailable',
@@ -235,6 +238,7 @@ export class LmsSessionManager {
 
     const revoked = this.claimWithMemory(session, input.policy);
     for (const id of revoked) recordSessionRevocation();
+    recordSessionCreate(true);
     return { session, revokedSessionIds: revoked };
   }
 

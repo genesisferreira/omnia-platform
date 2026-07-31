@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: omnia-admin-lms
+    metrics_path: /api/metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['omnia-platform-admin-dev:3000']
+        labels:
+          env: staging
+          service: omnia-admin
+    # Se METRICS_SCRAPE_TOKEN estiver definido no Admin, descomente:
+    # authorization:
+    #   type: Bearer
+    #   credentials_file: /etc/prometheus/metrics_token
+
+  - job_name: otel-collector
+    static_configs:
+      - targets: ['otel-collector:8888']
