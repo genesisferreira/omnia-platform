@@ -30,6 +30,13 @@
     --ring: var(--omnia-emerald);
     --radius: 0.5rem;
 
+    --lms-sidebar: 209 69% 14%;
+    --lms-sidebar-foreground: 0 0% 100%;
+    --lms-surface: 210 20% 98%;
+    --lms-progress: 164 79% 28%;
+    --lms-success: 152 60% 36%;
+    --lms-warning: 38 92% 45%;
+
     --font-heading:
       var(--font-montserrat), 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-body: var(--font-inter), 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -51,6 +58,12 @@
     --border: 210 17% 20%;
     --input: 210 17% 20%;
     --ring: 164 60% 35%;
+    --lms-sidebar: 210 17% 8%;
+    --lms-sidebar-foreground: 0 0% 100%;
+    --lms-surface: 210 17% 11%;
+    --lms-progress: 164 55% 42%;
+    --lms-success: 152 50% 42%;
+    --lms-warning: 38 85% 50%;
   }
 
   * {
