@@ -38,10 +38,16 @@ Documentação:
 | MinIO         | 9000/9001 | Object storage                      |
 | n8n           | 5678      | Automações                          |
 
+## Omnia LMS (engine Moodle)
+
+Stack isolada em [`lms/`](lms/) — MariaDB + Redis + Moodle 4.5 LTS + Cron.  
+Documentação: [`../docs/09-infrastructure/OMNIA_LMS_ARCHITECTURE.md`](../docs/09-infrastructure/OMNIA_LMS_ARCHITECTURE.md).
+
 ## Documentação
 
 - [SPRINT-01-INFRASTRUCTURE](../docs/09-infrastructure/SPRINT-01-INFRASTRUCTURE.md)
 
 ## Status
 
-**Sprint 2** — Docker Compose para desenvolvimento local e homologação VPS.
+**Sprint 2** — Docker Compose para desenvolvimento local e homologação VPS.  
+**Omnia LMS** — infraestrutura engine sob `docker/lms/` (DEV deployável).

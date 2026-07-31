@@ -1,0 +1,54 @@
+<?php
+// Generated at container start — do not edit in the image.
+// Template placeholders replaced by entrypoint.sh from environment variables.
+unset($CFG);
+global $CFG;
+$CFG = new stdClass();
+
+$CFG->dbtype    = 'mariadb';
+$CFG->dblibrary = 'native';
+$CFG->dbhost    = '__MOODLE_DB_HOST__';
+$CFG->dbname    = '__MOODLE_DB_NAME__';
+$CFG->dbuser    = '__MOODLE_DB_USER__';
+$CFG->dbpass    = '__MOODLE_DB_PASSWORD__';
+$CFG->prefix    = '__MOODLE_DB_PREFIX__';
+$CFG->dboptions = [
+    'dbpersist' => false,
+    'dbsocket'  => false,
+    'dbport'    => '__MOODLE_DB_PORT__',
+    'dbcollation' => 'utf8mb4_unicode_ci',
+];
+
+$CFG->wwwroot   = '__MOODLE_WWWROOT__';
+$CFG->dataroot  = '__MOODLE_DATAROOT__';
+$CFG->admin     = 'admin';
+$CFG->directorypermissions = 02777;
+
+// Traefik TLS termination
+$CFG->sslproxy = true;
+$CFG->reverseproxy = true;
+
+// Redis sessions
+$CFG->session_handler_class = '\core\session\redis';
+$CFG->session_redis_host = '__MOODLE_REDIS_HOST__';
+$CFG->session_redis_port = __MOODLE_REDIS_PORT__;
+$CFG->session_redis_database = __MOODLE_REDIS_SESSION_DB__;
+$CFG->session_redis_prefix = '__MOODLE_REDIS_PREFIX__sess_';
+$CFG->session_redis_acquire_lock_timeout = 120;
+$CFG->session_redis_lock_expire = 7200;
+
+// Application cache store configured post-install via CLI when needed.
+// Connection defaults for manual MUC Redis store:
+// host=__MOODLE_REDIS_HOST__ port=__MOODLE_REDIS_PORT__ db=__MOODLE_REDIS_CACHE_DB__
+
+$CFG->passwordsaltmain = '__MOODLE_SALT__';
+
+// SMTP (Moodle messaging) — configured via admin or env-driven overrides after install.
+$CFG->smtphosts = '__MOODLE_SMTP_HOST__:__MOODLE_SMTP_PORT__';
+$CFG->smtpsecure = '__MOODLE_SMTP_SECURE__';
+$CFG->smtpuser = '__MOODLE_SMTP_USER__';
+$CFG->smtppass = '__MOODLE_SMTP_PASS__';
+$CFG->smtpmaxbulk = 1;
+$CFG->noreplyaddress = '__MOODLE_SMTP_FROM__';
+
+require_once(__DIR__ . '/lib/setup.php');
