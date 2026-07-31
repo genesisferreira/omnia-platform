@@ -1,13 +1,27 @@
 # Omnia LMS — Especificação de Integração (Connector + Políticas)
 
-> Contratos **futuros** para o Connector Omnia ↔ Moodle e serviços de sessão/mídia.  
-> **Não implementar** nesta etapa.
+> Contratos do Connector Omnia ↔ Moodle e serviços de sessão/mídia.  
+> **Macroentrega 01:** read-only + session/policy foundation — ver docs `OMNIA_LMS_CONNECTOR_*`.
 
 Documentos relacionados:
 
 - [`OMNIA_LMS_SESSION_POLICY.md`](OMNIA_LMS_SESSION_POLICY.md)
 - [`OMNIA_LMS_CONTENT_PROTECTION_POLICY.md`](OMNIA_LMS_CONTENT_PROTECTION_POLICY.md)
 - [`OMNIA_LMS_API_MAP.md`](OMNIA_LMS_API_MAP.md)
+- [`OMNIA_LMS_CONNECTOR_ARCHITECTURE.md`](OMNIA_LMS_CONNECTOR_ARCHITECTURE.md)
+- [`OMNIA_LMS_CONNECTOR_API.md`](OMNIA_LMS_CONNECTOR_API.md)
+
+### Status ME01
+
+| Contrato | Status |
+|----------|--------|
+| Health + site info | Implementado |
+| Read: me/courses/content/progress/grades/completion | Implementado |
+| Identity link storage | Implementado (manual DEV) |
+| Session create/heartbeat/logout/revoke | Implementado |
+| Policy engine (sessão global/perfil) | Implementado |
+| Provisionamento / write Moodle | **Não** nesta entrega |
+| Media signed URL | Preparado (não real CDN) |
 
 ---
 

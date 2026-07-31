@@ -33,13 +33,21 @@
 
 ## Sprint 2.5 — Connector e identidade
 
-- Omnia LMS Connector (service-to-service → Moodle WS)
-- Mapeamento usuário Omnia ↔ Moodle (provisionamento)
-- Leitura: cursos, categorias, matrículas, progresso
-- Feature flags; ambientes `lms.dev` shell mínimo (read-only)
-- Segurança: tokens, scopes, auditoria de chamadas
+### Macroentrega 01 (esta entrega) — **em implementação**
 
-**Saída:** Aluno autenticado Omnia vê lista de cursos (dados Moodle) sem UI Moodle.
+- Package `@omnia/lms-connector` + BFF Admin `/api/omnia/lms/*`
+- Cliente Moodle REST read-only + health
+- Leitura: me, courses, content, progress, grades, completion
+- Vínculo Omnia↔Moodle mínimo (manual DEV)
+- Policy Engine + Session Manager (Redis Platform)
+- Global `lms-settings` + auditoria
+- **Fora:** provisionamento, escrita acadêmica, UI completa, PROD
+
+### Macroentrega 02 (seguinte)
+
+- Provisionamento de usuários / matrícula
+- Sync de identidade automatizado
+- Shell `lms.dev` read-only UX
 
 ---
 

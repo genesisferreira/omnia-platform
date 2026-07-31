@@ -31,8 +31,20 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | --- | --- |
 | [OMNIA_LMS_SESSION_POLICY.md](OMNIA_LMS_SESSION_POLICY.md) | Sessões concurrentes |
 | [OMNIA_LMS_CONTENT_PROTECTION_POLICY.md](OMNIA_LMS_CONTENT_PROTECTION_POLICY.md) | Sem download / signed media |
-| [OMNIA_LMS_INTEGRATION_SPEC.md](OMNIA_LMS_INTEGRATION_SPEC.md) | Contratos futuros Connector |
+| [OMNIA_LMS_INTEGRATION_SPEC.md](OMNIA_LMS_INTEGRATION_SPEC.md) | Contratos Connector |
 | [OMNIA_LMS_SECURITY_CHECKLIST.md](OMNIA_LMS_SECURITY_CHECKLIST.md) | Checklist de segurança |
 | [OMNIA_LMS_DECISION_LOG.md](OMNIA_LMS_DECISION_LOG.md) | Decision log |
+
+## Connector (Sprint 2.5 — Macroentrega 01)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_CONNECTOR_ARCHITECTURE.md](OMNIA_LMS_CONNECTOR_ARCHITECTURE.md) | Arquitetura BFF + package |
+| [OMNIA_LMS_CONNECTOR_API.md](OMNIA_LMS_CONNECTOR_API.md) | APIs `/api/omnia/lms/*` |
+| [OMNIA_LMS_MOODLE_SERVICE_SETUP.md](OMNIA_LMS_MOODLE_SERVICE_SETUP.md) | WS Moodle DEV |
+| [OMNIA_LMS_SESSION_MANAGER.md](OMNIA_LMS_SESSION_MANAGER.md) | Session Manager |
+| [OMNIA_LMS_POLICY_ENGINE.md](OMNIA_LMS_POLICY_ENGINE.md) | Policy Engine |
+| [OMNIA_LMS_CONNECTOR_SECURITY.md](OMNIA_LMS_CONNECTOR_SECURITY.md) | Segurança do connector |
+| [OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md](OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md) | Roteiro homologação DEV |
 
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

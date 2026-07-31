@@ -1,0 +1,41 @@
+{
+  "name": "@omnia/lms-connector",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Omnia LMS BFF connector — Moodle REST client, policy engine e session manager",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config/load-lms-config.ts",
+    "./errors": "./src/errors.ts",
+    "./client": "./src/client/moodle-client.ts",
+    "./policy": "./src/policy/resolve-lms-policy.ts",
+    "./session": "./src/session/session-manager.ts",
+    "./cache": "./src/cache/lms-cache.ts",
+    "./health": "./src/health/connector-health.ts",
+    "./mappers": "./src/mappers/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/test-*.ts",
+    "test:client": "tsx --test src/client/test-moodle-client.ts",
+    "test:mappers": "tsx --test src/mappers/test-mappers.ts",
+    "test:policy": "tsx --test src/policy/test-policy-engine.ts",
+    "test:session": "tsx --test src/session/test-session-manager.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@omnia/shared": "workspace:*",
+    "ioredis": "catalog:"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

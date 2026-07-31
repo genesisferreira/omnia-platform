@@ -1,7 +1,8 @@
 # Omnia LMS — API Map (lógico)
 
-> Mapa de **contratos lógicos** do Blueprint. **Não implementar** nesta fase.  
-> Convenção: Omnia BFF = fachada; Moodle WS = academia; Neurofrigo = IA; Ext = terceiros.
+> Mapa de contratos lógicos do Blueprint.  
+> **Implementado (ME01):** endpoints Admin BFF em `/api/omnia/lms/*` — ver [`OMNIA_LMS_CONNECTOR_API.md`](OMNIA_LMS_CONNECTOR_API.md).  
+> Demais rotas `/lms/*` no domínio produto permanecem planejadas.
 
 ---
 

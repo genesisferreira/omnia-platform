@@ -12,7 +12,9 @@ Registro oficial de decisões de arquitetura do Omnia LMS.
 | D006 | 2026-07-31 | **Sessão concurrent configurável** (aluno default 1; novo login revoga anterior; sync Omnia↔Moodle; abas = mesma sessão) | Adendo segurança | BFF sessão + Connector revoke; painel limites | **Aprovado (spec)** |
 | D007 | 2026-07-31 | **Conteúdo sem download** (stream/viewer; signed URL; política material>curso>global; proteção backend) | Adendo segurança | Media authorize no BFF; CDN Ext; limitação screen capture explícita | **Aprovado (spec)** |
 | D008 | 2026-07-31 | Precedência de política de conteúdo: material > curso > global; forceViewOnly sensível | Adendo | Overrides auditados | Aprovado (spec) |
-| D009 | 2026-07-31 | Connector não inicia até GO pós-adendos | Governança | Docs Integration Spec + Security Checklist | Pendente GO |
+| D009 | 2026-07-31 | Connector não inicia até GO pós-adendos | Governança | Docs Integration Spec + Security Checklist | **GO parcial — Macroentrega 01 (read-only)** |
+| D010 | 2026-07-31 | BFF LMS no Admin Payload + package `@omnia/lms-connector`; sem terceiro runtime | Monorepo audit | Endpoints `/api/omnia/lms/*`; Redis Platform namespaces | Aprovado |
+| D011 | 2026-07-31 | Macroentrega 01: somente leitura acadêmica; vínculo manual DEV; sem provisionamento | Escopo 2.5 | Write Moodle = próxima macroentrega | Aprovado |
 
 ---
 

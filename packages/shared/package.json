@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./rate-limit": "./src/rate-limit/index.ts"
+    "./rate-limit": "./src/rate-limit/index.ts",
+    "./lms": "./src/lms/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

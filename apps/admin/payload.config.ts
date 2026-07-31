@@ -31,6 +31,8 @@ import { Sites } from './src/collections/Sites';
 import { Tags } from './src/collections/Tags';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
+import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
+import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
@@ -50,8 +52,10 @@ import {
   publicPostTagsEndpoint,
 } from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
+import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
+import { LmsSettings } from './src/globals/LmsSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 
 const filename = fileURLToPath(import.meta.url);
@@ -98,8 +102,10 @@ export default buildConfig({
     PartnerCategories,
     PartnerSpecialties,
     Partners,
+    LmsIdentityLinks,
+    LmsAuditEvents,
   ],
-  globals: [GlobalSettings, PartnerNetworkDashboard],
+  globals: [GlobalSettings, PartnerNetworkDashboard, LmsSettings],
   endpoints: [
     resolveSiteEndpoint,
     publicCompaniesEndpoint,
@@ -117,6 +123,7 @@ export default buildConfig({
     publicPartnerSpecialtiesEndpoint,
     publicPostalCodeEndpoint,
     partnerRegisterEndpoint,
+    ...lmsEndpoints,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

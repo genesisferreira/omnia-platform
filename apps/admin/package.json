@@ -39,12 +39,15 @@
     "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts",
     "test:partner-register": "tsx --test src/scripts/test-partner-register.ts",
     "test:postal-geocode": "tsx --test src/scripts/test-postal-geocode.ts",
+    "test:lms-connector": "tsx --test ../../packages/lms-connector/src/**/test-*.ts",
+    "test:lms-bff-helpers": "tsx --test src/scripts/test-lms-bff-helpers.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
     "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",
+    "@omnia/lms-connector": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
