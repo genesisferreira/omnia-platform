@@ -15,11 +15,13 @@
 | Item | Valor |
 | --- | --- |
 | Commit anterior (VPS) | `a5bad91` (`feature/omnia-lms-observability`) |
-| Commit implantado | **`f82abb6`** + hotfix sanitize (ver commits abaixo) |
+| Commit base solicitado | `f82abb6` |
+| Commit implantado (tip) | **`10fddfa`** (`f82abb6` + scrub Moodle URLs + fix ESLint build) |
 | Container | `omnia-platform-web-dev` |
-| Image digest (1º deploy) | `sha256:3fece73ea3f4385c09629079bf34eab6b18582c97bb7931473734e416f0dbc79` |
+| Image digest (tip) | `sha256:28ebfd85bbf83e8f19947872804787c5d82dedd8caed23c5217e6a38a61fdf9a` |
 | Health | **healthy** |
-| Janela | `2026-07-31T21:34:04Z` → `21:36:44Z` (~2m40s) |
+| 1º deploy `f82abb6` | `21:34:04Z` → `21:36:44Z` (`sha256:3fece73e…`) |
+| Redeploy tip `10fddfa` | `21:49:48Z` → `21:51:48Z` |
 | Serviços NÃO rebuildados | Moodle, Redis LMS, MariaDB, Admin/Connector, Traefik, PROD |
 
 ### Nota de auditoria
