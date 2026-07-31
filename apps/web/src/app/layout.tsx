@@ -3,8 +3,7 @@ import type { Metadata } from 'next';
 
 import '@omnia/ui/globals.css';
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
+import { PathAwareChrome } from '@/components/layout/PathAwareChrome';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import {
@@ -52,11 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="font-sans antialiased">
         <JsonLd data={[buildOrganizationJsonLd({ hostname }), buildWebSiteJsonLd({ hostname })]} />
         <SkipLink />
-        <Header />
-        <main id="conteudo-principal" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
+        <PathAwareChrome>{children}</PathAwareChrome>
       </body>
     </html>
   );
