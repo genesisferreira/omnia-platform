@@ -63,8 +63,20 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_PRODUCT_SPEC.md](OMNIA_LMS_PRODUCT_SPEC.md) | Spec do produto (aluno) |
 | [OMNIA_LMS_FRONTEND_ARCHITECTURE.md](OMNIA_LMS_FRONTEND_ARCHITECTURE.md) | Shell `/lms/*`, proxy S2S |
 | [OMNIA_LMS_DESIGN_SYSTEM.md](OMNIA_LMS_DESIGN_SYSTEM.md) | Tokens e a11y LMS |
-| [OMNIA_LMS_COMPONENT_CATALOG.md](OMNIA_LMS_COMPONENT_CATALOG.md) | Catálogo de componentes |
+| [OMNIA_LMS_COMPONENT_CATALOG.md](OMNIA_LMS_COMPONENT_CATALOG.md) | Catálogo de componentes UI |
 | [OMNIA_LMS_USER_JOURNEYS.md](OMNIA_LMS_USER_JOURNEYS.md) | Jornadas (incl. MVP aluno) |
 | [OMNIA_LMS_EXPERIENCE_DEV_HOMOLOGATION.md](OMNIA_LMS_EXPERIENCE_DEV_HOMOLOGATION.md) | Homologação DEV |
+
+## Product Modeling (Sprint 2.6.5)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_DOMAIN_MODEL.md](OMNIA_LMS_DOMAIN_MODEL.md) | Entidades, estados, relacionamentos |
+| [OMNIA_LMS_EVENT_CATALOG.md](OMNIA_LMS_EVENT_CATALOG.md) | Eventos de domínio |
+| [OMNIA_LMS_BUSINESS_RULES.md](OMNIA_LMS_BUSINESS_RULES.md) | Regras de negócio |
+| [OMNIA_LMS_LEARNING_EXPERIENCE_SPEC.md](OMNIA_LMS_LEARNING_EXPERIENCE_SPEC.md) | Experiências por persona |
+| [OMNIA_LMS_BOUNDED_CONTEXTS.md](OMNIA_LMS_BOUNDED_CONTEXTS.md) | DDD / contextos |
+| [OMNIA_LMS_COMPONENT_MAP.md](OMNIA_LMS_COMPONENT_MAP.md) | Mapa de componentes de produto |
+| [OMNIA_LMS_INFORMATION_ARCHITECTURE.md](OMNIA_LMS_INFORMATION_ARCHITECTURE.md) | IA (MVP + alvo) |
 
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

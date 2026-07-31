@@ -15,6 +15,8 @@ Registro oficial de decisões de arquitetura do Omnia LMS.
 | D009 | 2026-07-31 | Connector não inicia até GO pós-adendos | Governança | Docs Integration Spec + Security Checklist | **GO parcial — Macroentrega 01 (read-only)** |
 | D010 | 2026-07-31 | BFF LMS no Admin Payload + package `@omnia/lms-connector`; sem terceiro runtime | Monorepo audit | Endpoints `/api/omnia/lms/*`; Redis Platform namespaces | Aprovado |
 | D011 | 2026-07-31 | Macroentrega 01: somente leitura acadêmica; vínculo manual DEV; sem provisionamento | Escopo 2.5 | Write Moodle = próxima macroentrega | Aprovado |
+| D012 | 2026-07-31 | **Domain Model + Event Catalog + Business Rules + LX Spec + Bounded Contexts** como fonte de verdade pré-2.7 | Sprint 2.6.5 | Sprints futuras não contradizem sem RFC; sem implementação nesta sprint | **Aprovado** |
+| D013 | 2026-07-31 | Experience MVP em `apps/web` `/lms/*`; promoção `lms.*` pós-MVP | Sprint 2.6 | Reuso de UI modules | Aprovado |
 
 ---
 
