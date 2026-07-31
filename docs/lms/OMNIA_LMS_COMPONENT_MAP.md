@@ -61,6 +61,7 @@
 
 | Componente | Job | Status |
 | --- | --- | :---: |
+| Provision Console | UI gestor de provision | — (API S2S dry-run ● Sprint 3.0A) |
 | ClassRoster | Turma | — |
 | GradingQueue | Fila correção | — |
 | KpiStrip | Indicadores gestor | — |

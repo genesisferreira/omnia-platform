@@ -56,6 +56,12 @@ export function jsonError(err: unknown): Response {
         { status: 403, headers: { 'Cache-Control': 'no-store' } },
       );
     }
+    if (err.message === 'PROVISION_DISABLED') {
+      return Response.json(
+        { ok: false, error: { code: 'PROVISION_DISABLED', message: 'Provisioning disabled' } },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
   }
   return Response.json(
     { ok: false, error: { code: 'INTERNAL_ERROR', message: 'Unexpected error' } },

@@ -84,6 +84,15 @@ Todo evento **deve** carregar:
 | `completion.updated` | Completion sync | `{ courseId, activityId?, completed }` | ○ |
 | `certificate.generated` | Emissão | `{ courseId, certificateId }` | — |
 
+### 2.3b Academic Provisioning (Sprint 3.0 — audit/domain)
+
+| type | Quando | Payload mínimo | MVP |
+| --- | --- | --- | :---: |
+| `provision.user.requested` | Comando user (dry-run) | `{ action, omniaUserId, mode }` | ● (audit) |
+| `provision.user.completed` | Resultado user | `{ action, mode, code? }` | ● (audit) |
+| `enrollment.requested` | Comando matrícula | `{ action, courseId, mode }` | ● (audit) |
+| `enrollment.completed` | Resultado matrícula | `{ action, mode, code? }` | ● (audit) |
+
 ### 2.4 Segurança e plataforma
 
 | type | Quando | Payload mínimo | MVP |

@@ -15,6 +15,9 @@ export type RedisLike = {
   sadd: (key: string, ...members: string[]) => Promise<number>;
   srem: (key: string, ...members: string[]) => Promise<number>;
   smembers: (key: string) => Promise<string[]>;
+  lpush?: (key: string, ...values: string[]) => Promise<number>;
+  rpop?: (key: string) => Promise<string | null>;
+  llen?: (key: string) => Promise<number>;
   eval: (script: string, numKeys: number, ...args: (string | number)[]) => Promise<unknown>;
   ping: () => Promise<string>;
   status?: string;

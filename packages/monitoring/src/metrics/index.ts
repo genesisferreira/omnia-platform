@@ -37,4 +37,11 @@ export {
   lmsPolicyChanges,
   lmsIdentityLinksMetric,
   lmsApiErrors,
+  provisionSuccessTotal,
+  provisionFailureTotal,
+  enrollmentSuccessTotal,
+  enrollmentFailureTotal,
+  provisionRetryTotal,
+  provisionQueueSize,
+  provisionLatencySeconds,
 } from './lms-metrics';

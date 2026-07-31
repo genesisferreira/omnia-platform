@@ -21,7 +21,11 @@ import { recordMoodleCall } from '../observability/metrics';
 import {
   IDEMPOTENT_MOODLE_FUNCTIONS,
   MOODLE_READ_FUNCTION_SET,
+  MOODLE_WRITE_CAPABILITY_CATALOG,
+  MOODLE_WRITE_FUNCTION_SET,
   type MoodleReadFunction,
+  type MoodleWriteCapability,
+  type MoodleWriteFunction,
 } from './moodle-functions';
 
 export type MoodleClientOptions = {
@@ -34,6 +38,23 @@ export type MoodleCallOptions = {
   signal?: AbortSignal;
   correlationId?: string;
   skipRetry?: boolean;
+};
+
+export type MoodleWriteCallOptions = MoodleCallOptions & {
+  /**
+   * Default: true (dry-run). Sprint 3.0 força dry-run enquanto
+   * provisionExecuteEnabled=false (EXECUTE_DISABLED_UNTIL_ACTIVATION).
+   */
+  dryRun?: boolean;
+};
+
+export type MoodleWriteResult<T = unknown> = {
+  mode: 'dry-run' | 'execute';
+  functionName: string;
+  correlationId: string;
+  params: Record<string, unknown>;
+  data: T;
+  code?: string;
 };
 
 type MoodleExceptionBody = {
@@ -86,12 +107,27 @@ export class MoodleClient {
     return this.config.connectorReadOnly;
   }
 
+  get provisionDryRunForced(): boolean {
+    // Epic lock: execute real bloqueado até ativação explícita
+    return !this.config.provisionExecuteEnabled || this.config.provisionDryRun !== false;
+  }
+
   assertEnabled(): void {
     if (!this.config.connectorEnabled) {
       throw new LmsConnectorError('CONNECTOR_DISABLED', 'LMS connector is disabled', {
         httpStatus: 503,
       });
     }
+  }
+
+  /** Allowlist local de writes (+ notas). Não executa HTTP write. */
+  listWriteCapabilities(): MoodleWriteCapability[] {
+    return MOODLE_WRITE_CAPABILITY_CATALOG.map((c) => ({
+      ...c,
+      note: this.provisionDryRunForced
+        ? `${c.note ?? ''} | EXECUTE_DISABLED_UNTIL_ACTIVATION`.trim()
+        : c.note,
+    }));
   }
 
   async call<T = unknown>(
@@ -104,6 +140,75 @@ export class MoodleClient {
       async () => this.callInner(wsfunction, params, options),
       { component: 'moodle-client' },
     );
+  }
+
+  /**
+   * Caminho WRITE: allowlist + dry-run forçado neste épico.
+   * Nunca usa o path `call()` (read). Sem HTTP quando dry-run.
+   */
+  async callWrite<T = unknown>(
+    wsfunction: MoodleWriteFunction | string,
+    params: Record<string, unknown> = {},
+    options: MoodleWriteCallOptions = {},
+  ): Promise<MoodleWriteResult<T>> {
+    return withSpan(
+      `moodle.write.${wsfunction}`,
+      async () => this.callWriteInner<T>(wsfunction, params, options),
+      { component: 'moodle-client-write' },
+    );
+  }
+
+  private async callWriteInner<T>(
+    wsfunction: string,
+    params: Record<string, unknown>,
+    options: MoodleWriteCallOptions,
+  ): Promise<MoodleWriteResult<T>> {
+    this.assertEnabled();
+
+    if (!MOODLE_WRITE_FUNCTION_SET.has(wsfunction)) {
+      throw new MoodleValidationError(
+        'Moodle write function is not allowed by connector write policy',
+      );
+    }
+
+    const trace = getTraceContext();
+    const correlationId = options.correlationId || trace?.requestId || randomUUID();
+    const wantDryRun = options.dryRun !== false;
+    const forcedDryRun = this.provisionDryRunForced || wantDryRun;
+
+    if (forcedDryRun) {
+      lmsLog('info', 'moodle.write.dry_run', {
+        correlationId,
+        function: wsfunction,
+        result: 'dry-run',
+        code: 'EXECUTE_DISABLED_UNTIL_ACTIVATION',
+      });
+      return {
+        mode: 'dry-run',
+        functionName: wsfunction,
+        correlationId,
+        params,
+        code: 'EXECUTE_DISABLED_UNTIL_ACTIVATION',
+        data: {
+          simulated: true,
+          function: wsfunction,
+          params,
+        } as T,
+      };
+    }
+
+    // Caminho execute (bloqueado neste épico; permanece para contrato futuro)
+    const data = await this.executeOnce<T>(wsfunction, params, {
+      ...options,
+      correlationId,
+    });
+    return {
+      mode: 'execute',
+      functionName: wsfunction,
+      correlationId,
+      params,
+      data,
+    };
   }
 
   private async callInner<T = unknown>(

@@ -108,4 +108,15 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_ASSESSMENT_EXPERIENCE.md](OMNIA_LMS_ASSESSMENT_EXPERIENCE.md) | Viewer / Provider |
 | [OMNIA_LMS_ACTIVITY_RENDERERS.md](OMNIA_LMS_ACTIVITY_RENDERERS.md) | Renderers de atividade |
 
+## Academic Provisioning (Sprint 3.0 — Épico A)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_ACADEMIC_PROVISIONING.md](OMNIA_ACADEMIC_PROVISIONING.md) | Package + BFF interno dry-run |
+| [OMNIA_WRITE_CONNECTOR.md](OMNIA_WRITE_CONNECTOR.md) | Camada WRITE Connector |
+| [OMNIA_IDENTITY_SYNC.md](OMNIA_IDENTITY_SYNC.md) | Deduplicação IdentityLink |
+| [OMNIA_ENROLLMENT_LIFECYCLE.md](OMNIA_ENROLLMENT_LIFECYCLE.md) | Lifecycle de matrícula |
+| [OMNIA_PROVISIONING_SECURITY.md](OMNIA_PROVISIONING_SECURITY.md) | Segurança S2S |
+| [OMNIA_PROVISIONING_DEV_HOMOLOGATION.md](OMNIA_PROVISIONING_DEV_HOMOLOGATION.md) | Checklist DEV |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

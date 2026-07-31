@@ -63,6 +63,26 @@ export const LmsSettings: GlobalConfig = {
       defaultValue: true,
     },
     {
+      name: 'provisionEnabled',
+      type: 'checkbox',
+      label: 'Habilitar Academic Provisioning',
+      defaultValue: true,
+      admin: {
+        description:
+          'Endpoints internos S2S de provisionamento. Execute real no Moodle permanece bloqueado até ativação.',
+      },
+    },
+    {
+      name: 'provisionDryRun',
+      type: 'checkbox',
+      label: 'Provision dry-run (sem mutação Moodle)',
+      defaultValue: true,
+      admin: {
+        description:
+          'Default true. Sprint 3.0 força dry-run mesmo se desmarcado (EXECUTE_DISABLED_UNTIL_ACTIVATION).',
+      },
+    },
+    {
       name: 'sessionPolicyEnabled',
       type: 'checkbox',
       label: 'Habilitar política de sessão',

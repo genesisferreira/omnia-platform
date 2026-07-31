@@ -7,11 +7,22 @@ export {
 } from './config/load-lms-config';
 export * from './errors';
 export { MoodleClient, appendFormParams } from './client/moodle-client';
+export type {
+  MoodleCallOptions,
+  MoodleClientOptions,
+  MoodleWriteCallOptions,
+  MoodleWriteResult,
+} from './client/moodle-client';
 export {
   MOODLE_READ_FUNCTIONS,
   MOODLE_READ_FUNCTION_SET,
+  MOODLE_WRITE_FUNCTIONS,
+  MOODLE_WRITE_FUNCTION_SET,
+  MOODLE_WRITE_CAPABILITY_CATALOG,
   IDEMPOTENT_MOODLE_FUNCTIONS,
   type MoodleReadFunction,
+  type MoodleWriteFunction,
+  type MoodleWriteCapability,
 } from './client/moodle-functions';
 export * from './mappers';
 export {

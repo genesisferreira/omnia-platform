@@ -40,6 +40,26 @@
 - `lms_identity_links`
 - `lms_api_errors`
 
+### Academic Provisioning (Sprint 3.0)
+- `provision_success_total` / `provision_failure_total`
+- `enrollment_success_total` / `enrollment_failure_total`
+- `provision_retry_total`
+- `provision_queue_size`
+- `provision_latency_seconds`
+
+## Grafana
+
+Dashboards em `docker/observability/grafana/dashboards/`:
+
+| Arquivo | Foco |
+|---------|------|
+| `01-infraestrutura.json` | Infra |
+| `02-connector.json` | Connector / HTTP |
+| `03-sessoes.json` | Sessões |
+| `04-academico.json` | Academico RO |
+| `05-seguranca.json` | Segurança |
+| `06-provisioning.json` | Provision / enrollment |
+
 ## Stack Docker (DEV)
 
 ```bash

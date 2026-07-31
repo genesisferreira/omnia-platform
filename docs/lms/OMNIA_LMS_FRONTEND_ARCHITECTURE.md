@@ -51,6 +51,10 @@ Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md) · [`
 
 Ver [`OMNIA_LMS_ASSESSMENT_ENGINE.md`](OMNIA_LMS_ASSESSMENT_ENGINE.md). Quiz/assign na Lesson Page via `AssessmentExperience` (read-only).
 
+## Academic Provisioning
+
+Sem UI neste épico. Provisionamento é **somente** Admin BFF interno S2S (`/api/omnia/lms/internal/provision/*`). O proxy Web `/api/lms/*` **não** expõe rotas de provision. Ver [`OMNIA_ACADEMIC_PROVISIONING.md`](OMNIA_ACADEMIC_PROVISIONING.md).
+
 ## Session Manager
 
 `LmsSessionLifecycle` (client):

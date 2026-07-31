@@ -28,6 +28,7 @@ import {
   getRuntimeLmsConfig,
   resolveRolePolicy,
 } from '../../services/lms/runtime';
+import { lmsProvisionEndpoints } from './provision';
 
 async function applyRateLimit(
   _req: PayloadRequest,
@@ -556,4 +557,5 @@ export const lmsEndpoints: Endpoint[] = [
   lmsSessionsListEndpoint,
   lmsSessionsRevokeEndpoint,
   lmsSessionsRevokeAllEndpoint,
+  ...lmsProvisionEndpoints,
 ];

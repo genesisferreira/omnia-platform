@@ -11,6 +11,18 @@ export type LmsConnectorConfig = {
   moodleRequestTimeoutMs: number;
   connectorEnabled: boolean;
   connectorReadOnly: boolean;
+  /** Provisionamento acadêmico habilitado (fila/audit). Execute real ainda bloqueado. */
+  provisionEnabled: boolean;
+  /**
+   * Dry-run de writes Moodle. Default true.
+   * Sprint 3.0: runtime força dry-run mesmo se false (EXECUTE_DISABLED_UNTIL_ACTIVATION).
+   */
+  provisionDryRun: boolean;
+  /**
+   * Se true, permite callWrite com dryRun=false (HTTP write).
+   * Bloqueado até ativação explícita do épico seguinte.
+   */
+  provisionExecuteEnabled: boolean;
   sessionPolicyEnabled: boolean;
   defaultStudentSessions: number;
   defaultTeacherSessions: number;
@@ -73,6 +85,10 @@ export function loadLmsConnectorConfig(
 
   const connectorEnabled = parseBool(env.MOODLE_CONNECTOR_ENABLED, false);
   const connectorReadOnly = parseBool(env.MOODLE_CONNECTOR_READ_ONLY, true);
+  const provisionEnabled = parseBool(env.MOODLE_PROVISION_ENABLED, true);
+  const provisionDryRun = parseBool(env.MOODLE_PROVISION_DRY_RUN, true);
+  // MOODLE_PROVISION_EXECUTE — bloqueado até ativação; default false
+  const provisionExecuteEnabled = parseBool(env.MOODLE_PROVISION_EXECUTE, false);
   const sessionPolicyEnabled = parseBool(env.LMS_SESSION_POLICY_ENABLED, true);
 
   const moodleBaseUrl = normalizeBaseUrl(env.MOODLE_BASE_URL || '');
@@ -130,6 +146,9 @@ export function loadLmsConnectorConfig(
     moodleRequestTimeoutMs,
     connectorEnabled,
     connectorReadOnly,
+    provisionEnabled,
+    provisionDryRun,
+    provisionExecuteEnabled,
     sessionPolicyEnabled,
     defaultStudentSessions: parsePositiveInt(env.LMS_DEFAULT_STUDENT_SESSIONS, 1, 1, 10),
     defaultTeacherSessions: parsePositiveInt(env.LMS_DEFAULT_TEACHER_SESSIONS, 2, 1, 10),

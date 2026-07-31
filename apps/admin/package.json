@@ -44,6 +44,7 @@
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
+    "@omnia/academic-provisioning": "workspace:*",
     "@omnia/config": "workspace:*",
     "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",

@@ -119,6 +119,35 @@ export const lmsApiErrors = defaultRegistry.register(
   new Counter('lms_api_errors', 'LMS BFF API errors by code class'),
 );
 
+/** Academic Provisioning (Sprint 3.0) — labels: action only, sem PII. */
+export const provisionSuccessTotal = defaultRegistry.register(
+  new Counter('provision_success_total', 'Academic provision user operations succeeded'),
+);
+
+export const provisionFailureTotal = defaultRegistry.register(
+  new Counter('provision_failure_total', 'Academic provision user operations failed'),
+);
+
+export const enrollmentSuccessTotal = defaultRegistry.register(
+  new Counter('enrollment_success_total', 'Enrollment lifecycle operations succeeded'),
+);
+
+export const enrollmentFailureTotal = defaultRegistry.register(
+  new Counter('enrollment_failure_total', 'Enrollment lifecycle operations failed'),
+);
+
+export const provisionRetryTotal = defaultRegistry.register(
+  new Counter('provision_retry_total', 'Provision queue retries / failures requeued'),
+);
+
+export const provisionQueueSize = defaultRegistry.register(
+  new Gauge('provision_queue_size', 'Academic provision ready queue depth'),
+);
+
+export const provisionLatencySeconds = defaultRegistry.register(
+  new Histogram('provision_latency_seconds', 'Academic provision operation latency in seconds'),
+);
+
 export function renderPrometheusMetrics(): string {
   return defaultRegistry.render();
 }

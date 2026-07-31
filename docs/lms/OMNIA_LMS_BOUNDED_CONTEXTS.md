@@ -45,6 +45,7 @@
 | **Learning Experience** | Dashboard, Aula, Continuar | `apps/web` `/lms` | Proxy S2S + Learning Engine |
 | **Learning Engine** | Continue, Timeline, Events, State, Cache, Sync | `@omnia/learning-engine` | Porta `LearningPersistence`; lê Connector via Experience |
 | **Assessment Engine** | Quiz/Assign RO, status, grade, feedback | `@omnia/assessment-engine` | Sink → Learning Engine; Connector RO |
+| **Academic Provisioning** | User provision, enrollment lifecycle, queue | `@omnia/academic-provisioning` + Admin internal BFF | Connector `callWrite` dry-run; Identity Bridge (consulta) |
 | **Session Security** | Session, device, revoke | Session Manager | Redis |
 | **Policy** | Limits, flags | Policy Engine + lms-settings | Audit |
 | **Observability** | metrics, traces | monitoring/logger | Prom/Grafana |

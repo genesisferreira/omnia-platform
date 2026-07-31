@@ -8,6 +8,9 @@ import { resetLmsMetricsForTests } from '../observability/metrics';
 const baseConfig: LmsConnectorConfig = {
   connectorEnabled: false,
   connectorReadOnly: true,
+  provisionEnabled: true,
+  provisionDryRun: true,
+  provisionExecuteEnabled: false,
   moodleBaseUrl: 'https://moodle.example',
   moodleInternalUrl: '',
   moodleRestToken: 'SUPER_SECRET_TOKEN',

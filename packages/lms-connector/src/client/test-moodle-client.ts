@@ -22,6 +22,9 @@ function baseConfig(overrides: Partial<LmsConnectorConfig> = {}): LmsConnectorCo
     moodleRequestTimeoutMs: 1000,
     connectorEnabled: true,
     connectorReadOnly: true,
+    provisionEnabled: true,
+    provisionDryRun: true,
+    provisionExecuteEnabled: false,
     sessionPolicyEnabled: true,
     defaultStudentSessions: 1,
     defaultTeacherSessions: 2,
@@ -159,5 +162,38 @@ describe('MoodleClient', () => {
     appendFormParams(body, { field: 'email', values: ['a@b.com'] });
     assert.equal(body.get('field'), 'email');
     assert.equal(body.get('values[0]'), 'a@b.com');
+  });
+
+  it('callWrite dry-run não chama fetch', async () => {
+    let fetchCalls = 0;
+    const client = new MoodleClient({
+      config: baseConfig({ provisionExecuteEnabled: false, provisionDryRun: true }),
+      fetchImpl: async () => {
+        fetchCalls += 1;
+        return new Response('{}', { status: 200 });
+      },
+      maxRetries: 0,
+    });
+    const result = await client.callWrite('core_user_create_users', {
+      users: [{ username: 'x', email: 'x@y.z', firstname: 'A', lastname: 'B' }],
+    });
+    assert.equal(result.mode, 'dry-run');
+    assert.equal(result.code, 'EXECUTE_DISABLED_UNTIL_ACTIVATION');
+    assert.equal(fetchCalls, 0);
+  });
+
+  it('callWrite rejeita função fora da write allowlist', async () => {
+    const client = new MoodleClient({ config: baseConfig(), maxRetries: 0 });
+    await assert.rejects(
+      () => client.callWrite('core_webservice_get_site_info', {}),
+      (err: unknown) => err instanceof MoodleValidationError,
+    );
+  });
+
+  it('listWriteCapabilities retorna catálogo', () => {
+    const client = new MoodleClient({ config: baseConfig(), maxRetries: 0 });
+    const caps = client.listWriteCapabilities();
+    assert.ok(caps.length >= 4);
+    assert.ok(caps.some((c) => c.functionName === 'core_user_create_users'));
   });
 });
