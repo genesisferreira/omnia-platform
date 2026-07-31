@@ -1,4 +1,4 @@
-import type { Endpoint } from 'payload';
+import type { Endpoint, PayloadRequest } from 'payload';
 import { checkRateLimit } from '@omnia/shared/rate-limit';
 
 import { requireLmsAdmin, requireLmsAuth } from '../../services/lms/auth-context';
@@ -25,7 +25,11 @@ import {
   resolveRolePolicy,
 } from '../../services/lms/runtime';
 
-async function applyRateLimit(req: Request, scope: string, subject: string): Promise<Response | null> {
+async function applyRateLimit(
+  _req: PayloadRequest,
+  scope: string,
+  subject: string,
+): Promise<Response | null> {
   const decision = await checkRateLimit({
     scope: `lms:${scope}`,
     subjects: [{ value: subject }],
@@ -48,7 +52,7 @@ async function applyRateLimit(req: Request, scope: string, subject: string): Pro
   return null;
 }
 
-function clientIp(req: Request): string {
+function clientIp(req: PayloadRequest): string {
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0]?.trim() || '0.0.0.0';
   return req.headers.get('x-real-ip') || '0.0.0.0';
