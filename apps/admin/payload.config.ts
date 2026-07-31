@@ -57,6 +57,7 @@ import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { LmsSettings } from './src/globals/LmsSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
+import { migrations } from './src/migrations';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -134,6 +135,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    prodMigrations: migrations,
   }),
   cors: getAllowedCorsOrigins(),
   onInit: (payload) => {

@@ -12,6 +12,7 @@ import * as migration_20260720_190000_crm_companies_texts from './20260720_19000
 import * as migration_20260720_191000_locked_documents_crm_rels from './20260720_191000_locked_documents_crm_rels';
 import * as migration_20260724_120000_partner_network from './20260724_120000_partner_network';
 import * as migration_20260724_180000_partner_geocoding_meta from './20260724_180000_partner_geocoding_meta';
+import * as migration_20260731_160000_lms_connector_foundation from './20260731_160000_lms_connector_foundation';
 
 export const migrations = [
   {
@@ -83,5 +84,10 @@ export const migrations = [
     up: migration_20260724_180000_partner_geocoding_meta.up,
     down: migration_20260724_180000_partner_geocoding_meta.down,
     name: '20260724_180000_partner_geocoding_meta',
+  },
+  {
+    up: migration_20260731_160000_lms_connector_foundation.up,
+    down: migration_20260731_160000_lms_connector_foundation.down,
+    name: '20260731_160000_lms_connector_foundation',
   },
 ];

@@ -23,8 +23,27 @@
 11. `POST /sessions` duas vezes (aluno) → segunda revoga primeira
 12. Duas abas com mesmo `sessionFamilyId` → mesmo `sessionId`
 
-## Não fazer
+## Comandos VPS (DEV Platform) — quando SSH disponível
 
-- Deploy produção
-- Escrita acadêmica Moodle
-- Usar dados reais de alunos
+```bash
+cd /opt/omnia/platform
+git fetch origin
+git checkout feature/omnia-lms-connector
+git pull --ff-only origin feature/omnia-lms-connector
+
+# Env (não versionar): adicionar MOODLE_* e LMS_* ao .env.staging
+# Token só em secret store / arquivo chmod 600
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  build admin admin-migrate
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  --profile bootstrap run --rm admin-migrate
+
+docker compose -f docker/compose/staging.yml --env-file .env.staging \
+  up -d --no-deps admin
+
+curl -sS https://admin.dev.omniafrigo.com.br/api/omnia/lms/health
+```
+
+Moodle WS: seguir [`OMNIA_LMS_MOODLE_SERVICE_SETUP.md`](OMNIA_LMS_MOODLE_SERVICE_SETUP.md).
