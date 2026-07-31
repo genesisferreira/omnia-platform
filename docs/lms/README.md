@@ -47,4 +47,13 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_CONNECTOR_SECURITY.md](OMNIA_LMS_CONNECTOR_SECURITY.md) | Segurança do connector |
 | [OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md](OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md) | Roteiro homologação DEV |
 
+## Observabilidade (Sprint 2.5.3)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_OBSERVABILITY.md](OMNIA_LMS_OBSERVABILITY.md) | Arquitetura OTel / métricas / tracing |
+| [OMNIA_LMS_MONITORING.md](OMNIA_LMS_MONITORING.md) | Endpoints, métricas, Grafana |
+| [OMNIA_LMS_ALERTING.md](OMNIA_LMS_ALERTING.md) | Alertas e SLO/SLA |
+| [OMNIA_LMS_RUNBOOK.md](OMNIA_LMS_RUNBOOK.md) | Runbook operacional |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.
