@@ -10,20 +10,21 @@
 2. Cria/entra na conta Omnia (**cria sessão S1**; se já havia outra, é revogada conforme limite).  
 3. Conclui pagamento ou recebe matrícula B2B.  
 4. Omnia cria/sincroniza usuário e enrollment no Moodle.  
-5. Dashboard mostra curso e CTA **Começar**.  
-6. Abre aula no player Omnia (**media authorize** com URL assinada; sem download).  
-7. Progresso gravado no Moodle; Neurofrigo (opcional) dá dica de estudo.
+5. Dashboard mostra curso e CTA **Começar** / **Continuar**.  
+6. Abre aula na **Lesson Experience** Omnia (sidebar módulos, conteúdo sanitizado, nav prev/next).  
+7. Learning Engine emite `lesson.opened` / `continue.updated` / timeline; progresso via Connector.  
+8. (Futuro) media authorize com URL assinada; sem download.
 
-**Sucesso:** aluno completa ≥1 atividade com progresso visível; mídia sem URL permanente.
+**Sucesso (2.7B):** aluno abre aula, navega, marca conclusão local, vê Continue/Timeline atualizados — **sem UI Moodle**.
 
 ---
 
 ## J2 — Aluno: continuar estudando
 
-1. Abre app/web → “Continuar de onde parei”.  
-2. BFF resolve última posição (Moodle + player state Omnia).  
-3. Retoma vídeo/material; marca conclusão.  
-4. Notificação se houver prazo de avaliação.
+1. Abre `/lms` → “Continuar de onde parei” (`/lms/continuar`).  
+2. Learning Engine resolve pointer (last_seen / progress / enrollment).  
+3. Retoma a Lesson Experience; marca conclusão; avança para próxima.  
+4. Notificação de prazo = futuro.
 
 ---
 

@@ -258,6 +258,9 @@ importers:
       '@omnia/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@omnia/learning-engine':
+        specifier: workspace:*
+        version: link:../../packages/learning-engine
       '@omnia/monitoring':
         specifier: workspace:*
         version: link:../../packages/monitoring
@@ -522,6 +525,27 @@ importers:
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/learning-engine:
+    devDependencies:
+      '@omnia/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.0
+      eslint:
+        specifier: 'catalog:'
+        version: 8.57.1
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

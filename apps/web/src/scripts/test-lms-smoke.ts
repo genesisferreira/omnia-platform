@@ -63,8 +63,43 @@ describe('LMS smoke routes', () => {
       'docs/lms/OMNIA_LMS_FRONTEND_ARCHITECTURE.md',
       'docs/lms/OMNIA_LMS_DESIGN_SYSTEM.md',
       'docs/lms/OMNIA_LMS_COMPONENT_CATALOG.md',
+      'docs/lms/OMNIA_LMS_LEARNING_ENGINE.md',
+      'docs/lms/OMNIA_LMS_EVENT_CATALOG.md',
+      'docs/lms/OMNIA_LMS_LESSON_EXPERIENCE.md',
+      'docs/lms/OMNIA_LMS_MATERIAL_EXPERIENCE.md',
+      'docs/lms/OMNIA_LMS_MATERIAL_VIEWER.md',
+      'docs/lms/OMNIA_LMS_RENDERERS.md',
+      'docs/lms/OMNIA_LMS_CONTENT_ARCHITECTURE.md',
     ]) {
       assert.equal(existsSync(join(repoRoot, doc)), true, doc);
+    }
+  });
+
+  it('lesson experience components exist', () => {
+    for (const rel of [
+      'components/lms/LessonWorkspace.tsx',
+      'components/lms/LessonSidebar.tsx',
+      'components/lms/LessonNav.tsx',
+      'components/lms/LessonStatusBadge.tsx',
+      'components/lms/LessonSkeleton.tsx',
+      'lib/lms/lesson-nav.ts',
+    ]) {
+      assert.equal(existsSync(join(root, rel)), true, rel);
+    }
+  });
+
+  it('material experience components exist', () => {
+    for (const rel of [
+      'components/lms/material/MaterialViewer.tsx',
+      'components/lms/material/MaterialProvider.tsx',
+      'components/lms/material/MaterialExperience.tsx',
+      'components/lms/material/MaterialNav.tsx',
+      'components/lms/material/renderers/renderers.tsx',
+      'components/lms/material/renderers/registry.tsx',
+      'lib/lms/material/resolve-material.ts',
+      'lib/lms/material/security-ports.ts',
+    ]) {
+      assert.equal(existsSync(join(root, rel)), true, rel);
     }
   });
 });

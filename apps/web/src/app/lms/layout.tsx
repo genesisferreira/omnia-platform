@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { LmsShell } from '@/components/lms/LmsShell';
+import { LmsAppShell } from '@/components/lms/LmsAppShell';
 import { requirePortalSession } from '@/lib/auth/require-session';
 
 export const metadata: Metadata = {
@@ -21,7 +21,22 @@ function displayName(user: {
   return user.email.split('@')[0] || 'Aluno';
 }
 
+function mapRole(role: string | null | undefined): string {
+  if (role === 'super_admin' || role === 'admin') return 'admin';
+  if (role === 'editor') return 'manager';
+  if (role === 'instructor') return 'teacher';
+  return 'student';
+}
+
 export default async function LmsLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePortalSession('/lms');
-  return <LmsShell userName={displayName(user)}>{children}</LmsShell>;
+  return (
+    <LmsAppShell
+      omniaUserId={user.id}
+      userName={displayName(user)}
+      actorRole={mapRole(user.role)}
+    >
+      {children}
+    </LmsAppShell>
+  );
 }

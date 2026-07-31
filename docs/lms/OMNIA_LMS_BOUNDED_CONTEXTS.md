@@ -25,14 +25,15 @@
 │ (Payload Users)     │     │ (IdentityLink)       │
 └─────────────────────┘     └──────────┬───────────┘
                                        │
-┌─────────────────────┐     ┌──────────▼───────────┐     ┌──────────────────┐
-│ Learning Experience │◀───▶│ LMS Connector BFF    │────▶│ Academic Engine  │
-│ (Omnia UI /lms)     │     │ (Anti-Corruption)    │     │ (Moodle)         │
-└─────────────────────┘     └──────────┬───────────┘     └──────────────────┘
-                                       │
-                        ┌──────────────┼──────────────┐
-                        ▼              ▼              ▼
-                 Session Security   Policy        Observability
+┌─────────────────────┐     ┌──────────▼───────────┐     ┌──────────────────┐     ┌──────────────────┐
+│ Learning Experience │────▶│ Learning Engine      │────▶│ LMS Connector BFF│────▶│ Academic Engine  │
+│ (Omnia UI /lms)     │◀────│ (@omnia/learning-    │     │ (Anti-Corruption)│     │ (Moodle)         │
+│                     │     │  engine)             │     │                  │     │                  │
+└─────────────────────┘     └──────────────────────┘     └────────┬─────────┘     └──────────────────┘
+                                                                  │
+                                                   ┌──────────────┼──────────────┐
+                                                   ▼              ▼              ▼
+                                            Session Security   Policy        Observability
 ```
 
 | Context | Linguagem | Ownership | Integração |
@@ -41,7 +42,8 @@
 | **Identity Bridge** | IdentityLink | Omnia LMS tables | Moodle user id |
 | **Academic Engine** | Course, enrol, grade… | Moodle | WS RO |
 | **LMS Connector** | DTOs Omnia, errors | `@omnia/lms-connector` + Admin BFF | ACL traduz Moodle→Omnia |
-| **Learning Experience** | Dashboard, Aula, Continuar | `apps/web` `/lms` | Proxy S2S |
+| **Learning Experience** | Dashboard, Aula, Continuar | `apps/web` `/lms` | Proxy S2S + Learning Engine |
+| **Learning Engine** | Continue, Timeline, Events, State, Cache, Sync | `@omnia/learning-engine` | Porta `LearningPersistence`; lê Connector via Experience |
 | **Session Security** | Session, device, revoke | Session Manager | Redis |
 | **Policy** | Limits, flags | Policy Engine + lms-settings | Audit |
 | **Observability** | metrics, traces | monitoring/logger | Prom/Grafana |

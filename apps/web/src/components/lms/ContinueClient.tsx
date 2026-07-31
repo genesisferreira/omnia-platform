@@ -1,22 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Spinner } from '@omnia/ui';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-import { resolveContinueTarget } from '@/lib/lms/continue';
+import { useLearningEngine } from '@/components/lms/LearningEngineProvider';
 
 export function ContinueClient(props: {
   omniaUserId: string;
   courses: Array<{ moodleCourseId: number }>;
 }) {
   const router = useRouter();
+  const engine = useLearningEngine();
 
   useEffect(() => {
-    const target = resolveContinueTarget({
-      omniaUserId: props.omniaUserId,
-      courses: props.courses,
-    });
+    if (engine.omniaUserId !== props.omniaUserId) {
+      router.replace('/lms/cursos');
+      return;
+    }
+    const target = engine.resolveContinue(props.courses);
     if (!target) {
       router.replace('/lms/cursos');
       return;
@@ -26,7 +28,7 @@ export function ContinueClient(props: {
     } else {
       router.replace(`/lms/cursos/${target.courseId}`);
     }
-  }, [props.omniaUserId, props.courses, router]);
+  }, [engine, props.omniaUserId, props.courses, router]);
 
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">

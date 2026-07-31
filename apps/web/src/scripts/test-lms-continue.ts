@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { computeProgressPercent, resolveContinueTarget } from '../lib/lms/continue';
+import {
+  computeProgressPercent,
+  createLearningEngine,
+  createMemoryPersistence,
+  resolveContinueTarget,
+} from '@omnia/learning-engine';
 
-describe('computeProgressPercent', () => {
+describe('computeProgressPercent (via learning-engine)', () => {
   it('returns 0 for empty list', () => {
     assert.equal(computeProgressPercent([]), 0);
   });
@@ -20,48 +25,54 @@ describe('computeProgressPercent', () => {
   });
 });
 
-describe('resolveContinueTarget', () => {
-  it('prefers last-seen when course is enrolled', () => {
+describe('resolveContinueTarget (via learning-engine)', () => {
+  it('prefers continue pointer when course is enrolled', () => {
     const target = resolveContinueTarget({
-      omniaUserId: 'u1',
       courses: [{ moodleCourseId: 10 }, { moodleCourseId: 42 }],
-      lastSeen: {
+      continuePointer: {
         courseId: 42,
         activityId: 7,
         updatedAt: new Date().toISOString(),
+        source: 'last_seen',
       },
       progressByCourse: {
         10: { incompleteActivityId: 99 },
       },
     });
-    assert.deepEqual(target, { courseId: 42, activityId: 7 });
+    assert.deepEqual(target, { courseId: 42, activityId: 7, source: 'last_seen' });
   });
 
-  it('uses incomplete activity when no last-seen', () => {
+  it('uses incomplete activity when no pointer', () => {
     const target = resolveContinueTarget({
-      omniaUserId: 'u1',
       courses: [{ moodleCourseId: 10 }, { moodleCourseId: 42 }],
-      lastSeen: null,
+      continuePointer: null,
       progressByCourse: {
         10: { incompleteActivityId: 99 },
       },
     });
-    assert.deepEqual(target, { courseId: 10, activityId: 99 });
+    assert.deepEqual(target, { courseId: 10, activityId: 99, source: 'progress' });
   });
 
   it('falls back to first course when no progress hints', () => {
     const target = resolveContinueTarget({
-      omniaUserId: 'user-empty',
       courses: [{ moodleCourseId: 3 }],
-      lastSeen: null,
+      continuePointer: null,
     });
-    assert.deepEqual(target, { courseId: 3, activityId: null });
+    assert.deepEqual(target, { courseId: 3, activityId: null, source: 'enrollment' });
   });
 
   it('returns null when there are no courses', () => {
-    assert.equal(
-      resolveContinueTarget({ omniaUserId: 'u', courses: [], lastSeen: null }),
-      null,
-    );
+    assert.equal(resolveContinueTarget({ courses: [], continuePointer: null }), null);
+  });
+});
+
+describe('LearningEngine continue provider', () => {
+  it('does not require window.localStorage', () => {
+    const engine = createLearningEngine({
+      omniaUserId: 'u',
+      persistence: createMemoryPersistence(),
+    });
+    engine.openLesson(1, 2, null);
+    assert.equal(engine.resolveContinue([{ moodleCourseId: 1 }])?.activityId, 2);
   });
 });

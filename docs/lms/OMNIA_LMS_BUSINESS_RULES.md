@@ -9,12 +9,13 @@
 
 | ID | Regra |
 | --- | --- |
-| CL-1 | Sem endpoint BFF `/continue` no MVP: resolução **client/server agregada**. |
-| CL-2 | Preferência: `localStorage` `omnia:lms:last:{omniaUserId}` com `{ courseId, activityId?, sectionId?, updatedAt }`. |
+| CL-1 | Sem endpoint BFF `/continue` no MVP: resolução via **Learning Engine**. |
+| CL-2 | Pointer em `LearningState` persistido por porta `LearningPersistence` (browser adapter opcional). |
 | CL-3 | Last-seen só vale se `courseId` ∈ matrículas ativas. |
 | CL-4 | Senão: primeira atividade incompleta conhecida; senão primeiro curso matriculado. |
-| CL-5 | `TrackLastSeen` grava ao abrir curso/atividade. |
+| CL-5 | `TrackLastSeen` / `openLesson` atualizam continue + eventos. |
 | CL-6 | `/lms/continuar?courseId=` força contexto do curso se matriculado. |
+| CL-7 | **Proibido** ler/gravar `localStorage` nas regras de domínio; só adapters de borda. |
 
 ## 2. Progress
 

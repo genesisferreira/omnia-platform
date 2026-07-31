@@ -16,12 +16,15 @@
     "test:seo-companies": "tsx src/scripts/test-seo-companies.ts",
     "test:partners-nav": "tsx --test src/scripts/test-partners-nav.ts",
     "test:lms-continue": "tsx --test src/scripts/test-lms-continue.ts",
-    "test:lms-smoke": "tsx --test src/scripts/test-lms-smoke.ts src/scripts/test-lms-course-card.ts src/scripts/test-lms-sanitize.ts"
+    "test:lms-lesson": "tsx --test src/scripts/test-lms-lesson.ts src/scripts/test-lms-lesson-engine.ts",
+    "test:lms-material": "tsx --test src/scripts/test-lms-material.ts src/scripts/test-lms-material-engine.ts",
+    "test:lms-smoke": "tsx --test src/scripts/test-lms-smoke.ts src/scripts/test-lms-course-card.ts src/scripts/test-lms-sanitize.ts src/scripts/test-lms-lesson.ts src/scripts/test-lms-lesson-engine.ts src/scripts/test-lms-material.ts src/scripts/test-lms-material-engine.ts"
   },
   "dependencies": {
     "@omnia/config": "workspace:*",
     "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",
+    "@omnia/learning-engine": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",

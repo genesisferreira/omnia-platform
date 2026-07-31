@@ -28,14 +28,22 @@
 | ModuleTree | Árvore módulos/aulas | ● (lista em Cards) |
 | ActivityCard / ActivityRow | Item de atividade | ● |
 | Progress | % visual | ● |
-| Timeline | Sequência temporal | — |
-| CompletionBadge | Estado conclusão | ● (Badge) |
-| GradeCard | Item de nota | ● (lista) |
-| EmptyState | Sem dados | ● |
+| Timeline | Sequência temporal | ● | `LearningTimeline` (Dashboard) |
+| CompletionBadge | Estado conclusão | ● | `LessonStatusBadge` + Badge |
+| GradeCard | Item de nota | ● | lista |
+| EmptyState | Sem dados | ● | |
 | Alert / Toast | Feedback | ● / — Toast dedicado |
-| Spinner / Skeleton | Loading | ● |
-| OfflineBanner | Offline | ● |
-| Tabs | Seções do curso | ● |
+| Spinner / Skeleton | Loading | ● | `LessonSkeleton` |
+| OfflineBanner | Offline | ● | |
+| Tabs | Seções do curso | ● | |
+| **LessonSidebar** | Nav módulos/aulas (L2) | ● | Épico B |
+| **LessonWorkspace** | Shell da aula | ● | Lifecycle Learning Engine |
+| **LessonContent** | Conteúdo + placeholders | ● | HTML sanitizado / links |
+| **LessonNav** | Prev/next/módulo/curso | ● | SPA + prefetch |
+| **MaterialProvider** | Resolve material + security ports | ● | Épico C |
+| **MaterialViewer** | Consumo de material | ● | Lazy renderers |
+| **MaterialExperience** | Host materiais da aula | ● | |
+| **MaterialNav** | Prev/next material | ● | |
 
 ## 3. Media & assessment (futuro)
 
@@ -62,7 +70,7 @@
 | `/lms` | Shell, Greeting, CourseCard, Progress, EmptyState |
 | `/lms/cursos` | Shell, CourseCard grid |
 | `/lms/cursos/[id]` | Breadcrumb, Progress, ModuleTree, Tabs, Grade list, CompletionBadge |
-| `.../atividades/[id]` | Breadcrumb, Badge, placeholder content |
+| `.../atividades/[id]` | LessonWorkspace, MaterialExperience, Sidebar, Nav, SyncLearningState |
 | `/lms/continuar` | Spinner + redirect |
 | `/lms/progresso` | Progress rows |
 | `/lms/notas` | Grade lists |

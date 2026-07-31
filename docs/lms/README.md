@@ -79,4 +79,25 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_COMPONENT_MAP.md](OMNIA_LMS_COMPONENT_MAP.md) | Mapa de componentes de produto |
 | [OMNIA_LMS_INFORMATION_ARCHITECTURE.md](OMNIA_LMS_INFORMATION_ARCHITECTURE.md) | IA (MVP + alvo) |
 
+## Learning Engine (Sprint 2.7 — Épico A)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_LEARNING_ENGINE.md](OMNIA_LMS_LEARNING_ENGINE.md) | Núcleo continue/timeline/events/state/cache/sync |
+
+## Lesson Experience (Sprint 2.7 — Épico B)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_LESSON_EXPERIENCE.md](OMNIA_LMS_LESSON_EXPERIENCE.md) | Página da aula, nav, conteúdo, estados, a11y |
+
+## Material Experience (Sprint 2.7 — Épico C)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_MATERIAL_EXPERIENCE.md](OMNIA_LMS_MATERIAL_EXPERIENCE.md) | Camada de consumo de materiais |
+| [OMNIA_LMS_MATERIAL_VIEWER.md](OMNIA_LMS_MATERIAL_VIEWER.md) | MaterialViewer |
+| [OMNIA_LMS_RENDERERS.md](OMNIA_LMS_RENDERERS.md) | Renderers desacoplados |
+| [OMNIA_LMS_CONTENT_ARCHITECTURE.md](OMNIA_LMS_CONTENT_ARCHITECTURE.md) | Arquitetura de conteúdo |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

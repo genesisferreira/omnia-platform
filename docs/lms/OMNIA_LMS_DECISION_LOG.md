@@ -17,6 +17,9 @@ Registro oficial de decisões de arquitetura do Omnia LMS.
 | D011 | 2026-07-31 | Macroentrega 01: somente leitura acadêmica; vínculo manual DEV; sem provisionamento | Escopo 2.5 | Write Moodle = próxima macroentrega | Aprovado |
 | D012 | 2026-07-31 | **Domain Model + Event Catalog + Business Rules + LX Spec + Bounded Contexts** como fonte de verdade pré-2.7 | Sprint 2.6.5 | Sprints futuras não contradizem sem RFC; sem implementação nesta sprint | **Aprovado** |
 | D013 | 2026-07-31 | Experience MVP em `apps/web` `/lms/*`; promoção `lms.*` pós-MVP | Sprint 2.6 | Reuso de UI modules | Aprovado |
+| D014 | 2026-07-31 | **Learning Engine** (`@omnia/learning-engine`) entre Experience e Connector; Continue/Timeline/Events via porta `LearningPersistence` (sem localStorage nas regras) | Sprint 2.7A | IA/marketplace/professor/gestor/provisionamento fora | **Aprovado** |
+| D015 | 2026-07-31 | **Lesson Experience** em `/lms/.../atividades/[id]`; conteúdo via Connector + placeholders; conclusão local via engine (write Moodle = futuro) | Sprint 2.7B | Streaming CDN / media auth avançada fora | **Aprovado** |
+| D016 | 2026-07-31 | **Material Experience** (`MaterialProvider`/`Viewer`/renderers) + security ports stub; eventos `material.viewed|completed` | Sprint 2.7C | Signed URLs / watermark / streaming fora | **Aprovado** |
 
 ---
 

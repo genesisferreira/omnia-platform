@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { writeLastSeen } from '@/lib/lms/continue';
+import { useLearningEngine } from '@/components/lms/LearningEngineProvider';
 
 export function TrackLastSeen(props: {
   omniaUserId: string;
@@ -10,14 +10,16 @@ export function TrackLastSeen(props: {
   activityId?: number | null;
   sectionId?: number | null;
 }) {
+  const engine = useLearningEngine();
+
   useEffect(() => {
-    writeLastSeen(props.omniaUserId, {
-      courseId: props.courseId,
-      activityId: props.activityId ?? null,
-      sectionId: props.sectionId ?? null,
-      updatedAt: new Date().toISOString(),
-    });
-  }, [props.omniaUserId, props.courseId, props.activityId, props.sectionId]);
+    if (engine.omniaUserId !== props.omniaUserId) return;
+    if (props.activityId) {
+      engine.openLesson(props.courseId, props.activityId, props.sectionId ?? null);
+    } else {
+      engine.openCourse(props.courseId);
+    }
+  }, [engine, props.omniaUserId, props.courseId, props.activityId, props.sectionId]);
 
   return null;
 }

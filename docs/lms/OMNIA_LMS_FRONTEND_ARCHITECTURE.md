@@ -23,11 +23,29 @@ Browser (/lms/*)
 
 ## Continue Learning
 
-Sem endpoint `/continue` no Connector. Agregação client:
+Agregação via **`@omnia/learning-engine`** (Continue provider central):
 
-1. `localStorage` chave `omnia:lms:last:{omniaUserId}` (`writeLastSeen` / `readLastSeen`).
-2. Fallback: primeiro curso matriculado.
-3. Rota `/lms/continuar` → `ContinueClient` resolve e redireciona.
+1. Pointer hidratado por `LearningPersistence` (browser adapter na UI).
+2. Fallback: progresso incompleto / primeiro curso.
+3. Rota `/lms/continuar` → `ContinueClient` → `engine.resolveContinue()`.
+
+**Não** acoplar regras a `localStorage` diretamente.
+
+## Learning Engine
+
+Ver [`OMNIA_LMS_LEARNING_ENGINE.md`](OMNIA_LMS_LEARNING_ENGINE.md). Timeline no Dashboard; eventos emitidos em `TrackLastSeen` / `SyncLearningState` / **`LessonWorkspace`**.
+
+## Lesson Experience
+
+Ver [`OMNIA_LMS_LESSON_EXPERIENCE.md`](OMNIA_LMS_LESSON_EXPERIENCE.md).
+
+- Layout: sidebar módulos + área principal + nav prev/next.
+- Conteúdo via **Material Experience** (`MaterialViewer` + renderers).
+- Lifecycle: `openLesson` → materiais (`material.*`) → `completeLesson` → `closeLesson`.
+
+## Material Experience
+
+Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md) · [`OMNIA_LMS_CONTENT_ARCHITECTURE.md`](OMNIA_LMS_CONTENT_ARCHITECTURE.md).
 
 ## Session Manager
 
@@ -44,8 +62,8 @@ Sem endpoint `/continue` no Connector. Agregação client:
 | `/lms` | RSC | `me`, `courses`, `progress` |
 | `/lms/cursos` | RSC | `courses`, `progress` |
 | `/lms/cursos/[id]` | RSC | `courses/:id`, `content`, `progress`, `grades`, `completion` |
-| `/lms/cursos/[id]/atividades/[aid]` | RSC | `content`, `progress` (metadados; sem player) |
-| `/lms/continuar` | RSC + client | `courses` + last-seen |
+| `/lms/cursos/[id]/atividades/[aid]` | RSC + client | Lesson + Material Experience |
+| `/lms/continuar` | RSC + client | `courses` + Learning Engine continue |
 | `/lms/progresso` | RSC | `courses` + `progress` |
 | `/lms/notas` | RSC | `courses` + `grades` |
 | `/api/lms/[...path]` | Route Handler | Proxy S2S |
@@ -53,7 +71,8 @@ Sem endpoint `/continue` no Connector. Agregação client:
 ## Performance
 
 - `dynamic = 'force-dynamic'` nas páginas LMS (dados por usuário).
-- Cache curto fica no Connector/BFF; web usa `cache: 'no-store'` no S2S.
+- Prefetch da próxima aula + lazy renderers de material (`next/dynamic`).
+- Cache snapshot Learning Engine (TTL); sync com keys estáveis.
 - Sem lib SWR/React Query nesta sprint (padrão fetch nativo).
 
 ## Segurança
@@ -63,9 +82,11 @@ Sem endpoint `/continue` no Connector. Agregação client:
 - Proxy `/api/lms/*` aplica `scrubMoodleLeakage` antes de responder ao browser (URLs Moodle / `wstoken`).
 - Path traversal bloqueado no proxy (`..`).
 - `OMNIA_INTERNAL_API_SECRET` só no server.
+- Portas stub Media Authorization / Signed URL / Watermark / Protected Viewer (Épico C).
 
 ## Testes
 
-- Unit: `pnpm --filter @omnia/web test:lms-continue`
+- Material: `pnpm --filter @omnia/web test:lms-material`
+- Lesson: `pnpm --filter @omnia/web test:lms-lesson`
+- Continue: `pnpm --filter @omnia/web test:lms-continue`
 - Smoke: `pnpm --filter @omnia/web test:lms-smoke`
-- Homologação manual DEV: ver `OMNIA_LMS_EXPERIENCE_DEV_HOMOLOGATION.md`

@@ -9,10 +9,10 @@ import {
   CardTitle,
   EmptyState,
   Progress,
-  Skeleton,
 } from '@omnia/ui';
 
 import { CourseCard } from '@/components/lms/CourseCard';
+import { LearningTimeline } from '@/components/lms/LearningTimeline';
 import { requirePortalSession } from '@/lib/auth/require-session';
 import { fetchLmsConnector } from '@/lib/lms/connector';
 import { computeProgressPercent } from '@/lib/lms/continue';
@@ -208,11 +208,10 @@ export default async function LmsDashboardPage() {
       <section className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Últimas atividades</CardTitle>
+            <CardTitle className="text-base">Linha do tempo</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>Use Continuar para retomar a última aula registrada neste dispositivo.</p>
-            <Skeleton className="h-3 w-2/3" />
+          <CardContent>
+            <LearningTimeline />
           </CardContent>
         </Card>
         <Card>

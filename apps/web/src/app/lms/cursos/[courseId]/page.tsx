@@ -15,6 +15,7 @@ import {
 } from '@omnia/ui';
 
 import { TrackLastSeen } from '@/components/lms/TrackLastSeen';
+import { SyncLearningState } from '@/components/lms/SyncLearningState';
 import { requirePortalSession } from '@/lib/auth/require-session';
 import { fetchLmsConnector } from '@/lib/lms/connector';
 import { computeProgressPercent } from '@/lib/lms/continue';
@@ -96,7 +97,11 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
         <p className="text-sm text-muted-foreground">Nenhum módulo disponível.</p>
       ) : (
         sections.map((section) => (
-          <Card key={section.sectionId} className="shadow-lms-card">
+          <Card
+            key={section.sectionId}
+            id={`modulo-${section.sectionId}`}
+            className="scroll-mt-20 shadow-lms-card"
+          >
             <CardHeader>
               <CardTitle className="text-base">{section.name}</CardTitle>
             </CardHeader>
@@ -173,6 +178,14 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
   return (
     <div className="space-y-6">
       <TrackLastSeen omniaUserId={user.id} courseId={courseId} />
+      <SyncLearningState
+        courseId={courseId}
+        activities={activitiesProgress.map((a) => ({
+          moodleActivityId: a.moodleActivityId,
+          state: a.state,
+        }))}
+        completion={completion}
+      />
       <Breadcrumb
         items={[
           { label: 'LMS', href: '/lms' },

@@ -1,9 +1,10 @@
 # Omnia LMS — Event Catalog
 
-> **Sprint 2.6.5** — Catálogo oficial de eventos de domínio/produto.  
+> **Sprint 2.6.5 + 2.7 Épico A** — Catálogo oficial de eventos de domínio/produto.  
 > **Status:** Aceito.  
 > Eventos alimentam analytics, auditoria, observabilidade e (futuro) Neurofrigo.  
-> **MVP:** subset emitido (sessões, policy audit, HTTP/OTel); demais são **contratos reservados**.
+> **Learning Engine (2.7A):** navegação/consumo (`lesson.*`, `module.*`, `material.*`, `activity.*`, `progress.updated`, `continue.*`, `course.completed`) emitidos via `@omnia/learning-engine`.  
+> **MVP Connector:** sessões, policy audit, HTTP/OTel; demais são **contratos reservados**.
 
 ---
 
@@ -46,12 +47,23 @@ Todo evento **deve** carregar:
 
 | type | Quando | Payload mínimo | MVP |
 | --- | --- | --- | :---: |
-| `course.opened` | Abre `/lms/cursos/:id` | `{ courseId }` | ○ |
-| `course.started` | Primeiro progresso > 0 | `{ courseId }` | ○ |
-| `lesson.started` | Abre atividade/aula | `{ courseId, activityId }` | ○ |
-| `lesson.completed` | Completion atividade | `{ courseId, activityId, state }` | ○ |
-| `material.opened` | Abre material | `{ courseId, activityId, materialId? }` | — |
-| `continue.resolved` | Continue Learning | `{ courseId, activityId?, source }` | ○ |
+| `lesson.opened` | Abre aula/atividade | `{ courseId, activityId }` | ● |
+| `lesson.closed` | Sai da aula | `{ courseId, activityId }` | ● |
+| `lesson.completed` | Conclusão de aula | `{ courseId, activityId, state }` | ● |
+| `module.opened` | Abre módulo | `{ courseId, sectionId }` | ● |
+| `module.completed` | Módulo concluído | `{ courseId, sectionId }` | ● |
+| `material.opened` | Abre material | `{ courseId, activityId, materialId? }` | ● |
+| `material.closed` | Fecha material | `{ courseId, activityId, materialId? }` | ● |
+| `material.viewed` | Material visualizado | `{ courseId, activityId, materialId? }` | ● |
+| `material.completed` | Material concluído (Experience) | `{ courseId, activityId, materialId? }` | ● |
+| `activity.started` | Início atividade | `{ courseId, activityId }` | ● |
+| `activity.completed` | Fim atividade | `{ courseId, activityId, state? }` | ● |
+| `progress.updated` | Sync progresso | `{ courseId, percent }` | ● |
+| `continue.updated` | Pointer continue | `{ courseId, activityId?, source }` | ● |
+| `continue.resolved` | Resolve Continuar | `{ courseId, activityId?, source }` | ● |
+| `course.opened` | Abre curso | `{ courseId }` | ● |
+| `course.completed` | Curso concluído | `{ courseId, timeCompleted? }` | ● |
+| `lesson.started` | *(alias legado → use `lesson.opened`)* | `{ courseId, activityId }` | ○ |
 
 ### 2.3 Avaliação e conclusão
 
