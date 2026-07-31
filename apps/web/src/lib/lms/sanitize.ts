@@ -37,6 +37,6 @@ export function sanitizeLmsHtml(html: string): string {
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\s(on\w+)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(MOODLE_URL_RE, '#')
-    .replace(/href\s*=\s*("|\')[^"']*moodle[^"']*\1/gi, 'href="#"')
-    .replace(/src\s*=\s*("|\')[^"']*moodle[^"']*\1/gi, 'src=""');
+    .replace(/href\s*=\s*(["'])[^"']*moodle[^"']*\1/gi, 'href="#"')
+    .replace(/src\s*=\s*(["'])[^"']*moodle[^"']*\1/gi, 'src=""');
 }
