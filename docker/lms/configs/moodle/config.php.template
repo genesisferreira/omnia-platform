@@ -24,9 +24,9 @@ $CFG->dataroot  = '__MOODLE_DATAROOT__';
 $CFG->admin     = 'admin';
 $CFG->directorypermissions = 02777;
 
-// Traefik TLS termination
+// Traefik TLS termination (same hostname as wwwroot → sslproxy only)
 $CFG->sslproxy = true;
-$CFG->reverseproxy = true;
+$CFG->reverseproxy = false;
 
 // Redis sessions
 $CFG->session_handler_class = '\core\session\redis';

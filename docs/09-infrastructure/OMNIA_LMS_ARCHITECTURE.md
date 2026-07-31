@@ -56,4 +56,6 @@ Ver [`docker/lms/VERSIONS.md`](../../docker/lms/VERSIONS.md) e [`docker/lms/READ
 
 ## Evolução
 
-Preparada para Web Services, connector Omnia, multiempresa, escala — sem reestruturar a stack. Ver sprints 2.4.2 e 2.4.3.
+Preparada para Web Services, connector Omnia, multiempresa, escala — sem reestruturar a stack. Ver sprints 2.4.2 (instalação limpa) e 2.4.3 (integração).
+
+**Nota:** a HostGator **não** será migrada; serve apenas como referência. Ver `OMNIA_LMS_HOSTGATOR_MIGRATION.md`.

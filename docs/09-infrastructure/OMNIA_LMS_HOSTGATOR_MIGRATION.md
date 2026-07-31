@@ -1,38 +1,26 @@
-# Plano — Migração Moodle HostGator → Omnia LMS Engine
+# HostGator Moodle — referência apenas (sem migração)
 
-> **Não executar nesta sprint.** Apenas planejamento.
+> **Estratégia atualizada:** a instalação HostGator **não** será migrada para a VPS Omnia.
 
-## Objetivos
+## Decisão
 
-Trazer cursos/usuários/arquivos do Moodle hospedado na HostGator para a stack Docker Omnia (`moodle.*`), sem customizar o core.
+- Omnia LMS Engine = **instalação limpa** (Sprint 2.4.2)
+- HostGator = referência durante o desenvolvimento
+- Descontinuação da HostGator em momento futuro (cutover de usuários para a experiência Omnia)
 
-## Inventário (pré-requisitos)
+## O que NÃO fazer
 
-- Versão Moodle origem e PHP
-- Tamanho DB + `moodledata`
-- Plugins instalados (lista)
-- Cron atual e SMTP
-- Janela de manutenção
+- Dump/restore do banco HostGator
+- Cópia de `moodledata`
+- Importação de usuários, cursos, notas ou plugins
 
-## Estratégia
+## Uso permitido da HostGator
 
-1. **Compatibilidade:** origem deve ser upgradeável para 4.5.x (ou migrar em etapas).
-2. **Dump DB** na origem (`mysqldump`) + checksum.
-3. **Arquivos:** rsync/tar de `moodledata` (filedir prioritário).
-4. **Restore** em DEV Omnia → upgrade CLI Moodle se necessário → validação.
-5. **Cutover:** DNS/freeze writes origem → sync final → PROD.
-6. **Rollback:** manter HostGator read-only até estabilizar.
+- Consulta de estrutura pedagógica / nomenclatura
+- Referência de fluxos para desenho da UI Omnia (`lms.*`)
+- Checklist funcional manual (o que o aluno/professor via na UI antiga)
 
-## Riscos
+## Ver também
 
-- Plugins incompatíveis com 4.5
-- Paths/wwwroot
-- Tamanho de filedir / tempo de transferência
-- Sessões Redis vs file sessions na origem
-
-## Critérios de aceite da migração (Sprint 2.4.2)
-
-- Login admin + amostra de alunos
-- Cursos e arquivos abertos
-- Cron saudável
-- Backup pós-migração
+- [`OMNIA_LMS_SPRINT_2.4.2.md`](OMNIA_LMS_SPRINT_2.4.2.md) — instalação limpa
+- [`OMNIA_LMS_SPRINT_2.4.3.md`](OMNIA_LMS_SPRINT_2.4.3.md) — integração Omnia ↔ Engine
