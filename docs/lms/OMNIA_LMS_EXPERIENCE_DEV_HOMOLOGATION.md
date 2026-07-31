@@ -41,15 +41,24 @@ bash scripts/deploy/deploy-lms-experience-dev.sh feature/omnia-lms-experience-mv
 
 Rebuild **somente** o serviço `web`. Admin/Connector permanecem na tip de observabilidade já homologada.
 
-## Veredito
-
-Preencher após deploy:
+## Veredito (2026-07-31)
 
 | Item | Resultado |
 | --- | --- |
-| Commit / imagem web | _TBD_ |
-| `/lms` HTTP (auth gate) | _TBD_ |
-| Sem requests `moodle.*` no browser | _TBD_ |
-| PROD intocada | sim (escopo DEV) |
-| GO / NO-GO Sprint 2.7 | _TBD_ |
-| Notas | _TBD_ |
+| Branch tip | `653ea18` (`feature/omnia-lms-experience-mvp`) |
+| Testes locais | `test:lms-continue` + `test:lms-smoke` OK; `typecheck` web OK |
+| Push origin | OK |
+| Deploy web DEV | **bloqueado** — senha SSH root não aceita nesta sessão |
+| `/lms` em DEV | ainda **não** implantado (aguardando rebuild `web`) |
+| PROD intocada | sim |
+| GO / NO-GO Sprint 2.7 | **NO-GO deploy** até rebuild web na VPS; **código MVP pronto** |
+
+### Desbloqueio
+
+Fornecer senha root atual (ou chave SSH) e executar:
+
+```bash
+cd /opt/omnia/platform
+bash scripts/deploy/deploy-lms-experience-dev.sh feature/omnia-lms-experience-mvp 653ea18
+```
+
