@@ -103,7 +103,7 @@ export const lmsCoursesEndpoint: Endpoint = {
       const linked = await resolveLinkedMoodleUser(req, auth.omniaUserId);
       if (!linked.linked) return jsonOk({ ok: true, ...linked.body });
 
-      const url = new URL(req.url);
+      const url = new URL(req.url || 'http://local', 'http://local');
       const page = parsePositiveIntParam(url.searchParams.get('page') ?? undefined, 1, 100);
       const pageSize = parsePositiveIntParam(url.searchParams.get('pageSize') ?? undefined, 20, 50);
       const enrollments = await listUserCourses(linked.user.moodleUserId);
@@ -249,7 +249,7 @@ export const lmsGradesEndpoint: Endpoint = {
       if (limited) return limited;
       const linked = await resolveLinkedMoodleUser(req, auth.omniaUserId);
       if (!linked.linked) return jsonOk({ ok: true, ...linked.body });
-      const url = new URL(req.url);
+      const url = new URL(req.url || 'http://local', 'http://local');
       const courseId = parseCourseId(url.searchParams.get('courseId') ?? undefined);
       if (courseId && !(await assertUserEnrolled(linked.user.moodleUserId, courseId))) {
         return jsonOk(
@@ -275,7 +275,7 @@ export const lmsCompletionEndpoint: Endpoint = {
       if (limited) return limited;
       const linked = await resolveLinkedMoodleUser(req, auth.omniaUserId);
       if (!linked.linked) return jsonOk({ ok: true, ...linked.body });
-      const url = new URL(req.url);
+      const url = new URL(req.url || 'http://local', 'http://local');
       const courseId = parseCourseId(url.searchParams.get('courseId') ?? undefined);
       if (!courseId) {
         return jsonOk(
@@ -410,7 +410,7 @@ export const lmsSessionsListEndpoint: Endpoint = {
   handler: async (req) => {
     try {
       const auth = requireLmsAdmin(req);
-      const url = new URL(req.url);
+      const url = new URL(req.url || 'http://local', 'http://local');
       const userId = url.searchParams.get('userId')?.trim() || auth.omniaUserId;
       const sessions = await getLmsSessionManager();
       const active = await sessions.listActiveSessions(userId);
