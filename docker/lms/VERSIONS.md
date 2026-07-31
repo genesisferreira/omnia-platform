@@ -32,7 +32,7 @@ Checksum verificado no Dockerfile (`MOODLE_SHA256`). Atualizar ao mudar o patch.
 | Campo | Valor |
 | --- | --- |
 | Imagem | `mariadb:11.4` |
-| Digest | pinado em `compose/*.yml` após `docker pull` na VPS (`docker image inspect --format '{{.RepoDigests}}'`) |
+| Digest (DEV) | `mariadb@sha256:a794d9eb009e20de605858a11f32f63b4075cbd197c650436f0e3b457e4caed7` |
 | Charset | `utf8mb4` |
 | Collation | `utf8mb4_unicode_ci` |
 
@@ -41,8 +41,9 @@ Checksum verificado no Dockerfile (`MOODLE_SHA256`). Atualizar ao mudar o patch.
 | Campo | Valor |
 | --- | --- |
 | Imagem | `redis:7.4-alpine` |
-| Digest | pinado em `compose/*.yml` após `docker pull` na VPS |
+| Digest (DEV) | `redis@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2` |
 | Uso | sessões + application cache Moodle |
+| Nota | `protected-mode no` — porta não publicada; só rede interna LMS |
 
 ## Política de atualização
 
