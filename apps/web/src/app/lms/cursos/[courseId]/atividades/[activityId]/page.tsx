@@ -27,7 +27,7 @@ export default async function LmsActivityPage({ params }: ActivityPageProps) {
 
   const user = await requirePortalSession(`/lms/cursos/${courseId}/atividades/${activityId}`);
 
-  const [courseRes, contentRes, progressRes, completionRes] = await Promise.all([
+  const [courseRes, contentRes, progressRes, completionRes, gradesRes] = await Promise.all([
     fetchLmsConnector<{ course?: { displayName?: string; fullName?: string } }>(
       `courses/${courseId}`,
       { user },
@@ -49,11 +49,25 @@ export default async function LmsActivityPage({ params }: ActivityPageProps) {
       }>;
     }>(`courses/${courseId}/content`, { user }),
     fetchLmsConnector<{
-      progress?: { activities: Array<{ moodleActivityId: number; state: number }> };
+      progress?: {
+        activities: Array<{
+          moodleActivityId: number;
+          state: number;
+          timeCompleted?: string | null;
+        }>;
+      };
     }>(`courses/${courseId}/progress`, { user }),
     fetchLmsConnector<{
       completion?: { completed: boolean; timeCompleted: string | null };
     }>(`completion`, { user, search: `courseId=${courseId}` }),
+    fetchLmsConnector<{
+      grades?: Array<{
+        moodleActivityId?: number | null;
+        itemName: string;
+        gradeFormatted: string | null;
+        percentage: number | null;
+      }>;
+    }>(`grades`, { user, search: `courseId=${courseId}` }),
   ]);
 
   if (!courseRes.ok) {
@@ -165,8 +179,16 @@ export default async function LmsActivityPage({ params }: ActivityPageProps) {
     stateById[a.moodleActivityId] = a.state;
   }
   const moodleState = stateById[activityId] ?? 0;
+  const activityProgress = activitiesProgress.find((a) => a.moodleActivityId === activityId);
   const courseProgressPercent = computeProgressPercent(activitiesProgress);
   const completion = completionRes.ok ? completionRes.data?.completion : null;
+  const grades = gradesRes.ok ? gradesRes.data?.grades || [] : [];
+  const activityGrade =
+    grades.find((g) => g.moodleActivityId === activityId) ||
+    grades.find((g) =>
+      g.itemName?.toLowerCase().includes(activity.name.toLowerCase().slice(0, 12)),
+    ) ||
+    null;
 
   const flat = flattenVisibleLessons(courseId, sections);
   const { prev, next } = findLessonNeighbors(flat, activityId);
@@ -207,6 +229,16 @@ export default async function LmsActivityPage({ params }: ActivityPageProps) {
         prev={prev}
         next={next}
         moodleState={moodleState}
+        activityTimeCompleted={activityProgress?.timeCompleted ?? null}
+        activityGrade={
+          activityGrade
+            ? {
+                itemName: activityGrade.itemName,
+                gradeFormatted: activityGrade.gradeFormatted,
+                percentage: activityGrade.percentage,
+              }
+            : null
+        }
       />
     </div>
   );

@@ -70,6 +70,9 @@ describe('LMS smoke routes', () => {
       'docs/lms/OMNIA_LMS_MATERIAL_VIEWER.md',
       'docs/lms/OMNIA_LMS_RENDERERS.md',
       'docs/lms/OMNIA_LMS_CONTENT_ARCHITECTURE.md',
+      'docs/lms/OMNIA_LMS_ASSESSMENT_ENGINE.md',
+      'docs/lms/OMNIA_LMS_ASSESSMENT_EXPERIENCE.md',
+      'docs/lms/OMNIA_LMS_ACTIVITY_RENDERERS.md',
     ]) {
       assert.equal(existsSync(join(repoRoot, doc)), true, doc);
     }
@@ -98,6 +101,19 @@ describe('LMS smoke routes', () => {
       'components/lms/material/renderers/registry.tsx',
       'lib/lms/material/resolve-material.ts',
       'lib/lms/material/security-ports.ts',
+    ]) {
+      assert.equal(existsSync(join(root, rel)), true, rel);
+    }
+  });
+
+  it('assessment experience components exist', () => {
+    for (const rel of [
+      'components/lms/assessment/AssessmentViewer.tsx',
+      'components/lms/assessment/AssessmentProvider.tsx',
+      'components/lms/assessment/AssessmentExperience.tsx',
+      'components/lms/assessment/AssessmentNav.tsx',
+      'components/lms/assessment/renderers/renderers.tsx',
+      'components/lms/assessment/renderers/registry.tsx',
     ]) {
       assert.equal(existsSync(join(root, rel)), true, rel);
     }

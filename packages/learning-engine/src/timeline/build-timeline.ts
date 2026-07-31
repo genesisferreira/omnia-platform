@@ -10,6 +10,14 @@ const KIND_BY_TYPE: Partial<Record<LearningEventType, TimelineItemKind>> = {
   'material.closed': 'material',
   'material.viewed': 'material',
   'material.completed': 'material',
+  'assessment.opened': 'quiz',
+  'assessment.closed': 'quiz',
+  'assessment.viewed': 'quiz',
+  'assessment.completed': 'quiz',
+  'quiz.viewed': 'quiz',
+  'assignment.viewed': 'activity',
+  'grade.viewed': 'activity',
+  'feedback.viewed': 'activity',
   'activity.started': 'activity',
   'activity.completed': 'activity',
   'progress.updated': 'progress',
@@ -41,6 +49,22 @@ function titleFor(event: LearningEventEnvelope): string {
       return 'Material visualizado';
     case 'material.completed':
       return 'Material concluído';
+    case 'assessment.opened':
+      return 'Avaliação aberta';
+    case 'assessment.closed':
+      return 'Avaliação fechada';
+    case 'assessment.viewed':
+      return 'Avaliação visualizada';
+    case 'assessment.completed':
+      return 'Avaliação concluída';
+    case 'quiz.viewed':
+      return 'Quiz visualizado';
+    case 'assignment.viewed':
+      return 'Tarefa visualizada';
+    case 'grade.viewed':
+      return 'Nota visualizada';
+    case 'feedback.viewed':
+      return 'Feedback visualizado';
     case 'activity.started':
       return 'Atividade iniciada';
     case 'activity.completed':

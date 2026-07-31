@@ -100,4 +100,12 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_RENDERERS.md](OMNIA_LMS_RENDERERS.md) | Renderers desacoplados |
 | [OMNIA_LMS_CONTENT_ARCHITECTURE.md](OMNIA_LMS_CONTENT_ARCHITECTURE.md) | Arquitetura de conteúdo |
 
+## Assessment (Sprint 2.7 — Épico D)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_ASSESSMENT_ENGINE.md](OMNIA_LMS_ASSESSMENT_ENGINE.md) | Assessment Engine RO |
+| [OMNIA_LMS_ASSESSMENT_EXPERIENCE.md](OMNIA_LMS_ASSESSMENT_EXPERIENCE.md) | Viewer / Provider |
+| [OMNIA_LMS_ACTIVITY_RENDERERS.md](OMNIA_LMS_ACTIVITY_RENDERERS.md) | Renderers de atividade |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

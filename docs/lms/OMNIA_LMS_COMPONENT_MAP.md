@@ -44,14 +44,17 @@
 | **MaterialViewer** | Consumo de material | ● | Lazy renderers |
 | **MaterialExperience** | Host materiais da aula | ● | |
 | **MaterialNav** | Prev/next material | ● | |
+| **AssessmentProvider** | Resolve avaliação + sink engine | ● | Épico D |
+| **AssessmentViewer** | Quiz/tarefa RO | ● | |
+| **AssessmentExperience** | Host avaliações na aula | ● | |
 
 ## 3. Media & assessment (futuro)
 
 | Componente | Job | Status |
 | --- | --- | :---: |
 | Player | Streaming Omnia | — |
-| MaterialViewer | PDF/doc view_only | — |
-| QuizRunner | Quiz UX | — |
+| MaterialViewer | PDF/doc view_only | ● (placeholders + Material Experience) |
+| QuizRunner | Quiz UX | ○ (Assessment Viewer RO; submit —) |
 | AssignmentSubmit | Entrega | — |
 
 ## 4. Teaching / Governance (futuro)

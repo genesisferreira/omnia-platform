@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Button, Progress } from '@omnia/ui';
 
+import { AssessmentExperience, isAssessmentMod } from '@/components/lms/assessment/AssessmentExperience';
 import { LessonNav } from '@/components/lms/LessonNav';
 import { LessonSidebar } from '@/components/lms/LessonSidebar';
 import { LessonStatusBadge } from '@/components/lms/LessonStatusBadge';
@@ -34,6 +35,12 @@ export type LessonWorkspaceProps = {
   next: FlatLesson | null;
   /** Sync já feito pelo SyncLearningState — evita double open. */
   moodleState?: number | null;
+  activityTimeCompleted?: string | null;
+  activityGrade?: {
+    itemName: string;
+    gradeFormatted: string | null;
+    percentage: number | null;
+  } | null;
 };
 
 /**
@@ -190,13 +197,27 @@ export function LessonWorkspace(props: LessonWorkspaceProps) {
             </dl>
           </header>
 
-          <MaterialExperience
-            courseId={props.courseId}
-            activity={props.activity}
-            sectionId={props.sectionId}
-            sectionSummary={props.sectionSummary}
-            nextActivityId={props.next?.activityId ?? null}
-          />
+          {isAssessmentMod(props.activity.modName) ? (
+            <AssessmentExperience
+              courseId={props.courseId}
+              activity={props.activity}
+              sectionId={props.sectionId}
+              sectionSummary={props.sectionSummary}
+              progressState={props.moodleState ?? 0}
+              timeCompleted={props.activityTimeCompleted}
+              grade={props.activityGrade}
+              prev={props.prev}
+              next={props.next}
+            />
+          ) : (
+            <MaterialExperience
+              courseId={props.courseId}
+              activity={props.activity}
+              sectionId={props.sectionId}
+              sectionSummary={props.sectionSummary}
+              nextActivityId={props.next?.activityId ?? null}
+            />
+          )}
 
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-lms-card">
             <div className="min-w-0 flex-1">

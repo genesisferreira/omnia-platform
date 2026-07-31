@@ -44,6 +44,7 @@
 | **LMS Connector** | DTOs Omnia, errors | `@omnia/lms-connector` + Admin BFF | ACL traduz Moodle→Omnia |
 | **Learning Experience** | Dashboard, Aula, Continuar | `apps/web` `/lms` | Proxy S2S + Learning Engine |
 | **Learning Engine** | Continue, Timeline, Events, State, Cache, Sync | `@omnia/learning-engine` | Porta `LearningPersistence`; lê Connector via Experience |
+| **Assessment Engine** | Quiz/Assign RO, status, grade, feedback | `@omnia/assessment-engine` | Sink → Learning Engine; Connector RO |
 | **Session Security** | Session, device, revoke | Session Manager | Redis |
 | **Policy** | Limits, flags | Policy Engine + lms-settings | Audit |
 | **Observability** | metrics, traces | monitoring/logger | Prom/Grafana |

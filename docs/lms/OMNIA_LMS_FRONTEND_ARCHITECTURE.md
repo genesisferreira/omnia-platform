@@ -47,6 +47,10 @@ Ver [`OMNIA_LMS_LESSON_EXPERIENCE.md`](OMNIA_LMS_LESSON_EXPERIENCE.md).
 
 Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md) · [`OMNIA_LMS_CONTENT_ARCHITECTURE.md`](OMNIA_LMS_CONTENT_ARCHITECTURE.md).
 
+## Assessment Experience
+
+Ver [`OMNIA_LMS_ASSESSMENT_ENGINE.md`](OMNIA_LMS_ASSESSMENT_ENGINE.md). Quiz/assign na Lesson Page via `AssessmentExperience` (read-only).
+
 ## Session Manager
 
 `LmsSessionLifecycle` (client):
@@ -62,7 +66,7 @@ Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md) · [`
 | `/lms` | RSC | `me`, `courses`, `progress` |
 | `/lms/cursos` | RSC | `courses`, `progress` |
 | `/lms/cursos/[id]` | RSC | `courses/:id`, `content`, `progress`, `grades`, `completion` |
-| `/lms/cursos/[id]/atividades/[aid]` | RSC + client | Lesson + Material Experience |
+| `/lms/cursos/[id]/atividades/[aid]` | RSC + client | Lesson + Material **ou** Assessment Experience |
 | `/lms/continuar` | RSC + client | `courses` + Learning Engine continue |
 | `/lms/progresso` | RSC | `courses` + `progress` |
 | `/lms/notas` | RSC | `courses` + `grades` |
@@ -70,23 +74,15 @@ Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md) · [`
 
 ## Performance
 
-- `dynamic = 'force-dynamic'` nas páginas LMS (dados por usuário).
-- Prefetch da próxima aula + lazy renderers de material (`next/dynamic`).
-- Cache snapshot Learning Engine (TTL); sync com keys estáveis.
-- Sem lib SWR/React Query nesta sprint (padrão fetch nativo).
+- Prefetch próxima aula/atividade + lazy renderers (`next/dynamic`).
+- Cache Learning Engine + Assessment Cache (TTL).
 
 ## Segurança
 
-- Zero links `moodle.*` no client.
-- HTML de summary sanitizado (`sanitizeLmsHtml`).
-- Proxy `/api/lms/*` aplica `scrubMoodleLeakage` antes de responder ao browser (URLs Moodle / `wstoken`).
-- Path traversal bloqueado no proxy (`..`).
-- `OMNIA_INTERNAL_API_SECRET` só no server.
-- Portas stub Media Authorization / Signed URL / Watermark / Protected Viewer (Épico C).
+- Zero links `moodle.*` no client; HTML sanitizado; scrub no proxy.
+- Assessment security ports stub (Write API / attempt lock / secure submission).
 
 ## Testes
 
-- Material: `pnpm --filter @omnia/web test:lms-material`
-- Lesson: `pnpm --filter @omnia/web test:lms-lesson`
-- Continue: `pnpm --filter @omnia/web test:lms-continue`
-- Smoke: `pnpm --filter @omnia/web test:lms-smoke`
+- Assessment: `pnpm --filter @omnia/web test:lms-assessment`
+- Material / Lesson / Continue / Smoke: scripts `test:lms-*`

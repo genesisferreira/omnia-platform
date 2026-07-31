@@ -300,6 +300,22 @@ export class LearningEngine {
   closeMaterial(courseId: number, activityId: number, materialId?: string): void {
     this.emit('material.closed', { courseId, activityId, materialId });
   }
+
+  /** Bridge Assessment Engine → Event Catalog (read-only). */
+  emitAssessmentEvent(
+    type:
+      | 'assessment.opened'
+      | 'assessment.closed'
+      | 'assessment.viewed'
+      | 'assessment.completed'
+      | 'quiz.viewed'
+      | 'assignment.viewed'
+      | 'grade.viewed'
+      | 'feedback.viewed',
+    payload: Record<string, unknown>,
+  ): void {
+    this.emit(type, payload);
+  }
 }
 
 export function createLearningEngine(options: CreateLearningEngineOptions): LearningEngine {

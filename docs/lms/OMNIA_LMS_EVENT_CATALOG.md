@@ -69,7 +69,15 @@ Todo evento **deve** carregar:
 
 | type | Quando | Payload mínimo | MVP |
 | --- | --- | --- | :---: |
-| `quiz.started` | Início quiz | `{ courseId, quizId }` | — |
+| `assessment.opened` | Abre avaliação | `{ courseId, activityId, assessmentId?, type? }` | ● |
+| `assessment.closed` | Fecha avaliação | `{ courseId, activityId }` | ● |
+| `assessment.viewed` | Visualiza avaliação | `{ courseId, activityId }` | ● |
+| `assessment.completed` | Conclusão local (RO) | `{ courseId, activityId }` | ● |
+| `quiz.viewed` | Visualiza quiz | `{ courseId, quizId }` | ● |
+| `assignment.viewed` | Visualiza tarefa | `{ courseId, assignmentId }` | ● |
+| `grade.viewed` | Visualiza nota | `{ courseId, activityId?, percentage? }` | ● |
+| `feedback.viewed` | Visualiza feedback | `{ courseId, activityId }` | ● |
+| `quiz.started` | Início quiz (submit futuro) | `{ courseId, quizId }` | — |
 | `quiz.finished` | Fim quiz | `{ courseId, quizId, attemptId? }` | — |
 | `assignment.submitted` | Entrega | `{ courseId, assignmentId }` | — |
 | `grade.updated` | Nota alterada | `{ courseId, itemId?, percentage? }` | ○ |
