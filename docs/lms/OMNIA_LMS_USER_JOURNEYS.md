@@ -123,3 +123,23 @@
 2. BFF retorna 403 `MEDIA_DOWNLOAD_FORBIDDEN`.  
 3. Evento `download_attempt` auditado.  
 4. Conteúdo permanece apenas no viewer/player com token temporário.
+
+---
+
+## MVP Aluno (Sprint 2.6) — jornadas implementadas
+
+Host: `apps/web` em `/lms/*` (não `lms.*` ainda). Auth: cookie portal. Dados: só Connector.
+
+| ID | Fluxo | Rota |
+| --- | --- | --- |
+| J-L1 | Login Omnia | Portal → `/lms` |
+| J-L2 | Dashboard | `/lms` |
+| J-L3 | Meus cursos | `/lms/cursos` |
+| J-L4 | Continuar (last-seen local + matrículas) | `/lms/continuar` |
+| J-L5 | Abrir curso (módulos / notas / conclusão) | `/lms/cursos/[id]` |
+| J-L6 | Abrir aula (metadados; sem player Moodle) | `.../atividades/[id]` |
+| J-L7 | Progresso agregado | `/lms/progresso` |
+| J-L8 | Notas agregadas | `/lms/notas` |
+| J-L10 | Logout LMS session + portal | Shell → `/api/auth/logout` |
+
+**Diferenças vs Blueprint completo:** sem marketplace/pagamento, sem player de mídia assinada, Continue Learning sem endpoint BFF `/continue` (agregação client).

@@ -56,4 +56,15 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_LMS_ALERTING.md](OMNIA_LMS_ALERTING.md) | Alertas e SLO/SLA |
 | [OMNIA_LMS_RUNBOOK.md](OMNIA_LMS_RUNBOOK.md) | Runbook operacional |
 
+## Experience MVP (Sprint 2.6)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_LMS_PRODUCT_SPEC.md](OMNIA_LMS_PRODUCT_SPEC.md) | Spec do produto (aluno) |
+| [OMNIA_LMS_FRONTEND_ARCHITECTURE.md](OMNIA_LMS_FRONTEND_ARCHITECTURE.md) | Shell `/lms/*`, proxy S2S |
+| [OMNIA_LMS_DESIGN_SYSTEM.md](OMNIA_LMS_DESIGN_SYSTEM.md) | Tokens e a11y LMS |
+| [OMNIA_LMS_COMPONENT_CATALOG.md](OMNIA_LMS_COMPONENT_CATALOG.md) | Catálogo de componentes |
+| [OMNIA_LMS_USER_JOURNEYS.md](OMNIA_LMS_USER_JOURNEYS.md) | Jornadas (incl. MVP aluno) |
+| [OMNIA_LMS_EXPERIENCE_DEV_HOMOLOGATION.md](OMNIA_LMS_EXPERIENCE_DEV_HOMOLOGATION.md) | Homologação DEV |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.
