@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import {
-  createStubSecurityPorts,
+  createControlledSecurityPorts,
   resolveMaterial,
   type MaterialDescriptor,
   type MaterialSecurityPorts,
@@ -26,7 +26,7 @@ export function MaterialProvider(props: {
   children: ReactNode;
   security?: MaterialSecurityPorts;
 }) {
-  const security = props.security ?? createStubSecurityPorts();
+  const security = props.security ?? createControlledSecurityPorts();
   const value = useMemo<MaterialProviderValue>(
     () => ({
       security,

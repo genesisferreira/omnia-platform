@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@omnia/academic-provisioning": "workspace:*",
+    "@omnia/media-authorization": "workspace:*",
     "@omnia/config": "workspace:*",
     "@omnia/constants": "workspace:*",
     "@omnia/database": "workspace:*",

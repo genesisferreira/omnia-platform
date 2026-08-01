@@ -40,8 +40,9 @@
 | **LessonWorkspace** | Shell da aula | ● | Lifecycle Learning Engine |
 | **LessonContent** | Conteúdo + placeholders | ● | HTML sanitizado / links |
 | **LessonNav** | Prev/next/módulo/curso | ● | SPA + prefetch |
-| **MaterialProvider** | Resolve material + security ports | ● | Épico C |
-| **MaterialViewer** | Consumo de material | ● | Lazy renderers |
+| **MaterialProvider** | Resolve material + security ports | ● | Controlled Media Auth |
+| **MaterialViewer** | Consumo de material | ● | Authorize gate + block screen |
+| **MaterialAccessBlocked** | Tela oficial de deny | ● | Épico B |
 | **MaterialExperience** | Host materiais da aula | ● | |
 | **MaterialNav** | Prev/next material | ● | |
 | **AssessmentProvider** | Resolve avaliação + sink engine | ● | Épico D |

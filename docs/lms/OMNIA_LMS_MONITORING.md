@@ -47,6 +47,12 @@
 - `provision_queue_size`
 - `provision_latency_seconds`
 
+### Media Authorization (Sprint 3.0B)
+- `media_authorize_total` / `media_authorize_denied_total`
+- `media_signed_total` / `media_revoked_total`
+- `media_cache_hits`
+- `media_latency`
+
 ## Grafana
 
 Dashboards em `docker/observability/grafana/dashboards/`:
@@ -59,6 +65,7 @@ Dashboards em `docker/observability/grafana/dashboards/`:
 | `04-academico.json` | Academico RO |
 | `05-seguranca.json` | Segurança |
 | `06-provisioning.json` | Provision / enrollment |
+| `07-media-authorization.json` | Media authorize / sign / cache |
 
 ## Stack Docker (DEV)
 

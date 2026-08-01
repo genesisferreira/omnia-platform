@@ -62,6 +62,18 @@ export function jsonError(err: unknown): Response {
         { status: 503, headers: { 'Cache-Control': 'no-store' } },
       );
     }
+    const code = (err as { code?: string }).code;
+    if (
+      code === 'ASSET_REQUIRED' ||
+      code === 'USER_REQUIRED' ||
+      code === 'COURSE_REQUIRED' ||
+      code === 'MEDIA_FORBIDDEN'
+    ) {
+      return Response.json(
+        { ok: false, error: { code, message: err.message } },
+        { status: code === 'MEDIA_FORBIDDEN' ? 403 : 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
   }
   return Response.json(
     { ok: false, error: { code: 'INTERNAL_ERROR', message: 'Unexpected error' } },

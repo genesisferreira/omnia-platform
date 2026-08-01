@@ -92,6 +92,10 @@ Todo evento **deve** carregar:
 | `provision.user.completed` | Resultado user | `{ action, mode, code? }` | ● (audit) |
 | `enrollment.requested` | Comando matrícula | `{ action, courseId, mode }` | ● (audit) |
 | `enrollment.completed` | Resultado matrícula | `{ action, mode, code? }` | ● (audit) |
+| `media.authorized` | Grant controlado | `{ assetId, purpose, reason }` | ● (audit) |
+| `media.denied` | Deny | `{ assetId, purpose, reason }` | ● (audit) |
+| `media.signed` | Token mock | `{ tokenId, mode }` | ● (audit) |
+| `media.revoked` | Revogação | `{ tokenId?, grantId? }` | ● (audit) |
 
 ### 2.4 Segurança e plataforma
 

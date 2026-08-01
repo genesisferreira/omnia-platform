@@ -119,4 +119,15 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_PROVISIONING_SECURITY.md](OMNIA_PROVISIONING_SECURITY.md) | Segurança S2S |
 | [OMNIA_PROVISIONING_DEV_HOMOLOGATION.md](OMNIA_PROVISIONING_DEV_HOMOLOGATION.md) | Checklist DEV |
 
+## Media Authorization (Sprint 3.0 — Épico B)
+
+| Documento | Descrição |
+| --- | --- |
+| [OMNIA_MEDIA_AUTHORIZATION.md](OMNIA_MEDIA_AUTHORIZATION.md) | Serviço + arquitetura |
+| [OMNIA_MEDIA_POLICIES.md](OMNIA_MEDIA_POLICIES.md) | Políticas / capabilities |
+| [OMNIA_SIGNED_ACCESS.md](OMNIA_SIGNED_ACCESS.md) | Contratos signed access |
+| [OMNIA_PROTECTED_VIEWER.md](OMNIA_PROTECTED_VIEWER.md) | Gate no Material Experience |
+| [OMNIA_MEDIA_SECURITY.md](OMNIA_MEDIA_SECURITY.md) | Segurança |
+| [OMNIA_MEDIA_AUTHORIZATION_DEV_HOMOLOGATION.md](OMNIA_MEDIA_AUTHORIZATION_DEV_HOMOLOGATION.md) | Checklist DEV |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

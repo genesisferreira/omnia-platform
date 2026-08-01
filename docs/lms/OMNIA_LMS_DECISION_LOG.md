@@ -22,6 +22,7 @@ Registro oficial de decisões de arquitetura do Omnia LMS.
 | D016 | 2026-07-31 | **Material Experience** (`MaterialProvider`/`Viewer`/renderers) + security ports stub; eventos `material.viewed|completed` | Sprint 2.7C | Signed URLs / watermark / streaming fora | **Aprovado** |
 | D017 | 2026-07-31 | **Assessment Engine** (`@omnia/assessment-engine`) read-only; Viewer quiz/assign; eventos `assessment.*`; sem Write API / submissão | Sprint 2.7D | Submissão Moodle = futuro | **Aprovado** |
 | D018 | 2026-07-31 | **Academic Provisioning** (`@omnia/academic-provisioning`) + Connector `callWrite` dry-run forçado (`EXECUTE_DISABLED_UNTIL_ACTIVATION`); endpoints S2S internos; fila/retry/audit; sem mutação Moodle real; sem UI | Sprint 3.0A | Execute real = ativação explícita pós-épico | **Aprovado** |
+| D019 | 2026-07-31 | **Media Authorization** (`@omnia/media-authorization`) modo controlado; decisões servidor; Signed Access mock; Protected Viewer gate; sem DRM/CDN/signed URL produção; entrega de conteúdo inalterada pós-grant | Sprint 3.0B | Streaming/CDN/DRM = futuros | **Aprovado** |
 
 ---
 

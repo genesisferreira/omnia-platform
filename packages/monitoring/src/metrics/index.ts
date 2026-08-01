@@ -44,4 +44,10 @@ export {
   provisionRetryTotal,
   provisionQueueSize,
   provisionLatencySeconds,
+  mediaAuthorizeTotal,
+  mediaAuthorizeDeniedTotal,
+  mediaSignedTotal,
+  mediaRevokedTotal,
+  mediaCacheHitsTotal,
+  mediaLatencySeconds,
 } from './lms-metrics';

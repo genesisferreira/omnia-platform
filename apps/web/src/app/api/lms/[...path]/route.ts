@@ -22,10 +22,18 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
     body = await request.json().catch(() => null);
   }
 
+  const forwardHeaders: Record<string, string> = {};
+  const idem = request.headers.get('idempotency-key') || request.headers.get('Idempotency-Key');
+  if (idem) forwardHeaders['Idempotency-Key'] = idem;
+  const corr =
+    request.headers.get('x-correlation-id') || request.headers.get('x-request-id');
+  if (corr) forwardHeaders['x-correlation-id'] = corr;
+
   const result = await fetchLmsConnector(joined, {
     method,
     body,
     search: url.search,
+    headers: forwardHeaders,
   });
 
   const payload = scrubMoodleLeakage(result.data ?? { ok: false });

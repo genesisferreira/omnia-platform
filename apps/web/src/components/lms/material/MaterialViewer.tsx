@@ -1,9 +1,10 @@
 'use client';
 
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle } from '@omnia/ui';
 
 import { useLearningEngine } from '@/components/lms/LearningEngineProvider';
+import { MaterialAccessBlocked } from '@/components/lms/material/MaterialAccessBlocked';
 import { useMaterialProvider } from '@/components/lms/material/MaterialProvider';
 import { MaterialMetadataPanel } from '@/components/lms/material/MaterialMetadata';
 import { MaterialSkeleton } from '@/components/lms/material/MaterialSkeleton';
@@ -16,6 +17,12 @@ export type MaterialViewerProps = {
   /** Emite eventos Learning Engine para este material. */
   trackLifecycle?: boolean;
 };
+
+type AuthGate =
+  | { status: 'pending' }
+  | { status: 'granted'; reason: string }
+  | { status: 'denied'; reason: string }
+  | { status: 'error'; reason: string };
 
 function StateBanner(props: { resolved: ResolvedMaterial }) {
   const s = props.resolved.state;
@@ -40,9 +47,11 @@ function StateBanner(props: { resolved: ResolvedMaterial }) {
 
 function MaterialViewerInner(props: MaterialViewerProps) {
   const engine = useLearningEngine();
-  const { resolve } = useMaterialProvider();
+  const { resolve, security } = useMaterialProvider();
   const [offline, setOffline] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [authGate, setAuthGate] = useState<AuthGate>({ status: 'pending' });
+  const [authNonce, setAuthNonce] = useState(0);
   const lifecycle = useRef(false);
 
   useEffect(() => {
@@ -61,9 +70,55 @@ function MaterialViewerInner(props: MaterialViewerProps) {
     [resolve, props.descriptor, offline],
   );
 
+  const assetId =
+    props.descriptor.source.assetId?.trim() ||
+    `omnia-material:${props.descriptor.courseId}:${props.descriptor.activityId}:${props.descriptor.id}`;
+
+  const runAuthorize = useCallback(async () => {
+    setAuthGate({ status: 'pending' });
+    const result = await security.mediaAuthorization.authorize({
+      assetId,
+      courseId: props.descriptor.courseId,
+      activityId: props.descriptor.activityId,
+      materialId: props.descriptor.id,
+      purpose: 'view',
+    });
+    if (!result.ok) {
+      setAuthGate({
+        status: result.code === 'DENIED' ? 'denied' : 'error',
+        reason: result.reason,
+      });
+      return;
+    }
+    const viewer = await security.protectedViewer.open({
+      assetId,
+      grantId: result.grantId,
+      decisionGranted: true,
+    });
+    if (!viewer.ok) {
+      setAuthGate({ status: 'denied', reason: viewer.reason });
+      return;
+    }
+    // Signed access contrato (mock) — não altera entrega do conteúdo neste épico
+    if (result.grantToken) {
+      void security.signedUrl.issue({
+        assetId,
+        grantId: result.grantId,
+        decisionId: result.decisionId,
+        grantToken: result.grantToken,
+      });
+    }
+    setAuthGate({ status: 'granted', reason: result.reason });
+  }, [assetId, props.descriptor, security]);
+
+  useEffect(() => {
+    void runAuthorize();
+  }, [runAuthorize, authNonce]);
+
   useEffect(() => {
     if (props.trackLifecycle === false) return;
     if (lifecycle.current) return;
+    if (authGate.status !== 'granted') return;
     lifecycle.current = true;
     const { courseId, activityId, id } = props.descriptor;
     engine.openMaterial(courseId, activityId, id);
@@ -72,7 +127,7 @@ function MaterialViewerInner(props: MaterialViewerProps) {
       engine.closeMaterial(courseId, activityId, id);
       lifecycle.current = false;
     };
-  }, [engine, props.descriptor, props.trackLifecycle]);
+  }, [engine, props.descriptor, props.trackLifecycle, authGate.status]);
 
   const Renderer = useMemo(
     () => getLazyRenderer(resolved.rendererKey),
@@ -85,9 +140,10 @@ function MaterialViewerInner(props: MaterialViewerProps) {
       : resolved.source.body;
 
   const showContent =
-    resolved.state === 'ready' ||
-    resolved.state === 'offline' ||
-    (resolved.state === 'empty' && Boolean(resolved.fallbackMessage));
+    authGate.status === 'granted' &&
+    (resolved.state === 'ready' ||
+      resolved.state === 'offline' ||
+      (resolved.state === 'empty' && Boolean(resolved.fallbackMessage)));
 
   function handleComplete() {
     if (completed || !resolved.permissions.canComplete) return;
@@ -106,10 +162,15 @@ function MaterialViewerInner(props: MaterialViewerProps) {
         <MaterialMetadataPanel metadata={resolved.metadata} />
       </CardHeader>
       <CardContent className="space-y-4">
-        <StateBanner resolved={resolved} />
-        {resolved.state === 'loading' || resolved.state === 'skeleton' ? (
-          <MaterialSkeleton />
+        {authGate.status === 'pending' ? <MaterialSkeleton /> : null}
+        {authGate.status === 'denied' || authGate.status === 'error' ? (
+          <MaterialAccessBlocked
+            reason={authGate.reason}
+            materialName={resolved.metadata.name}
+            onRetry={() => setAuthNonce((n) => n + 1)}
+          />
         ) : null}
+        {authGate.status === 'granted' ? <StateBanner resolved={resolved} /> : null}
         {showContent &&
         resolved.state !== 'forbidden' &&
         resolved.state !== 'blocked' &&
@@ -124,7 +185,7 @@ function MaterialViewerInner(props: MaterialViewerProps) {
             />
           </div>
         ) : null}
-        {resolved.permissions.canComplete ? (
+        {authGate.status === 'granted' && resolved.permissions.canComplete ? (
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"

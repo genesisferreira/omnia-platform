@@ -1,0 +1,48 @@
+{
+  "uid": "omnia-lms-media-authorization",
+  "title": "Omnia LMS — Media Authorization",
+  "tags": ["omnia", "lms", "media"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Authorize granted / denied",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(media_authorize_total[5m]))", "legendFormat": "total" },
+        { "expr": "sum(rate(media_authorize_denied_total[5m]))", "legendFormat": "denied" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Signed / revoked",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(media_signed_total[5m]))", "legendFormat": "signed" },
+        { "expr": "sum(rate(media_revoked_total[5m]))", "legendFormat": "revoked" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Media latency P95",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(media_latency_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decision cache hits",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(media_cache_hits[5m]))", "legendFormat": "cache hits" }
+      ]
+    }
+  ]
+}

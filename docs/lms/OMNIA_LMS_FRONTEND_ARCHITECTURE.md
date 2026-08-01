@@ -55,6 +55,10 @@ Ver [`OMNIA_LMS_ASSESSMENT_ENGINE.md`](OMNIA_LMS_ASSESSMENT_ENGINE.md). Quiz/ass
 
 Sem UI neste épico. Provisionamento é **somente** Admin BFF interno S2S (`/api/omnia/lms/internal/provision/*`). O proxy Web `/api/lms/*` **não** expõe rotas de provision. Ver [`OMNIA_ACADEMIC_PROVISIONING.md`](OMNIA_ACADEMIC_PROVISIONING.md).
 
+## Media Authorization
+
+Gate no Material Viewer via `createControlledSecurityPorts` → `/api/lms/internal/media/authorize`. Deny → `MaterialAccessBlocked`. Entrega pós-grant inalterada. Ver [`OMNIA_MEDIA_AUTHORIZATION.md`](OMNIA_MEDIA_AUTHORIZATION.md).
+
 ## Session Manager
 
 `LmsSessionLifecycle` (client):

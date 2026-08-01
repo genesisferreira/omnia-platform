@@ -29,6 +29,7 @@ import {
   resolveRolePolicy,
 } from '../../services/lms/runtime';
 import { lmsProvisionEndpoints } from './provision';
+import { lmsMediaEndpoints } from './media';
 
 async function applyRateLimit(
   _req: PayloadRequest,
@@ -558,4 +559,5 @@ export const lmsEndpoints: Endpoint[] = [
   lmsSessionsRevokeEndpoint,
   lmsSessionsRevokeAllEndpoint,
   ...lmsProvisionEndpoints,
+  ...lmsMediaEndpoints,
 ];

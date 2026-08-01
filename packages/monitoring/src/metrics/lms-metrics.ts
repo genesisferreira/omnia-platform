@@ -148,6 +148,31 @@ export const provisionLatencySeconds = defaultRegistry.register(
   new Histogram('provision_latency_seconds', 'Academic provision operation latency in seconds'),
 );
 
+/** Media Authorization (Sprint 3.0B) — labels sem PII. */
+export const mediaAuthorizeTotal = defaultRegistry.register(
+  new Counter('media_authorize_total', 'Media authorization decisions'),
+);
+
+export const mediaAuthorizeDeniedTotal = defaultRegistry.register(
+  new Counter('media_authorize_denied_total', 'Media authorization denials'),
+);
+
+export const mediaSignedTotal = defaultRegistry.register(
+  new Counter('media_signed_total', 'Controlled media sign operations'),
+);
+
+export const mediaRevokedTotal = defaultRegistry.register(
+  new Counter('media_revoked_total', 'Media access revocations'),
+);
+
+export const mediaCacheHitsTotal = defaultRegistry.register(
+  new Counter('media_cache_hits', 'Media decision cache hits'),
+);
+
+export const mediaLatencySeconds = defaultRegistry.register(
+  new Histogram('media_latency', 'Media authorization latency in seconds'),
+);
+
 export function renderPrometheusMetrics(): string {
   return defaultRegistry.render();
 }

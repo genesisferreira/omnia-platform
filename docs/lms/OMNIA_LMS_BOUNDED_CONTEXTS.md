@@ -46,6 +46,7 @@
 | **Learning Engine** | Continue, Timeline, Events, State, Cache, Sync | `@omnia/learning-engine` | Porta `LearningPersistence`; lê Connector via Experience |
 | **Assessment Engine** | Quiz/Assign RO, status, grade, feedback | `@omnia/assessment-engine` | Sink → Learning Engine; Connector RO |
 | **Academic Provisioning** | User provision, enrollment lifecycle, queue | `@omnia/academic-provisioning` + Admin internal BFF | Connector `callWrite` dry-run; Identity Bridge (consulta) |
+| **Media Authorization** | View/download/print/share decisions, signed access contracts | `@omnia/media-authorization` + Admin internal BFF + Material Experience | Controlled mode; Policy Engine; audit |
 | **Session Security** | Session, device, revoke | Session Manager | Redis |
 | **Policy** | Limits, flags | Policy Engine + lms-settings | Audit |
 | **Observability** | metrics, traces | monitoring/logger | Prom/Grafana |

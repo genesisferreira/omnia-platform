@@ -27,6 +27,7 @@ export async function fetchLmsConnector<T = unknown>(
     body?: unknown;
     user?: PortalUser;
     search?: string;
+    headers?: Record<string, string>;
   } = {},
 ): Promise<LmsProxyResult<T>> {
   const token = await getSessionToken();
@@ -63,6 +64,7 @@ export async function fetchLmsConnector<T = unknown>(
       'x-omnia-internal-key': secret,
       'x-omnia-user-id': user.id,
       'x-omnia-lms-role': mapRole(user.role),
+      ...(options.headers ?? {}),
     },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
     cache: 'no-store',

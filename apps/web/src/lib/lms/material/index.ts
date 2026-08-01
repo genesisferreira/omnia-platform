@@ -18,6 +18,7 @@ export {
 } from './resolve-material';
 
 export {
+  createControlledSecurityPorts,
   createStubSecurityPorts,
   type MaterialSecurityPorts,
   type MediaAuthorizationPort,
