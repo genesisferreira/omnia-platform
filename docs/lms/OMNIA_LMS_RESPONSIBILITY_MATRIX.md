@@ -31,8 +31,11 @@
 | WhatsApp | ● | — | — | ● | Futuro | P2 | M |
 | Fórum acadêmico | ○ | ● | — | — | Planejado | P2 | M |
 | Gamificação / ranking | ● | ○ | ○ | — | Planejado | P2 | A |
-| Tutor IA / chat | ● | ○ | ● | — | Planejado | P1 | A |
-| Plano de estudos IA | ● | ○ | ● | — | Planejado | P2 | A |
+| Tutor IA / chat | ● | ○ | ● | — | Spec 3.1 | P1 | A |
+| Plano de estudos IA | ● | ○ | ● | — | Spec 3.1 | P2 | A |
+| Orchestrator / Security / Compliance Guards | ○ | — | ● | — | Spec 3.1 | P0 | AA |
+| Assessment Integrity Guard | ○ | ○ | ● | — | Spec 3.1 | P0 | A |
+| RAG ACL-first + Knowledge Base | ○ | ○ | ● | ○ | Spec 3.1 | P1 | AA |
 | Recomendações | ● | ○ | ● | — | Planejado | P2 | A |
 | Authoring professor (UI) | ● | ○ | ○ | — | Planejado | P0 | AA |
 | Gerador conteúdo/provas IA | ○ | ○ | ● | — | Planejado | P1 | A |

@@ -1,4 +1,4 @@
-# Omnia LMS — Roadmap Oficial (Sprint 2.4 → 3.0)
+# Omnia LMS — Roadmap Oficial (Sprint 2.4 → 3.1)
 
 > Alinhado ao Blueprint v1.0. Datas são de sequência de produto, não compromissos comerciais fixos.
 
@@ -113,6 +113,23 @@
 
 ---
 
+## Sprint 3.1 — Neurofrigo Runtime Blueprint (spec only)
+
+- Runtime Spec + Orchestrator + Agent Catalog  
+- Security / Compliance / Assessment Integrity Guards  
+- Context, Tool, Memory, Knowledge, RAG policies  
+- Portal Chat Journey + Adaptive Learning (níveis 1–2)  
+- Implementation Roadmap Fases 1–5  
+- **Sem** implementação de LLM / SDKs nesta sprint  
+
+Docs: [`../neurofrigo/README.md`](../neurofrigo/README.md) · Decisões **D020**, **D021**.
+
+**Pré-requisito recomendado para ações de escrita via IA:** Write APIs acadêmicas (LMS Épico C).
+
+**Saída:** Spec aprovada para implementação futura do Runtime.
+
+---
+
 ## Dependências críticas entre sprints
 
 | Antes | Depois |
@@ -122,6 +139,8 @@
 | 2.6 Progresso | 2.7 Certificados |
 | 2.8 Vídeo | 3.0 Offline vídeo |
 | 2.9 Billing | 3.0 Assinaturas avançadas |
+| 3.0 Media Auth + Provisioning | 3.1 Neurofrigo Spec |
+| Write APIs acadêmicas (LMS) | Neurofrigo Fase 1+ com tools de escrita |
 
 ---
 

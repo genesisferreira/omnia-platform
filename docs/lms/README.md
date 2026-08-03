@@ -130,4 +130,10 @@ Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS
 | [OMNIA_MEDIA_SECURITY.md](OMNIA_MEDIA_SECURITY.md) | Segurança |
 | [OMNIA_MEDIA_AUTHORIZATION_DEV_HOMOLOGATION.md](OMNIA_MEDIA_AUTHORIZATION_DEV_HOMOLOGATION.md) | Checklist DEV |
 
+## Neurofrigo (Sprint 3.1 — Spec)
+
+| Documento | Descrição |
+| --- | --- |
+| [../neurofrigo/README.md](../neurofrigo/README.md) | Índice Runtime / Agentes / Guards |
+
 Infraestrutura do engine (Docker): `docs/09-infrastructure/OMNIA_LMS_*.md`.

@@ -36,6 +36,7 @@ Não é “um Moodle com tema”. É um **produto Omnia** que usa o Moodle exclu
 8. **HostGator Moodle = referência apenas** — instalação limpa na VPS; sem migração de dados legados como caminho oficial.
 9. **Sessões concurrentes limitadas e configuráveis** — padrão aluno = 1 dispositivo/sessão; novo login revoga a anterior (Omnia + Moodle); abas do mesmo browser = uma sessão. Ver [`OMNIA_LMS_SESSION_POLICY.md`](OMNIA_LMS_SESSION_POLICY.md).
 10. **Conteúdo sem download por padrão** — vídeo só streaming; documentos só viewer; URLs assinadas/TTL; proteção no backend. Ver [`OMNIA_LMS_CONTENT_PROTECTION_POLICY.md`](OMNIA_LMS_CONTENT_PROTECTION_POLICY.md). Captura de tela não é bloqueável de forma absoluta.
+11. **Neurofrigo = única camada de IA** — pipeline Identity→Purpose→Intent→Security→Context→Tools→Specialist→Compliance; Tutor/Concierge (Portal MVP) ≠ Command (`super_admin`); DeepSeek só via adapter; sem LLM no domínio Omnia; ver [`../neurofrigo/README.md`](../neurofrigo/README.md) (D020, D021).
 
 ---
 
@@ -130,6 +131,7 @@ Detalhamento: [`OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md`](OMNIA_LMS_ARCHITECTURE_FU
 | [`OMNIA_LMS_INTEGRATION_SPEC.md`](OMNIA_LMS_INTEGRATION_SPEC.md) | Contratos Connector / sessão / mídia |
 | [`OMNIA_LMS_SECURITY_CHECKLIST.md`](OMNIA_LMS_SECURITY_CHECKLIST.md) | Checklist de segurança |
 | [`OMNIA_LMS_DECISION_LOG.md`](OMNIA_LMS_DECISION_LOG.md) | Log de decisões |
+| [`../neurofrigo/README.md`](../neurofrigo/README.md) | **Neurofrigo Runtime** (Sprint 3.1) — agentes, guards, RAG, roadmap |
 
 Infra Docker já existente (engine): `docs/09-infrastructure/OMNIA_LMS_*.md` — **não substitui** este Blueprint de produto.
 

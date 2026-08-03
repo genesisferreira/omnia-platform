@@ -105,6 +105,22 @@ Todo evento **deve** carregar:
 | `connector.error` | Falha sanitizada | `{ code, endpoint }` | ● (logs/métricas) |
 | `lms.http.request` | Observabilidade | métricas OTel/Prom | ● |
 
+### 2.5 Neurofrigo Runtime (Sprint 3.1 — spec; emissão na Fase 1+)
+
+| type | Quando | Payload mínimo | MVP |
+| --- | --- | --- | :---: |
+| `ai.request.received` | Mensagem recebida | `{ channel, profile? }` | — |
+| `ai.intent.classified` | Intent | `{ intent, confidence }` | — |
+| `ai.agent.routed` | Especialista | `{ agentId }` | — |
+| `ai.context.authorized` / `denied` | Context Builder | `{ slot? }` | — |
+| `ai.tool.requested` / `executed` / `denied` | Tool Router | `{ tool, risk }` | — |
+| `ai.security_guard.triggered` | Security | `{ decision }` | — |
+| `ai.assessment_guard.triggered` | Integridade | `{ reason }` | — |
+| `ai.compliance_guard.triggered` | Compliance | `{ action }` | — |
+| `ai.response.blocked` | Bloqueio final | `{ reason }` | — |
+| `ai.handoff.created` | Humano/CRM | `{ intent, urgency? }` | — |
+| `ai.feedback.received` | Feedback | `{ score? }` | — |
+
 ● emitido · ○ planejado curto prazo · — futuro
 
 ---

@@ -164,6 +164,20 @@ Contexto enviado: user id Omnia, course/activity ids Moodle, trechos autorizados
 
 ---
 
+## 6b. Neurofrigo Runtime (lógico — Sprint 3.1)
+
+| API lógica | Descrição | Status |
+| --- | --- | --- |
+| `/ai/v1/chat` | Entrypoint Orchestrator (Portal / LMS) | Spec |
+| `/ai/v1/handoff` | Criar handoff humano / CRM | Spec |
+| `/ai/v1/memory` | Consultar / apagar memória do titular | Spec |
+| `/ai/internal/moderate` | Moderation port | Spec |
+| Tools Omnia LMS | Via Tool Router → `/api/omnia/lms/*` | Spec |
+
+Detalhe: [`../neurofrigo/NEUROFRIGO_RUNTIME_SPEC.md`](../neurofrigo/NEUROFRIGO_RUNTIME_SPEC.md).
+
+---
+
 ## 7. Versionamento e governança
 
 - APIs públicas Omnia: versionadas (`/v1`).  
