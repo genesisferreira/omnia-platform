@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import {
   BENEFITS,
   COMMUNITY_NOTICE,
@@ -41,13 +40,14 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="container site-header__inner">
-        <Image
-          src="/logo-omnia.jpg"
+        {/* basePath: path absoluto sob /lancamento (evita 404 no Traefik PathPrefix) */}
+        <img
+          src="/lancamento/logo-omnia.jpg"
           alt="Logo Omnia Frigo"
           width={44}
           height={44}
           className="site-header__logo"
-          priority
+          decoding="async"
         />
         <div>
           <span className="site-header__brand">Omnia Frigo</span>
