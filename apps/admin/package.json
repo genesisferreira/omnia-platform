@@ -41,6 +41,8 @@
     "test:postal-geocode": "tsx --test src/scripts/test-postal-geocode.ts",
     "test:lms-connector": "tsx --test ../../packages/lms-connector/src/**/test-*.ts",
     "test:lms-bff-helpers": "tsx --test src/scripts/test-lms-bff-helpers.ts",
+    "test:knowledge-hub": "tsx --test src/scripts/test-knowledge-hub.ts ../../packages/neurofrigo-knowledge/src/**/test-*.ts",
+    "seed:knowledge-hub": "tsx src/scripts/seed-knowledge-hub.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
@@ -52,6 +54,7 @@
     "@omnia/lms-connector": "workspace:*",
     "@omnia/logger": "workspace:*",
     "@omnia/monitoring": "workspace:*",
+    "@omnia/neurofrigo-knowledge": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",

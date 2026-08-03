@@ -13,6 +13,7 @@ import * as migration_20260720_191000_locked_documents_crm_rels from './20260720
 import * as migration_20260724_120000_partner_network from './20260724_120000_partner_network';
 import * as migration_20260724_180000_partner_geocoding_meta from './20260724_180000_partner_geocoding_meta';
 import * as migration_20260731_160000_lms_connector_foundation from './20260731_160000_lms_connector_foundation';
+import * as migration_20260803_180000_neurofrigo_knowledge_hub from './20260803_180000_neurofrigo_knowledge_hub';
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20260731_160000_lms_connector_foundation.up,
     down: migration_20260731_160000_lms_connector_foundation.down,
     name: '20260731_160000_lms_connector_foundation',
+  },
+  {
+    up: migration_20260803_180000_neurofrigo_knowledge_hub.up,
+    down: migration_20260803_180000_neurofrigo_knowledge_hub.down,
+    name: '20260803_180000_neurofrigo_knowledge_hub',
   },
 ];

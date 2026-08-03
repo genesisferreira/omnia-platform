@@ -165,7 +165,13 @@ export const Users: CollectionConfig = {
   access: {
     admin: ({ req: { user } }) => {
       const role = getUserRole(user);
-      return role === 'super_admin' || role === 'admin' || role === 'editor';
+      return (
+        role === 'super_admin' ||
+        role === 'admin' ||
+        role === 'editor' ||
+        role === 'neurofrigo_admin' ||
+        role === 'technical_reviewer'
+      );
     },
     read: usersReadAccess,
     create: usersCreateAccess,

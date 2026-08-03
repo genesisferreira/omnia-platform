@@ -7,6 +7,8 @@ export const PLATFORM_ROLES = [
   'super_admin',
   'admin',
   'editor',
+  'neurofrigo_admin',
+  'technical_reviewer',
   'partner',
   'instructor',
   'student',
@@ -16,7 +18,13 @@ export const PLATFORM_ROLES = [
 export type PlatformRole = (typeof PLATFORM_ROLES)[number];
 
 /** Papéis com acesso ao painel administrativo global (Next frontend + Payload Admin). */
-export const STAFF_ROLES = ['super_admin', 'admin', 'editor'] as const;
+export const STAFF_ROLES = [
+  'super_admin',
+  'admin',
+  'editor',
+  'neurofrigo_admin',
+  'technical_reviewer',
+] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 /** Papéis sem painel global — áreas próprias futuras + Portal. */
@@ -27,6 +35,8 @@ export const PLATFORM_ROLE_LABELS: Record<PlatformRole, string> = {
   super_admin: 'Super administrador',
   admin: 'Administrador',
   editor: 'Editor',
+  neurofrigo_admin: 'Administrador Neurofrigo',
+  technical_reviewer: 'Revisor técnico',
   partner: 'Parceiro',
   instructor: 'Instrutor',
   student: 'Aluno',

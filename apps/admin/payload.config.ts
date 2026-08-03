@@ -33,6 +33,13 @@ import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
 import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
+import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
+import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
+import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
+import { KnowledgeDocuments } from './src/collections/knowledge/KnowledgeDocuments';
+import { KnowledgeProcessingJobs } from './src/collections/knowledge/KnowledgeProcessingJobs';
+import { KnowledgeReviews } from './src/collections/knowledge/KnowledgeReviews';
+import { KnowledgeSources } from './src/collections/knowledge/KnowledgeSources';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
@@ -56,6 +63,8 @@ import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { LmsSettings } from './src/globals/LmsSettings';
+import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
+import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 import { migrations } from './src/migrations';
 
@@ -105,8 +114,21 @@ export default buildConfig({
     Partners,
     LmsIdentityLinks,
     LmsAuditEvents,
+    KnowledgeDocuments,
+    KnowledgeCategories,
+    KnowledgeSources,
+    KnowledgeReviews,
+    KnowledgeProcessingJobs,
+    KnowledgeAuditEvents,
+    KnowledgeAgentAccess,
   ],
-  globals: [GlobalSettings, PartnerNetworkDashboard, LmsSettings],
+  globals: [
+    GlobalSettings,
+    PartnerNetworkDashboard,
+    LmsSettings,
+    NeurofrigoKnowledgeSettings,
+    NeurofrigoKnowledgeDashboard,
+  ],
   endpoints: [
     resolveSiteEndpoint,
     publicCompaniesEndpoint,
