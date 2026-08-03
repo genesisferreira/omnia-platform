@@ -207,7 +207,17 @@ a {
   font-weight: 500;
   letter-spacing: 0.02em;
   color: rgba(247, 250, 252, 0.52);
+  margin-bottom: 0.65rem;
+}
+
+.hero__raffle-note {
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(247, 250, 252, 0.62);
+  max-width: 30rem;
   margin-bottom: 1.75rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(196, 132, 61, 0.65);
 }
 
 .hero__actions {
@@ -215,6 +225,100 @@ a {
   flex-wrap: wrap;
   gap: 0.85rem;
   align-items: center;
+}
+
+/* ---------- Evento especial (após Hero) ---------- */
+.section--event {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.event-block {
+  max-width: 48rem;
+}
+
+.event-block__intro {
+  margin-bottom: 2rem;
+}
+
+.event-block__intro h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--deep);
+  margin-bottom: 0.75rem;
+}
+
+.event-block__lead {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 38rem;
+  margin-bottom: 1.15rem;
+}
+
+.event-block__highlight {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--deep);
+  letter-spacing: -0.01em;
+  padding: 0.55rem 0;
+  border-bottom: 2px solid var(--copper);
+}
+
+.event-block__grid {
+  display: grid;
+  gap: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 720px) {
+  .event-block__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.event-block__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--emerald);
+  margin-bottom: 0.75rem;
+}
+
+.event-block__audience,
+.event-block__steps {
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.event-block__audience li,
+.event-block__steps li {
+  font-size: 1.02rem;
+  color: var(--deep);
+  padding-left: 1rem;
+  border-left: 2px solid var(--line);
+}
+
+.event-block__steps li {
+  counter-increment: event-step;
+}
+
+.event-block__steps {
+  counter-reset: event-step;
+}
+
+.event-block__steps li::before {
+  content: counter(event-step) '. ';
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--copper);
+  margin-right: 0.15rem;
 }
 
 .cta-notice {

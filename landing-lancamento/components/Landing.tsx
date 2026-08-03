@@ -2,6 +2,7 @@ import {
   BENEFITS,
   COMMUNITY_NOTICE,
   CTA_LABEL,
+  CTA_SECONDARY_LABEL,
   ECOSYSTEM,
   FOOTER_LINKS,
   WHATSAPP_COMMUNITY_URL,
@@ -76,11 +77,55 @@ export function Hero() {
             plataforma.
           </p>
           <p className="hero__date">Lançamento oficial previsto para o dia 20.</p>
+          <p className="hero__raffle-note">
+            🎁 No dia do lançamento acontecerá o sorteio de 20 cursos técnicos reconhecidos pelo
+            MEC.
+          </p>
           <div className="hero__actions">
             <CommunityCta />
           </div>
           <p className="cta-notice">{COMMUNITY_NOTICE}</p>
         </div>
+      </div>
+    </section>
+  )
+}
+
+export function LaunchEvent() {
+  return (
+    <section className="section section--event" aria-labelledby="evento-title">
+      <div className="container event-block">
+        <div className="event-block__intro">
+          <h2 id="evento-title">🎁 Evento Especial de Lançamento</h2>
+          <p className="event-block__lead">
+            No dia 20 a Omnia Frigo realizará um sorteio exclusivo para os participantes da
+            Comunidade Oficial.
+          </p>
+          <p className="event-block__highlight">
+            🎓 20 Cursos Técnicos reconhecidos pelo MEC
+          </p>
+        </div>
+
+        <div className="event-block__grid">
+          <div>
+            <p className="event-block__label">O sorteio será destinado a:</p>
+            <ul className="event-block__audience">
+              <li>MEIs</li>
+              <li>Microempresas</li>
+              <li>Pequenas Empresas</li>
+            </ul>
+          </div>
+          <div>
+            <p className="event-block__label">Como participar</p>
+            <ol className="event-block__steps">
+              <li>Entre na Comunidade Oficial.</li>
+              <li>Permaneça no grupo até o dia do lançamento.</li>
+              <li>Aguarde o sorteio oficial.</li>
+            </ol>
+          </div>
+        </div>
+
+        <CommunityCta className="btn-cta" label={CTA_SECONDARY_LABEL} />
       </div>
     </section>
   )

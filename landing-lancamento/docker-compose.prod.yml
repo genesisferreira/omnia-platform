@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: omnia-landing-lancamento:1.0.0
+    image: omnia-landing-lancamento:1.0.1
     container_name: omnia-landing-lancamento
     restart: unless-stopped
     networks:

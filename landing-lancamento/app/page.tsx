@@ -6,6 +6,7 @@ import {
   Footer,
   Header,
   Hero,
+  LaunchEvent,
   WhyNow,
 } from '@/components/Landing'
 
@@ -15,6 +16,7 @@ export default function Page() {
       <Header />
       <main id="conteudo">
         <Hero />
+        <LaunchEvent />
         <Benefits />
         <Authority />
         <WhyNow />

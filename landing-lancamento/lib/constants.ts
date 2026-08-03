@@ -7,6 +7,7 @@ export const CANONICAL_PATH = '/lancamento'
 export const CANONICAL_URL = `${SITE_URL}${CANONICAL_PATH}`
 
 export const CTA_LABEL = 'Quero acesso antecipado'
+export const CTA_SECONDARY_LABEL = 'Quero participar'
 
 export const FOOTER_LINKS = [
   { label: 'Política de Privacidade', href: `${SITE_URL}/privacidade` },
