@@ -1,0 +1,37 @@
+# Landing Pré-Lançamento v1.0 — serviço isolado (produção)
+# Uso na VPS (rede Traefik existente):
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Não altera LMS, portal web nem Neurofrigo.
+
+services:
+  omnia-landing-lancamento:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: omnia-landing-lancamento:1.0.0
+    container_name: omnia-landing-lancamento
+    restart: unless-stopped
+    networks:
+      - omnia_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      - traefik.http.routers.omnia-landing-lancamento.rule=Host(`omniafrigo.com.br`) && PathPrefix(`/lancamento`)
+      - traefik.http.routers.omnia-landing-lancamento.entrypoints=websecure
+      - traefik.http.routers.omnia-landing-lancamento.tls=true
+      - traefik.http.routers.omnia-landing-lancamento.tls.certresolver=letsencrypt
+      - traefik.http.routers.omnia-landing-lancamento.priority=100
+      - traefik.http.routers.omnia-landing-lancamento.service=omnia-landing-lancamento
+      - traefik.http.services.omnia-landing-lancamento.loadbalancer.server.port=3000
+      - traefik.http.routers.omnia-landing-lancamento-www.rule=Host(`www.omniafrigo.com.br`) && PathPrefix(`/lancamento`)
+      - traefik.http.routers.omnia-landing-lancamento-www.entrypoints=websecure
+      - traefik.http.routers.omnia-landing-lancamento-www.tls=true
+      - traefik.http.routers.omnia-landing-lancamento-www.tls.certresolver=letsencrypt
+      - traefik.http.routers.omnia-landing-lancamento-www.priority=100
+      - traefik.http.routers.omnia-landing-lancamento-www.middlewares=omnia-platform-www-redirect
+      - traefik.http.routers.omnia-landing-lancamento-www.service=omnia-landing-lancamento
+
+networks:
+  omnia_proxy:
+    external: true
