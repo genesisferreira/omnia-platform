@@ -10,11 +10,11 @@
 | **URL** | https://omniafrigo.com.br/lancamento |
 | **Ambiente** | Produção (VPS `omnia-server` · Traefik PathPrefix `/lancamento`) |
 | **Data** | 2026-08-03 |
-| **Hora** | (preenchida no commit de publicação) |
+| **Hora** | 14:04:37 -03:00 |
 | **Responsável** | Genesis Ferreira Esteves |
 | **Branch** | `release/landing-v1.0` |
 | **Tag** | `landing-v1.0.1` |
-| **Commit** | *(preenchido após git tag)* |
+| **Commit** | `029c4c02ef45a2560fefa192c0632c84eb397b43` (`029c4c0`) |
 | **Status** | 🟢 PRODUÇÃO |
 
 ## Conteúdo publicado
