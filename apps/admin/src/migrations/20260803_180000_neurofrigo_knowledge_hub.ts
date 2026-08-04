@@ -167,7 +167,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
     DO $$ BEGIN
-      CREATE TYPE "public"."enum_neurofrigo_knowledge_settings_default_security_classification" AS ENUM(
+      CREATE TYPE "public"."enum_nk_settings_def_sec_class" AS ENUM(
         'PUBLIC','CLIENT_PARTNER','STUDENT','TEACHER_MANAGER','INTERNAL_RESTRICTED'
       );
     EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -929,7 +929,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "knowledge_hub_enabled" boolean DEFAULT true,
       "ingestion_mode" "public"."enum_neurofrigo_knowledge_settings_ingestion_mode" DEFAULT 'manual' NOT NULL,
       "require_human_approval" boolean DEFAULT true,
-      "default_security_classification" "public"."enum_neurofrigo_knowledge_settings_default_security_classification" DEFAULT 'INTERNAL_RESTRICTED',
+      "default_security_classification" "public"."enum_nk_settings_def_sec_class" DEFAULT 'INTERNAL_RESTRICTED',
       "default_language" varchar DEFAULT 'pt-BR',
       "default_validity_days" numeric DEFAULT 365,
       "allow_web_research" boolean DEFAULT false,

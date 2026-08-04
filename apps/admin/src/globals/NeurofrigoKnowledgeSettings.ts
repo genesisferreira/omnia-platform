@@ -55,6 +55,8 @@ export const NeurofrigoKnowledgeSettings: GlobalConfig = {
     {
       name: 'defaultSecurityClassification',
       type: 'select',
+      // Postgres identifier limit is 63 chars; auto name exceeds it.
+      enumName: 'enum_nk_settings_def_sec_class',
       defaultValue: 'INTERNAL_RESTRICTED',
       label: 'Classificação padrão',
       options: optionsFrom(SECURITY_CLASSIFICATIONS),
