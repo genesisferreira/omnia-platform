@@ -3,41 +3,39 @@
 > **Macroentrega 01 — Knowledge Hub Foundation**  
 > Ambiente: **staging/DEV apenas**. Produção e landing de lançamento **intactas**.
 
-## Registro ME01.2 (2026-08-03)
+## Registro ME01.2 (2026-08-04) — deploy staging
 
 | Item | Valor |
 |------|-------|
-| Branch | `feature/neurofrigo-knowledge-hub` |
+| Branch VPS | `feature/neurofrigo-knowledge-hub` |
 | Worktree local | `C:\Users\genes\omnia-kh-wt` |
-| Commit docs | `8c5bc78` — specs Neurofrigo / Knowledge Hub |
-| Commit foundation | `648e4cc` — `feat(neurofrigo): create knowledge hub foundation` |
-| Remote | `origin/feature/neurofrigo-knowledge-hub` @ `648e4cc` (push OK) |
-| Build Admin local | ✅ `pnpm --filter @omnia/admin build` exit 0 (com `NODE_PATH` apontando deps de `@omnia/ui`) |
-| Testes package | ✅ 10/10 `test-workflow-acl` |
-| Testes admin script | ✅ 4/4 `test-knowledge-hub` |
-| Typecheck `@omnia/neurofrigo-knowledge` | ✅ |
-| Lint escopo ME01 | ✅ |
-| Deploy VPS `/opt/omnia/platform` | ❌ **bloqueado** — sem chave SSH neste agente (`Permission denied (publickey)` para `root@`/`genesis@dev.omniafrigo.com.br`; apenas `known_hosts` presente) |
-| Backup staging | ❌ não executado (depende SSH) |
-| Migration staging | ❌ não executada (depende SSH) |
-| Seed staging | ❌ não executado (depende SSH) |
-| Homologação Admin UI DEV | ❌ não executada (depende SSH) |
-| Produção / Landing / Moodle / Web | ✅ **não tocados** nesta sessão |
+| Tip remote / VPS | `0edb897` — `fix(neurofrigo): shorten knowledge settings security enum name` |
+| Ancestrais | `dee769f` seed bootstrap · `648e4cc` foundation · `8c5bc78` docs |
+| PREV_HEAD VPS (antes) | `d69ab50` em `feature/omnia-lms-media-authorization` |
+| Postgres alvo | `omnia-postgres` / DB `omnia_staging` / user `omnia_admin` (**não** `omnia-platform-postgres-prod`) |
+| Backup | `/opt/omnia/backups/staging/knowledge-hub-me01-20260804-150321/` · dump sha256 `1b9cb1cbee69616a972215ee37732a15831f5c9f17d7daac4338528437918266` |
+| Build Admin DEV | ✅ `docker compose … --profile bootstrap build admin admin-migrate` |
+| Migration staging | ✅ `MIGRATE_OK` (`20260803_180000_neurofrigo_knowledge_hub`) |
+| Seed staging | ✅ `knowledge.hub.seed_complete` / `SEED_OK` |
+| Admin DEV health | ✅ `https://admin.dev.omniafrigo.com.br/api/health` → database up |
+| Web DEV | ✅ `https://dev.omniafrigo.com.br/` HTTP 200 · container healthy |
+| Schema KH | ✅ 27 tabelas `knowledge*` / `neurofrigo_knowledge*` |
+| Landing | ✅ `omnia-landing-lancamento` imagem `1.0.1` — **não** recriada |
+| Admin prod | ✅ `omnia-platform-admin-prod` healthy — **não** tocado |
+| Homologação Admin UI (CRUD/workflow) | ⏳ pendente (manual no Admin DEV) |
 
-### Pré-requisito para retomar deploy DEV
+### Incidente resolvido no caminho
 
-1. Disponibilizar acesso SSH autenticado à VPS (`/opt/omnia/platform`).  
-2. Executar seções 5–21 do plano ME01.2 (backup → pull → build admin → migrate → seed → homologação).  
-3. Atualizar este documento com evidências DEV e declarar GO/NO-GO.
+1ª tentativa de migrate falhou: enum auto `enum_neurofrigo_knowledge_settings_default_security_classification` (66 chars > 63). Corrigido com `enumName: 'enum_nk_settings_def_sec_class'` + migration alinhada (`0edb897`). DB staging intacta até o retry (falha ocorreu no init do schema, antes do SQL).
 
-### Rollback documentado (quando houver PREV_HEAD na VPS)
+### Rollback documentado
 
 | Artefato | Uso |
 |----------|-----|
-| `PREV_HEAD` | `git checkout` / `git reset --hard` do monorepo em `/opt/omnia/platform` |
-| Imagem Admin anterior | `docker compose ... up` com tag/digest registrado |
-| Backup `omnia_staging` | `pg_restore` / procedimento oficial do projeto |
-| Migration down | `20260803_180000_neurofrigo_knowledge_hub.down` **somente** se aplicada e aprovado rollback |
+| `PREV_HEAD` | `d69ab50` / branch LMS — checkout apenas se aprovado rollback de código |
+| Imagem Admin anterior | digest pré-deploy em `MANIFEST.txt` do backup |
+| Backup `omnia_staging` | `/opt/omnia/backups/staging/knowledge-hub-me01-20260804-150321/omnia_staging.dump` |
+| Migration down | `20260803_180000_neurofrigo_knowledge_hub` `down()` **somente** se aprovado |
 
 ## Pré-condições
 
@@ -51,19 +49,19 @@
 
 ## 1. Migrate
 
-- [ ] Aplicar migration `20260803_180000_neurofrigo_knowledge_hub` (ou equivalente) no Postgres **staging**  
-- [ ] Confirmar collections/tabelas Knowledge Hub criadas  
-- [ ] Confirmar globals `neurofrigo-knowledge-settings` e `neurofrigo-knowledge-dashboard`  
-- [ ] Confirmar `_knowledge_documents_v`, FKs, arrays, `event_at`, locked docs rels  
-- [ ] **Não** rodar migrate contra produção
+- [x] Aplicar migration `20260803_180000_neurofrigo_knowledge_hub` no Postgres **staging** (`omnia_staging`)  
+- [x] Confirmar collections/tabelas Knowledge Hub criadas (27 tabelas)  
+- [x] Confirmar globals `neurofrigo_knowledge_settings` e `neurofrigo_knowledge_dashboard`  
+- [x] Confirmar `_knowledge_documents_v` (+ arrays/rels)  
+- [x] **Não** rodar migrate contra produção
 
 ## 2. Seed
 
-- [ ] `pnpm --filter @omnia/admin seed:knowledge-hub` (ou script documentado no Admin / target compose)  
-- [ ] Categorias sugeridas presentes (ex.: CO₂, SCADA, Refrigeração…)  
-- [ ] `knowledge-agent-access` com todas as `AGENT_KEYS` (incl. `command`)  
-- [ ] Settings: `ingestionMode=manual`, `requireHumanApproval=true`, web research **false**, `commandAllowedRoles` ⊇ `super_admin`, `futureVectorStore=placeholder`  
-- [ ] Seed **não** criou documentos técnicos sensíveis com `allowAiUse=true`
+- [x] Bootstrap `knowledge-hub` via `omnia-admin-bootstrap.sh` → `seed:knowledge-hub`  
+- [ ] Categorias sugeridas presentes (ex.: CO₂, SCADA, Refrigeração…) — validar no Admin UI  
+- [ ] `knowledge-agent-access` com todas as `AGENT_KEYS` (incl. `command`) — validar no Admin UI  
+- [ ] Settings defaults seguros — validar no Admin UI  
+- [x] Seed log `knowledge.hub.seed_complete` (sem docs técnicos sensíveis no script)
 
 ## 3. CRUD Admin
 
@@ -109,21 +107,22 @@
 
 | Superfície | Critério | Status sessão ME01.2 |
 |------------|----------|----------------------|
-| **Produção** | Containers/compose/DB prod **não** alterados | ✅ não tocado |
-| **Landing** | Sem mudança de deploy; smoke URL landing OK | ✅ não tocado |
-| **Moodle / Web** | Containers DEV/prod LMS/web sem rebuild desta missão | ✅ não tocado |
+| **Produção** | Containers/compose/DB prod **não** alterados | ✅ admin-prod healthy, sem recreate |
+| **Landing** | Sem mudança de deploy; tag `1.0.1` | ✅ container Up, imagem `omnia-landing-lancamento:1.0.1` |
+| **Moodle / Web** | Web DEV healthy; sem rebuild forçado do web nesta missão | ✅ web 200 / healthy |
 | **Portal chat** | Sem feature Knowledge Hub ligada | ✅ |
 | **WhatsApp / ERP** | Ausentes | ✅ |
 
-## 8. Evidências sugeridas
+## 8. Evidências
 
-- Screenshot grupo Neurofrigo AI  
-- Log `knowledge.hub.seed_complete`  
-- Um doc draft sensível com flags corretas  
-- Um fluxo approve + audit event  
-- Confirmação explícita: prod + landing intactas  
-- Backup path + checksum staging  
-- HEAD VPS = `648e4cc`
+- [x] Backup path + checksum staging  
+- [x] HEAD VPS = `0edb897`  
+- [x] Log `knowledge.hub.seed_complete`  
+- [x] Health Admin DEV + Web DEV  
+- [x] Confirmação: prod + landing intactas  
+- [ ] Screenshot grupo Neurofrigo AI  
+- [ ] Um doc draft sensível com flags corretas  
+- [ ] Um fluxo approve + audit event  
 
 ## Critério GO ME01
 
@@ -131,4 +130,6 @@ Migrate + seed + CRUD + workflow + ACL OK em staging, sem embeddings/LLM, produ�
 
 ### Status atual
 
-**NO-GO homologação DEV completa** — código versionado e no remote; falta execução na VPS (SSH).
+**GO deploy staging (migrate + seed + health + isolamento)** — fundação aplicada em `omnia_staging` no tip `0edb897`.
+
+**PENDENTE GO homologação UI completa** — falta validação manual CRUD / workflow / ACL no Admin DEV (itens 3–5). Sem ME02 / RAG / prod.
