@@ -27,8 +27,10 @@ const normalizeAndGuardStatus: CollectionBeforeChangeHook = async ({
   }
 
   const nextStatus = data.status ?? originalDoc?.status;
+  // Seed/sistema (sem user) pode publicar; usuários precisam ser publisher.
   if (
     (nextStatus === 'published' || nextStatus === 'archived') &&
+    req.user &&
     !isLmsPublisher(req.user)
   ) {
     throw new APIError('Somente admin pode publicar ou arquivar cursos.', 403);
