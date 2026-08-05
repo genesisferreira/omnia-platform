@@ -1,4 +1,4 @@
-import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload';
+import type { CollectionSlug, Endpoint, PayloadRequest, Where } from 'payload';
 
 type ErrorBody = {
   ok: false;
@@ -77,13 +77,17 @@ export const publicCoursesEndpoint: Endpoint = {
       const pageSize = Math.min(50, Math.max(1, Number(url.searchParams.get('pageSize') || 12) || 12));
       const q = url.searchParams.get('q')?.trim() || null;
 
-      const and: Record<string, unknown>[] = [
+      const and: Where[] = [
         { status: { equals: 'published' } },
         { visibility: { equals: 'public' } },
       ];
       if (q) {
         and.push({
-          or: [{ title: { contains: q } }, { shortDescription: { contains: q } }, { category: { contains: q } }],
+          or: [
+            { title: { contains: q } },
+            { shortDescription: { contains: q } },
+            { category: { contains: q } },
+          ],
         });
       }
 
