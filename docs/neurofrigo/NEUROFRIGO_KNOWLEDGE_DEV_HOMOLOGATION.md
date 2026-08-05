@@ -3,6 +3,45 @@
 > **Macroentrega 01 — Knowledge Hub Foundation**  
 > Ambiente: **staging/DEV apenas**. Produção e landing de lançamento **intactas**.
 
+## Registro S0.1.1 (2026-08-05) — versionamento final Foundation
+
+| Item | Valor |
+|------|-------|
+| Tip VPS / remote | `f5c0f77` — `fix(audit): persist entity id and delete events` |
+| Commit LMS | `95771f7` — `fix(lms): version lms settings migration` |
+| Migration | `20260804_160000_lms_settings_provision_flags` (batch **16** em `payload_migrations`) |
+| Postgres | `omnia-postgres` / `omnia_staging` |
+| Admin DEV | healthy · `lms-settings` HTTP 200 · `provisionEnabled=true` |
+| Landing / Prod | intactos (`landing-lancamento:1.0.1`, admin-prod healthy) |
+
+### Causa raiz (LMS → Políticas 404)
+
+Código do Global `lms-settings` incluía `provisionEnabled` / `provisionDryRun`, mas a migration foundation `20260731_160000_lms_connector_foundation` não criava as colunas. `findGlobal` falhava com `column "provision_enabled" does not exist` e o Admin renderizava **404**.
+
+### Solução
+
+1. Migration idempotente `ADD COLUMN IF NOT EXISTS` (compatível com staging já corrigido via SQL manual em S0.1).  
+2. `payload migrate` registrou a migration (batch 16); colunas já presentes → no-op seguro.  
+3. Auditoria Knowledge: create passou de `beforeChange` → `afterChange` (entityId persistido); delete via `afterDelete`.
+
+### Homologação Local API (S0.1.1)
+
+| Check | Resultado |
+|-------|-----------|
+| Create / Update / Delete | ✅ |
+| Workflow `draft` → `in_review` | ✅ |
+| Audit create com `entityId` | ✅ (`"2"`) |
+| Audit workflow | ✅ |
+| Audit delete (`operation=delete`) | ✅ |
+| Schema drift LMS restante | ❌ nenhum (`missing_in_db []`) |
+| Migrations pendentes | ❌ nenhuma após batch 16 |
+
+### Status
+
+**GO encerramento ME01 Foundation (staging)** — código ↔ migration ↔ banco ↔ Payload ↔ Git sincronizados; CRUD + workflow + audit create/update/delete OK via Local API. UI manual no Admin continua opcional para evidência visual. Sem ME02.
+
+---
+
 ## Registro ME01.2 (2026-08-04) — deploy staging
 
 | Item | Valor |
@@ -130,6 +169,4 @@ Migrate + seed + CRUD + workflow + ACL OK em staging, sem embeddings/LLM, produ�
 
 ### Status atual
 
-**GO deploy staging (migrate + seed + health + isolamento)** — fundação aplicada em `omnia_staging` no tip `0edb897`.
-
-**PENDENTE GO homologação UI completa** — falta validação manual CRUD / workflow / ACL no Admin DEV (itens 3–5). Sem ME02 / RAG / prod.
+**GO encerramento Foundation ME01 (S0.1.1)** — tip `f5c0f77`; migration LMS provision flags registrada; auditoria create/delete OK; staging saudável; produção e landing intactas. Sem ME02 / RAG / Runtime.

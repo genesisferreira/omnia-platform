@@ -62,7 +62,15 @@ Registro explícito da decisão humana:
 
 ## Auditoria
 
-Mudanças de status / ACL / classificação geram eventos em `knowledge-audit-events` (payload sanitizado — sem corpo completo do documento nem secrets).
+Eventos em `knowledge-audit-events` (payload sanitizado — sem corpo completo do documento nem secrets):
+
+| Operação | Hook | `entityId` |
+|----------|------|------------|
+| Create | `afterChange` | ID do documento criado |
+| Update (status / ACL / classificação) | `beforeChange` | ID existente |
+| Delete | `afterDelete` | ID do documento removido |
+
+Campos típicos: `actor`, `action` (operation), `entityType`, `entityId`, `eventAt`, `reason` (`operation=…;tenant=…` via `ownerCompany` quando houver).
 
 ## Defaults para material técnico sensível
 
