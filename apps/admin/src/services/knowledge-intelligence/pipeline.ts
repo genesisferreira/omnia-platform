@@ -521,7 +521,7 @@ export async function processLearningResource(args: {
           chunk: chunkDoc.id,
           status: 'pending',
           attempts: 0,
-          provider: 'none',
+          provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',
           scheduledAt: new Date().toISOString(),
         },
         overrideAccess: true,

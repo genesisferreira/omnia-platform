@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { kiPublisherAccess, kiStaffAccess } from '../../access/knowledge-intelligence';
+import { knowledgeChunkAfterChangeForRetrieval } from '../../services/retrieval/hooks';
 
 export const KnowledgeChunks: CollectionConfig = {
   slug: 'knowledge-chunks',
@@ -27,6 +28,9 @@ export const KnowledgeChunks: CollectionConfig = {
     create: kiStaffAccess,
     update: kiStaffAccess,
     delete: kiPublisherAccess,
+  },
+  hooks: {
+    afterChange: [knowledgeChunkAfterChangeForRetrieval],
   },
   fields: [
     {

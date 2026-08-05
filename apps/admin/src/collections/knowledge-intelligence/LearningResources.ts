@@ -10,6 +10,7 @@ import {
   learningResourceAfterChange,
   learningResourceBeforeChange,
 } from '../../services/knowledge-intelligence/hooks';
+import { learningResourceAfterChangeForRetrieval } from '../../services/retrieval/hooks';
 
 function optionsFrom(values: readonly string[]) {
   return values.map((value) => ({ label: value, value }));
@@ -41,7 +42,7 @@ export const LearningResources: CollectionConfig = {
   },
   hooks: {
     beforeChange: [learningResourceBeforeChange],
-    afterChange: [learningResourceAfterChange],
+    afterChange: [learningResourceAfterChange, learningResourceAfterChangeForRetrieval],
   },
   fields: [
     { name: 'title', type: 'text', required: true, index: true, label: 'Título' },

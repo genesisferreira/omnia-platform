@@ -45,6 +45,7 @@ import {
   KnowledgeChunks,
   LearningResources,
 } from './src/collections/knowledge-intelligence';
+import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -81,10 +82,12 @@ import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { LmsSettings } from './src/globals/LmsSettings';
 import { KiIntelligenceDashboard } from './src/globals/KiIntelligenceDashboard';
+import { RetrievalDashboard } from './src/globals/RetrievalDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 import { migrations } from './src/migrations';
+import { retrievalEndpoints } from './src/endpoints/retrieval';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -140,6 +143,8 @@ export default buildConfig({
     KnowledgeChunks,
     EmbeddingQueue,
     KiProcessingRuns,
+    EmbeddingRecords,
+    SearchSessions,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -155,6 +160,7 @@ export default buildConfig({
     NeurofrigoKnowledgeSettings,
     NeurofrigoKnowledgeDashboard,
     KiIntelligenceDashboard,
+    RetrievalDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,
@@ -177,6 +183,7 @@ export default buildConfig({
     publicCourseEndpoint,
     publicLessonEndpoint,
     ...lmsEndpoints,
+    ...retrievalEndpoints,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

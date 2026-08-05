@@ -17,6 +17,7 @@ import * as migration_20260803_180000_neurofrigo_knowledge_hub from './20260803_
 import * as migration_20260804_160000_lms_settings_provision_flags from './20260804_160000_lms_settings_provision_flags';
 import * as migration_20260805_140000_lms_core from './20260805_140000_lms_core';
 import * as migration_20260805_180000_knowledge_intelligence from './20260805_180000_knowledge_intelligence';
+import * as migration_20260805_200000_retrieval_engine from './20260805_200000_retrieval_engine';
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20260805_180000_knowledge_intelligence.up,
     down: migration_20260805_180000_knowledge_intelligence.down,
     name: '20260805_180000_knowledge_intelligence',
+  },
+  {
+    up: migration_20260805_200000_retrieval_engine.up,
+    down: migration_20260805_200000_retrieval_engine.down,
+    name: '20260805_200000_retrieval_engine',
   },
 ];

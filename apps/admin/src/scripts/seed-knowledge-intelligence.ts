@@ -8,6 +8,8 @@
  * Importante: NÃO importar payload/config no topo — isso quebra pdf-parse.
  * Extrair PDF com imports dinâmicos antes do boot Payload.
  */
+export {};
+
 const COURSE_SLUG = 'fundamentos-refrigeracao-industrial';
 
 async function main() {

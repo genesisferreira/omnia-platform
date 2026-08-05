@@ -47,6 +47,9 @@
     "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
     "seed:knowledge-intelligence": "tsx src/scripts/seed-knowledge-intelligence.ts",
     "test:knowledge-intelligence": "tsx --test ../../packages/knowledge-intelligence/src/**/test-*.ts && tsx --test src/scripts/test-knowledge-intelligence.ts",
+    "seed:retrieval": "tsx src/scripts/seed-retrieval.ts",
+    "test:retrieval": "tsx --test ../../packages/retrieval/src/**/test-*.ts && tsx --test src/scripts/test-retrieval.ts",
+    "retrieval:worker": "tsx src/scripts/run-retrieval-worker.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
@@ -60,6 +63,7 @@
     "@omnia/monitoring": "workspace:*",
     "@omnia/neurofrigo-knowledge": "workspace:*",
     "@omnia/knowledge-intelligence": "workspace:*",
+    "@omnia/retrieval": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",
@@ -71,6 +75,7 @@
     "next": "catalog:",
     "nodemailer": "^9.0.3",
     "payload": "catalog:",
+    "postgres": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sharp": "catalog:"

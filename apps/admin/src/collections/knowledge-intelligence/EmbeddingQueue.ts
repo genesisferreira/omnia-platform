@@ -8,7 +8,7 @@ function optionsFrom(values: readonly string[]) {
 }
 
 /**
- * Fila de embeddings — apenas estados. Nenhum provider/SDK nesta entrega.
+ * Fila de embeddings — consumida pelo Retrieval Worker (EPIC 04).
  */
 export const EmbeddingQueue: CollectionConfig = {
   slug: 'embedding-queue',
@@ -20,7 +20,8 @@ export const EmbeddingQueue: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['status', 'learningResource', 'knowledgeDocument', 'attempts', 'updatedAt'],
     group: 'Knowledge Intelligence',
-    description: 'Fila de embeddings futuros. Status only — sem DeepSeek/OpenAI/vector DB.',
+    description:
+      'Fila de embeddings. Worker: pending → processing → vector store → completed/failed.',
   },
   timestamps: true,
   access: {
@@ -71,9 +72,11 @@ export const EmbeddingQueue: CollectionConfig = {
     {
       name: 'provider',
       type: 'text',
-      defaultValue: 'none',
+      defaultValue: 'deterministic',
       label: 'Provider',
-      admin: { description: 'Sempre none até GO de embeddings.' },
+      admin: {
+        description: 'Provider configurável via RETRIEVAL_EMBEDDING_PROVIDER (default deterministic).',
+      },
     },
     {
       name: 'lastError',
