@@ -47,10 +47,12 @@ async function main() {
     lessons.docs.find((l) => (l as { type?: string }).type === 'pdf') ?? lessons.docs[0];
 
   const pdf = buildKiSeedPdf();
+  const pdfBytes = Buffer.from(pdf);
   const txt = Buffer.from(
     'Omnia Knowledge Intelligence — checklist TXT.\n\nSeguranca, ciclo de compressao e boas praticas.\n',
     'utf8',
   );
+  const txtBytes = Buffer.from(txt);
 
   const pdfMedia = await payload.create({
     collection: 'media',
@@ -120,14 +122,14 @@ async function main() {
   const pdfResult = await processLearningResource({
     payload,
     learningResourceId: pdfResource.id,
-    sourceBuffer: pdf,
+    sourceBuffer: pdfBytes,
     sourceMimeType: 'application/pdf',
     sourceFilename: 'ki-seed.pdf',
   });
   const txtResult = await processLearningResource({
     payload,
     learningResourceId: txtResource.id,
-    sourceBuffer: txt,
+    sourceBuffer: txtBytes,
     sourceMimeType: 'text/plain',
     sourceFilename: 'ki-seed.txt',
   });

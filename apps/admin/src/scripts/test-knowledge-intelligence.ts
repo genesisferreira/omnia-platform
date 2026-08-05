@@ -17,6 +17,7 @@ describe('knowledge-intelligence e2e', () => {
     const pdf = buildKiSeedPdf(
       'Omnia KI E2E. Conteudo de teste para extracao, normalizacao e chunking do pipeline Knowledge Intelligence.',
     );
+    const pdfBytes = Buffer.from(pdf);
 
     const media = await payload.create({
       collection: 'media',
@@ -52,7 +53,7 @@ describe('knowledge-intelligence e2e', () => {
     const result = await processLearningResource({
       payload,
       learningResourceId: resource.id,
-      sourceBuffer: pdf,
+      sourceBuffer: pdfBytes,
       sourceMimeType: 'application/pdf',
       sourceFilename: 'ki-e2e.pdf',
     });
