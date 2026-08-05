@@ -2,6 +2,7 @@
 
 **Data:** 2026-08-05  
 **Branch:** `feature/neurofrigo-knowledge-hub`  
+**Tip:** `bf00497`  
 **Worktree:** `C:\Users\genes\omnia-kh-wt`  
 **Escopo:** fábrica de conhecimento apenas (sem Runtime / Chat / embeddings).
 
@@ -17,9 +18,8 @@
 | Processing Run | `ki-processing-runs` | Processing |
 | Dashboard | `ki-intelligence-dashboard` | Dashboard KI |
 
-Package: `@omnia/knowledge-intelligence` (extract / normalize / chunk).
-
-Migration: `20260805_180000_knowledge_intelligence`.
+Package: `@omnia/knowledge-intelligence` (extract / normalize / chunk).  
+Migration: `20260805_180000_knowledge_intelligence` (aplicada em staging).
 
 ---
 
@@ -31,67 +31,62 @@ Media → LearningResource → Extract → Normalize → Chunk → Metadata
 ```
 
 Extratores ativos: PDF, TXT, Markdown.  
-Stubs arquiteturais: DOCX, PPTX, HTML, video_transcript, OCR.
+Stubs: DOCX, PPTX, HTML, video_transcript, OCR.
+
+**Nota operacional:** `pdf-parse` conflita com o boot do Payload no mesmo processo. Seed/e2e fazem pre-extract (ou `preExtracted`) antes de `getPayload`. Hooks Admin em runtime usam disco/Media; PDF em processo limpo funciona (unit + seed).
 
 ---
 
 ## 3. Fluxo de processamento
 
 1. Hook `lesson-assets` → `ensureLearningResourceFromLessonAsset`
-2. `processLearningResource` (serviço)
-3. Persistência de texto/meta/chunks
-4. Upsert `knowledge-documents` (`allowAiUse=false`, unpublished)
-5. Itens de fila `pending` (um por chunk)
-6. Refresh do dashboard
+2. `processLearningResource` (extract/normalize/chunk/hub/queue)
+3. Knowledge Document com `allowAiUse=false`, unpublished
+4. Fila `embedding-queue` pending (sem provider)
+5. Refresh dashboard KI
 
 ---
 
-## 4. Integração com LMS
+## 4–5. Integrações LMS / Knowledge Hub
 
-Learning Resource herda course / module / lesson / company / instructor a partir do Lesson Asset.  
-IA **não** lê Media diretamente.
-
----
-
-## 5. Integração com Knowledge Hub
-
-Documento criado/atualizado em `knowledge-documents` com `processingStatus=queued`, sem chamar providers.
+- Learning Resource é a única porta de leitura para IA (não Media direta).
+- Proveniência: course / module / lesson / company / instructor.
+- Hub: `knowledge-documents` draft, `processingStatus=queued`.
 
 ---
 
-## 6. Testes
+## 6. Testes (staging)
 
 | Suite | Resultado |
 |-------|-----------|
-| `@omnia/knowledge-intelligence` unit (normalize/chunk/txt/pdf) | PASS (4/4) |
-| `test:knowledge-intelligence` e2e (Admin + DB) | depende de migrate + DATABASE_URL (staging/local) |
+| `@omnia/knowledge-intelligence` unit | PASS (4/4) |
+| `seed:knowledge-intelligence` | PASS — `pdfOk: true`, `txtOk: true` |
+| e2e Admin PDF+TXT | PASS (2/2) |
 
-Comandos:
-
-```bash
-pnpm --filter @omnia/knowledge-intelligence test
-pnpm --filter @omnia/admin migrate
-pnpm --filter @omnia/admin seed:lms-core
-pnpm --filter @omnia/admin seed:knowledge-intelligence
-pnpm --filter @omnia/admin test:knowledge-intelligence
-```
+Evidência seed: `completedResources≥8`, `chunks≥8`, `queuePending≥8`, Knowledge Documents criados.
 
 ---
 
-## 7. Evidências
+## 7. Evidências staging
 
-- Menu Admin: **Knowledge Intelligence** (Resources, Processing, Queue, Chunks, Dashboard KI)
-- Seed processa PDF/TXT do LMS Core
-- Filas com `provider=none` e status `pending`
-- Sem SDKs OpenAI/DeepSeek; sem Runtime/Chat
-
-*(Preencher após deploy staging: migrate status, seed log, counts.)*
+- Migration `20260805_180000_knowledge_intelligence` OK
+- Menu Admin: **Knowledge Intelligence**
+- Landing `omnia-landing-lancamento:1.0.1` intacta
+- Admin health OK; prod admin não alterado neste fluxo
+- Sem embeddings / Runtime / Chat
 
 ---
 
-## 8. Commits
+## 8. Commits (principais)
 
-*(Preencher SHAs após versionamento.)*
+| SHA | Mensagem |
+|-----|----------|
+| `7197cdc` | feat(ki): deliver Knowledge Intelligence factory pipeline |
+| `14e2717` | fix(ki): drop .js extensions |
+| `c23a247` | fix(ki): cast Payload user ACL |
+| `dfed5bf`…`bf00497` | fixes PDF/preExtract/e2e isolation |
+
+Remote: `origin/feature/neurofrigo-knowledge-hub` @ **`bf00497`**
 
 ---
 
@@ -99,11 +94,12 @@ pnpm --filter @omnia/admin test:knowledge-intelligence
 
 | Critério | Status |
 |----------|--------|
-| Arquitetura extensível (tipos + fila + package) | GO |
-| Pipeline PDF→chunks→doc→fila sem embeddings | GO (código + unit PDF) |
+| Arquitetura extensível | GO |
+| PDF→chunks→doc→fila sem embeddings | GO (seed staging) |
+| TXT path | GO |
 | Sem Runtime/Chat/embeddings reais | GO |
-| Homologação staging migrate/seed/e2e | PENDENTE deploy |
+| Homologação staging | GO (migrate + seed + unit + e2e) |
 
-**Veredito provisório:** **GO CONDICIONAL** — código e testes unitários prontos; aguarda homologação staging e aprovação humana.
+**Veredito: GO** — aguardar aprovação humana.
 
 **PARAR.** Não iniciar Runtime / Chat / embeddings.
