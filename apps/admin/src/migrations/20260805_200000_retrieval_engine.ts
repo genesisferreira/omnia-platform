@@ -201,6 +201,27 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     CREATE INDEX IF NOT EXISTS "retrieval_vectors_chunk_idx" ON "retrieval_vectors" ("chunk_id");
     CREATE INDEX IF NOT EXISTS "retrieval_vectors_doc_idx" ON "retrieval_vectors" ("knowledge_document_id");
     CREATE INDEX IF NOT EXISTS "retrieval_vectors_resource_idx" ON "retrieval_vectors" ("learning_resource_id");
+
+    ALTER TABLE "payload_locked_documents_rels"
+      ADD COLUMN IF NOT EXISTS "embedding_records_id" integer;
+    ALTER TABLE "payload_locked_documents_rels"
+      ADD COLUMN IF NOT EXISTS "search_sessions_id" integer;
+
+    DO $$ BEGIN
+      ALTER TABLE "payload_locked_documents_rels"
+        ADD CONSTRAINT "payload_locked_documents_rels_embedding_records_fk"
+        FOREIGN KEY ("embedding_records_id") REFERENCES "public"."embedding_records"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN
+      ALTER TABLE "payload_locked_documents_rels"
+        ADD CONSTRAINT "payload_locked_documents_rels_search_sessions_fk"
+        FOREIGN KEY ("search_sessions_id") REFERENCES "public"."search_sessions"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+    CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_embedding_records_id_idx"
+      ON "payload_locked_documents_rels" USING btree ("embedding_records_id");
+    CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_search_sessions_id_idx"
+      ON "payload_locked_documents_rels" USING btree ("search_sessions_id");
   `);
 }
 
