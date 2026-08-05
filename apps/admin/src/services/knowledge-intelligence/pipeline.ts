@@ -213,8 +213,12 @@ export async function processLearningResource(args: {
   payload: Payload;
   learningResourceId: string | number;
   req?: PayloadRequest;
+  /** Buffer opcional (evita roundtrip em disco quando o caller já tem os bytes). */
+  sourceBuffer?: Buffer;
+  sourceMimeType?: string | null;
+  sourceFilename?: string | null;
 }): Promise<{ ok: boolean; chunkCount: number; knowledgeDocumentId?: string | number }> {
-  const { payload, learningResourceId, req } = args;
+  const { payload, learningResourceId, req, sourceBuffer, sourceMimeType, sourceFilename } = args;
   const correlationId = randomUUID();
   const startedAt = new Date().toISOString();
 
@@ -270,7 +274,19 @@ export async function processLearningResource(args: {
       context: { kiPipelineActive: true },
     });
 
-    const { buffer, mimeType, filename } = await resolveMediaBuffer(payload, mediaId);
+    let buffer: Buffer;
+    let mimeType: string | null;
+    let filename: string | null;
+    if (sourceBuffer && sourceBuffer.length > 0) {
+      buffer = sourceBuffer;
+      mimeType = sourceMimeType ?? null;
+      filename = sourceFilename ?? null;
+    } else {
+      const resolved = await resolveMediaBuffer(payload, mediaId);
+      buffer = resolved.buffer;
+      mimeType = resolved.mimeType;
+      filename = resolved.filename;
+    }
     const fileHash = sha256Hex(buffer);
     const extracted = await extractByType(resourceType as KiSupportedExtractType, buffer, {
       mimeType,

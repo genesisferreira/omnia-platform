@@ -56,7 +56,7 @@ async function main() {
     collection: 'media',
     data: { alt: 'KI Seed PDF' },
     file: {
-      data: pdf,
+      data: Uint8Array.from(pdf),
       mimetype: 'application/pdf',
       name: `ki-seed-${Date.now()}.pdf`,
       size: pdf.length,
@@ -69,7 +69,7 @@ async function main() {
     collection: 'media',
     data: { alt: 'KI Seed TXT' },
     file: {
-      data: txt,
+      data: Uint8Array.from(txt),
       mimetype: 'text/plain',
       name: `ki-seed-${Date.now()}.txt`,
       size: txt.length,
@@ -120,13 +120,19 @@ async function main() {
   const pdfResult = await processLearningResource({
     payload,
     learningResourceId: pdfResource.id,
+    sourceBuffer: pdf,
+    sourceMimeType: 'application/pdf',
+    sourceFilename: 'ki-seed.pdf',
   });
   const txtResult = await processLearningResource({
     payload,
     learningResourceId: txtResource.id,
+    sourceBuffer: txt,
+    sourceMimeType: 'text/plain',
+    sourceFilename: 'ki-seed.txt',
   });
 
-  // Best-effort: processar lesson-assets existentes (pode falhar se media volume ausente)
+  // Best-effort: lesson-assets legados (podem falhar se media volume ausente)
   const assets = await payload.find({
     collection: 'lesson-assets',
     limit: 50,
@@ -135,12 +141,16 @@ async function main() {
   });
   let assetProcessed = 0;
   for (const asset of assets.docs) {
-    const result = await ensureLearningResourceFromLessonAsset({
-      payload,
-      lessonAssetId: asset.id,
-      process: true,
-    });
-    if (result.processed) assetProcessed += 1;
+    try {
+      const result = await ensureLearningResourceFromLessonAsset({
+        payload,
+        lessonAssetId: asset.id,
+        process: true,
+      });
+      if (result.processed) assetProcessed += 1;
+    } catch {
+      // ignore legacy media missing on volume
+    }
   }
 
   await refreshKiDashboard(payload);

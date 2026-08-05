@@ -22,7 +22,7 @@ describe('knowledge-intelligence e2e', () => {
       collection: 'media',
       data: { alt: 'KI E2E PDF' },
       file: {
-        data: pdf,
+        data: Uint8Array.from(pdf),
         mimetype: 'application/pdf',
         name: `ki-e2e-${Date.now()}.pdf`,
         size: pdf.length,
@@ -52,6 +52,9 @@ describe('knowledge-intelligence e2e', () => {
     const result = await processLearningResource({
       payload,
       learningResourceId: resource.id,
+      sourceBuffer: pdf,
+      sourceMimeType: 'application/pdf',
+      sourceFilename: 'ki-e2e.pdf',
     });
 
     assert.equal(result.ok, true);

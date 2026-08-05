@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 
 import type { ExtractMeta, ExtractResult } from './types';
+
+const require = createRequire(import.meta.url);
 
 export function sha256Hex(buffer: Buffer): string {
   return createHash('sha256').update(buffer).digest('hex');
@@ -73,10 +76,10 @@ export async function extractPdf(
   buffer: Buffer,
   opts?: { mimeType?: string | null; filename?: string | null },
 ): Promise<ExtractResult> {
-  // pdf-parse is CJS; dynamic import for ESM consumers.
-  const mod = await import('pdf-parse');
-  const pdfParse = (mod as { default?: (b: Buffer) => Promise<{ text: string; numpages: number }> })
-    .default;
+  // Importa o entry interno para evitar o self-test do index.js do pdf-parse.
+  const pdfParse = require('pdf-parse/lib/pdf-parse.js') as (
+    b: Buffer,
+  ) => Promise<{ text: string; numpages: number }>;
   if (typeof pdfParse !== 'function') {
     throw new Error('PDF_PARSE_UNAVAILABLE');
   }
