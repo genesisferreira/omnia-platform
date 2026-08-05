@@ -8,7 +8,7 @@ import { adminsOnly } from '../access/rbac';
  */
 export const LmsSettings: GlobalConfig = {
   slug: 'lms-settings',
-  label: 'LMS — Políticas',
+  label: 'Políticas',
   admin: {
     group: 'LMS',
     description:

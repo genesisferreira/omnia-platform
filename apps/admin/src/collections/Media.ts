@@ -13,7 +13,21 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: 'media',
-    mimeTypes: ['image/*'],
+    mimeTypes: [
+      'image/*',
+      'video/*',
+      'application/pdf',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'text/markdown',
+    ],
     imageSizes: [
       {
         name: 'thumbnail',

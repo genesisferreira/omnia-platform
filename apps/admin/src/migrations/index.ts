@@ -15,6 +15,7 @@ import * as migration_20260724_180000_partner_geocoding_meta from './20260724_18
 import * as migration_20260731_160000_lms_connector_foundation from './20260731_160000_lms_connector_foundation';
 import * as migration_20260803_180000_neurofrigo_knowledge_hub from './20260803_180000_neurofrigo_knowledge_hub';
 import * as migration_20260804_160000_lms_settings_provision_flags from './20260804_160000_lms_settings_provision_flags';
+import * as migration_20260805_140000_lms_core from './20260805_140000_lms_core';
 
 export const migrations = [
   {
@@ -101,5 +102,10 @@ export const migrations = [
     up: migration_20260804_160000_lms_settings_provision_flags.up,
     down: migration_20260804_160000_lms_settings_provision_flags.down,
     name: '20260804_160000_lms_settings_provision_flags',
+  },
+  {
+    up: migration_20260805_140000_lms_core.up,
+    down: migration_20260805_140000_lms_core.down,
+    name: '20260805_140000_lms_core',
   },
 ];

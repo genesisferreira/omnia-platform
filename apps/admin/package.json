@@ -43,6 +43,8 @@
     "test:lms-bff-helpers": "tsx --test src/scripts/test-lms-bff-helpers.ts",
     "test:knowledge-hub": "tsx --test src/scripts/test-knowledge-hub.ts ../../packages/neurofrigo-knowledge/src/**/test-*.ts",
     "seed:knowledge-hub": "tsx src/scripts/seed-knowledge-hub.ts",
+    "seed:lms-core": "tsx src/scripts/seed-lms-core.ts",
+    "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {

@@ -33,6 +33,12 @@ import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
 import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
+import {
+  CourseModules,
+  Courses,
+  LessonAssets,
+  Lessons,
+} from './src/collections/lms';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -44,6 +50,11 @@ import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
 import { partnerRegisterEndpoint } from './src/endpoints/partner-register';
+import {
+  publicCourseEndpoint,
+  publicCoursesEndpoint,
+  publicLessonEndpoint,
+} from './src/endpoints/public-courses';
 import { publicPageEndpoint } from './src/endpoints/public-page';
 import {
   publicPartnerCategoriesEndpoint,
@@ -114,6 +125,10 @@ export default buildConfig({
     Partners,
     LmsIdentityLinks,
     LmsAuditEvents,
+    Courses,
+    CourseModules,
+    Lessons,
+    LessonAssets,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -146,6 +161,9 @@ export default buildConfig({
     publicPartnerSpecialtiesEndpoint,
     publicPostalCodeEndpoint,
     partnerRegisterEndpoint,
+    publicCoursesEndpoint,
+    publicCourseEndpoint,
+    publicLessonEndpoint,
     ...lmsEndpoints,
   ],
   editor: lexicalEditor(),
