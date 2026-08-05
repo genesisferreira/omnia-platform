@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { extractPdf } from '@omnia/knowledge-intelligence';
 import { getPayload } from 'payload';
 
 import config from '../../payload.config';
@@ -12,12 +13,17 @@ import { processLearningResource } from '../services/knowledge-intelligence/pipe
 
 describe('knowledge-intelligence e2e', () => {
   it('PDF → Learning Resource → extract → normalize → chunks → KnowledgeDocument → queue', async () => {
-    const payload = await getPayload({ config });
-
+    // pdf-parse deve rodar antes do boot Payload neste processo.
     const pdf = buildKiSeedPdf(
       'Omnia KI E2E. Conteudo de teste para extracao, normalizacao e chunking do pipeline Knowledge Intelligence.',
     );
     const pdfBytes = Buffer.from(pdf);
+    const preExtracted = await extractPdf(pdfBytes, {
+      filename: 'ki-e2e.pdf',
+      mimeType: 'application/pdf',
+    });
+
+    const payload = await getPayload({ config });
 
     const media = await payload.create({
       collection: 'media',
@@ -56,6 +62,7 @@ describe('knowledge-intelligence e2e', () => {
       sourceBuffer: pdfBytes,
       sourceMimeType: 'application/pdf',
       sourceFilename: 'ki-e2e.pdf',
+      preExtracted,
     });
 
     assert.equal(result.ok, true);
