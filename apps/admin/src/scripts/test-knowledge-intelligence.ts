@@ -22,7 +22,7 @@ describe('knowledge-intelligence e2e', () => {
       collection: 'media',
       data: { alt: 'KI E2E PDF' },
       file: {
-        data: Uint8Array.from(pdf),
+        data: pdf,
         mimetype: 'application/pdf',
         name: `ki-e2e-${Date.now()}.pdf`,
         size: pdf.length,

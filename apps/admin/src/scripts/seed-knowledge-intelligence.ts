@@ -56,7 +56,7 @@ async function main() {
     collection: 'media',
     data: { alt: 'KI Seed PDF' },
     file: {
-      data: Uint8Array.from(pdf),
+      data: pdf,
       mimetype: 'application/pdf',
       name: `ki-seed-${Date.now()}.pdf`,
       size: pdf.length,
