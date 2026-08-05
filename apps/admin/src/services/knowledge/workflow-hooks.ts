@@ -1,4 +1,8 @@
-import type { CollectionBeforeChangeHook } from 'payload';
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+} from 'payload';
 import { APIError } from 'payload';
 
 import {
@@ -19,8 +23,19 @@ function isKnowledgeStatus(value: unknown): value is KnowledgeStatus {
   return typeof value === 'string' && (KNOWLEDGE_STATUSES as readonly string[]).includes(value);
 }
 
+function resolveTenantId(doc: Record<string, unknown> | null | undefined): string | null {
+  if (!doc) return null;
+  const owner = doc.ownerCompany;
+  if (owner == null) return null;
+  if (typeof owner === 'object' && owner !== null && 'id' in owner) {
+    return String((owner as { id: unknown }).id);
+  }
+  return String(owner);
+}
+
 function pickAuditSnapshot(doc: Record<string, unknown> | null | undefined) {
   if (!doc) return null;
+  const tenant = resolveTenantId(doc);
   return {
     id: doc.id ?? null,
     status: doc.status ?? null,
@@ -31,14 +46,24 @@ function pickAuditSnapshot(doc: Record<string, unknown> | null | undefined) {
     allowAiUse: doc.allowAiUse ?? null,
     humanReviewRequired: doc.humanReviewRequired ?? null,
     technicalRiskLevel: doc.technicalRiskLevel ?? null,
+    ownerCompany: doc.ownerCompany ?? null,
+    tenant,
   };
+}
+
+function auditReason(parts: Record<string, string | null | undefined>): string {
+  return Object.entries(parts)
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => `${k}=${v}`)
+    .join(';');
 }
 
 /**
  * beforeChange do knowledge-documents:
  * - valida transições via canTransition/assertTransition
  * - preenche createdBy/updatedBy
- * - audita mudanças de status / ACL / classificação
+ * - audita mudanças de status / ACL / classificação (update)
+ * - create/delete audit ficam em afterChange / afterDelete (entityId disponível)
  * - NUNCA chama embeddings / providers
  */
 export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async ({
@@ -80,14 +105,12 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
       }
     }
 
-    // Editor só opera em draft; não envia para aprovação sozinho se política restringir
     if (isEditor(req.user) && !isKnowledgePublisher(req.user) && !isTechnicalReviewer(req.user)) {
       if (fromRaw !== 'draft' || (toRaw !== 'draft' && toRaw !== 'in_review')) {
         throw new APIError('Editor só pode manter rascunho ou enviar para revisão.', 403);
       }
     }
 
-    // Publicação / aprovação restrita a publishers
     if (
       (toRaw === 'approved' || toRaw === 'published') &&
       !isKnowledgePublisher(req.user)
@@ -95,7 +118,6 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
       throw new APIError('Somente papéis autorizados podem aprovar ou publicar.', 403);
     }
 
-    // requiresHumanReview: bloqueia approved/published fora do fluxo de revisão humana
     if (toRaw === 'approved' || toRaw === 'published') {
       const merged = {
         ...(originalDoc as Record<string, unknown> | undefined),
@@ -150,13 +172,16 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
           string,
           unknown
         >),
-        reason: typeof data.revisionNotes === 'string' ? data.revisionNotes : null,
+        reason: auditReason({
+          operation: `status.${fromRaw}_to_${toRaw}`,
+          tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<string, unknown>),
+          note: typeof data.revisionNotes === 'string' ? data.revisionNotes : null,
+        }),
       },
       req,
     );
   }
 
-  // Auditoria de classificação / ACL sem dump de conteúdo
   if (operation === 'update' && originalDoc) {
     const aclKeys = [
       'securityClassification',
@@ -185,26 +210,76 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
             string,
             unknown
           >),
+          reason: auditReason({
+            operation: 'update',
+            tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<string, unknown>),
+          }),
         },
         req,
       );
     }
   }
 
-  if (operation === 'create') {
-    await writeKnowledgeAudit(
-      req.payload,
-      {
-        action: 'knowledge.document.created',
-        entityType: 'knowledge-documents',
-        entityId: null,
-        nextState: pickAuditSnapshot(data as Record<string, unknown>),
-        reason: `role=${getUserRole(req.user) ?? String(req.user?.role ?? 'anonymous')}`,
-      },
-      req,
-    );
+  return data;
+};
+
+/**
+ * afterChange: create audit com entityId persistido (id já existe).
+ */
+export const knowledgeDocumentAfterChange: CollectionAfterChangeHook = async ({
+  doc,
+  operation,
+  req,
+}) => {
+  if (operation !== 'create' || !doc) {
+    return doc;
   }
 
-  // Guardrail explícito: nenhum caminho aqui dispara embed/index real.
-  return data;
+  const docRecord = doc as Record<string, unknown>;
+  await writeKnowledgeAudit(
+    req.payload,
+    {
+      action: 'knowledge.document.created',
+      entityType: 'knowledge-documents',
+      entityId: doc.id,
+      nextState: pickAuditSnapshot(docRecord),
+      reason: auditReason({
+        operation: 'create',
+        tenant: resolveTenantId(docRecord),
+        role: getUserRole(req.user) ?? String(req.user?.role ?? 'anonymous'),
+      }),
+    },
+    req,
+  );
+
+  return doc;
+};
+
+/**
+ * afterDelete: auditoria de exclusão com entityId + snapshot sanitizado.
+ */
+export const knowledgeDocumentAfterDelete: CollectionAfterDeleteHook = async ({
+  doc,
+  req,
+}) => {
+  if (!doc) {
+    return;
+  }
+
+  const docRecord = doc as Record<string, unknown>;
+  await writeKnowledgeAudit(
+    req.payload,
+    {
+      action: 'knowledge.document.deleted',
+      entityType: 'knowledge-documents',
+      entityId: doc.id,
+      previousState: pickAuditSnapshot(docRecord),
+      reason: auditReason({
+        operation: 'delete',
+        tenant: resolveTenantId(docRecord),
+        role: getUserRole(req.user) ?? String(req.user?.role ?? 'anonymous'),
+      }),
+    },
+    req,
+  );
 };

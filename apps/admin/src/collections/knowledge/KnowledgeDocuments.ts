@@ -18,7 +18,11 @@ import {
   knowledgePublishFieldAccess,
   knowledgeReadAccess,
 } from '../../access/knowledge';
-import { knowledgeDocumentBeforeChange } from '../../services/knowledge/workflow-hooks';
+import {
+  knowledgeDocumentAfterChange,
+  knowledgeDocumentAfterDelete,
+  knowledgeDocumentBeforeChange,
+} from '../../services/knowledge/workflow-hooks';
 
 function optionsFrom(values: readonly string[]) {
   return values.map((value) => ({ label: value, value }));
@@ -64,6 +68,8 @@ export const KnowledgeDocuments: CollectionConfig = {
   },
   hooks: {
     beforeChange: [knowledgeDocumentBeforeChange],
+    afterChange: [knowledgeDocumentAfterChange],
+    afterDelete: [knowledgeDocumentAfterDelete],
   },
   fields: [
     {
