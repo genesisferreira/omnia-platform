@@ -10,9 +10,7 @@ describe('knowledge-intelligence e2e', () => {
     const { extractPdf } = await import('@omnia/knowledge-intelligence');
     const { buildKiSeedPdf } = await import('../services/knowledge-intelligence/fixtures');
 
-    const pdf = buildKiSeedPdf(
-      'Omnia KI E2E. Conteudo de teste para extracao, normalizacao e chunking do pipeline Knowledge Intelligence.',
-    );
+    const pdf = buildKiSeedPdf();
     const pdfBytes = Buffer.from(pdf);
     const preExtracted = await extractPdf(pdfBytes, {
       filename: 'ki-e2e.pdf',
