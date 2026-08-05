@@ -217,8 +217,18 @@ export async function processLearningResource(args: {
   sourceBuffer?: Buffer;
   sourceMimeType?: string | null;
   sourceFilename?: string | null;
+  /** Quando pdf-parse já rodou antes do boot Payload (evita conflito runtime). */
+  preExtracted?: { text: string; meta: Record<string, unknown> };
 }): Promise<{ ok: boolean; chunkCount: number; knowledgeDocumentId?: string | number }> {
-  const { payload, learningResourceId, req, sourceBuffer, sourceMimeType, sourceFilename } = args;
+  const {
+    payload,
+    learningResourceId,
+    req,
+    sourceBuffer,
+    sourceMimeType,
+    sourceFilename,
+    preExtracted,
+  } = args;
   const correlationId = randomUUID();
   const startedAt = new Date().toISOString();
 
@@ -288,10 +298,24 @@ export async function processLearningResource(args: {
       filename = resolved.filename;
     }
     const fileHash = sha256Hex(buffer);
-    const extracted = await extractByType(resourceType as KiSupportedExtractType, buffer, {
-      mimeType,
-      filename,
-    });
+    const extracted =
+      preExtracted && typeof preExtracted.text === 'string'
+        ? {
+            text: preExtracted.text,
+            meta: {
+              pages: (preExtracted.meta.pages as number | null) ?? null,
+              byteSize: buffer.length,
+              language: (preExtracted.meta.language as string | null) ?? null,
+              checksum: fileHash,
+              encoding: (preExtracted.meta.encoding as string) ?? 'utf-8',
+              mimeType,
+              filename,
+            },
+          }
+        : await extractByType(resourceType as KiSupportedExtractType, buffer, {
+            mimeType,
+            filename,
+          });
 
     if (!extracted.text?.trim()) {
       throw new Error('EXTRACT_EMPTY');

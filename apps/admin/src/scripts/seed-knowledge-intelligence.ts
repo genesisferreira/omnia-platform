@@ -4,7 +4,10 @@
  *
  * Pré-requisito: seed:lms-core (curso fundamentos-refrigeracao-industrial).
  * Não gera embeddings.
+ *
+ * Nota: extractPdf deve rodar ANTES de getPayload — pdf-parse conflita após boot Payload.
  */
+import { extractPdf } from '@omnia/knowledge-intelligence';
 import { getPayload } from 'payload';
 
 import config from '../../payload.config';
@@ -17,6 +20,20 @@ import {
 const COURSE_SLUG = 'fundamentos-refrigeracao-industrial';
 
 async function main() {
+  const pdf = buildKiSeedPdf();
+  const pdfBytes = Buffer.from(pdf);
+  const txt = Buffer.from(
+    'Omnia Knowledge Intelligence — checklist TXT.\n\nSeguranca, ciclo de compressao e boas praticas.\n',
+    'utf8',
+  );
+  const txtBytes = Buffer.from(txt);
+
+  const pdfExtracted = await extractPdf(pdfBytes, {
+    filename: 'ki-seed.pdf',
+    mimeType: 'application/pdf',
+  });
+  console.log('KI_PDF_PRE_EXTRACT', JSON.stringify(pdfExtracted.text).slice(0, 120));
+
   const payload = await getPayload({ config });
 
   const courses = await payload.find({
@@ -44,14 +61,6 @@ async function main() {
   });
   const pdfLesson =
     lessons.docs.find((l) => (l as { type?: string }).type === 'pdf') ?? lessons.docs[0];
-
-  const pdf = buildKiSeedPdf();
-  const pdfBytes = Buffer.from(pdf);
-  const txt = Buffer.from(
-    'Omnia Knowledge Intelligence — checklist TXT.\n\nSeguranca, ciclo de compressao e boas praticas.\n',
-    'utf8',
-  );
-  const txtBytes = Buffer.from(txt);
 
   const pdfMedia = await payload.create({
     collection: 'media',
@@ -124,6 +133,7 @@ async function main() {
     sourceBuffer: pdfBytes,
     sourceMimeType: 'application/pdf',
     sourceFilename: 'ki-seed.pdf',
+    preExtracted: pdfExtracted,
   });
   const txtResult = await processLearningResource({
     payload,
