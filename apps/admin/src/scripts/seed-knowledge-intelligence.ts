@@ -69,7 +69,7 @@ async function main() {
     collection: 'media',
     data: { alt: 'KI Seed TXT' },
     file: {
-      data: Uint8Array.from(txt),
+      data: txt,
       mimetype: 'text/plain',
       name: `ki-seed-${Date.now()}.txt`,
       size: txt.length,
