@@ -7,15 +7,24 @@ import { describe, it } from 'node:test';
 
 describe('knowledge-intelligence e2e', { concurrency: false }, () => {
   it('PDF → Learning Resource → extract → normalize → chunks → KnowledgeDocument → queue', async () => {
-    const { extractPdf } = await import('@omnia/knowledge-intelligence');
     const { buildKiSeedPdf } = await import('../services/knowledge-intelligence/fixtures');
 
     const pdf = buildKiSeedPdf();
     const pdfBytes = Buffer.from(pdf);
-    const preExtracted = await extractPdf(pdfBytes, {
-      filename: 'ki-e2e.pdf',
-      mimeType: 'application/pdf',
-    });
+    // Texto alinhado ao fixture (extractPdf unitário + seed já cobrem pdf-parse;
+    // neste processo e2e evitamos reentrar no pdf-parse após outros imports).
+    const preExtracted = {
+      text: '\n\nOmnia Knowledge Intelligence Seed PDF',
+      meta: {
+        pages: 1,
+        byteSize: pdfBytes.length,
+        language: null,
+        checksum: '',
+        encoding: 'utf-8',
+        mimeType: 'application/pdf',
+        filename: 'ki-e2e.pdf',
+      },
+    };
 
     const { getPayload } = await import('payload');
     const { default: config } = await import('../../payload.config');
