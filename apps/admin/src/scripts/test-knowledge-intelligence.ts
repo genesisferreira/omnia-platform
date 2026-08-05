@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-describe('knowledge-intelligence e2e', () => {
+describe('knowledge-intelligence e2e', { concurrency: false }, () => {
   it('PDF → Learning Resource → extract → normalize → chunks → KnowledgeDocument → queue', async () => {
     const { extractPdf } = await import('@omnia/knowledge-intelligence');
     const { buildKiSeedPdf } = await import('../services/knowledge-intelligence/fixtures');
