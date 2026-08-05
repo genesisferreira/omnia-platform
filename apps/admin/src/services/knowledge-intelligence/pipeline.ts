@@ -67,6 +67,8 @@ async function resolveMediaBuffer(
   const candidates = [
     path.resolve(process.cwd(), 'media', filename),
     path.resolve(process.cwd(), 'apps/admin/media', filename),
+    path.resolve('/app/media', filename),
+    path.resolve('/app/apps/admin/media', filename),
     path.resolve(process.cwd(), '..', 'media', filename),
   ];
 
@@ -80,6 +82,30 @@ async function resolveMediaBuffer(
       };
     } catch {
       // try next
+    }
+  }
+
+  // Fallback HTTP (Admin runtime / Traefik) — útil quando seed roda fora do volume de media
+  const base = (process.env.NEXT_PUBLIC_ADMIN_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '')
+    .replace(/\/$/, '');
+  const urlPath = media.url?.startsWith('http')
+    ? media.url
+    : base && media.url
+      ? `${base}${media.url.startsWith('/') ? '' : '/'}${media.url}`
+      : null;
+  if (urlPath) {
+    try {
+      const res = await fetch(urlPath);
+      if (res.ok) {
+        const ab = await res.arrayBuffer();
+        return {
+          buffer: Buffer.from(ab),
+          mimeType: media.mimeType ?? null,
+          filename,
+        };
+      }
+    } catch {
+      // fall through
     }
   }
 

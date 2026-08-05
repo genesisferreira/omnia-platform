@@ -1,5 +1,5 @@
 /**
- * Seed Knowledge Intelligence — processa materiais LMS Core (PDF/TXT) no pipeline.
+ * Seed Knowledge Intelligence — cria PDF/TXT frescos e processa o pipeline.
  * Uso: pnpm --filter @omnia/admin seed:knowledge-intelligence
  *
  * Pré-requisito: seed:lms-core (curso fundamentos-refrigeracao-industrial).
@@ -11,6 +11,7 @@ import config from '../../payload.config';
 import { buildKiSeedPdf } from '../services/knowledge-intelligence/fixtures';
 import {
   ensureLearningResourceFromLessonAsset,
+  processLearningResource,
   refreshKiDashboard,
 } from '../services/knowledge-intelligence/pipeline';
 
@@ -28,51 +29,118 @@ async function main() {
   if (!courses.docs.length) {
     throw new Error('KI_SEED_REQUIRES_LMS_CORE — rode seed:lms-core antes');
   }
+  const course = courses.docs[0]!;
 
-  // Atualiza o PDF do LMS seed com texto extraível (se existir apostila)
-  const pdfMedia = await payload.find({
-    collection: 'media',
-    where: { filename: { equals: 'apostila-fundamentos.pdf' } },
+  const modules = await payload.find({
+    collection: 'course-modules',
+    where: { course: { equals: course.id } },
     limit: 1,
     overrideAccess: true,
   });
+  const lessons = await payload.find({
+    collection: 'lessons',
+    where: { module: { equals: modules.docs[0]?.id } },
+    limit: 5,
+    overrideAccess: true,
+  });
+  const pdfLesson =
+    lessons.docs.find((l) => (l as { type?: string }).type === 'pdf') ?? lessons.docs[0];
 
-  if (pdfMedia.docs[0]) {
-    const betterPdf = buildKiSeedPdf(
-      'Omnia Knowledge Intelligence — Apostila Fundamentos de Refrigeracao Industrial. Ciclo de compressao, seguranca e boas praticas.',
-    );
-    await payload.update({
-      collection: 'media',
-      id: pdfMedia.docs[0].id,
-      data: { alt: 'Apostila Fundamentos de Refrigeração (PDF KI)' },
-      file: {
-        data: betterPdf,
-        mimetype: 'application/pdf',
-        name: 'apostila-fundamentos.pdf',
-        size: betterPdf.length,
-      },
-      overrideAccess: true,
-      context: { kiPipelineActive: true },
-    });
-  }
+  const pdf = buildKiSeedPdf();
+  const txt = Buffer.from(
+    'Omnia Knowledge Intelligence — checklist TXT.\n\nSeguranca, ciclo de compressao e boas praticas.\n',
+    'utf8',
+  );
 
+  const pdfMedia = await payload.create({
+    collection: 'media',
+    data: { alt: 'KI Seed PDF' },
+    file: {
+      data: pdf,
+      mimetype: 'application/pdf',
+      name: `ki-seed-${Date.now()}.pdf`,
+      size: pdf.length,
+    },
+    overrideAccess: true,
+    context: { kiPipelineActive: true },
+  });
+
+  const txtMedia = await payload.create({
+    collection: 'media',
+    data: { alt: 'KI Seed TXT' },
+    file: {
+      data: txt,
+      mimetype: 'text/plain',
+      name: `ki-seed-${Date.now()}.txt`,
+      size: txt.length,
+    },
+    overrideAccess: true,
+    context: { kiPipelineActive: true },
+  });
+
+  const pdfResource = await payload.create({
+    collection: 'learning-resources',
+    data: {
+      title: 'KI Seed — Apostila PDF',
+      media: pdfMedia.id,
+      lesson: pdfLesson?.id,
+      module: modules.docs[0]?.id,
+      course: course.id,
+      resourceType: 'pdf',
+      origin: 'upload',
+      processingStatus: 'pending',
+      autoProcess: false,
+      language: 'pt-BR',
+      version: '1.0.0',
+      category: 'Refrigeração',
+      tags: [{ tag: 'ki-seed' }, { tag: 'pdf' }],
+    },
+    overrideAccess: true,
+    context: { kiPipelineActive: true },
+  });
+
+  const txtResource = await payload.create({
+    collection: 'learning-resources',
+    data: {
+      title: 'KI Seed — Checklist TXT',
+      media: txtMedia.id,
+      course: course.id,
+      resourceType: 'txt',
+      origin: 'upload',
+      processingStatus: 'pending',
+      autoProcess: false,
+      language: 'pt-BR',
+      version: '1.0.0',
+      tags: [{ tag: 'ki-seed' }, { tag: 'txt' }],
+    },
+    overrideAccess: true,
+    context: { kiPipelineActive: true },
+  });
+
+  const pdfResult = await processLearningResource({
+    payload,
+    learningResourceId: pdfResource.id,
+  });
+  const txtResult = await processLearningResource({
+    payload,
+    learningResourceId: txtResource.id,
+  });
+
+  // Best-effort: processar lesson-assets existentes (pode falhar se media volume ausente)
   const assets = await payload.find({
     collection: 'lesson-assets',
     limit: 50,
     depth: 0,
     overrideAccess: true,
   });
-
-  let processed = 0;
-  let skipped = 0;
+  let assetProcessed = 0;
   for (const asset of assets.docs) {
     const result = await ensureLearningResourceFromLessonAsset({
       payload,
       lessonAssetId: asset.id,
       process: true,
     });
-    if (result.processed) processed += 1;
-    else if (result.learningResourceId == null) skipped += 1;
+    if (result.processed) assetProcessed += 1;
   }
 
   await refreshKiDashboard(payload);
@@ -91,13 +159,19 @@ async function main() {
 
   payload.logger.info({
     msg: 'ki.seed_complete',
-    assets: assets.docs.length,
-    processed,
-    skipped,
+    pdfOk: pdfResult.ok,
+    txtOk: txtResult.ok,
+    pdfChunks: pdfResult.chunkCount,
+    txtChunks: txtResult.chunkCount,
+    assetProcessed,
     completedResources: completed.totalDocs,
     chunks: chunks.totalDocs,
     queuePending: queue.totalDocs,
   });
+
+  if (!pdfResult.ok || !txtResult.ok) {
+    process.exit(2);
+  }
   process.exit(0);
 }
 

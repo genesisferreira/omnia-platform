@@ -30,7 +30,7 @@ function buildSimplePdf(text: string): Buffer {
     pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
   }
   pdf += `trailer<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
-  return Buffer.from(pdf, 'utf8');
+  return Buffer.from(pdf, 'binary');
 }
 
 describe('pdf extract', () => {

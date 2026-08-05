@@ -168,6 +168,10 @@ services:
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
     networks:
       - omnia_internal
+    volumes:
+      # Compartilha uploads com Admin runtime (Learning Resource / pipeline KI)
+      - omnia_platform_admin_media_dev:/app/apps/admin/media
+      - omnia_platform_admin_media_dev:/app/media
     restart: 'no'
     command: ['migrate']
 
