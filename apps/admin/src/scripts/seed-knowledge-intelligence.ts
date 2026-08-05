@@ -10,7 +10,6 @@ import { getPayload } from 'payload';
 import config from '../../payload.config';
 import { buildKiSeedPdf } from '../services/knowledge-intelligence/fixtures';
 import {
-  ensureLearningResourceFromLessonAsset,
   processLearningResource,
   refreshKiDashboard,
 } from '../services/knowledge-intelligence/pipeline';
@@ -134,26 +133,8 @@ async function main() {
     sourceFilename: 'ki-seed.txt',
   });
 
-  // Best-effort: lesson-assets legados (podem falhar se media volume ausente)
-  const assets = await payload.find({
-    collection: 'lesson-assets',
-    limit: 50,
-    depth: 0,
-    overrideAccess: true,
-  });
-  let assetProcessed = 0;
-  for (const asset of assets.docs) {
-    try {
-      const result = await ensureLearningResourceFromLessonAsset({
-        payload,
-        lessonAssetId: asset.id,
-        process: true,
-      });
-      if (result.processed) assetProcessed += 1;
-    } catch {
-      // ignore legacy media missing on volume
-    }
-  }
+  // Lesson-assets legados ficam para ingestão via hook Admin (volume media).
+  // Seed prova o pipeline com PDF/TXT frescos acima.
 
   await refreshKiDashboard(payload);
 
@@ -175,7 +156,6 @@ async function main() {
     txtOk: txtResult.ok,
     pdfChunks: pdfResult.chunkCount,
     txtChunks: txtResult.chunkCount,
-    assetProcessed,
     completedResources: completed.totalDocs,
     chunks: chunks.totalDocs,
     queuePending: queue.totalDocs,
