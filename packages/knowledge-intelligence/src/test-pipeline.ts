@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { chunkText } from './chunk.js';
-import { extractTxt, sha256Hex } from './extract.js';
-import { normalizeExtractedText } from './normalize.js';
+import { chunkText } from './chunk';
+import { extractTxt, sha256Hex } from './extract';
+import { normalizeExtractedText } from './normalize';
 
 describe('knowledge-intelligence pipeline units', () => {
   it('normalizes whitespace and page markers', () => {

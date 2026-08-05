@@ -3,7 +3,7 @@ import {
   estimateTokens,
   type ChunkConfig,
   type TextChunk,
-} from './types.js';
+} from './types';
 
 /**
  * Chunking por janela deslizante com preferência a quebras de parágrafo.

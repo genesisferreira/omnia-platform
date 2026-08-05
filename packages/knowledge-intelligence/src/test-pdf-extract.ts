@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { extractPdf } from './extract.js';
+import { extractPdf } from './extract';
 
 function buildSimplePdf(text: string): Buffer {
   const escaped = text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');

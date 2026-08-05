@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import type { ExtractMeta, ExtractResult } from './types.js';
+import type { ExtractMeta, ExtractResult } from './types';
 
 export function sha256Hex(buffer: Buffer): string {
   return createHash('sha256').update(buffer).digest('hex');
