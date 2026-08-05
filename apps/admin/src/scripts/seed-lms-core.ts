@@ -67,14 +67,24 @@ async function main() {
   const pdfMedia = await payload.create({
     collection: 'media',
     data: { alt: 'Apostila Fundamentos de Refrigeração (PDF)' },
-    filePath: pdfPath,
+    file: {
+      data: MINI_PDF,
+      mimetype: 'application/pdf',
+      name: 'apostila-fundamentos.pdf',
+      size: MINI_PDF.length,
+    },
     overrideAccess: true,
   });
 
   const downloadMedia = await payload.create({
     collection: 'media',
     data: { alt: 'Checklist de download LMS Core' },
-    filePath: txtPath,
+    file: {
+      data: MINI_TXT,
+      mimetype: 'text/plain',
+      name: 'checklist-download.txt',
+      size: MINI_TXT.length,
+    },
     overrideAccess: true,
   });
 
