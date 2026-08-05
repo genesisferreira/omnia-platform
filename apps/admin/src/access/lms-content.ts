@@ -1,4 +1,4 @@
-import type { Access, FieldAccess } from 'payload';
+import type { Access, FieldAccess, Where } from 'payload';
 
 import {
   getRelationId,
@@ -55,19 +55,18 @@ export const lmsContentReadAccess: Access = ({ req: { user } }) => {
   if (isLmsInstructor(user)) {
     const companyId = getRelationId(user.company);
     if (companyId != null) {
-      return {
-        or: [
-          { ownerCompany: { equals: companyId } },
-          { instructor: { equals: user.id } },
-        ],
+      const where: Where = {
+        or: [{ ownerCompany: { equals: companyId } }, { instructor: { equals: user.id } }],
       };
+      return where;
     }
-    return { instructor: { equals: user.id } };
+    const where: Where = { instructor: { equals: user.id } };
+    return where;
   }
   return false;
 };
 
-/** Modules/Lessons/Assets: staff vê tudo; instructor vê via course escopo no read de courses. */
+/** Modules/Lessons/Assets: staff + instructor. */
 export const lmsNestedReadAccess: Access = ({ req: { user } }) => {
   if (!user) return false;
   if (isPlatformAdmin(user) || isEditor(user) || isLmsInstructor(user)) return true;
@@ -83,22 +82,21 @@ export const lmsCourseUpdateAccess: Access = ({ req: { user } }) => {
   if (!user) return false;
   if (isLmsPublisher(user)) return true;
   if (isEditor(user)) {
-    return { status: { in: ['draft', 'review'] } };
+    const where: Where = { status: { in: ['draft', 'review'] } };
+    return where;
   }
   if (isLmsInstructor(user)) {
     const companyId = getRelationId(user.company);
-    const own: Record<string, unknown> = {
-      and: [
-        { status: { in: ['draft', 'review'] } },
-        {
-          or: [
-            { instructor: { equals: user.id } },
-            ...(companyId != null ? [{ ownerCompany: { equals: companyId } }] : []),
-          ],
-        },
-      ],
+    const ownership: Where =
+      companyId != null
+        ? {
+            or: [{ instructor: { equals: user.id } }, { ownerCompany: { equals: companyId } }],
+          }
+        : { instructor: { equals: user.id } };
+    const where: Where = {
+      and: [{ status: { in: ['draft', 'review'] } }, ownership],
     };
-    return own;
+    return where;
   }
   return false;
 };
@@ -110,5 +108,5 @@ export const lmsNestedWriteAccess: Access = ({ req: { user } }) => {
 
 export const lmsContentDeleteAccess: Access = ({ req: { user } }) => isLmsPublisher(user);
 
-/** Publicar / alterar status published|archived: só publishers. */
+/** Publicar / alterar status published|archived: só publishers (via hook). */
 export const lmsPublishFieldAccess: FieldAccess = ({ req: { user } }) => isLmsPublisher(user);
