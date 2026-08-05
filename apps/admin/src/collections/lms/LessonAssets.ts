@@ -6,6 +6,7 @@ import {
   lmsNestedReadAccess,
   lmsNestedWriteAccess,
 } from '../../access/lms-content';
+import { lessonAssetAfterChangeForKi } from '../../services/knowledge-intelligence/hooks';
 import { LESSON_ASSET_TYPES, optionsFrom } from './constants';
 
 /**
@@ -29,6 +30,9 @@ export const LessonAssets: CollectionConfig = {
     create: lmsContentCreateAccess,
     update: lmsNestedWriteAccess,
     delete: lmsContentDeleteAccess,
+  },
+  hooks: {
+    afterChange: [lessonAssetAfterChangeForKi],
   },
   fields: [
     {

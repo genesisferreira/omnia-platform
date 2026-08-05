@@ -1,0 +1,127 @@
+import type { CollectionConfig } from 'payload';
+
+import { kiPublisherAccess, kiStaffAccess } from '../../access/knowledge-intelligence';
+
+export const KnowledgeChunks: CollectionConfig = {
+  slug: 'knowledge-chunks',
+  labels: {
+    singular: 'Chunk',
+    plural: 'Chunks',
+  },
+  admin: {
+    useAsTitle: 'chunkIndex',
+    defaultColumns: [
+      'chunkIndex',
+      'learningResource',
+      'course',
+      'lesson',
+      'tokenEstimate',
+      'updatedAt',
+    ],
+    group: 'Knowledge Intelligence',
+    description: 'Fragmentos normalizados com proveniência LMS para futura indexação RAG.',
+  },
+  timestamps: true,
+  access: {
+    read: kiStaffAccess,
+    create: kiStaffAccess,
+    update: kiStaffAccess,
+    delete: kiPublisherAccess,
+  },
+  fields: [
+    {
+      name: 'learningResource',
+      type: 'relationship',
+      relationTo: 'learning-resources',
+      required: true,
+      index: true,
+      label: 'Learning Resource',
+    },
+    {
+      name: 'knowledgeDocument',
+      type: 'relationship',
+      relationTo: 'knowledge-documents',
+      index: true,
+      label: 'Knowledge Document',
+    },
+    {
+      name: 'chunkIndex',
+      type: 'number',
+      required: true,
+      index: true,
+      label: 'Índice',
+      min: 0,
+    },
+    {
+      name: 'chunkText',
+      type: 'textarea',
+      required: true,
+      label: 'Texto',
+    },
+    {
+      name: 'tokenEstimate',
+      type: 'number',
+      required: true,
+      label: 'Tokens (estimativa)',
+      min: 0,
+    },
+    {
+      name: 'startOffset',
+      type: 'number',
+      required: true,
+      label: 'Offset início',
+      min: 0,
+    },
+    {
+      name: 'endOffset',
+      type: 'number',
+      required: true,
+      label: 'Offset fim',
+      min: 0,
+    },
+    {
+      name: 'course',
+      type: 'relationship',
+      relationTo: 'courses',
+      index: true,
+      label: 'Curso',
+    },
+    {
+      name: 'module',
+      type: 'relationship',
+      relationTo: 'course-modules',
+      index: true,
+      label: 'Módulo',
+    },
+    {
+      name: 'lesson',
+      type: 'relationship',
+      relationTo: 'lessons',
+      index: true,
+      label: 'Aula',
+    },
+    {
+      name: 'ownerCompany',
+      type: 'relationship',
+      relationTo: 'companies',
+      index: true,
+      label: 'Empresa',
+    },
+    {
+      name: 'instructor',
+      type: 'relationship',
+      relationTo: 'users',
+      index: true,
+      label: 'Instrutor',
+    },
+    { name: 'language', type: 'text', label: 'Idioma' },
+    { name: 'version', type: 'text', label: 'Versão' },
+    { name: 'category', type: 'text', label: 'Categoria' },
+    {
+      name: 'tags',
+      type: 'array',
+      label: 'Tags',
+      fields: [{ name: 'tag', type: 'text', required: true }],
+    },
+  ],
+};

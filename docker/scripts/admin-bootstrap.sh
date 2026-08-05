@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -29,6 +29,12 @@ run_lms_core() {
   echo "==> Seed LMS Core (1 curso, 2 módulos, 4 aulas + materiais)..."
   pnpm --filter @omnia/admin seed:lms-core
   echo "==> Seed lms-core concluído."
+}
+
+run_knowledge_intelligence() {
+  echo "==> Seed Knowledge Intelligence (pipeline LMS → chunks + fila; sem embeddings)..."
+  pnpm --filter @omnia/admin seed:knowledge-intelligence
+  echo "==> Seed knowledge-intelligence concluído."
 }
 
 run_holding_home() {
@@ -93,8 +99,11 @@ case "$MODE" in
   lms-core)
     run_lms_core
     ;;
+  knowledge-intelligence)
+    run_knowledge_intelligence
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence]"
     exit 1
     ;;
 esac

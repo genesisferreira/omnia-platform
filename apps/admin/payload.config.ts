@@ -39,6 +39,12 @@ import {
   LessonAssets,
   Lessons,
 } from './src/collections/lms';
+import {
+  EmbeddingQueue,
+  KiProcessingRuns,
+  KnowledgeChunks,
+  LearningResources,
+} from './src/collections/knowledge-intelligence';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -74,6 +80,7 @@ import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { LmsSettings } from './src/globals/LmsSettings';
+import { KiIntelligenceDashboard } from './src/globals/KiIntelligenceDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
@@ -129,6 +136,10 @@ export default buildConfig({
     CourseModules,
     Lessons,
     LessonAssets,
+    LearningResources,
+    KnowledgeChunks,
+    EmbeddingQueue,
+    KiProcessingRuns,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -143,6 +154,7 @@ export default buildConfig({
     LmsSettings,
     NeurofrigoKnowledgeSettings,
     NeurofrigoKnowledgeDashboard,
+    KiIntelligenceDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,

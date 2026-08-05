@@ -45,6 +45,8 @@
     "seed:knowledge-hub": "tsx src/scripts/seed-knowledge-hub.ts",
     "seed:lms-core": "tsx src/scripts/seed-lms-core.ts",
     "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
+    "seed:knowledge-intelligence": "tsx src/scripts/seed-knowledge-intelligence.ts",
+    "test:knowledge-intelligence": "tsx --test src/scripts/test-knowledge-intelligence.ts ../../packages/knowledge-intelligence/src/**/test-*.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
@@ -57,6 +59,7 @@
     "@omnia/logger": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/neurofrigo-knowledge": "workspace:*",
+    "@omnia/knowledge-intelligence": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",

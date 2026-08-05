@@ -51,7 +51,7 @@ async function ensureSeedFiles() {
 
 async function main() {
   const payload = await getPayload({ config });
-  const { pdfPath, txtPath } = await ensureSeedFiles();
+  await ensureSeedFiles();
 
   const existing = await payload.find({
     collection: 'courses',

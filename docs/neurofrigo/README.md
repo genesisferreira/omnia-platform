@@ -52,6 +52,7 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [NEUROFRIGO_TOOL_POLICY.md](NEUROFRIGO_TOOL_POLICY.md) | Tool Router allowlist |
 | [NEUROFRIGO_KNOWLEDGE_ARCHITECTURE.md](NEUROFRIGO_KNOWLEDGE_ARCHITECTURE.md) | Base de conhecimento ACL (visão); aponta Hub ME01 |
 | [NEUROFRIGO_KNOWLEDGE_HUB_ARCHITECTURE.md](NEUROFRIGO_KNOWLEDGE_HUB_ARCHITECTURE.md) | **ME01** — Arquitetura Knowledge Hub Foundation |
+| [EPIC_03_KNOWLEDGE_INTELLIGENCE.md](EPIC_03_KNOWLEDGE_INTELLIGENCE.md) | **Epic 03** — Fábrica LMS → chunks + fila (sem embeddings) |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |
