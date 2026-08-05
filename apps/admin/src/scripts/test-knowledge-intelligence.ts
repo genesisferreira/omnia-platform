@@ -1,19 +1,15 @@
 /**
  * Testes Epic 03 — Knowledge Intelligence (pipeline sem embeddings).
+ * PDF extract ocorre antes de importar payload.config (conflito pdf-parse).
  */
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { extractPdf } from '@omnia/knowledge-intelligence';
-import { getPayload } from 'payload';
-
-import config from '../../payload.config';
-import { buildKiSeedPdf } from '../services/knowledge-intelligence/fixtures';
-import { processLearningResource } from '../services/knowledge-intelligence/pipeline';
-
 describe('knowledge-intelligence e2e', () => {
   it('PDF → Learning Resource → extract → normalize → chunks → KnowledgeDocument → queue', async () => {
-    // pdf-parse deve rodar antes do boot Payload neste processo.
+    const { extractPdf } = await import('@omnia/knowledge-intelligence');
+    const { buildKiSeedPdf } = await import('../services/knowledge-intelligence/fixtures');
+
     const pdf = buildKiSeedPdf(
       'Omnia KI E2E. Conteudo de teste para extracao, normalizacao e chunking do pipeline Knowledge Intelligence.',
     );
@@ -22,6 +18,12 @@ describe('knowledge-intelligence e2e', () => {
       filename: 'ki-e2e.pdf',
       mimeType: 'application/pdf',
     });
+
+    const { getPayload } = await import('payload');
+    const { default: config } = await import('../../payload.config');
+    const { processLearningResource } = await import(
+      '../services/knowledge-intelligence/pipeline'
+    );
 
     const payload = await getPayload({ config });
 
@@ -115,6 +117,12 @@ describe('knowledge-intelligence e2e', () => {
   });
 
   it('TXT extract path works end-to-end', async () => {
+    const { getPayload } = await import('payload');
+    const { default: config } = await import('../../payload.config');
+    const { processLearningResource } = await import(
+      '../services/knowledge-intelligence/pipeline'
+    );
+
     const payload = await getPayload({ config });
     const body = Buffer.from(
       'Titulo\n\nParagrafo um do teste TXT Knowledge Intelligence.\n\nParagrafo dois com mais conteudo para chunking.\n',
@@ -151,6 +159,9 @@ describe('knowledge-intelligence e2e', () => {
     const result = await processLearningResource({
       payload,
       learningResourceId: resource.id,
+      sourceBuffer: body,
+      sourceMimeType: 'text/plain',
+      sourceFilename: 'ki-e2e.txt',
     });
     assert.equal(result.ok, true);
     assert.ok((result.chunkCount ?? 0) >= 1);

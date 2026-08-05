@@ -2,24 +2,18 @@
  * Seed Knowledge Intelligence — cria PDF/TXT frescos e processa o pipeline.
  * Uso: pnpm --filter @omnia/admin seed:knowledge-intelligence
  *
- * Pré-requisito: seed:lms-core (curso fundamentos-refrigeracao-industrial).
+ * Pré-requisito: seed:lms-core.
  * Não gera embeddings.
  *
- * Nota: extractPdf deve rodar ANTES de getPayload — pdf-parse conflita após boot Payload.
+ * Importante: NÃO importar payload/config no topo — isso quebra pdf-parse.
+ * Extrair PDF com imports dinâmicos antes do boot Payload.
  */
-import { extractPdf } from '@omnia/knowledge-intelligence';
-import { getPayload } from 'payload';
-
-import config from '../../payload.config';
-import { buildKiSeedPdf } from '../services/knowledge-intelligence/fixtures';
-import {
-  processLearningResource,
-  refreshKiDashboard,
-} from '../services/knowledge-intelligence/pipeline';
-
 const COURSE_SLUG = 'fundamentos-refrigeracao-industrial';
 
 async function main() {
+  const { extractPdf } = await import('@omnia/knowledge-intelligence');
+  const { buildKiSeedPdf } = await import('../services/knowledge-intelligence/fixtures');
+
   const pdf = buildKiSeedPdf();
   const pdfBytes = Buffer.from(pdf);
   const txt = Buffer.from(
@@ -33,6 +27,13 @@ async function main() {
     mimeType: 'application/pdf',
   });
   console.log('KI_PDF_PRE_EXTRACT', JSON.stringify(pdfExtracted.text).slice(0, 120));
+
+  const { getPayload } = await import('payload');
+  const { default: config } = await import('../../payload.config');
+  const {
+    processLearningResource,
+    refreshKiDashboard,
+  } = await import('../services/knowledge-intelligence/pipeline');
 
   const payload = await getPayload({ config });
 
@@ -142,9 +143,6 @@ async function main() {
     sourceMimeType: 'text/plain',
     sourceFilename: 'ki-seed.txt',
   });
-
-  // Lesson-assets legados ficam para ingestão via hook Admin (volume media).
-  // Seed prova o pipeline com PDF/TXT frescos acima.
 
   await refreshKiDashboard(payload);
 
