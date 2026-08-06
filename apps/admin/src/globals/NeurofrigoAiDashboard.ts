@@ -7,7 +7,8 @@ export const NeurofrigoAiDashboard: GlobalConfig = {
   label: 'Dashboard Neurofrigo AI',
   admin: {
     group: 'Neurofrigo AI',
-    description: 'Perguntas, latência, tokens, custo, erros, top cursos e perguntas.',
+    description:
+      'Perguntas, feedback, grounding, latência, top cursos/perguntas e taxa sem contexto.',
   },
   access: {
     read: kiStaffAccess,
@@ -19,6 +20,27 @@ export const NeurofrigoAiDashboard: GlobalConfig = {
       type: 'number',
       defaultValue: 0,
       label: 'Perguntas',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'feedbackUpCount',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Feedback positivo',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'feedbackDownCount',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Feedback negativo',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'avgGroundingScore',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Grounding Score médio',
       admin: { readOnly: true },
     },
     {
@@ -53,7 +75,14 @@ export const NeurofrigoAiDashboard: GlobalConfig = {
       name: 'notFoundCount',
       type: 'number',
       defaultValue: 0,
-      label: 'Não encontrado',
+      label: 'Sem contexto',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'noContextRate',
+      type: 'number',
+      defaultValue: 0,
+      label: 'Taxa sem contexto',
       admin: { readOnly: true },
     },
     {

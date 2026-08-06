@@ -49,6 +49,12 @@ run_neurofrigo_ai() {
   echo "==> Seed neurofrigo-ai concluído."
 }
 
+run_ai_experience() {
+  echo "==> Seed AI Experience (follow-up, grounding, feedback)..."
+  pnpm --filter @omnia/admin seed:ai-experience
+  echo "==> Seed ai-experience concluído."
+}
+
 run_holding_home() {
   echo "==> Seed exclusivo da Home (omnia-hub)..."
   pnpm --filter @omnia/admin seed:holding-home
@@ -120,8 +126,11 @@ case "$MODE" in
   neurofrigo-ai)
     run_neurofrigo_ai
     ;;
+  ai-experience)
+    run_ai_experience
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience]"
     exit 1
     ;;
 esac

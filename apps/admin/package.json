@@ -52,6 +52,8 @@
     "retrieval:worker": "tsx src/scripts/run-retrieval-worker.ts",
     "seed:neurofrigo-ai": "tsx src/scripts/seed-neurofrigo-ai.ts",
     "test:neurofrigo-ai": "tsx --test ../../packages/neurofrigo-runtime/src/**/test-*.ts && tsx --test src/scripts/test-neurofrigo-ai.ts",
+    "seed:ai-experience": "tsx src/scripts/seed-ai-experience.ts",
+    "test:ai-experience": "tsx --test ../../packages/neurofrigo-runtime/src/**/test-*.ts && tsx --test src/scripts/test-ai-experience.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {

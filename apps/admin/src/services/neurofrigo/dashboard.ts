@@ -13,13 +13,25 @@ function topCounts(values: string[], limit = 10): Array<{ key: string; count: nu
 }
 
 export async function refreshNeurofrigoAiDashboard(payload: Payload): Promise<void> {
-  const sessions = await payload.find({
-    collection: 'ai-sessions',
-    limit: 500,
-    sort: '-createdAt',
-    depth: 0,
-    overrideAccess: true,
-  });
+  const [sessions, feedbackUp, feedbackDown] = await Promise.all([
+    payload.find({
+      collection: 'ai-sessions',
+      limit: 500,
+      sort: '-createdAt',
+      depth: 0,
+      overrideAccess: true,
+    }),
+    payload.count({
+      collection: 'ai-feedback',
+      where: { rating: { equals: 'up' } },
+      overrideAccess: true,
+    }).catch(() => ({ totalDocs: 0 })),
+    payload.count({
+      collection: 'ai-feedback',
+      where: { rating: { equals: 'down' } },
+      overrideAccess: true,
+    }).catch(() => ({ totalDocs: 0 })),
+  ]);
 
   const docs = sessions.docs;
   const took = docs.map((d) => Number(d.tookMs || 0));
@@ -32,6 +44,19 @@ export async function refreshNeurofrigoAiDashboard(payload: Payload): Promise<vo
   );
   const errorCount = docs.filter((d) => d.status === 'error' || d.status === 'timeout').length;
   const notFoundCount = docs.filter((d) => d.status === 'not_found').length;
+  const groundingValues = docs
+    .map((d) => Number(d.groundingScore || 0))
+    .filter((n) => Number.isFinite(n));
+  const avgGroundingScore = groundingValues.length
+    ? Number(
+        (
+          groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length
+        ).toFixed(3),
+      )
+    : 0;
+  const noContextRate = docs.length
+    ? Number((notFoundCount / docs.length).toFixed(3))
+    : 0;
 
   const courseKeys = docs.map((d) => {
     const c = d.course;
@@ -48,10 +73,14 @@ export async function refreshNeurofrigoAiDashboard(payload: Payload): Promise<vo
       estimatedCostUsd,
       errorCount,
       notFoundCount,
+      feedbackUpCount: feedbackUp.totalDocs,
+      feedbackDownCount: feedbackDown.totalDocs,
+      avgGroundingScore,
+      noContextRate,
       topCourses: topCounts(courseKeys),
       topQuestions: topCounts(docs.map((d) => String(d.question || '').slice(0, 120))),
       lastRefreshAt: new Date().toISOString(),
-      lastActivitySummary: `q=${sessions.totalDocs} avgMs=${avgTookMs} errors=${errorCount}`,
+      lastActivitySummary: `q=${sessions.totalDocs} grounding=${avgGroundingScore} up=${feedbackUp.totalDocs} down=${feedbackDown.totalDocs}`,
     },
     overrideAccess: true,
   });

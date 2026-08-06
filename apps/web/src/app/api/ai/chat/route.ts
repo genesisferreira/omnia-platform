@@ -19,12 +19,14 @@ export async function POST(request: Request) {
 
   const result = await fetchAiChat({
     question,
+    sessionId: (body.sessionId as string | number | null) ?? null,
     courseId: (body.courseId as string | number | null) ?? null,
     courseTitle: (body.courseTitle as string | null) ?? null,
     moduleId: (body.moduleId as string | number | null) ?? null,
     moduleTitle: (body.moduleTitle as string | null) ?? null,
     lessonId: (body.lessonId as string | number | null) ?? null,
     lessonTitle: (body.lessonTitle as string | null) ?? null,
+    lessonObjectives: (body.lessonObjectives as string | null) ?? null,
     ownerCompanyId: (body.ownerCompanyId as string | number | null) ?? null,
     language: (body.language as string | null) ?? 'pt-BR',
     topK: body.topK != null ? Number(body.topK) : undefined,

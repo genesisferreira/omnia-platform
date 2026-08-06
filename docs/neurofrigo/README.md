@@ -55,6 +55,7 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [EPIC_03_KNOWLEDGE_INTELLIGENCE.md](EPIC_03_KNOWLEDGE_INTELLIGENCE.md) | **Epic 03** — Fábrica LMS → chunks + fila (sem embeddings) |
 | [EPIC_04_RETRIEVAL_ENGINE.md](EPIC_04_RETRIEVAL_ENGINE.md) | **Epic 04** — Embeddings → vector search → ranking → citations |
 | [EPIC_05_NEUROFRIGO_AI_MVP.md](EPIC_05_NEUROFRIGO_AI_MVP.md) | **Epic 05** — Runtime + Portal Chat + AISession |
+| [EPIC_06_AI_EXPERIENCE.md](EPIC_06_AI_EXPERIENCE.md) | **Epic 06** — UX, explainability, follow-up, feedback |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |

@@ -6,7 +6,6 @@ import type {
   HealthStatus,
   LLMCompletion,
   PromptBundle,
-  RuntimeIdentity,
   RuntimeRequest,
 } from '../domain/types';
 

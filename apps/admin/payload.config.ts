@@ -46,7 +46,7 @@ import {
   LearningResources,
 } from './src/collections/knowledge-intelligence';
 import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
-import { AiSessions } from './src/collections/neurofrigo';
+import { AiSessions, AiFeedback } from './src/collections/neurofrigo';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -149,6 +149,7 @@ export default buildConfig({
     EmbeddingRecords,
     SearchSessions,
     AiSessions,
+    AiFeedback,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,

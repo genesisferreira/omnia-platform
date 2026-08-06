@@ -2,6 +2,9 @@ import type { RuntimeAnswer, RuntimeRequest, GuardrailLimits } from '../domain/t
 import { DEFAULT_GUARDRAIL_LIMITS } from '../domain/types';
 import { ContextBuilder } from '../context/context-builder';
 import { PromptBuilder } from '../prompt/prompt-builder';
+import { formatResponse } from '../formatter/response-formatter';
+import { computeGroundingScore } from '../quality/grounding-score';
+import { classifyIntent } from '../intent/classify-intent';
 import {
   applyRetrievalGuardrails,
   computeConfidence,
@@ -24,7 +27,7 @@ export type NeurofrigoRuntimeDeps = {
 };
 
 /**
- * Orquestrador MVP — não acessa Payload/pgvector/banco.
+ * Orquestrador Experience V2 — ports only; sem Payload/pgvector.
  */
 export class NeurofrigoRuntime {
   private readonly retrieval: RetrievalPort;
@@ -45,12 +48,14 @@ export class NeurofrigoRuntime {
     const started = Date.now();
     const context = this.contextBuilder.build(request);
     const meta = this.llm.metadata();
+    const intentHint = classifyIntent(request.question);
 
     try {
+      const retrievalStarted = Date.now();
       const retrieval = await withTimeout(
         this.retrieval.search(
           {
-            text: request.question,
+            text: this.buildRetrievalQuery(request),
             tenantId: context.tenantId,
             userId: context.userId,
             ownerCompanyId: context.ownerCompanyId,
@@ -70,6 +75,7 @@ export class NeurofrigoRuntime {
         ),
         this.limits.timeoutMs,
       );
+      const retrievalTookMs = Date.now() - retrievalStarted;
 
       const guarded = applyRetrievalGuardrails(
         request.question,
@@ -78,8 +84,14 @@ export class NeurofrigoRuntime {
       );
 
       if (!guarded.ok) {
+        const formatted = formatResponse({
+          text: guarded.message,
+          intent: intentHint,
+          status: 'not_found',
+        });
         return {
           text: guarded.message,
+          formattedText: formatted,
           sources: [],
           confidence: 0,
           tookMs: Date.now() - started,
@@ -91,11 +103,29 @@ export class NeurofrigoRuntime {
           estimatedCostUsd: 0,
           status: 'not_found',
           errorCode: guarded.code,
+          intent: intentHint,
+          grounding: computeGroundingScore({
+            chunks: [],
+            confidence: 0,
+            contextChars: 0,
+          }),
+          explainability: {
+            sourceCount: 0,
+            avgScore: 0,
+            confidence: 0,
+            documents: [],
+            retrievalTookMs,
+            llmTookMs: 0,
+            intent: intentHint,
+            justification:
+              'Nenhuma fonte autorizada atingiu o limiar de relevância para esta pergunta.',
+          },
           retrieval: {
             candidateCount: retrieval.candidateCount,
             afterAclCount: retrieval.afterAclCount,
             recoveredTokens: retrieval.recoveredTokens,
             tookMs: retrieval.tookMs,
+            llmTookMs: 0,
           },
         };
       }
@@ -107,6 +137,7 @@ export class NeurofrigoRuntime {
         limits: this.limits,
       });
 
+      const llmStarted = Date.now();
       const completion = await withTimeout(
         this.llm.complete({
           system: prompt.system,
@@ -116,6 +147,7 @@ export class NeurofrigoRuntime {
         }),
         Math.max(1000, this.limits.timeoutMs - (Date.now() - started)),
       );
+      const llmTookMs = Date.now() - llmStarted;
 
       const sources = guarded.chunks.map((c) => ({
         chunkId: c.chunkId,
@@ -125,10 +157,27 @@ export class NeurofrigoRuntime {
         citation: c.citation,
       }));
 
+      const confidence = computeConfidence(guarded.chunks);
+      const contextChars = guarded.chunks.reduce((s, c) => s + c.text.length, 0);
+      const grounding = computeGroundingScore({
+        chunks: guarded.chunks,
+        confidence,
+        contextChars,
+      });
+      const avgScore =
+        sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length);
+
+      const formattedText = formatResponse({
+        text: completion.text,
+        intent: prompt.intent,
+        status: 'ok',
+      });
+
       return {
         text: completion.text,
+        formattedText,
         sources,
-        confidence: computeConfidence(guarded.chunks),
+        confidence,
         tookMs: Date.now() - started,
         model: completion.model || meta.model,
         provider: completion.provider || meta.name,
@@ -143,20 +192,46 @@ export class NeurofrigoRuntime {
         ),
         status: 'ok',
         errorCode: null,
+        intent: prompt.intent,
+        grounding,
+        explainability: {
+          sourceCount: sources.length,
+          avgScore: Number(avgScore.toFixed(3)),
+          confidence,
+          documents: sources.map((s) => ({
+            chunkId: s.chunkId,
+            knowledgeDocumentId: s.citation.knowledgeDocumentId,
+            learningResourceId: s.citation.learningResourceId,
+            page: s.citation.page,
+            score: s.score,
+            similarity: s.similarity,
+          })),
+          retrievalTookMs,
+          llmTookMs,
+          intent: prompt.intent,
+          justification: `Resposta ancorada em ${sources.length} trecho(s) do material autorizado (score médio ${avgScore.toFixed(2)}, grounding ${grounding.score.toFixed(2)}).`,
+        },
         retrieval: {
           candidateCount: retrieval.candidateCount,
           afterAclCount: retrieval.afterAclCount,
           recoveredTokens: retrieval.recoveredTokens,
           tookMs: retrieval.tookMs,
+          llmTookMs,
         },
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'runtime_error';
       const isTimeout = message === 'TIMEOUT' || /timeout/i.test(message);
+      const text = isTimeout
+        ? 'A solicitação excedeu o tempo limite. Tente novamente.'
+        : 'Ocorreu um erro ao processar sua pergunta. Tente novamente em instantes.';
       return {
-        text: isTimeout
-          ? 'A solicitação excedeu o tempo limite. Tente novamente.'
-          : 'Ocorreu um erro ao processar sua pergunta. Tente novamente em instantes.',
+        text,
+        formattedText: formatResponse({
+          text,
+          intent: intentHint,
+          status: isTimeout ? 'timeout' : 'error',
+        }),
         sources: [],
         confidence: 0,
         tookMs: Date.now() - started,
@@ -168,7 +243,18 @@ export class NeurofrigoRuntime {
         estimatedCostUsd: 0,
         status: isTimeout ? 'timeout' : 'error',
         errorCode: isTimeout ? 'TIMEOUT' : 'RUNTIME_ERROR',
+        intent: intentHint,
+        grounding: null,
+        explainability: null,
       };
     }
+  }
+
+  /** Inclui leve reforço do último turno para follow-up sem mudar o Retriever. */
+  private buildRetrievalQuery(request: RuntimeRequest): string {
+    const history = request.conversationHistory ?? [];
+    if (!history.length) return request.question;
+    const last = history[history.length - 1]!;
+    return `${request.question}\n(contexto da sessão: ${last.question})`;
   }
 }

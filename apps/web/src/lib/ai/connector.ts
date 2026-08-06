@@ -6,12 +6,14 @@ import { getSessionToken } from '@/lib/auth/session';
 
 export type AiChatPayload = {
   question: string;
+  sessionId?: string | number | null;
   courseId?: string | number | null;
   courseTitle?: string | null;
   moduleId?: string | number | null;
   moduleTitle?: string | null;
   lessonId?: string | number | null;
   lessonTitle?: string | null;
+  lessonObjectives?: string | null;
   ownerCompanyId?: string | number | null;
   language?: string | null;
   topK?: number;
@@ -71,5 +73,45 @@ export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
     };
   }
 
+  return { ok: true, status: response.status, data };
+}
+
+export async function fetchAiFeedback(body: {
+  sessionId: string | number;
+  rating: 'up' | 'down';
+  comment?: string;
+}): Promise<AiChatResult> {
+  let secret: string;
+  try {
+    secret = getInternalApiConfig().secret;
+  } catch {
+    return { ok: false, status: 503, data: null, error: 'INTERNAL_MISCONFIGURED' };
+  }
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'x-omnia-internal-key': secret,
+  };
+
+  const token = await getSessionToken();
+  if (token) {
+    const me = await fetchMe(token);
+    if (me.ok) {
+      headers['x-omnia-user-id'] = me.data.id;
+    }
+  }
+
+  const url = `${getAdminBaseUrl()}/api/omnia/ai/feedback`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'AI_FEEDBACK_ERROR' };
+  }
   return { ok: true, status: response.status, data };
 }

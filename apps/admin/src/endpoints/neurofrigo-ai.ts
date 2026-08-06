@@ -1,7 +1,7 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
 import { isKiStaff } from '../access/knowledge-intelligence';
-import { runNeurofrigoAsk } from '../services/neurofrigo/ask';
+import { runNeurofrigoAsk, submitAiFeedback } from '../services/neurofrigo/ask';
 import { refreshNeurofrigoAiDashboard } from '../services/neurofrigo/dashboard';
 
 function json(data: unknown, status = 200): Response {
@@ -31,7 +31,6 @@ function authorize(req: PayloadRequest): { ok: true; userId?: string; role?: str
   if (isKiStaff(req.user as { role?: unknown } | null)) {
     return { ok: true, role: 'admin' };
   }
-  // MVP público: permite pergunta anônima no canal portal (ACL retrieval restringe conteúdo)
   return { ok: true, role: 'anonymous' };
 }
 
@@ -58,12 +57,14 @@ export const neurofrigoChatEndpoint: Endpoint = {
 
     const { answer, sessionId } = await runNeurofrigoAsk(req.payload, {
       question,
+      sessionId: (body.sessionId as string | number | null) ?? null,
       identity: {
         userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
         role: (body.role != null ? String(body.role) : auth.role) || null,
         tenantId: body.tenantId != null ? String(body.tenantId) : null,
         companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
         language: body.language != null ? String(body.language) : 'pt-BR',
+        profileLabel: body.profileLabel != null ? String(body.profileLabel) : null,
       },
       course: {
         courseId: body.courseId != null ? String(body.courseId) : null,
@@ -72,6 +73,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
         moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
         lessonId: body.lessonId != null ? String(body.lessonId) : null,
         lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
+        lessonObjectives:
+          body.lessonObjectives != null ? String(body.lessonObjectives) : null,
         ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
       },
       topK: body.topK != null ? Number(body.topK) : undefined,
@@ -81,7 +84,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
       ok: true,
       data: {
         sessionId,
-        text: answer.text,
+        text: answer.formattedText || answer.text,
+        rawText: answer.text,
         sources: answer.sources,
         confidence: answer.confidence,
         tookMs: answer.tookMs,
@@ -95,8 +99,34 @@ export const neurofrigoChatEndpoint: Endpoint = {
         estimatedCostUsd: answer.estimatedCostUsd,
         status: answer.status,
         errorCode: answer.errorCode ?? null,
+        intent: answer.intent,
+        grounding: answer.grounding,
+        explainability: answer.explainability,
+        sourceCount: answer.sources.length,
       },
     });
+  },
+};
+
+export const neurofrigoFeedbackEndpoint: Endpoint = {
+  path: '/omnia/ai/feedback',
+  method: 'post',
+  handler: async (req) => {
+    const auth = authorize(req);
+    if (auth instanceof Response) return auth;
+    const body = await readJson(req);
+    const sessionId = body.sessionId;
+    const rating = String(body.rating || '');
+    if (sessionId == null || (rating !== 'up' && rating !== 'down')) {
+      return json({ ok: false, error: 'sessionId and rating(up|down) required' }, 400);
+    }
+    const created = await submitAiFeedback(req.payload, {
+      sessionId: sessionId as string | number,
+      rating,
+      comment: body.comment != null ? String(body.comment) : null,
+      userId: auth.userId ?? null,
+    });
+    return json({ ok: true, data: { id: created.id } });
   },
 };
 
@@ -120,5 +150,6 @@ export const neurofrigoDashboardRefreshEndpoint: Endpoint = {
 
 export const neurofrigoEndpoints = [
   neurofrigoChatEndpoint,
+  neurofrigoFeedbackEndpoint,
   neurofrigoDashboardRefreshEndpoint,
 ];

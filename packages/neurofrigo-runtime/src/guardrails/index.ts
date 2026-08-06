@@ -1,7 +1,7 @@
 import type { CitationResult } from '@omnia/retrieval';
 
 import type { GuardrailLimits } from '../domain/types';
-import { DEFAULT_GUARDRAIL_LIMITS } from '../domain/types';
+import { DEFAULT_GUARDRAIL_LIMITS, NOT_FOUND_MESSAGE } from '../domain/types';
 
 export type GuardrailDecision =
   | { ok: true; chunks: CitationResult[] }
@@ -25,8 +25,7 @@ export function applyRetrievalGuardrails(
     return {
       ok: false,
       code: 'NO_SOURCES',
-      message:
-        'Não encontrei informações suficientes na base de conhecimento autorizada para este curso.',
+      message: NOT_FOUND_MESSAGE,
     };
   }
 
@@ -35,7 +34,7 @@ export function applyRetrievalGuardrails(
     return {
       ok: false,
       code: 'LOW_CONFIDENCE',
-      message: 'Não encontrei trechos relevantes o bastante na base do curso.',
+      message: NOT_FOUND_MESSAGE,
     };
   }
 

@@ -3,7 +3,6 @@ import type { LLMProviderPort } from '../../ports';
 
 /**
  * Provider default — resposta ancorada exclusivamente nos chunks recuperados.
- * Sem chamada HTTP/LLM externa. Substituível via LLMProviderPort.
  */
 export class GroundedExtractiveProvider implements LLMProviderPort {
   private readonly model: string;
@@ -29,23 +28,39 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
   }): Promise<LLMCompletion> {
     const sources = this.parseSources(input.user);
     const question = this.parseQuestion(input.user);
+    const intent = this.parseIntent(input.system);
 
     let text: string;
     if (!sources.length) {
       text =
-        'Não encontrei informações suficientes na base de conhecimento autorizada para responder.';
+        'Não encontrei essa informação no conteúdo autorizado deste curso. Posso responder apenas com base no material publicado.';
     } else {
-      const bullets = sources.slice(0, 3).map((s, i) => {
-        const excerpt = s.text.slice(0, 280).trim();
-        return `${i + 1}. ${excerpt}${s.text.length > 280 ? '…' : ''} [chunk:${s.id}]`;
+      const bullets = sources.slice(0, 4).map((s, i) => {
+        const excerpt = s.text.slice(0, 260).trim().replace(/\s+/g, ' ');
+        return `${i + 1}. ${excerpt}${s.text.length > 260 ? '…' : ''} [chunk:${s.id}]`;
       });
-      text = [
-        `Com base no material do curso sobre “${question.slice(0, 120)}”:`,
-        '',
-        ...bullets,
-        '',
-        'Se precisar de mais detalhe, refine a pergunta citando o tópico da aula.',
-      ].join('\n');
+
+      if (intent.includes('procedural') || intent.includes('troubleshooting')) {
+        text = [
+          `Com base no material autorizado sobre “${question.slice(0, 100)}”:`,
+          '',
+          ...bullets,
+          '',
+          'Observação técnica: confirme os parâmetros e procedimentos descritos no material do curso.',
+        ].join('\n');
+      } else if (intent.includes('comparative')) {
+        text = [
+          `Comparativo com base no material:`,
+          '',
+          ...bullets,
+        ].join('\n');
+      } else {
+        text = [
+          `Pontos principais do material sobre “${question.slice(0, 100)}”:`,
+          '',
+          ...bullets.map((b) => b.replace(/^\d+\.\s/, '- ')),
+        ].join('\n');
+      }
     }
 
     if (text.length > input.maxTokens * 4) {
@@ -64,6 +79,11 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
       totalTokens: promptTokens + completionTokens,
       finishReason: 'stop',
     };
+  }
+
+  private parseIntent(system: string): string {
+    const m = /Intenção detectada:\s*(\w+)/i.exec(system);
+    return (m?.[1] || '').toLowerCase();
   }
 
   private parseQuestion(user: string): string {

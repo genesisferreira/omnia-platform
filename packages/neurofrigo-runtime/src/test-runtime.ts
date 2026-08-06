@@ -5,8 +5,12 @@ import type { CitationResult, RetrievalResult } from '@omnia/retrieval';
 
 import { ContextBuilder } from './context/context-builder';
 import { PromptBuilder } from './prompt/prompt-builder';
+import { classifyIntent } from './intent/classify-intent';
+import { formatResponse } from './formatter/response-formatter';
+import { computeGroundingScore } from './quality/grounding-score';
 import { GroundedExtractiveProvider } from './adapters/llm/grounded-extractive';
 import { NeurofrigoRuntime } from './runtime/runtime';
+import { NOT_FOUND_MESSAGE } from './domain/types';
 import type { RetrievalPort } from './ports';
 
 function citation(partial: Partial<CitationResult> & Pick<CitationResult, 'chunkId' | 'text'>): CitationResult {
@@ -23,58 +27,89 @@ function citation(partial: Partial<CitationResult> & Pick<CitationResult, 'chunk
       lessonId: '2',
       learningResourceId: '3',
       chunkId: partial.chunkId,
-      page: null,
+      page: 2,
       version: '1.0.0',
     },
     ...partial,
   };
 }
 
-describe('neurofrigo-runtime', () => {
-  it('context builder includes course/lesson/permissions', () => {
+describe('neurofrigo-runtime experience v2', () => {
+  it('classifies intents', () => {
+    assert.equal(classifyIntent('O que é um compressor scroll?'), 'definition');
+    assert.equal(classifyIntent('Como instalar a válvula passo a passo?'), 'procedural');
+    assert.equal(classifyIntent('Diferença entre expansão termostática e eletrônica'), 'comparative');
+    assert.equal(classifyIntent('O equipamento não liga, qual a causa?'), 'troubleshooting');
+  });
+
+  it('context builder v2 includes profile and objectives', () => {
     const ctx = new ContextBuilder().build({
-      question: 'o que é compressor?',
-      identity: { userId: '9', role: 'student', language: 'pt-BR' },
+      question: 'x',
+      identity: { userId: '9', role: 'student', language: 'pt-BR', tenantId: 't1' },
       course: {
         courseId: '1',
         courseTitle: 'Fundamentos',
         lessonId: '2',
         lessonTitle: 'Ciclo',
+        lessonObjectives: 'Compreender o ciclo de refrigeração',
       },
+      conversationHistory: [{ question: 'q1', answer: 'a1' }],
     });
-    assert.equal(ctx.courseId, '1');
-    assert.equal(ctx.lessonId, '2');
-    assert.ok(ctx.permissions.includes('ai.ask'));
+    assert.equal(ctx.profileLabel, 'Aluno');
+    assert.equal(ctx.lessonObjectives, 'Compreender o ciclo de refrigeração');
+    assert.equal(ctx.tenantId, 't1');
+    assert.ok(ctx.permissions.includes('ai.session_followup'));
   });
 
-  it('prompt builder never omits sources block', () => {
+  it('prompt builder adapts by intent and includes history', () => {
     const prompt = new PromptBuilder().build({
-      question: 'explique a válvula',
+      question: 'Como medir a pressão passo a passo?',
       context: new ContextBuilder().build({
         question: 'x',
-        identity: {},
-        course: { courseTitle: 'Curso X' },
+        identity: { role: 'student' },
+        course: { courseTitle: 'Curso X', lessonObjectives: 'Medições' },
+        conversationHistory: [
+          { question: 'O que é manômetro?', answer: 'Instrumento de pressão.' },
+        ],
       }),
-      chunks: [
-        citation({
-          chunkId: 'c1',
-          text: 'A válvula de expansão controla o refrigerante.',
-        }),
-      ],
+      chunks: [citation({ chunkId: 'c1', text: 'Meça a pressão no serviço alto.' })],
       limits: {
         maxContextChunks: 6,
         maxPromptTokens: 3500,
         maxCompletionTokens: 800,
         timeoutMs: 1000,
         minSimilarity: 0.3,
+        maxHistoryTurns: 4,
       },
     });
-    assert.match(prompt.system, /FONTES|trechos/i);
-    assert.match(prompt.user, /chunk:c1/);
-    assert.deepEqual(prompt.citationIds, ['c1']);
+    assert.equal(prompt.intent, 'procedural');
+    assert.match(prompt.system, /passos numerados/i);
+    assert.match(prompt.user, /HISTÓRICO DA SESSÃO/);
+    assert.match(prompt.user, /manômetro/);
   });
 
-  it('runtime returns answer with citations via retrieval port', async () => {
+  it('formatter and grounding score work', () => {
+    const formatted = formatResponse({
+      text: 'Passo A\nPasso B',
+      intent: 'procedural',
+      status: 'ok',
+    });
+    assert.match(formatted, /## /);
+    assert.match(formatted, /Nota de segurança/);
+
+    const g = computeGroundingScore({
+      chunks: [
+        citation({ chunkId: '1', text: 'abc'.repeat(100), similarity: 0.8, score: 0.85 }),
+        citation({ chunkId: '2', text: 'def'.repeat(100), similarity: 0.7, score: 0.75 }),
+      ],
+      confidence: 0.75,
+      contextChars: 600,
+    });
+    assert.ok(g.score > 0.4);
+    assert.equal(g.sourceCount, 2);
+  });
+
+  it('runtime follow-up + explainability + not_found message', async () => {
     const retrieval: RetrievalPort = {
       async search() {
         const result: RetrievalResult = {
@@ -109,18 +144,19 @@ describe('neurofrigo-runtime', () => {
       question: 'Como funciona a válvula de expansão?',
       identity: { userId: '1', role: 'student' },
       course: { courseId: '1', courseTitle: 'Fundamentos' },
+      conversationHistory: [
+        { question: 'O que é refrigerante?', answer: 'Fluido do ciclo.' },
+      ],
     });
 
     assert.equal(answer.status, 'ok');
-    assert.ok(answer.text.length > 10);
+    assert.ok(answer.formattedText.includes('##'));
     assert.ok(answer.sources.length >= 1);
-    assert.equal(answer.sources[0]?.chunkId, '11');
-    assert.ok(answer.confidence > 0);
-    assert.ok(answer.tookMs >= 0);
-  });
+    assert.ok(answer.explainability);
+    assert.ok((answer.grounding?.score ?? 0) > 0);
+    assert.ok(answer.intent);
 
-  it('runtime returns not_found when retrieval empty', async () => {
-    const retrieval: RetrievalPort = {
+    const empty: RetrievalPort = {
       async search() {
         return {
           query: 'xyz',
@@ -136,19 +172,15 @@ describe('neurofrigo-runtime', () => {
         };
       },
     };
-
-    const runtime = new NeurofrigoRuntime({
-      retrieval,
+    const nf = await new NeurofrigoRuntime({
+      retrieval: empty,
       llm: new GroundedExtractiveProvider(),
-    });
-
-    const answer = await runtime.ask({
-      question: 'conteúdo inexistente na base',
+    }).ask({
+      question: 'conteúdo inexistente',
       identity: {},
       course: { courseId: '1' },
     });
-
-    assert.equal(answer.status, 'not_found');
-    assert.equal(answer.sources.length, 0);
+    assert.equal(nf.status, 'not_found');
+    assert.equal(nf.text, NOT_FOUND_MESSAGE);
   });
 });
