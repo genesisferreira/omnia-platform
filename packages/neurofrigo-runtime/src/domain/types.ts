@@ -161,7 +161,7 @@ export const DEFAULT_GUARDRAIL_LIMITS: GuardrailLimits = {
   maxPromptTokens: 3500,
   maxCompletionTokens: 800,
   timeoutMs: 25_000,
-  minSimilarity: 0.35,
+  minSimilarity: 0.42,
   maxHistoryTurns: 4,
 };
 

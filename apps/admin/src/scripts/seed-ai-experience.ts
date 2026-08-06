@@ -48,7 +48,8 @@ async function main() {
   });
 
   const empty = await runNeurofrigoAsk(payload, {
-    question: 'Qual a capital da França no material deste curso?',
+    question:
+      'Qual foi o placar do jogo Flamengo contra Vasco em 12 de março de 2099 segundo o PDF deste curso?',
     identity: { role: 'student', language: 'pt-BR' },
     course: { courseId: String(course.id), courseTitle: String(course.title || '') },
   });

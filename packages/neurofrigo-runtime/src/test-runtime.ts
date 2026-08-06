@@ -10,7 +10,7 @@ import { formatResponse } from './formatter/response-formatter';
 import { computeGroundingScore } from './quality/grounding-score';
 import { GroundedExtractiveProvider } from './adapters/llm/grounded-extractive';
 import { NeurofrigoRuntime } from './runtime/runtime';
-import { NOT_FOUND_MESSAGE } from './domain/types';
+import { DEFAULT_GUARDRAIL_LIMITS, NOT_FOUND_MESSAGE } from './domain/types';
 import type { RetrievalPort } from './ports';
 
 function citation(partial: Partial<CitationResult> & Pick<CitationResult, 'chunkId' | 'text'>): CitationResult {
@@ -107,6 +107,24 @@ describe('neurofrigo-runtime experience v2', () => {
     });
     assert.ok(g.score > 0.4);
     assert.equal(g.sourceCount, 2);
+  });
+
+  it('guardrail rejects off-topic chunks despite similarity', async () => {
+    const { applyRetrievalGuardrails } = await import('./guardrails');
+    const decision = applyRetrievalGuardrails(
+      'Qual o placar do Flamengo contra Vasco em 2099?',
+      [
+        citation({
+          chunkId: 'x',
+          text: 'A válvula de expansão termostática regula o fluxo de refrigerante no evaporador.',
+          similarity: 0.55,
+          score: 0.6,
+        }),
+      ],
+      { ...DEFAULT_GUARDRAIL_LIMITS, minSimilarity: 0.3 },
+    );
+    assert.equal(decision.ok, false);
+    if (!decision.ok) assert.equal(decision.code, 'OFF_TOPIC');
   });
 
   it('runtime follow-up + explainability + not_found message', async () => {
