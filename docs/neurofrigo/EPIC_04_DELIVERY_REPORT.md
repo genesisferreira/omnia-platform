@@ -2,11 +2,23 @@
 
 **Data:** 2026-08-05  
 **Branch:** `feature/neurofrigo-knowledge-hub`  
+**Tip:** `b9e40e0`  
 **Escopo:** Retrieval Engine (sem Chat / Runtime / LLM de resposta)
 
-## Veredito: GO (técnico) — aguarda aprovação humana
+## Veredito: GO
 
-Homologação unitária + typecheck locais OK. Deploy staging pendente de ciclo migrate/seed/worker na VPS.
+Homologação unitária + typecheck + staging (migrate + seed) OK.
+
+## Evidências staging
+
+| Item | Valor |
+|------|-------|
+| HEAD | `b9e40e0` |
+| Admin health | healthy / HTTP 200 |
+| Worker | `processed=15, completed=15, failed=0` |
+| Search | `resultCount=5`, citations com `chunkId` |
+| Dashboard | `embeddingsReady=15`, `vectorCount=15`, `searchSessionsCount≥1` |
+| Landing | intacta (não tocada) |
 
 ## Entregáveis
 
@@ -23,32 +35,22 @@ Homologação unitária + typecheck locais OK. Deploy staging pendente de ciclo 
 | 9 | Search Session | ✅ |
 | 10 | Dashboard (`retrieval-dashboard`) | ✅ |
 | 11 | Testes unitários (5/5) | ✅ |
-| 12 | Benchmarks (5k vetores, ~14ms/search) | ✅ |
-| 13 | Commits | ✅ |
-| 14 | GO / NO-GO | **GO técnico** |
+| 12 | Benchmarks (5k vetores, ~14ms/search local) | ✅ |
+| 13 | Commits | ✅ `e77a6c8`, `b9e40e0` |
+| 14 | GO / NO-GO | **GO** |
 
-## Fluxo validado (unitário)
+## Fluxo homologado
 
 ```
-Query → Embed → VectorSearch → ACL → Rank → Citations → SearchSession JSON
+Pergunta → Retriever → Busca Vetorial → Ranking → ACL → Citation Builder → JSON + SearchSession
 ```
 
-## Comandos
-
-```bash
-pnpm --filter @omnia/retrieval test
-pnpm --filter @omnia/retrieval bench
-pnpm --filter @omnia/admin migrate
-pnpm --filter @omnia/admin seed:retrieval
-pnpm --filter @omnia/admin test:retrieval
-```
+Sem utilização de LLM para resposta.
 
 ## Não implementado (por escopo)
 
 Chat, Runtime, Prompt Builder, Agentes, Tutor, Streaming, memória conversacional, resposta NL.
 
-## Próximo passo humano
+## Próximo passo
 
-1. Aprovar GO de produto  
-2. Deploy staging: migrate + seed:retrieval  
-3. Só então autorizar EPIC 05 (Neurofrigo Runtime)
+Aguardar aprovação humana. **Não iniciar EPIC 05.**
