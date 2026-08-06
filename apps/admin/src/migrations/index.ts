@@ -19,6 +19,7 @@ import * as migration_20260805_140000_lms_core from './20260805_140000_lms_core'
 import * as migration_20260805_180000_knowledge_intelligence from './20260805_180000_knowledge_intelligence';
 import * as migration_20260805_200000_retrieval_engine from './20260805_200000_retrieval_engine';
 import * as migration_20260805_201000_retrieval_locked_rels from './20260805_201000_retrieval_locked_rels';
+import * as migration_20260806_120000_neurofrigo_ai_mvp from './20260806_120000_neurofrigo_ai_mvp';
 
 export const migrations = [
   {
@@ -125,5 +126,10 @@ export const migrations = [
     up: migration_20260805_201000_retrieval_locked_rels.up,
     down: migration_20260805_201000_retrieval_locked_rels.down,
     name: '20260805_201000_retrieval_locked_rels',
+  },
+  {
+    up: migration_20260806_120000_neurofrigo_ai_mvp.up,
+    down: migration_20260806_120000_neurofrigo_ai_mvp.down,
+    name: '20260806_120000_neurofrigo_ai_mvp',
   },
 ];

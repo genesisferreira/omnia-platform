@@ -46,6 +46,7 @@ import {
   LearningResources,
 } from './src/collections/knowledge-intelligence';
 import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
+import { AiSessions } from './src/collections/neurofrigo';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -83,11 +84,13 @@ import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
 import { LmsSettings } from './src/globals/LmsSettings';
 import { KiIntelligenceDashboard } from './src/globals/KiIntelligenceDashboard';
 import { RetrievalDashboard } from './src/globals/RetrievalDashboard';
+import { NeurofrigoAiDashboard } from './src/globals/NeurofrigoAiDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 import { migrations } from './src/migrations';
 import { retrievalEndpoints } from './src/endpoints/retrieval';
+import { neurofrigoEndpoints } from './src/endpoints/neurofrigo-ai';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -145,6 +148,7 @@ export default buildConfig({
     KiProcessingRuns,
     EmbeddingRecords,
     SearchSessions,
+    AiSessions,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -161,6 +165,7 @@ export default buildConfig({
     NeurofrigoKnowledgeDashboard,
     KiIntelligenceDashboard,
     RetrievalDashboard,
+    NeurofrigoAiDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,
@@ -184,6 +189,7 @@ export default buildConfig({
     publicLessonEndpoint,
     ...lmsEndpoints,
     ...retrievalEndpoints,
+    ...neurofrigoEndpoints,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

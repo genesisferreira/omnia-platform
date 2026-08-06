@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Container, SectionTitle } from '@omnia/ui';
 
+import { AskAiPanel } from '@/components/ai/AskAiPanel';
 import { fetchPublicCourse } from '@/lib/cms-lms-core';
 import { buildPageMetadata } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
@@ -45,10 +46,18 @@ export default async function CursoDetailPage({ params }: PageProps) {
           title={course.title}
           subtitle={course.shortDescription ?? undefined}
         />
-        <p className="mb-8 text-sm text-muted-foreground">
+        <p className="mb-4 text-sm text-muted-foreground">
           {course.category ?? 'Curso'} · {course.level ?? '—'}
           {course.estimatedHours != null ? ` · ${course.estimatedHours}h` : ''}
         </p>
+
+        <AskAiPanel
+          context={{
+            courseId: course.id,
+            courseTitle: course.title,
+            language: 'pt-BR',
+          }}
+        />
 
         <div className="space-y-8">
           {modules.map((mod) => (

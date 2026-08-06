@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -41,6 +41,12 @@ run_retrieval() {
   echo "==> Seed Retrieval Engine (embeddings → vector store → busca semântica)..."
   pnpm --filter @omnia/admin seed:retrieval
   echo "==> Seed retrieval concluído."
+}
+
+run_neurofrigo_ai() {
+  echo "==> Seed Neurofrigo AI MVP (Runtime + AISession)..."
+  pnpm --filter @omnia/admin seed:neurofrigo-ai
+  echo "==> Seed neurofrigo-ai concluído."
 }
 
 run_holding_home() {
@@ -111,8 +117,11 @@ case "$MODE" in
   retrieval)
     run_retrieval
     ;;
+  neurofrigo-ai)
+    run_neurofrigo_ai
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai]"
     exit 1
     ;;
 esac

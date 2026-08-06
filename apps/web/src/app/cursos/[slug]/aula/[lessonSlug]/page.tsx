@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { Container, SectionTitle } from '@omnia/ui';
 
+import { AskAiPanel } from '@/components/ai/AskAiPanel';
 import { fetchPublicLesson } from '@/lib/cms-lms-core';
 import { buildPageMetadata } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
@@ -52,6 +53,18 @@ export default async function AulaPage({ params }: PageProps) {
           {lesson.type}
           {lesson.duration != null ? ` · ${lesson.duration} min` : ''}
         </p>
+
+        <AskAiPanel
+          context={{
+            courseId: course.id,
+            courseTitle: course.title,
+            moduleId: mod?.id ?? null,
+            moduleTitle: mod?.title ?? null,
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            language: 'pt-BR',
+          }}
+        />
 
         {lesson.externalUrl ? (
           <p className="mb-6 text-sm">

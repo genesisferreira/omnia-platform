@@ -1,0 +1,124 @@
+import type { Endpoint, PayloadRequest } from 'payload';
+
+import { isKiStaff } from '../access/knowledge-intelligence';
+import { runNeurofrigoAsk } from '../services/neurofrigo/ask';
+import { refreshNeurofrigoAiDashboard } from '../services/neurofrigo/dashboard';
+
+function json(data: unknown, status = 200): Response {
+  return Response.json(data, {
+    status,
+    headers: { 'Cache-Control': 'no-store' },
+  });
+}
+
+function authorize(req: PayloadRequest): { ok: true; userId?: string; role?: string } | Response {
+  const secret = process.env.OMNIA_INTERNAL_API_SECRET;
+  const key = req.headers.get('x-omnia-internal-key') || req.headers.get('x-omnia-internal-secret');
+  if (secret && key && key === secret) {
+    return {
+      ok: true,
+      userId: req.headers.get('x-omnia-user-id') || undefined,
+      role: req.headers.get('x-omnia-lms-role') || 'student',
+    };
+  }
+  if (req.user) {
+    return {
+      ok: true,
+      userId: String(req.user.id),
+      role: String((req.user as { role?: string }).role || 'student'),
+    };
+  }
+  if (isKiStaff(req.user as { role?: unknown } | null)) {
+    return { ok: true, role: 'admin' };
+  }
+  // MVP público: permite pergunta anônima no canal portal (ACL retrieval restringe conteúdo)
+  return { ok: true, role: 'anonymous' };
+}
+
+async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
+  try {
+    const body = await req.json?.();
+    if (body && typeof body === 'object') return body as Record<string, unknown>;
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
+export const neurofrigoChatEndpoint: Endpoint = {
+  path: '/omnia/ai/chat',
+  method: 'post',
+  handler: async (req) => {
+    const auth = authorize(req);
+    if (auth instanceof Response) return auth;
+
+    const body = await readJson(req);
+    const question = String(body.question || body.text || '').trim();
+    if (!question) return json({ ok: false, error: 'question is required' }, 400);
+
+    const { answer, sessionId } = await runNeurofrigoAsk(req.payload, {
+      question,
+      identity: {
+        userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
+        role: (body.role != null ? String(body.role) : auth.role) || null,
+        tenantId: body.tenantId != null ? String(body.tenantId) : null,
+        companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
+        language: body.language != null ? String(body.language) : 'pt-BR',
+      },
+      course: {
+        courseId: body.courseId != null ? String(body.courseId) : null,
+        courseTitle: body.courseTitle != null ? String(body.courseTitle) : null,
+        moduleId: body.moduleId != null ? String(body.moduleId) : null,
+        moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
+        lessonId: body.lessonId != null ? String(body.lessonId) : null,
+        lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
+        ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
+      },
+      topK: body.topK != null ? Number(body.topK) : undefined,
+    });
+
+    return json({
+      ok: true,
+      data: {
+        sessionId,
+        text: answer.text,
+        sources: answer.sources,
+        confidence: answer.confidence,
+        tookMs: answer.tookMs,
+        model: answer.model,
+        provider: answer.provider,
+        tokens: {
+          prompt: answer.promptTokens,
+          completion: answer.completionTokens,
+          total: answer.totalTokens,
+        },
+        estimatedCostUsd: answer.estimatedCostUsd,
+        status: answer.status,
+        errorCode: answer.errorCode ?? null,
+      },
+    });
+  },
+};
+
+export const neurofrigoDashboardRefreshEndpoint: Endpoint = {
+  path: '/omnia/ai/dashboard/refresh',
+  method: 'post',
+  handler: async (req) => {
+    const secret = process.env.OMNIA_INTERNAL_API_SECRET;
+    const key = req.headers.get('x-omnia-internal-key') || req.headers.get('x-omnia-internal-secret');
+    if (!(secret && key === secret) && !isKiStaff(req.user as { role?: unknown } | null)) {
+      return json({ ok: false, error: 'UNAUTHORIZED' }, 401);
+    }
+    await refreshNeurofrigoAiDashboard(req.payload);
+    const dash = await req.payload.findGlobal({
+      slug: 'neurofrigo-ai-dashboard',
+      overrideAccess: true,
+    });
+    return json({ ok: true, data: dash });
+  },
+};
+
+export const neurofrigoEndpoints = [
+  neurofrigoChatEndpoint,
+  neurofrigoDashboardRefreshEndpoint,
+];

@@ -50,6 +50,8 @@
     "seed:retrieval": "tsx src/scripts/seed-retrieval.ts",
     "test:retrieval": "tsx --test ../../packages/retrieval/src/**/test-*.ts && tsx --test src/scripts/test-retrieval.ts",
     "retrieval:worker": "tsx src/scripts/run-retrieval-worker.ts",
+    "seed:neurofrigo-ai": "tsx src/scripts/seed-neurofrigo-ai.ts",
+    "test:neurofrigo-ai": "tsx --test ../../packages/neurofrigo-runtime/src/**/test-*.ts && tsx --test src/scripts/test-neurofrigo-ai.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
@@ -64,6 +66,7 @@
     "@omnia/neurofrigo-knowledge": "workspace:*",
     "@omnia/knowledge-intelligence": "workspace:*",
     "@omnia/retrieval": "workspace:*",
+    "@omnia/neurofrigo-runtime": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",
