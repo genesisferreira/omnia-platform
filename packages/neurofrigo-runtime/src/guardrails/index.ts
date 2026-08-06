@@ -62,10 +62,23 @@ export function significantTokens(text: string): Set<string> {
 export function hasLexicalOverlap(question: string, chunks: CitationResult[]): boolean {
   const qTokens = significantTokens(question);
   if (qTokens.size === 0) return true;
-  const haystack = chunks.slice(0, 4).map((c) => significantTokens(c.text));
+
+  const docBlob = chunks
+    .slice(0, 4)
+    .map((c) =>
+      c.text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{M}/gu, ''),
+    )
+    .join(' ');
+
   for (const token of qTokens) {
-    for (const doc of haystack) {
-      if (doc.has(token)) return true;
+    if (docBlob.includes(token)) return true;
+    // Prefixo (ex.: termostatica ≈ termostatico)
+    if (token.length >= 5) {
+      const prefix = token.slice(0, Math.min(6, token.length));
+      if (docBlob.includes(prefix)) return true;
     }
   }
   return false;

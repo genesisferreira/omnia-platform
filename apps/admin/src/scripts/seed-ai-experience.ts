@@ -68,16 +68,19 @@ async function main() {
         intent: first.answer.intent,
         grounding: first.answer.grounding?.score,
         sources: first.answer.sources.length,
+        errorCode: first.answer.errorCode ?? null,
       },
       follow: {
         sessionId: follow.sessionId,
         status: follow.answer.status,
         intent: follow.answer.intent,
         sameSession: follow.sessionId === first.sessionId,
+        errorCode: follow.answer.errorCode ?? null,
       },
       notFound: {
         status: empty.answer.status,
         textPreview: empty.answer.text.slice(0, 80),
+        errorCode: empty.answer.errorCode ?? null,
       },
       dashboard: {
         questionsCount: dash.questionsCount,
@@ -89,6 +92,9 @@ async function main() {
   );
 
   if (follow.sessionId !== first.sessionId) throw new Error('FOLLOWUP_SESSION_MISMATCH');
+  if (first.answer.status !== 'ok') {
+    throw new Error(`EXPECTED_GROUNDED_FIRST got=${first.answer.status} code=${first.answer.errorCode}`);
+  }
   if (empty.answer.status !== 'not_found') throw new Error('EXPECTED_NOT_FOUND');
   if (!first.answer.explainability) throw new Error('MISSING_EXPLAINABILITY');
 

@@ -78,7 +78,7 @@ export class NeurofrigoRuntime {
       const retrievalTookMs = Date.now() - retrievalStarted;
 
       const guarded = applyRetrievalGuardrails(
-        request.question,
+        this.buildRetrievalQuery(request),
         retrieval.results,
         this.limits,
       );
