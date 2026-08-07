@@ -17,22 +17,23 @@ export type AiChatPayload = {
   ownerCompanyId?: string | number | null;
   language?: string | null;
   topK?: number;
+  requestStudyPlan?: boolean;
+  objective?: string | null;
 };
 
 export type AiChatResult =
   | { ok: true; status: number; data: unknown }
   | { ok: false; status: number; data: unknown; error: string };
 
-/**
- * Bridge S2S Portal → Admin Neurofrigo Runtime.
- * Nunca expõe OMNIA_INTERNAL_API_SECRET ao browser.
- */
-export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
+async function buildInternalHeaders(): Promise<{
+  headers: Record<string, string>;
+  adminBase: string;
+} | { error: string }> {
   let secret: string;
   try {
     secret = getInternalApiConfig().secret;
   } catch {
-    return { ok: false, status: 503, data: null, error: 'INTERNAL_MISCONFIGURED' };
+    return { error: 'INTERNAL_MISCONFIGURED' };
   }
 
   const headers: Record<string, string> = {
@@ -55,10 +56,23 @@ export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
     }
   }
 
-  const url = `${getAdminBaseUrl()}/api/omnia/ai/chat`;
+  return { headers, adminBase: getAdminBaseUrl() };
+}
+
+/**
+ * Bridge S2S Portal → Admin Neurofrigo Runtime.
+ * Nunca expõe OMNIA_INTERNAL_API_SECRET ao browser.
+ */
+export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/ai/chat`;
   const response = await fetch(url, {
     method: 'POST',
-    headers,
+    headers: built.headers,
     body: JSON.stringify(body),
     cache: 'no-store',
   });
@@ -76,36 +90,59 @@ export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
   return { ok: true, status: response.status, data };
 }
 
+export async function fetchTutorChat(body: AiChatPayload): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/tutor/chat`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: built.headers,
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'TUTOR_RUNTIME_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
+export async function fetchTutorProfile(courseId: string | number): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/tutor/profile?courseId=${encodeURIComponent(String(courseId))}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'TUTOR_PROFILE_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
 export async function fetchAiFeedback(body: {
   sessionId: string | number;
   rating: 'up' | 'down';
   comment?: string;
 }): Promise<AiChatResult> {
-  let secret: string;
-  try {
-    secret = getInternalApiConfig().secret;
-  } catch {
-    return { ok: false, status: 503, data: null, error: 'INTERNAL_MISCONFIGURED' };
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
   }
 
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'x-omnia-internal-key': secret,
-  };
-
-  const token = await getSessionToken();
-  if (token) {
-    const me = await fetchMe(token);
-    if (me.ok) {
-      headers['x-omnia-user-id'] = me.data.id;
-    }
-  }
-
-  const url = `${getAdminBaseUrl()}/api/omnia/ai/feedback`;
+  const url = `${built.adminBase}/api/omnia/ai/feedback`;
   const response = await fetch(url, {
     method: 'POST',
-    headers,
+    headers: built.headers,
     body: JSON.stringify(body),
     cache: 'no-store',
   });

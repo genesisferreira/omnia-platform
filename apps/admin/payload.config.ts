@@ -46,7 +46,7 @@ import {
   LearningResources,
 } from './src/collections/knowledge-intelligence';
 import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
-import { AiSessions, AiFeedback } from './src/collections/neurofrigo';
+import { AiSessions, AiFeedback, StudentProfiles, LearningProfiles, TutorStudyPlans } from './src/collections/neurofrigo';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -85,12 +85,14 @@ import { LmsSettings } from './src/globals/LmsSettings';
 import { KiIntelligenceDashboard } from './src/globals/KiIntelligenceDashboard';
 import { RetrievalDashboard } from './src/globals/RetrievalDashboard';
 import { NeurofrigoAiDashboard } from './src/globals/NeurofrigoAiDashboard';
+import { NeurofrigoTutorDashboard } from './src/globals/NeurofrigoTutorDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
 import { migrations } from './src/migrations';
 import { retrievalEndpoints } from './src/endpoints/retrieval';
 import { neurofrigoEndpoints } from './src/endpoints/neurofrigo-ai';
+import { tutorEndpoints } from './src/endpoints/neurofrigo-tutor';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -150,6 +152,9 @@ export default buildConfig({
     SearchSessions,
     AiSessions,
     AiFeedback,
+    StudentProfiles,
+    LearningProfiles,
+    TutorStudyPlans,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -167,6 +172,7 @@ export default buildConfig({
     KiIntelligenceDashboard,
     RetrievalDashboard,
     NeurofrigoAiDashboard,
+    NeurofrigoTutorDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,
@@ -191,6 +197,7 @@ export default buildConfig({
     ...lmsEndpoints,
     ...retrievalEndpoints,
     ...neurofrigoEndpoints,
+    ...tutorEndpoints,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

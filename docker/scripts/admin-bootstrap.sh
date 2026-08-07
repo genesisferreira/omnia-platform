@@ -55,6 +55,12 @@ run_ai_experience() {
   echo "==> Seed ai-experience concluído."
 }
 
+run_tutor_ia() {
+  echo "==> Seed Tutor IA (profiles, personalização, plano, recomendações)..."
+  pnpm --filter @omnia/admin seed:tutor-ia
+  echo "==> Seed tutor-ia concluído."
+}
+
 run_holding_home() {
   echo "==> Seed exclusivo da Home (omnia-hub)..."
   pnpm --filter @omnia/admin seed:holding-home
@@ -129,8 +135,11 @@ case "$MODE" in
   ai-experience)
     run_ai_experience
     ;;
+  tutor-ia)
+    run_tutor_ia
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia]"
     exit 1
     ;;
 esac

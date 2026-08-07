@@ -21,6 +21,7 @@ import * as migration_20260805_200000_retrieval_engine from './20260805_200000_r
 import * as migration_20260805_201000_retrieval_locked_rels from './20260805_201000_retrieval_locked_rels';
 import * as migration_20260806_120000_neurofrigo_ai_mvp from './20260806_120000_neurofrigo_ai_mvp';
 import * as migration_20260806_180000_ai_experience from './20260806_180000_ai_experience';
+import * as migration_20260807_120000_tutor_ia from './20260807_120000_tutor_ia';
 
 export const migrations = [
   {
@@ -137,5 +138,10 @@ export const migrations = [
     up: migration_20260806_180000_ai_experience.up,
     down: migration_20260806_180000_ai_experience.down,
     name: '20260806_180000_ai_experience',
+  },
+  {
+    up: migration_20260807_120000_tutor_ia.up,
+    down: migration_20260807_120000_tutor_ia.down,
+    name: '20260807_120000_tutor_ia',
   },
 ];
