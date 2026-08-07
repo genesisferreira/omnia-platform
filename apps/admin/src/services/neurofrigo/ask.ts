@@ -112,9 +112,10 @@ export async function runNeurofrigoAsk(
         profileLabel: request.identity.profileLabel ?? null,
       },
     },
-    user: request.identity.userId
-      ? Number(request.identity.userId) || request.identity.userId
-      : undefined,
+    user:
+      request.identity.userId && /^\d+$/.test(String(request.identity.userId))
+        ? Number(request.identity.userId)
+        : undefined,
     tenant: request.identity.tenantId
       ? Number(request.identity.tenantId) || request.identity.tenantId
       : undefined,
