@@ -3,7 +3,7 @@ import type { AclFilterPort, AclSubject } from '../ports';
 
 /**
  * ACL de retrieval — filtragem antes da resposta final.
- * Regras mínimas da EPIC 04; adapters Payload podem enriquecer via composition.
+ * EPIC 04 regras mínimas + EPIC 10 filtro por agente (tags agent:*).
  */
 export class DefaultAclFilter implements AclFilterPort {
   async filter(hits: VectorSearchHit[], subject: AclSubject): Promise<VectorSearchHit[]> {
@@ -18,7 +18,7 @@ export class DefaultAclFilter implements AclFilterPort {
 
       if (r.publicationStatus && r.publicationStatus !== 'published') return false;
 
-      if (r.status && !['published', 'ready', 'active', 'completed'].includes(r.status)) {
+      if (r.status && !['published', 'ready', 'active', 'completed', 'indexed'].includes(r.status)) {
         return false;
       }
 
@@ -33,6 +33,16 @@ export class DefaultAclFilter implements AclFilterPort {
       if (r.ownerCompanyId && subject.companyIds?.length) {
         const allowed = subject.companyIds.map(String);
         if (!allowed.includes(String(r.ownerCompanyId))) return false;
+      }
+
+      if (subject.agentKey && subject.channel === 'portal_chat') {
+        const agentTags = (r.tags || []).filter((t) => t.startsWith('agent:'));
+        if (agentTags.length > 0) {
+          const needed = `agent:${subject.agentKey}`;
+          if (!agentTags.includes(needed) && subject.agentKey !== 'command') {
+            return false;
+          }
+        }
       }
 
       return true;

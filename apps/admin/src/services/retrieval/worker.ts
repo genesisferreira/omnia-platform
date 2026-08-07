@@ -170,6 +170,41 @@ async function embedChunk(
   const embedding = await provider.generate(text);
   const tags = (chunk.tags || []).map((t) => t.tag).filter(Boolean) as string[];
 
+  let allowAiUse = true;
+  let publicationStatus = 'published';
+  let status = 'published';
+  let visibility = 'enrolled';
+
+  if (documentId != null) {
+    try {
+      const doc = (await payload.findByID({
+        collection: 'knowledge-documents',
+        id: documentId,
+        depth: 0,
+        overrideAccess: true,
+      })) as {
+        allowAiUse?: boolean | null;
+        publicationStatus?: string | null;
+        status?: string | null;
+        securityClassification?: string | null;
+        allowedAgents?: string[] | null;
+      };
+      allowAiUse = doc.allowAiUse !== false;
+      publicationStatus = doc.publicationStatus || publicationStatus;
+      status = doc.status || status;
+      if (doc.securityClassification === 'INTERNAL_RESTRICTED') {
+        allowAiUse = false;
+        visibility = 'internal_restricted';
+      }
+      for (const agent of doc.allowedAgents || []) {
+        const tag = `agent:${agent}`;
+        if (!tags.includes(tag)) tags.push(tag);
+      }
+    } catch {
+      // Mantém defaults se o documento Hub não existir mais.
+    }
+  }
+
   const record: VectorRecord = {
     id: vectorId,
     chunkId: String(chunk.id),
@@ -186,10 +221,10 @@ async function embedChunk(
     version: chunk.version ?? null,
     category: chunk.category ?? null,
     tags,
-    allowAiUse: true,
-    publicationStatus: 'published',
-    visibility: 'enrolled',
-    status: 'published',
+    allowAiUse,
+    publicationStatus,
+    visibility,
+    status,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };

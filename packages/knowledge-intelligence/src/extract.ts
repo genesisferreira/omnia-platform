@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 
-import type { ExtractMeta, ExtractResult } from './types';
+import type { ExtractMeta, ExtractResult, KiSupportedExtractType } from './types';
+import { extractDocx, extractPptx } from './extract-office';
 
 const require = createRequire(import.meta.url);
 
@@ -12,10 +13,26 @@ export function sha256Hex(buffer: Buffer): string {
 export function detectResourceType(args: {
   mimeType?: string | null;
   filename?: string | null;
-}): 'pdf' | 'txt' | 'markdown' | null {
+}): KiSupportedExtractType | null {
   const mime = (args.mimeType || '').toLowerCase();
   const name = (args.filename || '').toLowerCase();
   if (mime.includes('pdf') || name.endsWith('.pdf')) return 'pdf';
+  if (
+    mime.includes('wordprocessingml') ||
+    mime.includes('msword') ||
+    name.endsWith('.docx') ||
+    name.endsWith('.doc')
+  ) {
+    return 'docx';
+  }
+  if (
+    mime.includes('presentationml') ||
+    mime.includes('ms-powerpoint') ||
+    name.endsWith('.pptx') ||
+    name.endsWith('.ppt')
+  ) {
+    return 'pptx';
+  }
   if (mime.includes('markdown') || name.endsWith('.md') || name.endsWith('.markdown')) {
     return 'markdown';
   }
@@ -97,11 +114,21 @@ export async function extractPdf(
 }
 
 export async function extractByType(
-  type: 'pdf' | 'txt' | 'markdown',
+  type: KiSupportedExtractType,
   buffer: Buffer,
   opts?: { mimeType?: string | null; filename?: string | null },
 ): Promise<ExtractResult> {
   if (type === 'pdf') return extractPdf(buffer, opts);
   if (type === 'markdown') return extractMarkdown(buffer, opts);
+  if (type === 'docx') return extractDocx(buffer, opts);
+  if (type === 'pptx') return extractPptx(buffer, opts);
   return extractTxt(buffer, opts);
 }
+
+export { extractDocx, extractPptx } from './extract-office';
+export {
+  classifyOfficialDocument,
+  isPendingArchive,
+  mimeForFilename,
+} from './classify-official';
+export type { OfficialClassification } from './classify-official';

@@ -62,6 +62,7 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [EPIC_08_DELIVERY_REPORT.md](EPIC_08_DELIVERY_REPORT.md) | **Epic 08** — Delivery / GO |
 | [EPIC_09_DEEPSEEK_AGENTS.md](EPIC_09_DEEPSEEK_AGENTS.md) | **Epic 09** — DeepSeek Live + Agent Library |
 | [EPIC_09_DELIVERY_REPORT.md](EPIC_09_DELIVERY_REPORT.md) | **Epic 09** — Delivery / GO |
+| [EPIC_10_KNOWLEDGE_HUB_LOAD.md](EPIC_10_KNOWLEDGE_HUB_LOAD.md) | **Epic 10** — Carga oficial Knowledge Hub |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |

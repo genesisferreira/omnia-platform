@@ -43,6 +43,7 @@
     "test:lms-bff-helpers": "tsx --test src/scripts/test-lms-bff-helpers.ts",
     "test:knowledge-hub": "tsx --test src/scripts/test-knowledge-hub.ts ../../packages/neurofrigo-knowledge/src/**/test-*.ts",
     "seed:knowledge-hub": "tsx src/scripts/seed-knowledge-hub.ts",
+    "seed:knowledge-hub-load": "tsx src/scripts/seed-knowledge-hub-load.ts",
     "seed:lms-core": "tsx src/scripts/seed-lms-core.ts",
     "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
     "seed:knowledge-intelligence": "tsx src/scripts/seed-knowledge-intelligence.ts",

@@ -12,8 +12,8 @@ export const KI_RESOURCE_TYPES = [
 ] as const;
 export type KiResourceType = (typeof KI_RESOURCE_TYPES)[number];
 
-/** Formatos com extractor implementado nesta entrega. */
-export const KI_SUPPORTED_EXTRACT_TYPES = ['pdf', 'txt', 'markdown'] as const;
+/** Formatos com extractor implementado (EPIC 03 + EPIC 10 Office). */
+export const KI_SUPPORTED_EXTRACT_TYPES = ['pdf', 'txt', 'markdown', 'docx', 'pptx'] as const;
 export type KiSupportedExtractType = (typeof KI_SUPPORTED_EXTRACT_TYPES)[number];
 
 export const KI_PROCESSING_STATUSES = [

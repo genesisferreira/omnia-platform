@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | deepseek-agents
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | deepseek-agents
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -23,6 +23,12 @@ run_knowledge_hub() {
   echo "==> Seed Knowledge Hub (categorias + agents + settings; sem docs técnicos)..."
   pnpm --filter @omnia/admin seed:knowledge-hub
   echo "==> Seed knowledge-hub concluído."
+}
+
+run_knowledge_hub_load() {
+  echo "==> Seed Knowledge Hub — carga oficial EPIC 10 (import + index + retrieval)..."
+  pnpm --filter @omnia/admin seed:knowledge-hub-load
+  echo "==> Seed knowledge-hub-load concluído."
 }
 
 run_lms_core() {
@@ -132,6 +138,9 @@ case "$MODE" in
   knowledge-hub)
     run_knowledge_hub
     ;;
+  knowledge-hub-load)
+    run_knowledge_hub_load
+    ;;
   lms-core)
     run_lms_core
     ;;
@@ -157,7 +166,7 @@ case "$MODE" in
     run_deepseek_agents
     ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|deepseek-agents]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|deepseek-agents]"
     exit 1
     ;;
 esac

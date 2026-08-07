@@ -31,6 +31,8 @@ function sourceTypeFor(resourceType: string): string {
   if (resourceType === 'pdf') return 'pdf';
   if (resourceType === 'markdown') return 'markdown';
   if (resourceType === 'txt') return 'txt';
+  if (resourceType === 'docx') return 'docx';
+  if (resourceType === 'pptx') return 'technical_manual';
   return 'lesson_ref';
 }
 
@@ -219,6 +221,24 @@ export async function processLearningResource(args: {
   sourceFilename?: string | null;
   /** Quando pdf-parse já rodou antes do boot Payload (evita conflito runtime). */
   preExtracted?: { text: string; meta: Record<string, unknown> };
+  /** Overrides do Hub (EPIC 10 — carga oficial publicada para Retrieval). */
+  hubOverrides?: {
+    title?: string;
+    knowledgeArea?: string;
+    category?: string | number;
+    subcategories?: Array<string | number>;
+    allowedAgents?: string[];
+    ownerCompany?: string | number;
+    allowAiUse?: boolean;
+    publicationStatus?: 'unpublished' | 'published' | 'archived';
+    status?: string;
+    securityClassification?: string;
+    technicalRiskLevel?: string;
+    humanReviewRequired?: boolean;
+    allowWebPublication?: boolean;
+    tags?: string[];
+    revisionNotes?: string;
+  };
 }): Promise<{ ok: boolean; chunkCount: number; knowledgeDocumentId?: string | number }> {
   const {
     payload,
@@ -228,6 +248,7 @@ export async function processLearningResource(args: {
     sourceMimeType,
     sourceFilename,
     preExtracted,
+    hubOverrides,
   } = args;
   const correlationId = randomUUID();
   const startedAt = new Date().toISOString();
@@ -391,47 +412,58 @@ export async function processLearningResource(args: {
       context: { kiPipelineActive: true },
     });
 
-    const title = String(resource.title || `Learning Resource ${learningResourceId}`);
+    const title = hubOverrides?.title || String(resource.title || `Learning Resource ${learningResourceId}`);
     const baseSlug = `ki-${slugify(title)}-${learningResourceId}`;
     const tags = Array.isArray(resource.tags)
       ? (resource.tags as Array<{ tag?: string }>)
           .map((t) => t.tag)
           .filter((t): t is string => Boolean(t))
       : [];
+    const mergedTags = [...new Set([...(hubOverrides?.tags || []), ...tags])];
 
     let knowledgeDocumentId = relId(resource.knowledgeDocument as Rel);
+    const publishForAi = hubOverrides?.allowAiUse === true;
     const hubData = {
-      title: `[KI] ${title}`,
+      title: publishForAi ? title : `[KI] ${title}`,
       slug: baseSlug,
       summary: normalized.slice(0, 2000),
       sourceType: sourceTypeFor(resourceType),
       file: mediaId,
       language: (resource.language as string) || 'pt-BR',
-      ownerCompany: relId(resource.ownerCompany as Rel) ?? undefined,
-      knowledgeArea: 'cursos',
-      tags: tags.map((tag) => ({ tag })),
+      ownerCompany:
+        hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel) ?? undefined,
+      knowledgeArea: hubOverrides?.knowledgeArea || 'cursos',
+      category: hubOverrides?.category,
+      subcategories: hubOverrides?.subcategories,
+      allowedAgents: hubOverrides?.allowedAgents,
+      tags: mergedTags.map((tag) => ({ tag })),
       authorName: (resource.author as string) || undefined,
-      status: 'draft' as const,
-      processingStatus: 'queued' as const,
-      publicationStatus: 'unpublished' as const,
-      securityClassification: 'INTERNAL_RESTRICTED' as const,
-      allowAiUse: false,
-      allowWebPublication: false,
+      status: hubOverrides?.status || 'draft',
+      processingStatus: publishForAi ? ('succeeded' as const) : ('queued' as const),
+      publicationStatus: hubOverrides?.publicationStatus || ('unpublished' as const),
+      securityClassification:
+        hubOverrides?.securityClassification || ('INTERNAL_RESTRICTED' as const),
+      allowAiUse: hubOverrides?.allowAiUse ?? false,
+      allowWebPublication: hubOverrides?.allowWebPublication ?? false,
       allowDownload: false,
       requiresEnrollment: false,
-      technicalRiskLevel: 'high' as const,
-      humanReviewRequired: true,
+      technicalRiskLevel: hubOverrides?.technicalRiskLevel || ('high' as const),
+      humanReviewRequired: hubOverrides?.humanReviewRequired ?? true,
       versionNumber: (resource.version as string) || '1.0.0',
       checksum: fileHash,
-      revisionNotes: `Ingestão automática Knowledge Intelligence (correlation=${correlationId}). Sem embeddings.`,
+      revisionNotes:
+        hubOverrides?.revisionNotes ||
+        `Ingestão automática Knowledge Intelligence (correlation=${correlationId}). Sem embeddings.`,
     };
+
+    const useDraft = !publishForAi;
 
     if (knowledgeDocumentId != null) {
       await payload.update({
         collection: 'knowledge-documents',
         id: knowledgeDocumentId,
         data: hubData,
-        draft: true,
+        draft: useDraft,
         overrideAccess: true,
         req,
         context: { kiPipelineActive: true },
@@ -442,7 +474,7 @@ export async function processLearningResource(args: {
         const created = await payload.create({
           collection: 'knowledge-documents',
           data: hubData,
-          draft: true,
+          draft: useDraft,
           overrideAccess: true,
           req,
           context: { kiPipelineActive: true },
@@ -455,7 +487,7 @@ export async function processLearningResource(args: {
             ...hubData,
             slug: `${baseSlug}-${createHash('sha1').update(String(learningResourceId)).digest('hex').slice(0, 8)}`,
           },
-          draft: true,
+          draft: useDraft,
           overrideAccess: true,
           req,
           context: { kiPipelineActive: true },
@@ -484,8 +516,11 @@ export async function processLearningResource(args: {
     const courseId = relId(resource.course as Rel);
     const moduleId = relId(resource.module as Rel);
     const lessonId = relId(resource.lesson as Rel);
-    const ownerCompanyId = relId(resource.ownerCompany as Rel);
+    const ownerCompanyId =
+      hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel);
     const instructorId = relId(resource.instructor as Rel);
+    const agentTags = (hubOverrides?.allowedAgents || []).map((a) => `agent:${a}`);
+    const chunkTags = [...new Set([...mergedTags, ...agentTags])];
 
     for (const chunk of chunks) {
       const chunkDoc = await payload.create({
@@ -505,8 +540,11 @@ export async function processLearningResource(args: {
           instructor: instructorId ?? undefined,
           language: (resource.language as string) || 'pt-BR',
           version: (resource.version as string) || '1.0.0',
-          category: (resource.category as string) || undefined,
-          tags: tags.map((tag) => ({ tag })),
+          category:
+            (hubOverrides?.knowledgeArea as string) ||
+            (resource.category as string) ||
+            undefined,
+          tags: chunkTags.map((tag) => ({ tag })),
         },
         overrideAccess: true,
         req,

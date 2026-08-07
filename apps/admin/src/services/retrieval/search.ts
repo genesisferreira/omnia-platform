@@ -12,6 +12,7 @@ export async function runSemanticSearch(
     userId?: string | null;
     tenantId?: string | null;
     companyIds?: Array<string | number>;
+    agentKey?: string | null;
     channel?: 'portal_chat' | 'admin' | 'system' | 'command';
   } = { channel: 'system' },
 ): Promise<RetrievalResult> {
