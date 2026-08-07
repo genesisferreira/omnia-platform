@@ -351,7 +351,11 @@ async function main() {
     let preExtracted: { text: string; meta: Record<string, unknown> } | undefined;
     if (resourceType === 'pdf' && pdfExtracted && filename.includes('epic10-carga.pdf')) {
       preExtracted = pdfExtracted;
-    } else if (resourceType === 'pptx' && filename.includes('epic10-carga.pptx')) {
+    } else if (
+      resourceType === 'pptx' &&
+      filename.includes('epic10-carga.pptx') &&
+      pptxExtracted
+    ) {
       preExtracted = pptxExtracted;
     } else if (resourceType === 'pdf') {
       preExtracted = await extractByType('pdf', buffer, { mimeType: mime, filename });
