@@ -37,4 +37,49 @@ describe('deepseek adapter', () => {
       'https://api.deepseek.com/v1',
     );
   });
+
+  it('disables V4 thinking by default and reads content', async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    const fetchImpl = (async (_url: string | URL | Request, init?: RequestInit) => {
+      capturedBody = JSON.parse(String(init?.body || '{}')) as Record<string, unknown>;
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { content: 'ok-deepseek', reasoning_content: 'think' }, finish_reason: 'stop' }],
+          usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    }) as typeof fetch;
+
+    const p = new DeepSeekChatProvider({
+      apiKey: 'test-key',
+      model: 'deepseek-v4-flash',
+      fetchImpl,
+      maxRetries: 0,
+    });
+    const out = await p.complete({ system: 's', user: 'u', maxTokens: 64 });
+    assert.equal(out.text, 'ok-deepseek');
+    assert.equal(out.provider, 'deepseek');
+    assert.deepEqual(capturedBody?.thinking, { type: 'disabled' });
+  });
+
+  it('falls back to reasoning_content when content is empty', async () => {
+    const fetchImpl = (async () =>
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: '', reasoning_content: 'only-cot' }, finish_reason: 'length' }],
+          usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )) as typeof fetch;
+
+    const p = new DeepSeekChatProvider({
+      apiKey: 'test-key',
+      model: 'deepseek-v4-flash',
+      fetchImpl,
+      maxRetries: 0,
+    });
+    const out = await p.complete({ system: 's', user: 'u', maxTokens: 16 });
+    assert.equal(out.text, 'only-cot');
+  });
 });

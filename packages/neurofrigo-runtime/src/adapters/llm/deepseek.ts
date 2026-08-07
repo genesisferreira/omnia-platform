@@ -1,6 +1,8 @@
 import type { HealthStatus, LLMCompletion } from '../../domain/types';
 import type { LLMProviderPort } from '../../ports';
 
+export type DeepSeekThinkingMode = 'disabled' | 'enabled';
+
 export type DeepSeekProviderConfig = {
   apiKey: string;
   model: string;
@@ -9,6 +11,12 @@ export type DeepSeekProviderConfig = {
   maxRetries?: number;
   fetchImpl?: typeof fetch;
   correlationId?: string;
+  /**
+   * V4 defaults to thinking ON; without this, max_tokens can be consumed by
+   * reasoning_content and leave message.content empty (LLM_EMPTY_COMPLETION).
+   * NeuroFrigo chat uses non-thinking by default (parity with legacy deepseek-chat).
+   */
+  thinking?: DeepSeekThinkingMode;
 };
 
 export type DeepSeekCompletion = LLMCompletion & {
@@ -44,6 +52,7 @@ export class DeepSeekChatProvider implements LLMProviderPort {
   private readonly fetchImpl: typeof fetch;
   private readonly apiKey: string;
   private readonly baseUrl: string;
+  private readonly thinking: DeepSeekThinkingMode;
 
   constructor(config: DeepSeekProviderConfig) {
     this.model = config.model;
@@ -56,6 +65,7 @@ export class DeepSeekChatProvider implements LLMProviderPort {
     this.baseUrl = normalizeDeepseekBaseUrl(
       config.baseUrl || 'https://api.deepseek.com/v1',
     );
+    this.thinking = config.thinking === 'enabled' ? 'enabled' : 'disabled';
   }
 
   metadata() {
@@ -141,6 +151,8 @@ export class DeepSeekChatProvider implements LLMProviderPort {
           model: this.model,
           temperature: input.temperature ?? 0.2,
           max_tokens: input.maxTokens,
+          // DeepSeek V4: thinking ON by default — disable for grounded Q&A.
+          thinking: { type: this.thinking },
           messages: [
             { role: 'system', content: input.system },
             { role: 'user', content: input.user },
@@ -162,7 +174,10 @@ export class DeepSeekChatProvider implements LLMProviderPort {
       }
 
       const json = (await res.json()) as {
-        choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
+        choices?: Array<{
+          message?: { content?: string | null; reasoning_content?: string | null };
+          finish_reason?: string;
+        }>;
         usage?: {
           prompt_tokens?: number;
           completion_tokens?: number;
@@ -170,7 +185,11 @@ export class DeepSeekChatProvider implements LLMProviderPort {
         };
       };
 
-      const text = json.choices?.[0]?.message?.content?.trim() || '';
+      const message = json.choices?.[0]?.message;
+      const text =
+        message?.content?.trim() ||
+        message?.reasoning_content?.trim() ||
+        '';
       if (!text) throw new Error('LLM_EMPTY_COMPLETION');
 
       return {
