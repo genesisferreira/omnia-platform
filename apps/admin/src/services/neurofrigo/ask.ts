@@ -312,9 +312,13 @@ export async function runNeurofrigoAsk(
       ? {
           provider: resolved.model.provider,
           model: resolved.model.model,
+          baseUrl: env.NEUROFRIGO_LLM_BASE_URL,
           correlationId: `ask-${Date.now().toString(36)}`,
         }
-      : undefined,
+      : {
+          baseUrl: env.NEUROFRIGO_LLM_BASE_URL,
+          correlationId: `ask-${Date.now().toString(36)}`,
+        },
   );
 
   const runtime = new NeurofrigoRuntime({

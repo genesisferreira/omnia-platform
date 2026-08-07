@@ -25,6 +25,13 @@ function isRetryableStatus(status: number): boolean {
   return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
+/** Aceita https://api.deepseek.com ou .../v1 e normaliza para .../v1. */
+export function normalizeDeepseekBaseUrl(url: string): string {
+  const trimmed = url.replace(/\/$/, '');
+  if (trimmed.endsWith('/v1')) return trimmed;
+  return `${trimmed}/v1`;
+}
+
 /**
  * Adapter DeepSeek — usa API OpenAI-compatible com retry/timeout/correlation.
  * Runtime depende apenas de LLMProviderPort (não acopla SDK).
@@ -46,7 +53,9 @@ export class DeepSeekChatProvider implements LLMProviderPort {
       config.correlationId || `ds-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     this.fetchImpl = config.fetchImpl ?? fetch;
     this.apiKey = config.apiKey;
-    this.baseUrl = (config.baseUrl || 'https://api.deepseek.com/v1').replace(/\/$/, '');
+    this.baseUrl = normalizeDeepseekBaseUrl(
+      config.baseUrl || 'https://api.deepseek.com/v1',
+    );
   }
 
   metadata() {

@@ -25,4 +25,16 @@ describe('deepseek adapter', () => {
     assert.equal(created.providerUsed, 'grounded');
     assert.ok(created.fallbackReason);
   });
+
+  it('normalizes base url without /v1', async () => {
+    const { normalizeDeepseekBaseUrl } = await import('./adapters/llm/deepseek');
+    assert.equal(
+      normalizeDeepseekBaseUrl('https://api.deepseek.com'),
+      'https://api.deepseek.com/v1',
+    );
+    assert.equal(
+      normalizeDeepseekBaseUrl('https://api.deepseek.com/v1/'),
+      'https://api.deepseek.com/v1',
+    );
+  });
 });

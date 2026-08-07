@@ -329,9 +329,20 @@ async function main() {
       askStatus: ask.answer.status,
       askAssistant: ask.assistantKey,
       specialistLabel: ask.specialistLabel,
-      providerUsed: ask.providerMeta?.providerUsed,
       providerRequested: ask.providerMeta?.providerRequested,
-      fallbackReason: ask.providerMeta?.fallbackReason,
+      providerUsed: ask.providerMeta?.providerUsed,
+      model: ask.answer.model,
+      tokens: {
+        prompt: ask.answer.promptTokens,
+        completion: ask.answer.completionTokens,
+        total: ask.answer.totalTokens,
+      },
+      latency: {
+        tookMs: ask.answer.tookMs,
+        llmTookMs: ask.answer.retrieval?.llmTookMs ?? null,
+        retrievalTookMs: ask.answer.retrieval?.tookMs ?? null,
+      },
+      fallbackReason: ask.providerMeta?.fallbackReason ?? null,
       injectionBlocked: injection.orchestrator?.blocked,
       examBlocked: exam.orchestrator?.blocked,
       deepseekStatus: dash.deepseekStatus,
@@ -343,6 +354,20 @@ async function main() {
   if (!injection.orchestrator?.blocked) throw new Error('EXPECTED_INJECTION_BLOCK');
   if (!exam.orchestrator?.blocked) throw new Error('EXPECTED_EXAM_BLOCK');
   if (!ask.assistantKey) throw new Error('EXPECTED_ASSISTANT');
+
+  if (process.env.DEEPSEEK_API_KEY) {
+    if (ask.providerMeta?.providerUsed !== 'deepseek') {
+      throw new Error(
+        `EXPECTED_DEEPSEEK_PROVIDER got=${ask.providerMeta?.providerUsed} fallback=${ask.providerMeta?.fallbackReason}`,
+      );
+    }
+    if (ask.providerMeta?.fallbackReason) {
+      throw new Error(`UNEXPECTED_FALLBACK:${ask.providerMeta.fallbackReason}`);
+    }
+    if (ask.answer.status === 'error') {
+      throw new Error(`DEEPSEEK_ASK_ERROR:${ask.answer.errorCode}`);
+    }
+  }
 
   console.log('DEEPSEEK_AGENTS_SEED_OK');
   process.exit(0);
