@@ -1,5 +1,3 @@
-import { deflateRawSync } from 'node:zlib';
-
 /** Gera PPTX mínimo válido com um slide de texto (EPIC 10 fixture). */
 export function buildMinimalPptx(slideText: string): Buffer {
   const files: Record<string, string> = {
@@ -37,7 +35,7 @@ export function buildMinimalPptx(slideText: string): Buffer {
 </p:sld>`,
   };
 
-  return buildZip(files);
+  return buildStoredZip(files);
 }
 
 function escapeXml(value: string): string {
@@ -48,7 +46,8 @@ function escapeXml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function buildZip(files: Record<string, string>): Buffer {
+/** ZIP method=0 (store) — evita Z_DATA_ERROR no extrator OOXML. */
+function buildStoredZip(files: Record<string, string>): Buffer {
   const localParts: Buffer[] = [];
   const centralParts: Buffer[] = [];
   let offset = 0;
@@ -56,31 +55,30 @@ function buildZip(files: Record<string, string>): Buffer {
   for (const [name, content] of Object.entries(files)) {
     const nameBuf = Buffer.from(name, 'utf8');
     const data = Buffer.from(content, 'utf8');
-    const compressed = deflateRawSync(data);
     const local = Buffer.alloc(30 + nameBuf.length);
     local.writeUInt32LE(0x04034b50, 0);
-    local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(0, 6);
-    local.writeUInt16LE(8, 8);
+    local.writeUInt16LE(20, 4); // version needed
+    local.writeUInt16LE(0, 6); // flags
+    local.writeUInt16LE(0, 8); // method = store
     local.writeUInt16LE(0, 10);
     local.writeUInt16LE(0, 12);
-    local.writeUInt32LE(0, 14);
-    local.writeUInt32LE(compressed.length, 18);
+    local.writeUInt32LE(0, 14); // crc
+    local.writeUInt32LE(data.length, 18);
     local.writeUInt32LE(data.length, 22);
     local.writeUInt16LE(nameBuf.length, 26);
     local.writeUInt16LE(0, 28);
-    const localFull = Buffer.concat([local, nameBuf, compressed]);
+    const localFull = Buffer.concat([local, nameBuf, data]);
 
     const central = Buffer.alloc(46 + nameBuf.length);
     central.writeUInt32LE(0x02014b50, 0);
     central.writeUInt16LE(20, 4);
     central.writeUInt16LE(20, 6);
     central.writeUInt16LE(0, 8);
-    central.writeUInt16LE(8, 10);
+    central.writeUInt16LE(0, 10); // method store
     central.writeUInt16LE(0, 12);
     central.writeUInt16LE(0, 14);
     central.writeUInt32LE(0, 16);
-    central.writeUInt32LE(compressed.length, 20);
+    central.writeUInt32LE(data.length, 20);
     central.writeUInt32LE(data.length, 24);
     central.writeUInt16LE(nameBuf.length, 28);
     central.writeUInt16LE(0, 30);

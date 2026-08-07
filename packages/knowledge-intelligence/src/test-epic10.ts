@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { deflateRawSync } from 'node:zlib';
 
 import {
   classifyOfficialDocument,
@@ -9,6 +8,7 @@ import {
   isPendingArchive,
 } from './index';
 
+/** ZIP store (method 0) mínimo com um slide. */
 function buildTinyPptx(text: string): Buffer {
   const files: Record<string, string> = {
     '[Content_Types].xml':
@@ -21,21 +21,19 @@ function buildTinyPptx(text: string): Buffer {
   for (const [name, content] of Object.entries(files)) {
     const nameBuf = Buffer.from(name, 'utf8');
     const data = Buffer.from(content, 'utf8');
-    const compressed = deflateRawSync(data);
     const local = Buffer.alloc(30 + nameBuf.length);
     local.writeUInt32LE(0x04034b50, 0);
     local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(8, 8);
-    local.writeUInt32LE(compressed.length, 18);
+    local.writeUInt16LE(0, 8); // store
+    local.writeUInt32LE(data.length, 18);
     local.writeUInt32LE(data.length, 22);
     local.writeUInt16LE(nameBuf.length, 26);
-    const full = Buffer.concat([local, nameBuf, compressed]);
+    const full = Buffer.concat([local, nameBuf, data]);
     const central = Buffer.alloc(46 + nameBuf.length);
     central.writeUInt32LE(0x02014b50, 0);
     central.writeUInt16LE(20, 4);
     central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(8, 10);
-    central.writeUInt32LE(compressed.length, 20);
+    central.writeUInt32LE(data.length, 20);
     central.writeUInt32LE(data.length, 24);
     central.writeUInt16LE(nameBuf.length, 28);
     central.writeUInt32LE(offset, 42);
