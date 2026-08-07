@@ -242,7 +242,9 @@ export class NeurofrigoRuntime {
         totalTokens: 0,
         estimatedCostUsd: 0,
         status: isTimeout ? 'timeout' : 'error',
-        errorCode: isTimeout ? 'TIMEOUT' : 'RUNTIME_ERROR',
+        errorCode: isTimeout
+          ? 'TIMEOUT'
+          : `RUNTIME_ERROR:${message.replace(/\s+/g, ' ').slice(0, 160)}`,
         intent: intentHint,
         grounding: null,
         explainability: null,
