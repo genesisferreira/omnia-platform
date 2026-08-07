@@ -81,7 +81,32 @@ export async function runNeurofrigoAsk(
   };
   const turns = [...history, nextTurn].slice(-8);
 
-  const data = {
+  const userNumeric =
+    request.identity.userId && /^\d+$/.test(String(request.identity.userId))
+      ? Number(request.identity.userId)
+      : null;
+  const tenantNumeric =
+    request.identity.tenantId && /^\d+$/.test(String(request.identity.tenantId))
+      ? Number(request.identity.tenantId)
+      : null;
+  const courseNumeric =
+    request.course.courseId && /^\d+$/.test(String(request.course.courseId))
+      ? Number(request.course.courseId)
+      : null;
+  const moduleNumeric =
+    request.course.moduleId && /^\d+$/.test(String(request.course.moduleId))
+      ? Number(request.course.moduleId)
+      : null;
+  const lessonNumeric =
+    request.course.lessonId && /^\d+$/.test(String(request.course.lessonId))
+      ? Number(request.course.lessonId)
+      : null;
+  const companyNumeric =
+    request.course.ownerCompanyId && /^\d+$/.test(String(request.course.ownerCompanyId))
+      ? Number(request.course.ownerCompanyId)
+      : null;
+
+  const data: Record<string, unknown> = {
     question: request.question,
     answerText: answer.text,
     formattedAnswer: answer.formattedText,
@@ -112,26 +137,13 @@ export async function runNeurofrigoAsk(
         profileLabel: request.identity.profileLabel ?? null,
       },
     },
-    user:
-      request.identity.userId && /^\d+$/.test(String(request.identity.userId))
-        ? Number(request.identity.userId)
-        : undefined,
-    tenant: request.identity.tenantId
-      ? Number(request.identity.tenantId) || request.identity.tenantId
-      : undefined,
-    course: request.course.courseId
-      ? Number(request.course.courseId) || request.course.courseId
-      : undefined,
-    module: request.course.moduleId
-      ? Number(request.course.moduleId) || request.course.moduleId
-      : undefined,
-    lesson: request.course.lessonId
-      ? Number(request.course.lessonId) || request.course.lessonId
-      : undefined,
-    ownerCompany: request.course.ownerCompanyId
-      ? Number(request.course.ownerCompanyId) || request.course.ownerCompanyId
-      : undefined,
   };
+  if (userNumeric != null) data.user = userNumeric;
+  if (tenantNumeric != null) data.tenant = tenantNumeric;
+  if (courseNumeric != null) data.course = courseNumeric;
+  if (moduleNumeric != null) data.module = moduleNumeric;
+  if (lessonNumeric != null) data.lesson = lessonNumeric;
+  if (companyNumeric != null) data.ownerCompany = companyNumeric;
 
   let sessionId: string | number;
   if (existing) {

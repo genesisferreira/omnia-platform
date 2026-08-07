@@ -123,8 +123,8 @@ async function main() {
 
   if (!beginner.recommendations.length) throw new Error('EXPECTED_RECOMMENDATIONS');
   if ((plan.studyPlan?.steps.length ?? 0) < 1) throw new Error('EXPECTED_STUDY_PLAN');
-  if (beginner.level === advanced.level && advanced.student.progressPercent < 80) {
-    /* ok if levels collide on weak data */
+  if (beginner.answer.status !== 'ok' && beginner.answer.status !== 'not_found') {
+    throw new Error(`EXPECTED_RUNTIME_OK got=${beginner.answer.status} code=${beginner.answer.errorCode}`);
   }
   if (!beginner.student.courseId) throw new Error('MISSING_STUDENT_PROFILE');
   if (!beginner.learning.userId) throw new Error('MISSING_LEARNING_PROFILE');
