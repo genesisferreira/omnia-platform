@@ -1,19 +1,12 @@
 # EPIC 09 — Delivery Report
 
 **Branch:** `feature/neurofrigo-knowledge-hub`  
-**Tip deploy:** `0297d32`  
+**Tip deploy:** `bc6e3eb`  
 **Escopo:** DeepSeek Live + Orquestrador + 8 especialistas oficiais
 
-## Veredito: **NO-GO** — pendência de autenticação DeepSeek em staging
+## Veredito: **GO**
 
-Staging operacional (`DEEPSEEK_AGENTS_SEED_OK`, admin/web healthy, landing/prod intactos), **porém** `.env.staging` está sem `DEEPSEEK_API_KEY` (`HAS_DS=0`). O Runtime usou `grounded` (fallback controlado), não DeepSeek real.
-
-### Para virar GO
-
-1. Inserir `DEEPSEEK_API_KEY` (e opcionalmente `NEUROFRIGO_LLM_PROVIDER=deepseek`, `NEUROFRIGO_LLM_FALLBACK=grounded`) apenas no secret/env da VPS — nunca no Git.  
-2. Recriar Admin com o env atualizado.  
-3. Reexecutar `admin-bootstrap.sh deepseek-agents`.  
-4. Confirmar seed com `providerUsed: "deepseek"` e `deepseekStatus` ≠ `key_missing`.
+Staging homologado com DeepSeek real (`providerUsed: "deepseek"`, `fallbackReason: null`), orquestrador e guards ativos, admin/web healthy, landing/prod intactos.
 
 ## Homologação staging (seed)
 
@@ -23,11 +16,15 @@ Staging operacional (`DEEPSEEK_AGENTS_SEED_OK`, admin/web healthy, landing/prod 
   "askStatus": "ok",
   "askAssistant": "hvac",
   "specialistLabel": "Refrigeração",
-  "providerUsed": "grounded",
-  "providerRequested": "grounded",
+  "providerRequested": "deepseek",
+  "providerUsed": "deepseek",
+  "model": "deepseek-v4-flash",
+  "tokens": { "prompt": 502, "completion": 602, "total": 1104 },
+  "latency": { "tookMs": 7426, "llmTookMs": 7240, "retrievalTookMs": 19 },
+  "fallbackReason": null,
   "injectionBlocked": true,
   "examBlocked": true,
-  "deepseekStatus": "key_missing"
+  "deepseekStatus": "ok:2_calls"
 }
 ```
 
@@ -36,7 +33,7 @@ Staging operacional (`DEEPSEEK_AGENTS_SEED_OK`, admin/web healthy, landing/prod 
 | # | Item | Status |
 |---|------|--------|
 | 1 | Arquitetura provider desacoplada | ✅ |
-| 2 | DeepSeek adapter (`DeepSeekChatProvider`) | ✅ |
+| 2 | DeepSeek adapter (`DeepSeekChatProvider`) + V4 thinking disabled | ✅ |
 | 3 | Model Registry `deepseek-chat` + `grounded-default` | ✅ |
 | 4 | Assistant Registry final (8 oficiais + legado) | ✅ |
 | 5 | Orquestrador Portal (`@omnia/neurofrigo-orchestrator`) | ✅ |
@@ -51,11 +48,11 @@ Staging operacional (`DEEPSEEK_AGENTS_SEED_OK`, admin/web healthy, landing/prod 
 | 14 | Dashboard Ops (DeepSeek status, custo dia/mês) | ✅ |
 | 15–17 | Testes agentes/orquestrador/segurança | ✅ (unit + seed) |
 | 18 | Typecheck/testes locais | ✅ |
-| 19 | Deploy staging | ✅ código |
-| 20 | Bugs | tipagem budget spend; build fix `0297d32` |
-| 21 | Pendências | **API key DeepSeek na VPS**; autenticação live |
-| 22 | Commits | `6d44cfa` → `0297d32` |
-| 23 | GO / NO-GO | **NO-GO** |
+| 19 | Deploy staging | ✅ |
+| 20 | Bugs | tipagem budget; base URL; V4 empty completion |
+| 21 | Pendências | nenhuma bloqueante |
+| 22 | Commits | `6d44cfa` → `bc6e3eb` |
+| 23 | GO / NO-GO | **GO** |
 
 \* Matrícula: páginas de curso tratam `courseId` como escopo; checagem `student-profiles` quando existir. Sem matrícula real no seed anônimo.
 
@@ -63,9 +60,13 @@ Staging operacional (`DEEPSEEK_AGENTS_SEED_OK`, admin/web healthy, landing/prod 
 
 | Critério | Resultado |
 |----------|-----------|
-| 1. DeepSeek autenticando | ❌ key missing |
-| 2. Runtime usando DeepSeek real | ❌ usou grounded |
-| 3–22 (demais) | ✅ / parcial conforme tabela |
+| 1. DeepSeek autenticando | ✅ |
+| 2. Runtime usando DeepSeek real | ✅ `providerUsed: deepseek` |
+| 3. Orquestrador (rota HVAC) | ✅ |
+| 4. Especialistas (student list) | ✅ |
+| 5. Injection / exam blocked | ✅ |
+| 6. Admin healthy | ✅ |
+| 7. Web healthy (HTTP 200) | ✅ |
 
 ## Não iniciado
 
@@ -73,4 +74,4 @@ Tool Framework · CRM IA · ERP · WhatsApp · agentes autônomos
 
 ## PARAR
 
-Aguardando: (a) secret DeepSeek em staging + re-seed, ou (b) aprovação humana do caminho de GO após chave.
+EPIC 09 encerrada em GO. Não iniciar próxima epic sem solicitação explícita.
