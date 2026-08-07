@@ -131,12 +131,12 @@ async function loadBudgetSpend(payload: Payload): Promise<{
     }),
   ]);
 
-  const sum = (docs: Array<{ estimatedCostUsd?: unknown }>) =>
+  const sum = (docs: Array<Record<string, unknown>>) =>
     docs.reduce((s, d) => s + Number(d.estimatedCostUsd || 0), 0);
 
   return {
-    spentTodayUsd: sum(today.docs),
-    spentMonthUsd: sum(month.docs),
+    spentTodayUsd: sum(today.docs as Array<Record<string, unknown>>),
+    spentMonthUsd: sum(month.docs as Array<Record<string, unknown>>),
   };
 }
 
