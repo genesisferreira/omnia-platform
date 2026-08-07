@@ -1,7 +1,6 @@
 /**
  * Seed Epic 08 — Enterprise AI Platform (5 assistentes + prompts + modelos + políticas).
  */
-// @ts-nocheck — collections enterprise ainda não estão no payload-types gerado.
 export {};
 
 async function main() {
@@ -13,10 +12,11 @@ async function main() {
   const { refreshEnterpriseAiDashboard } = await import('../services/enterprise/dashboard');
   const { listAllowedAssistants } = await import('../services/enterprise/resolve');
 
-  const payload = await getPayload({ config });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- collections enterprise ainda fora do payload-types
+  const payload: any = await getPayload({ config });
 
   async function upsertByKey(
-    collection: 'ai-models' | 'ai-assistants' | 'ai-policies',
+    collection: string,
     whereField: string,
     whereValue: string,
     data: Record<string, unknown>,
@@ -306,8 +306,8 @@ async function main() {
       tutorKey: tutorAsk.assistantKey,
       engineeringStatus: engineeringAsk.answer.status,
       engineeringKey: engineeringAsk.assistantKey,
-      studentAllowed: allowedStudent.allowedAssistants.map((a) => a.key),
-      adminAllowed: allowedAdmin.allowedAssistants.map((a) => a.key),
+      studentAllowed: allowedStudent.allowedAssistants.map((a: { key: string }) => a.key),
+      adminAllowed: allowedAdmin.allowedAssistants.map((a: { key: string }) => a.key),
       forbiddenOk,
       dashboardSessions: dash.sessionsCount,
     }),
@@ -316,10 +316,10 @@ async function main() {
   if (assistantCount < 5) throw new Error('EXPECTED_5_ASSISTANTS');
   if (promptCount < 20) throw new Error('EXPECTED_VERSIONED_PROMPTS');
   if (!forbiddenOk) throw new Error('EXPECTED_POLICY_FORBIDDEN_COMMERCIAL_FOR_STUDENT');
-  if (!allowedStudent.allowedAssistants.some((a) => a.key === 'tutor')) {
+  if (!allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'tutor')) {
     throw new Error('EXPECTED_STUDENT_TUTOR');
   }
-  if (allowedStudent.allowedAssistants.some((a) => a.key === 'commercial')) {
+  if (allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'commercial')) {
     throw new Error('UNEXPECTED_STUDENT_COMMERCIAL');
   }
   if (allowedAdmin.allowedAssistants.length < 5) {
