@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { inflateRawSync } from 'node:zlib';
 
 import type { ExtractMeta, ExtractResult } from './types';
 
@@ -27,9 +26,7 @@ function baseMeta(
 
 function stripXml(text: string): string {
   return text
-    .replace(/<a:t[^>]*>/gi, '')
     .replace(/<\/a:t>/gi, ' ')
-    .replace(/<w:t[^>]*>/gi, '')
     .replace(/<\/w:t>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&amp;/g, '&')
@@ -41,36 +38,17 @@ function stripXml(text: string): string {
     .trim();
 }
 
-/** Lê entradas de um ZIP (DOCX/PPTX) sem dependência externa. */
-export function readZipEntries(buffer: Buffer): Map<string, Buffer> {
+async function loadZipEntries(buffer: Buffer): Promise<Map<string, Buffer>> {
+  const JSZip = require('jszip') as {
+    loadAsync: (data: Buffer) => Promise<{
+      files: Record<string, { dir?: boolean; async: (type: 'nodebuffer') => Promise<Buffer> }>;
+    }>;
+  };
+  const zip = await JSZip.loadAsync(buffer);
   const out = new Map<string, Buffer>();
-  let offset = 0;
-  while (offset + 30 <= buffer.length) {
-    const sig = buffer.readUInt32LE(offset);
-    if (sig !== 0x04034b50) break;
-    const method = buffer.readUInt16LE(offset + 8);
-    const compSize = buffer.readUInt32LE(offset + 18);
-    const uncompSize = buffer.readUInt32LE(offset + 22);
-    const nameLen = buffer.readUInt16LE(offset + 26);
-    const extraLen = buffer.readUInt16LE(offset + 28);
-    const nameStart = offset + 30;
-    const name = buffer.subarray(nameStart, nameStart + nameLen).toString('utf8');
-    const dataStart = nameStart + nameLen + extraLen;
-    const compressed = buffer.subarray(dataStart, dataStart + compSize);
-    let data: Buffer;
-    if (method === 0) {
-      data = Buffer.from(compressed);
-    } else if (method === 8) {
-      data = inflateRawSync(compressed);
-      if (uncompSize && data.length !== uncompSize && uncompSize < 50_000_000) {
-        // tamanho informado pelo header local pode ser 0 com data descriptor; aceitar inflate
-      }
-    } else {
-      offset = dataStart + compSize;
-      continue;
-    }
-    out.set(name.replace(/\\/g, '/'), data);
-    offset = dataStart + compSize;
+  for (const [name, entry] of Object.entries(zip.files)) {
+    if (entry.dir) continue;
+    out.set(name.replace(/\\/g, '/'), await entry.async('nodebuffer'));
   }
   return out;
 }
@@ -94,12 +72,11 @@ export async function extractDocx(
   }
 
   if (!text) {
-    const entries = readZipEntries(buffer);
+    const entries = await loadZipEntries(buffer);
     const parts: string[] = [];
     for (const [name, data] of entries) {
       if (!name.startsWith('word/') || !name.endsWith('.xml')) continue;
-      const raw = data.toString('utf8');
-      const cleaned = stripXml(raw);
+      const cleaned = stripXml(data.toString('utf8'));
       if (cleaned) parts.push(cleaned);
     }
     text = parts.join('\n\n').trim();
@@ -121,12 +98,12 @@ export async function extractDocx(
   };
 }
 
-/** Extrai texto de slides PPTX (OOXML). */
+/** Extrai texto de slides PPTX (OOXML via JSZip). */
 export async function extractPptx(
   buffer: Buffer,
   opts?: { mimeType?: string | null; filename?: string | null },
 ): Promise<ExtractResult> {
-  const entries = readZipEntries(buffer);
+  const entries = await loadZipEntries(buffer);
   const slideNames = [...entries.keys()]
     .filter((n) => /^ppt\/slides\/slide\d+\.xml$/i.test(n))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));

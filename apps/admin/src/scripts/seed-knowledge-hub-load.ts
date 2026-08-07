@@ -107,16 +107,27 @@ async function main() {
   process.env.RETRIEVAL_EMBEDDING_PROVIDER =
     process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic';
 
-  // Pré-gera PPTX fixture (sem boot Payload).
+  // Pré-gera PPTX fixture (sem boot Payload). Fallback se ZIP mínimo falhar.
   const { buildMinimalPptx } = await import(
     '../services/knowledge-intelligence/office-fixtures'
   );
-  const pptxBytes = buildMinimalPptx(
-    'Neurofrigo EPIC 10 — slide de carga oficial PPTX para Retrieval e agentes autorizados.',
-  );
-  const pptxExtracted = await extractByType('pptx', pptxBytes, {
-    filename: 'neurofrigo-epic10-carga.pptx',
-  });
+  let pptxBytes: Buffer | null = null;
+  let pptxExtracted: { text: string; meta: Record<string, unknown> } | null = null;
+  try {
+    pptxBytes = buildMinimalPptx(
+      'Neurofrigo EPIC 10 — slide de carga oficial PPTX para Retrieval e agentes autorizados.',
+    );
+    pptxExtracted = await extractByType('pptx', pptxBytes, {
+      filename: 'neurofrigo-epic10-carga.pptx',
+    });
+  } catch (err) {
+    console.warn(
+      'E10_PPTX_FIXTURE_SKIP',
+      err instanceof Error ? err.message : String(err),
+    );
+    pptxBytes = null;
+    pptxExtracted = null;
+  }
 
   // PDF sintético opcional (cobertura de formato) — gerado se fixture PDF existir em KI.
   let pdfBytes: Buffer | null = null;
@@ -211,7 +222,11 @@ async function main() {
   }
 
   // Cobertura PPTX/PDF mesmo se não estiverem no diretório.
-  if (!workItems.some((w) => w.filename.toLowerCase().endsWith('.pptx'))) {
+  if (
+    pptxBytes &&
+    pptxExtracted &&
+    !workItems.some((w) => w.filename.toLowerCase().endsWith('.pptx'))
+  ) {
     workItems.push({
       filename: 'neurofrigo-epic10-carga.pptx',
       buffer: pptxBytes,
