@@ -27,24 +27,35 @@ export async function runSemanticSearch(
     ownerCompanyId: query.ownerCompanyId,
   });
 
+  const userNumeric =
+    session.userId && /^\d+$/.test(String(session.userId)) ? Number(session.userId) : null;
+  const tenantNumeric =
+    session.tenantId && /^\d+$/.test(String(session.tenantId))
+      ? Number(session.tenantId)
+      : null;
+  const companyNumeric =
+    session.ownerCompanyId && /^\d+$/.test(String(session.ownerCompanyId))
+      ? Number(session.ownerCompanyId)
+      : null;
+
+  const data: Record<string, unknown> = {
+    query: session.query,
+    tookMs: session.tookMs,
+    provider: session.provider,
+    model: session.model,
+    resultCount: session.resultCount,
+    recoveredTokens: session.recoveredTokens,
+    filters: session.filters,
+    chunkIds: session.chunkIds.map((chunkId) => ({ chunkId })),
+    scores: session.scores.map((score) => ({ score })),
+  };
+  if (userNumeric != null) data.user = userNumeric;
+  if (tenantNumeric != null) data.tenant = tenantNumeric;
+  if (companyNumeric != null) data.ownerCompany = companyNumeric;
+
   await payload.create({
     collection: 'search-sessions',
-    data: {
-      query: session.query,
-      tookMs: session.tookMs,
-      provider: session.provider,
-      model: session.model,
-      resultCount: session.resultCount,
-      recoveredTokens: session.recoveredTokens,
-      filters: session.filters,
-      chunkIds: session.chunkIds.map((chunkId) => ({ chunkId })),
-      scores: session.scores.map((score) => ({ score })),
-      tenant: session.tenantId ? Number(session.tenantId) || session.tenantId : undefined,
-      user: session.userId ? Number(session.userId) || session.userId : undefined,
-      ownerCompany: session.ownerCompanyId
-        ? Number(session.ownerCompanyId) || session.ownerCompanyId
-        : undefined,
-    },
+    data,
     overrideAccess: true,
     context: { retrievalPipelineActive: true },
   });
