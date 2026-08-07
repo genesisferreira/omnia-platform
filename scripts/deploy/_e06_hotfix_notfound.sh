@@ -5,7 +5,7 @@ cd /opt/omnia/platform
 git fetch origin feature/neurofrigo-knowledge-hub
 git reset --hard origin/feature/neurofrigo-knowledge-hub
 echo HEAD=$(git rev-parse --short HEAD)
-docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build admin
+docker compose -f docker/compose/staging.yml --env-file .env.staging up -d --build --force-recreate admin
 docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap build admin-bootstrap
 docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap run --rm admin-bootstrap ai-experience
 docker inspect omnia-platform-admin-dev --format 'admin={{.State.Health.Status}}' || true

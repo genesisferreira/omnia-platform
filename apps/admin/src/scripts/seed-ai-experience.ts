@@ -22,17 +22,17 @@ async function main() {
   if (!course) throw new Error('AI_EXPERIENCE_SEED_REQUIRES_LMS_CORE');
 
   const first = await runNeurofrigoAsk(payload, {
-    question: 'O que é a válvula de expansão termostática?',
+    question: 'O que é o ciclo de compressão e quais as boas práticas de segurança?',
     identity: { role: 'student', language: 'pt-BR', profileLabel: 'Aluno' },
     course: {
       courseId: String(course.id),
       courseTitle: String(course.title || ''),
-      lessonObjectives: 'Compreender componentes do ciclo',
+      lessonObjectives: 'Compreender ciclo de compressão e segurança',
     },
   });
 
   const follow = await runNeurofrigoAsk(payload, {
-    question: 'Como ela regula o fluxo, passo a passo?',
+    question: 'Como aplicar essas boas práticas, passo a passo?',
     sessionId: first.sessionId,
     identity: { role: 'student', language: 'pt-BR', profileLabel: 'Aluno' },
     course: {

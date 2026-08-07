@@ -110,13 +110,18 @@ describe('neurofrigo-runtime experience v2', () => {
   });
 
   it('guardrail rejects off-topic chunks despite similarity', async () => {
-    const { applyRetrievalGuardrails } = await import('./guardrails');
+    const { applyRetrievalGuardrails, significantTokens } = await import('./guardrails');
+    const tokens = significantTokens('O que é a válvula de expansão termostática?');
+    assert.ok(tokens.has('valvula'));
+    assert.ok(tokens.has('expansao'));
+    assert.ok(tokens.has('termostatica'));
+
     const decision = applyRetrievalGuardrails(
       'Qual o placar do Flamengo contra Vasco em 2099?',
       [
         citation({
           chunkId: 'x',
-          text: 'A válvula de expansão termostática regula o fluxo de refrigerante no evaporador.',
+          text: 'Seguranca, ciclo de compressao e boas praticas.',
           similarity: 0.55,
           score: 0.6,
         }),
@@ -125,6 +130,20 @@ describe('neurofrigo-runtime experience v2', () => {
     );
     assert.equal(decision.ok, false);
     if (!decision.ok) assert.equal(decision.code, 'OFF_TOPIC');
+
+    const onTopic = applyRetrievalGuardrails(
+      'O que é o ciclo de compressão?',
+      [
+        citation({
+          chunkId: 'y',
+          text: 'Seguranca, ciclo de compressao e boas praticas.',
+          similarity: 0.6,
+          score: 0.7,
+        }),
+      ],
+      { ...DEFAULT_GUARDRAIL_LIMITS, minSimilarity: 0.3 },
+    );
+    assert.equal(onTopic.ok, true);
   });
 
   it('runtime follow-up + explainability + not_found message', async () => {

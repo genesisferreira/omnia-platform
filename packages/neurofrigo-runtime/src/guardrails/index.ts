@@ -23,14 +23,11 @@ const GENERIC_TOKENS = new Set([
   'sobre',
   'material',
   'conteudo',
-  'conteúdo',
   'curso',
   'aula',
   'modulo',
-  'módulo',
   'documento',
   'informacao',
-  'informação',
   'autorizado',
   'publicado',
   'segundo',
@@ -43,16 +40,19 @@ const GENERIC_TOKENS = new Set([
   'texto',
   'resposta',
   'pergunta',
+  'jogo',
+  'contra',
 ]);
 
+function stripDiacritics(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 export function significantTokens(text: string): Set<string> {
-  const normalized = text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '');
+  const normalized = stripDiacritics(text.toLowerCase());
   const out = new Set<string>();
-  for (const raw of normalized.split(/[^a-z0-9]+/i)) {
-    if (raw.length < 4) continue;
+  for (const raw of normalized.split(/[^a-z0-9]+/)) {
+    if (raw.length < 5) continue;
     if (GENERIC_TOKENS.has(raw)) continue;
     out.add(raw);
   }
@@ -65,19 +65,13 @@ export function hasLexicalOverlap(question: string, chunks: CitationResult[]): b
 
   const docBlob = chunks
     .slice(0, 4)
-    .map((c) =>
-      c.text
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{M}/gu, ''),
-    )
+    .map((c) => stripDiacritics((c.text || '').toLowerCase()))
     .join(' ');
 
   for (const token of qTokens) {
     if (docBlob.includes(token)) return true;
-    // Prefixo (ex.: termostatica ≈ termostatico)
-    if (token.length >= 5) {
-      const prefix = token.slice(0, Math.min(6, token.length));
+    if (token.length >= 6) {
+      const prefix = token.slice(0, 6);
       if (docBlob.includes(prefix)) return true;
     }
   }
