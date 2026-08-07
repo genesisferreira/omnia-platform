@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -59,6 +59,12 @@ run_tutor_ia() {
   echo "==> Seed Tutor IA (profiles, personalização, plano, recomendações)..."
   pnpm --filter @omnia/admin seed:tutor-ia
   echo "==> Seed tutor-ia concluído."
+}
+
+run_enterprise_ai() {
+  echo "==> Seed Enterprise AI (assistants, prompts, models, policies)..."
+  pnpm --filter @omnia/admin seed:enterprise-ai
+  echo "==> Seed enterprise-ai concluído."
 }
 
 run_holding_home() {
@@ -138,8 +144,11 @@ case "$MODE" in
   tutor-ia)
     run_tutor_ia
     ;;
+  enterprise-ai)
+    run_enterprise_ai
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai]"
     exit 1
     ;;
 esac

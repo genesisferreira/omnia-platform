@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 export type AskAiContext = {
   courseId: string | number;
@@ -12,6 +12,15 @@ export type AskAiContext = {
   lessonObjectives?: string | null;
   ownerCompanyId?: string | number | null;
   language?: string;
+};
+
+type AssistantOption = {
+  id: string;
+  key: string;
+  name: string;
+  description?: string;
+  category?: string;
+  icon?: string | null;
 };
 
 type Source = {
@@ -48,6 +57,7 @@ type Explainability = {
 
 type ChatData = {
   sessionId: string | number;
+  assistantId?: string;
   text: string;
   sources: Source[];
   confidence: number;
@@ -77,6 +87,30 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
   const [feedbackFor, setFeedbackFor] = useState<number | null>(null);
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackDone, setFeedbackDone] = useState<Record<number, string>>({});
+  const [assistants, setAssistants] = useState<AssistantOption[]>([]);
+  const [assistantId, setAssistantId] = useState('tutor');
+
+  useEffect(() => {
+    if (!open) return;
+    const qs = new URLSearchParams({
+      courseId: String(context.courseId),
+    });
+    if (context.ownerCompanyId != null) {
+      qs.set('companyId', String(context.ownerCompanyId));
+    }
+    fetch(`/api/ai/assistants?${qs}`)
+      .then((r) => r.json())
+      .then((json) => {
+        const list = (json?.data?.assistants || json?.assistants || []) as AssistantOption[];
+        if (Array.isArray(list) && list.length) {
+          setAssistants(list);
+          setAssistantId((prev) =>
+            list.some((a) => a.key === prev) ? prev : list[0]!.key,
+          );
+        }
+      })
+      .catch(() => undefined);
+  }, [open, context.courseId, context.ownerCompanyId]);
 
   function submit() {
     const q = question.trim();
@@ -90,6 +124,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
           body: JSON.stringify({
             question: q,
             sessionId,
+            assistantId,
             courseId: context.courseId,
             courseTitle: context.courseTitle,
             moduleId: context.moduleId,
@@ -157,6 +192,14 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
     setFeedbackDone({});
   }
 
+  function changeAssistant(next: string) {
+    if (next === assistantId) return;
+    setAssistantId(next);
+    newSession();
+  }
+
+  const selected = assistants.find((a) => a.key === assistantId);
+
   return (
     <div className="my-6">
       <button
@@ -169,11 +212,31 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
 
       {open ? (
         <div className="mt-4 rounded-lg border border-border bg-background p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              Assistente Técnico Neurofrigo — respostas ancoradas no material autorizado, com fontes e
-              continuidade nesta sessão.
-            </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium" htmlFor="ask-ai-assistant">
+                Conversar com
+              </label>
+              <select
+                id="ask-ai-assistant"
+                value={assistantId}
+                onChange={(e) => changeAssistant(e.target.value)}
+                className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm"
+              >
+                {(assistants.length
+                  ? assistants
+                  : [{ key: 'tutor', name: 'Tutor IA', id: 'tutor' }]
+                ).map((a) => (
+                  <option key={a.key} value={a.key}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-muted-foreground">
+                {selected?.description ||
+                  'Assistente Omnia — respostas ancoradas no material autorizado, com fontes e continuidade nesta sessão.'}
+              </p>
+            </div>
             {turns.length > 0 ? (
               <button
                 type="button"
@@ -194,7 +257,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                   </p>
                   <p className="text-sm">{turn.question}</p>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Assistente
+                    {selected?.name || turn.answer.assistantId || 'Assistente'}
                   </p>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{turn.answer.text}</div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

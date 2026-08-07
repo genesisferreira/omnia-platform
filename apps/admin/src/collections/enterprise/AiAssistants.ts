@@ -1,0 +1,101 @@
+import type { CollectionConfig } from 'payload';
+
+import { kiPublisherAccess, kiStaffAccess } from '../../access/knowledge-intelligence';
+
+export const AiAssistants: CollectionConfig = {
+  slug: 'ai-assistants',
+  labels: { singular: 'Assistant', plural: 'Assistants' },
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['key', 'name', 'category', 'status', 'version'],
+    group: 'Enterprise AI',
+    description: 'Assistant Registry — catálogo multiassistente.',
+  },
+  timestamps: true,
+  access: {
+    read: kiStaffAccess,
+    create: kiPublisherAccess,
+    update: kiPublisherAccess,
+    delete: kiPublisherAccess,
+  },
+  fields: [
+    { name: 'key', type: 'text', required: true, unique: true, index: true },
+    { name: 'name', type: 'text', required: true },
+    { name: 'description', type: 'textarea' },
+    {
+      name: 'ownerCompany',
+      type: 'relationship',
+      relationTo: 'companies',
+      index: true,
+      label: 'Empresa proprietária',
+    },
+    {
+      name: 'category',
+      type: 'select',
+      required: true,
+      defaultValue: 'general',
+      options: [
+        { label: 'Tutor', value: 'tutor' },
+        { label: 'Comercial', value: 'commercial' },
+        { label: 'Engenharia', value: 'engineering' },
+        { label: 'Suporte', value: 'support' },
+        { label: 'Command', value: 'command' },
+        { label: 'Geral', value: 'general' },
+      ],
+    },
+    { name: 'version', type: 'text', required: true, defaultValue: '1.0.0' },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Active', value: 'active' },
+        { label: 'Deprecated', value: 'deprecated' },
+        { label: 'Disabled', value: 'disabled' },
+      ],
+    },
+    { name: 'icon', type: 'text' },
+    { name: 'language', type: 'text', defaultValue: 'pt-BR' },
+    {
+      name: 'allowedModels',
+      type: 'relationship',
+      relationTo: 'ai-models',
+      hasMany: true,
+      label: 'Modelos permitidos',
+    },
+    { name: 'defaultContext', type: 'textarea', label: 'Contexto padrão' },
+    { name: 'capabilities', type: 'json', label: 'Capacidades' },
+    {
+      name: 'config',
+      type: 'group',
+      label: 'Configuração',
+      fields: [
+        {
+          name: 'defaultModel',
+          type: 'relationship',
+          relationTo: 'ai-models',
+          label: 'Modelo padrão',
+        },
+        { name: 'temperature', type: 'number', defaultValue: 0.2 },
+        { name: 'maxContextChunks', type: 'number', defaultValue: 6 },
+        { name: 'maxPromptTokens', type: 'number', defaultValue: 3500 },
+        { name: 'maxCompletionTokens', type: 'number', defaultValue: 800 },
+        { name: 'minSimilarity', type: 'number', defaultValue: 0.35 },
+        { name: 'requireCitations', type: 'checkbox', defaultValue: true },
+        { name: 'defaultLanguage', type: 'text', defaultValue: 'pt-BR' },
+        {
+          name: 'fallbackBehavior',
+          type: 'select',
+          defaultValue: 'not_found',
+          options: [
+            { label: 'Not found', value: 'not_found' },
+            { label: 'Clarify', value: 'clarify' },
+            { label: 'Escalate', value: 'escalate' },
+          ],
+        },
+      ],
+    },
+  ],
+};

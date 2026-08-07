@@ -11,11 +11,19 @@ export type LlmFactoryEnv = {
   DEEPSEEK_API_KEY?: string;
 };
 
-export function createLLMProvider(env: LlmFactoryEnv = process.env as LlmFactoryEnv): LLMProviderPort {
-  const name = (env.NEUROFRIGO_LLM_PROVIDER || 'grounded').toLowerCase();
+export function createLLMProvider(
+  env: LlmFactoryEnv = process.env as LlmFactoryEnv,
+  overrides?: { provider?: string; model?: string; baseUrl?: string; apiKey?: string },
+): LLMProviderPort {
+  const name = (
+    overrides?.provider ||
+    env.NEUROFRIGO_LLM_PROVIDER ||
+    'grounded'
+  ).toLowerCase();
 
   if (name === 'openai' || name === 'openai-compatible' || name === 'deepseek') {
     const apiKey =
+      overrides?.apiKey ||
       env.NEUROFRIGO_LLM_API_KEY ||
       (name === 'deepseek' ? env.DEEPSEEK_API_KEY : undefined) ||
       env.OPENAI_API_KEY;
@@ -25,9 +33,11 @@ export function createLLMProvider(env: LlmFactoryEnv = process.env as LlmFactory
       );
     }
     const baseUrl =
+      overrides?.baseUrl ||
       env.NEUROFRIGO_LLM_BASE_URL ||
       (name === 'deepseek' ? 'https://api.deepseek.com/v1' : 'https://api.openai.com/v1');
     const model =
+      overrides?.model ||
       env.NEUROFRIGO_LLM_MODEL ||
       (name === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini');
     return new OpenAiCompatibleChatProvider({
@@ -39,6 +49,6 @@ export function createLLMProvider(env: LlmFactoryEnv = process.env as LlmFactory
   }
 
   return new GroundedExtractiveProvider({
-    model: env.NEUROFRIGO_LLM_MODEL || undefined,
+    model: overrides?.model || env.NEUROFRIGO_LLM_MODEL || undefined,
   });
 }

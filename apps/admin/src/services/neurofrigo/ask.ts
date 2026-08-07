@@ -1,6 +1,7 @@
 import type { Payload } from 'payload';
 import {
   NeurofrigoRuntime,
+  PromptBuilder,
   createLLMProvider,
   type ConversationTurn,
   type RuntimeAnswer,
@@ -9,6 +10,8 @@ import {
 
 import { runSemanticSearch } from '../retrieval/search';
 import { refreshNeurofrigoAiDashboard } from './dashboard';
+import { resolveAssistantForAsk } from '../enterprise/resolve';
+import { refreshEnterpriseAiDashboard } from '../enterprise/dashboard';
 
 type SessionDoc = {
   id: string | number;
@@ -40,8 +43,11 @@ function asTurns(value: unknown): ConversationTurn[] {
 
 export async function runNeurofrigoAsk(
   payload: Payload,
-  request: RuntimeRequest & { sessionId?: string | number | null },
-): Promise<{ answer: RuntimeAnswer; sessionId: string | number }> {
+  request: RuntimeRequest & {
+    sessionId?: string | number | null;
+    assistantId?: string | null;
+  },
+): Promise<{ answer: RuntimeAnswer; sessionId: string | number; assistantKey?: string }> {
   let existing: SessionDoc | null = null;
   let history: ConversationTurn[] = request.conversationHistory ?? [];
 
@@ -59,17 +65,54 @@ export async function runNeurofrigoAsk(
     }
   }
 
+  let resolved = null as Awaited<ReturnType<typeof resolveAssistantForAsk>> | null;
+  try {
+    resolved = await resolveAssistantForAsk(payload, {
+      assistantId: request.assistantId ?? 'tutor',
+      subject: {
+        role: request.identity.role,
+        userId: request.identity.userId,
+        tenantId: request.identity.tenantId,
+        companyIds: request.identity.companyIds,
+        courseId: request.course.courseId,
+      },
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN')) {
+      throw err;
+    }
+    // Sem registry seedado ainda — fallback Runtime default (compat Epic 05–07).
+    resolved = null;
+  }
+
+  const llm = createLLMProvider(
+    process.env as unknown as import('@omnia/neurofrigo-runtime').LlmFactoryEnv,
+    resolved?.model
+      ? { provider: resolved.model.provider, model: resolved.model.model }
+      : undefined,
+  );
+
   const runtime = new NeurofrigoRuntime({
     retrieval: {
       search: (query, subject) => runSemanticSearch(payload, query, subject),
     },
-    llm: createLLMProvider(
-      process.env as unknown as import('@omnia/neurofrigo-runtime').LlmFactoryEnv,
-    ),
+    llm,
+    promptBuilder: resolved
+      ? new PromptBuilder(resolved.systemPrompt)
+      : undefined,
+    limits: resolved?.limits,
   });
 
+  const language = resolved?.language || request.identity.language || 'pt-BR';
   const answer = await runtime.ask({
     ...request,
+    identity: {
+      ...request.identity,
+      language,
+      profileLabel:
+        request.identity.profileLabel ||
+        (resolved ? `${resolved.assistant.name} · ${resolved.assistant.category}` : null),
+    },
     conversationHistory: history,
   });
 
@@ -136,6 +179,9 @@ export async function runNeurofrigoAsk(
         tenantId: request.identity.tenantId ?? null,
         profileLabel: request.identity.profileLabel ?? null,
       },
+      assistantId: resolved?.assistant.id ?? request.assistantId ?? null,
+      assistantKey: resolved?.assistant.key ?? request.assistantId ?? 'default',
+      modelKey: resolved?.model?.key ?? null,
     },
   };
   if (userNumeric != null) data.user = userNumeric;
@@ -166,7 +212,12 @@ export async function runNeurofrigoAsk(
   }
 
   await refreshNeurofrigoAiDashboard(payload).catch(() => undefined);
-  return { answer, sessionId };
+  await refreshEnterpriseAiDashboard(payload).catch(() => undefined);
+  return {
+    answer,
+    sessionId,
+    assistantKey: resolved?.assistant.key ?? request.assistantId ?? undefined,
+  };
 }
 
 export async function submitAiFeedback(

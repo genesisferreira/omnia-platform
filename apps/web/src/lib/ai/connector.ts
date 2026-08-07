@@ -7,6 +7,7 @@ import { getSessionToken } from '@/lib/auth/session';
 export type AiChatPayload = {
   question: string;
   sessionId?: string | number | null;
+  assistantId?: string | null;
   courseId?: string | number | null;
   courseTitle?: string | null;
   moduleId?: string | number | null;
@@ -87,6 +88,33 @@ export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
     };
   }
 
+  return { ok: true, status: response.status, data };
+}
+
+export async function fetchEnterpriseAssistants(params?: {
+  courseId?: string | number | null;
+  role?: string | null;
+  companyId?: string | number | null;
+}): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const qs = new URLSearchParams();
+  if (params?.courseId != null) qs.set('courseId', String(params.courseId));
+  if (params?.role) qs.set('role', String(params.role));
+  if (params?.companyId != null) qs.set('companyId', String(params.companyId));
+  const url = `${built.adminBase}/api/omnia/enterprise/assistants${qs.size ? `?${qs}` : ''}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'ENTERPRISE_ASSISTANTS_ERROR' };
+  }
   return { ok: true, status: response.status, data };
 }
 

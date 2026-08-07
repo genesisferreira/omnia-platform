@@ -58,6 +58,8 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [EPIC_06_AI_EXPERIENCE.md](EPIC_06_AI_EXPERIENCE.md) | **Epic 06** — UX, explainability, follow-up, feedback |
 | [EPIC_07_TUTOR_IA.md](EPIC_07_TUTOR_IA.md) | **Epic 07** — Tutor IA sobre Runtime + LMS |
 | [EPIC_07_DELIVERY_REPORT.md](EPIC_07_DELIVERY_REPORT.md) | **Epic 07** — Delivery / GO |
+| [EPIC_08_ENTERPRISE_AI.md](EPIC_08_ENTERPRISE_AI.md) | **Epic 08** — Enterprise AI multiassistente |
+| [EPIC_08_DELIVERY_REPORT.md](EPIC_08_DELIVERY_REPORT.md) | **Epic 08** — Delivery / GO |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |

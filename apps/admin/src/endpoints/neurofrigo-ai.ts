@@ -55,35 +55,47 @@ export const neurofrigoChatEndpoint: Endpoint = {
     const question = String(body.question || body.text || '').trim();
     if (!question) return json({ ok: false, error: 'question is required' }, 400);
 
-    const { answer, sessionId } = await runNeurofrigoAsk(req.payload, {
-      question,
-      sessionId: (body.sessionId as string | number | null) ?? null,
-      identity: {
-        userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
-        role: (body.role != null ? String(body.role) : auth.role) || null,
-        tenantId: body.tenantId != null ? String(body.tenantId) : null,
-        companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
-        language: body.language != null ? String(body.language) : 'pt-BR',
-        profileLabel: body.profileLabel != null ? String(body.profileLabel) : null,
-      },
-      course: {
-        courseId: body.courseId != null ? String(body.courseId) : null,
-        courseTitle: body.courseTitle != null ? String(body.courseTitle) : null,
-        moduleId: body.moduleId != null ? String(body.moduleId) : null,
-        moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
-        lessonId: body.lessonId != null ? String(body.lessonId) : null,
-        lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
-        lessonObjectives:
-          body.lessonObjectives != null ? String(body.lessonObjectives) : null,
-        ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
-      },
-      topK: body.topK != null ? Number(body.topK) : undefined,
-    });
+    let result;
+    try {
+      result = await runNeurofrigoAsk(req.payload, {
+        question,
+        sessionId: (body.sessionId as string | number | null) ?? null,
+        assistantId: body.assistantId != null ? String(body.assistantId) : 'tutor',
+        identity: {
+          userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
+          role: (body.role != null ? String(body.role) : auth.role) || null,
+          tenantId: body.tenantId != null ? String(body.tenantId) : null,
+          companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
+          language: body.language != null ? String(body.language) : 'pt-BR',
+          profileLabel: body.profileLabel != null ? String(body.profileLabel) : null,
+        },
+        course: {
+          courseId: body.courseId != null ? String(body.courseId) : null,
+          courseTitle: body.courseTitle != null ? String(body.courseTitle) : null,
+          moduleId: body.moduleId != null ? String(body.moduleId) : null,
+          moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
+          lessonId: body.lessonId != null ? String(body.lessonId) : null,
+          lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
+          lessonObjectives:
+            body.lessonObjectives != null ? String(body.lessonObjectives) : null,
+          ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
+        },
+        topK: body.topK != null ? Number(body.topK) : undefined,
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN')) {
+        return json({ ok: false, error: err.message }, 403);
+      }
+      throw err;
+    }
+
+    const { answer, sessionId, assistantKey } = result;
 
     return json({
       ok: true,
       data: {
         sessionId,
+        assistantId: assistantKey || (body.assistantId != null ? String(body.assistantId) : 'tutor'),
         text: answer.formattedText || answer.text,
         rawText: answer.text,
         sources: answer.sources,

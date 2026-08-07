@@ -18,8 +18,15 @@ Ao citar, use [chunk:ID].`;
 
 /**
  * PromptBuilder V2 — adapta o prompt pela intenção detectada.
+ * baseSystem pode vir do Prompt Registry (Enterprise AI).
  */
 export class PromptBuilder implements PromptBuilderPort {
+  private readonly baseSystem: string;
+
+  constructor(baseSystem: string = BASE_SYSTEM) {
+    this.baseSystem = baseSystem;
+  }
+
   build(input: {
     question: string;
     context: BuiltContext;
@@ -33,7 +40,7 @@ export class PromptBuilder implements PromptBuilderPort {
       -Math.max(0, input.limits.maxHistoryTurns),
     );
 
-    const system = `${BASE_SYSTEM}\n\nIntenção detectada: ${intent}.\n${intentSystemAddon(intent)}`;
+    const system = `${this.baseSystem}\n\nIntenção detectada: ${intent}.\n${intentSystemAddon(intent)}`;
 
     const contextBlock = [
       `Curso: ${input.context.courseTitle ?? input.context.courseId ?? 'n/d'}`,
