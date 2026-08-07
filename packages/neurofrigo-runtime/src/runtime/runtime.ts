@@ -24,6 +24,8 @@ export type NeurofrigoRuntimeDeps = {
   contextBuilder?: ContextBuilderPort;
   promptBuilder?: PromptBuilderPort;
   limits?: Partial<GuardrailLimits>;
+  /** Custo estimado do Model Registry ($ / 1k tokens). */
+  costPer1kTokens?: number | null;
 };
 
 /**
@@ -35,6 +37,7 @@ export class NeurofrigoRuntime {
   private readonly contextBuilder: ContextBuilderPort;
   private readonly promptBuilder: PromptBuilderPort;
   private readonly limits: GuardrailLimits;
+  private readonly costPer1kTokens: number | null;
 
   constructor(deps: NeurofrigoRuntimeDeps) {
     this.retrieval = deps.retrieval;
@@ -42,6 +45,7 @@ export class NeurofrigoRuntime {
     this.contextBuilder = deps.contextBuilder ?? new ContextBuilder();
     this.promptBuilder = deps.promptBuilder ?? new PromptBuilder();
     this.limits = { ...DEFAULT_GUARDRAIL_LIMITS, ...deps.limits };
+    this.costPer1kTokens = deps.costPer1kTokens ?? null;
   }
 
   async ask(request: RuntimeRequest): Promise<RuntimeAnswer> {
@@ -189,6 +193,7 @@ export class NeurofrigoRuntime {
         estimatedCostUsd: estimateCostUsd(
           completion.totalTokens || completion.promptTokens + completion.completionTokens,
           completion.provider || meta.name,
+          this.costPer1kTokens,
         ),
         status: 'ok',
         errorCode: null,

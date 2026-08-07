@@ -8,5 +8,6 @@ export * from './formatter/response-formatter';
 export * from './quality/grounding-score';
 export * from './adapters/llm/grounded-extractive';
 export * from './adapters/llm/openai-compatible';
+export * from './adapters/llm/deepseek';
 export * from './runtime/runtime';
 export * from './factory';

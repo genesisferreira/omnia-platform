@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | deepseek-agents
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -65,6 +65,12 @@ run_enterprise_ai() {
   echo "==> Seed Enterprise AI (assistants, prompts, models, policies)..."
   pnpm --filter @omnia/admin seed:enterprise-ai
   echo "==> Seed enterprise-ai concluído."
+}
+
+run_deepseek_agents() {
+  echo "==> Seed DeepSeek Live + Agent Library oficial..."
+  pnpm --filter @omnia/admin seed:deepseek-agents
+  echo "==> Seed deepseek-agents concluído."
 }
 
 run_holding_home() {
@@ -147,8 +153,11 @@ case "$MODE" in
   enterprise-ai)
     run_enterprise_ai
     ;;
+  deepseek-agents)
+    run_deepseek_agents
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|deepseek-agents]"
     exit 1
     ;;
 esac

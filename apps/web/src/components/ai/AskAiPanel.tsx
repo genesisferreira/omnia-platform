@@ -58,6 +58,7 @@ type Explainability = {
 type ChatData = {
   sessionId: string | number;
   assistantId?: string;
+  specialistLabel?: string | null;
   text: string;
   sources: Source[];
   confidence: number;
@@ -88,7 +89,8 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackDone, setFeedbackDone] = useState<Record<number, string>>({});
   const [assistants, setAssistants] = useState<AssistantOption[]>([]);
-  const [assistantId, setAssistantId] = useState('tutor');
+  const [assistantId, setAssistantId] = useState('auto');
+  const [specialistLabel, setSpecialistLabel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -105,7 +107,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
         if (Array.isArray(list) && list.length) {
           setAssistants(list);
           setAssistantId((prev) =>
-            list.some((a) => a.key === prev) ? prev : list[0]!.key,
+            prev === 'auto' || list.some((a) => a.key === prev) ? prev : 'auto',
           );
         }
       })
@@ -142,6 +144,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
           return;
         }
         setSessionId(json.data.sessionId);
+        setSpecialistLabel(json.data.specialistLabel || null);
         setTurns((prev) => [...prev, { question: q, answer: json.data! }]);
         setQuestion('');
       } catch {
@@ -190,6 +193,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
     setShowSourcesFor(null);
     setShowExplainFor(null);
     setFeedbackDone({});
+    setSpecialistLabel(null);
   }
 
   function changeAssistant(next: string) {
@@ -215,7 +219,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <label className="block text-sm font-medium" htmlFor="ask-ai-assistant">
-                Conversar com
+                Fale com a Omnia AI
               </label>
               <select
                 id="ask-ai-assistant"
@@ -223,19 +227,22 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                 onChange={(e) => changeAssistant(e.target.value)}
                 className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm"
               >
-                {(assistants.length
-                  ? assistants
-                  : [{ key: 'tutor', name: 'Tutor IA', id: 'tutor' }]
-                ).map((a) => (
+                <option value="auto">Automático (recomendado)</option>
+                {assistants.map((a) => (
                   <option key={a.key} value={a.key}>
                     {a.name}
                   </option>
                 ))}
               </select>
               <p className="text-sm text-muted-foreground">
-                {selected?.description ||
-                  'Assistente Omnia — respostas ancoradas no material autorizado, com fontes e continuidade nesta sessão.'}
+                {assistantId === 'auto'
+                  ? 'A Omnia AI escolhe o especialista adequado. Você não precisa conhecer os agentes.'
+                  : selected?.description ||
+                    'Assistente Omnia — respostas ancoradas no material autorizado.'}
               </p>
+              {specialistLabel ? (
+                <p className="text-xs text-muted-foreground">Especialista: {specialistLabel}</p>
+              ) : null}
             </div>
             {turns.length > 0 ? (
               <button
@@ -257,7 +264,10 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                   </p>
                   <p className="text-sm">{turn.question}</p>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {selected?.name || turn.answer.assistantId || 'Assistente'}
+                    {turn.answer.specialistLabel ||
+                      selected?.name ||
+                      turn.answer.assistantId ||
+                      'Omnia AI'}
                   </p>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{turn.answer.text}</div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

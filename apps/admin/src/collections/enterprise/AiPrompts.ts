@@ -36,6 +36,7 @@ export const AiPrompts: CollectionConfig = {
         { label: 'Security', value: 'security' },
         { label: 'Style', value: 'style' },
         { label: 'Domain', value: 'domain' },
+        { label: 'Compliance', value: 'compliance' },
       ],
     },
     { name: 'version', type: 'number', required: true, defaultValue: 1, min: 1 },

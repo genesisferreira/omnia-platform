@@ -135,10 +135,17 @@ export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   });
 }
 
-export function estimateCostUsd(totalTokens: number, provider: string): number {
-  // Estimativa conservadora; Grounded = 0
+export function estimateCostUsd(
+  totalTokens: number,
+  provider: string,
+  costPer1kTokens?: number | null,
+): number {
   if (provider === 'grounded' || provider === 'extractive') return 0;
-  return Number(((totalTokens / 1000) * 0.0002).toFixed(6));
+  const rate =
+    costPer1kTokens != null && Number.isFinite(costPer1kTokens)
+      ? Number(costPer1kTokens)
+      : 0.0002;
+  return Number(((totalTokens / 1000) * rate).toFixed(6));
 }
 
 export function computeConfidence(chunks: CitationResult[]): number {

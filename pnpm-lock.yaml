@@ -176,6 +176,9 @@ importers:
       '@omnia/neurofrigo-knowledge':
         specifier: workspace:*
         version: link:../../packages/neurofrigo-knowledge
+      '@omnia/neurofrigo-orchestrator':
+        specifier: workspace:*
+        version: link:../../packages/neurofrigo-orchestrator
       '@omnia/neurofrigo-runtime':
         specifier: workspace:*
         version: link:../../packages/neurofrigo-runtime
@@ -792,6 +795,28 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 8.57.1
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/neurofrigo-orchestrator:
+    dependencies:
+      '@omnia/enterprise-ai':
+        specifier: workspace:*
+        version: link:../enterprise-ai
+    devDependencies:
+      '@omnia/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.0
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3

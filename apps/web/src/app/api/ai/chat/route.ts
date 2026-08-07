@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const result = await fetchAiChat({
     question,
     sessionId: (body.sessionId as string | number | null) ?? null,
-    assistantId: (body.assistantId as string | null) ?? 'tutor',
+    assistantId: (body.assistantId as string | null) ?? 'auto',
     courseId: (body.courseId as string | number | null) ?? null,
     courseTitle: (body.courseTitle as string | null) ?? null,
     moduleId: (body.moduleId as string | number | null) ?? null,

@@ -23,6 +23,7 @@ import * as migration_20260806_120000_neurofrigo_ai_mvp from './20260806_120000_
 import * as migration_20260806_180000_ai_experience from './20260806_180000_ai_experience';
 import * as migration_20260807_120000_tutor_ia from './20260807_120000_tutor_ia';
 import * as migration_20260807_180000_enterprise_ai from './20260807_180000_enterprise_ai';
+import * as migration_20260807_220000_deepseek_agents from './20260807_220000_deepseek_agents';
 
 export const migrations = [
   {
@@ -149,5 +150,10 @@ export const migrations = [
     up: migration_20260807_180000_enterprise_ai.up,
     down: migration_20260807_180000_enterprise_ai.down,
     name: '20260807_180000_enterprise_ai',
+  },
+  {
+    up: migration_20260807_220000_deepseek_agents.up,
+    down: migration_20260807_220000_deepseek_agents.down,
+    name: '20260807_220000_deepseek_agents',
   },
 ];

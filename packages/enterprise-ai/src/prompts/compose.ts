@@ -1,6 +1,12 @@
 import type { PromptKind, PromptVersionRecord } from '../domain/types';
 
-const KIND_ORDER: PromptKind[] = ['system', 'security', 'style', 'domain'];
+const KIND_ORDER: PromptKind[] = [
+  'system',
+  'security',
+  'style',
+  'domain',
+  'compliance',
+];
 
 /**
  * Compõe o system prompt a partir das versões ativas (sem tocar no PromptBuilder de intenção).

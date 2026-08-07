@@ -11,5 +11,6 @@ describe('enterprise-ai admin smoke', () => {
     assert.equal(typeof mod.resolveAssistantRuntime, 'function');
     assert.equal(typeof mod.composeSystemPrompt, 'function');
     assert.ok(mod.PROMPT_KINDS.includes('system'));
+    assert.ok(mod.PROMPT_KINDS.includes('compliance'));
   });
 });

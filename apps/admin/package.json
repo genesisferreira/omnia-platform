@@ -58,6 +58,8 @@
     "test:tutor-ia": "tsx --test ../../packages/neurofrigo-tutor/src/**/test-*.ts && tsx --test src/scripts/test-tutor-ia.ts",
     "seed:enterprise-ai": "tsx src/scripts/seed-enterprise-ai.ts",
     "test:enterprise-ai": "tsx --test ../../packages/enterprise-ai/src/**/test-*.ts && tsx --test src/scripts/test-enterprise-ai.ts",
+    "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
+    "test:deepseek-agents": "tsx --test ../../packages/neurofrigo-orchestrator/src/**/test-*.ts && tsx --test src/scripts/test-deepseek-agents.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
   },
   "dependencies": {
@@ -75,6 +77,7 @@
     "@omnia/neurofrigo-runtime": "workspace:*",
     "@omnia/neurofrigo-tutor": "workspace:*",
     "@omnia/enterprise-ai": "workspace:*",
+    "@omnia/neurofrigo-orchestrator": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",
     "@payloadcms/db-postgres": "catalog:",

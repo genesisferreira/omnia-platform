@@ -5,13 +5,26 @@ export const ASSISTANT_CATEGORIES = [
   'support',
   'command',
   'general',
+  'refrigeration',
+  'technology',
+  'electrical',
+  'assessor',
+  'radar',
+  'lab',
+  'content',
 ] as const;
 export type AssistantCategory = (typeof ASSISTANT_CATEGORIES)[number];
 
 export const ASSISTANT_STATUSES = ['draft', 'active', 'deprecated', 'disabled'] as const;
 export type AssistantStatus = (typeof ASSISTANT_STATUSES)[number];
 
-export const PROMPT_KINDS = ['system', 'security', 'style', 'domain'] as const;
+export const PROMPT_KINDS = [
+  'system',
+  'security',
+  'style',
+  'domain',
+  'compliance',
+] as const;
 export type PromptKind = (typeof PROMPT_KINDS)[number];
 
 export type AiModelRecord = {

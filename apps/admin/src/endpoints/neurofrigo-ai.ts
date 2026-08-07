@@ -60,7 +60,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
       result = await runNeurofrigoAsk(req.payload, {
         question,
         sessionId: (body.sessionId as string | number | null) ?? null,
-        assistantId: body.assistantId != null ? String(body.assistantId) : 'tutor',
+        assistantId: body.assistantId != null ? String(body.assistantId) : 'auto',
+        orchestrate: body.orchestrate !== false,
         identity: {
           userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
           role: (body.role != null ? String(body.role) : auth.role) || null,
@@ -86,16 +87,21 @@ export const neurofrigoChatEndpoint: Endpoint = {
       if (err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN')) {
         return json({ ok: false, error: err.message }, 403);
       }
+      if (err instanceof Error && err.message.includes('DEEPSEEK_API_KEY_MISSING')) {
+        return json({ ok: false, error: 'PROVIDER_UNAVAILABLE:DeepSeek key missing' }, 503);
+      }
       throw err;
     }
 
-    const { answer, sessionId, assistantKey } = result;
+    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta } =
+      result;
 
     return json({
       ok: true,
       data: {
         sessionId,
-        assistantId: assistantKey || (body.assistantId != null ? String(body.assistantId) : 'tutor'),
+        assistantId: assistantKey || (body.assistantId != null ? String(body.assistantId) : 'auto'),
+        specialistLabel: specialistLabel || null,
         text: answer.formattedText || answer.text,
         rawText: answer.text,
         sources: answer.sources,
@@ -115,6 +121,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
         grounding: answer.grounding,
         explainability: answer.explainability,
         sourceCount: answer.sources.length,
+        orchestrator: orchestrator || null,
+        providerMeta: providerMeta || null,
       },
     });
   },
