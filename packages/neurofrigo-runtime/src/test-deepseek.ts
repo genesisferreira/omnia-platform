@@ -39,9 +39,10 @@ describe('deepseek adapter', () => {
   });
 
   it('disables V4 thinking by default and reads content', async () => {
-    let capturedBody: Record<string, unknown> | null = null;
+    let capturedThinking: unknown;
     const fetchImpl = (async (_url: string | URL | Request, init?: RequestInit) => {
-      capturedBody = JSON.parse(String(init?.body || '{}')) as Record<string, unknown>;
+      const body = JSON.parse(String(init?.body || '{}')) as { thinking?: unknown };
+      capturedThinking = body.thinking;
       return new Response(
         JSON.stringify({
           choices: [{ message: { content: 'ok-deepseek', reasoning_content: 'think' }, finish_reason: 'stop' }],
@@ -60,7 +61,7 @@ describe('deepseek adapter', () => {
     const out = await p.complete({ system: 's', user: 'u', maxTokens: 64 });
     assert.equal(out.text, 'ok-deepseek');
     assert.equal(out.provider, 'deepseek');
-    assert.deepEqual(capturedBody?.thinking, { type: 'disabled' });
+    assert.deepEqual(capturedThinking, { type: 'disabled' });
   });
 
   it('falls back to reasoning_content when content is empty', async () => {
