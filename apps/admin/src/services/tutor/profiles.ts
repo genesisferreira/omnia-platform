@@ -12,6 +12,13 @@ function asStringArray(value: unknown): string[] {
   return value.map((v) => String(v)).filter(Boolean);
 }
 
+function numericUserId(userId: string): number | null {
+  if (!userId || userId === 'anonymous') return null;
+  if (!/^\d+$/.test(userId)) return null;
+  const n = Number(userId);
+  return Number.isFinite(n) ? n : null;
+}
+
 /**
  * Deriva StudentProfile do LMS Core + sinais de AI sessions do curso.
  * Progresso = aulas com atividade de IA ou marcadas; sem inventar matrícula Moodle.
@@ -41,14 +48,13 @@ export async function syncStudentProfile(
     };
   }
 
+  const userNumeric = numericUserId(input.userId);
   const sessions = await payload.find({
     collection: 'ai-sessions',
     where: {
       and: [
         { course: { equals: catalog.courseId } },
-        ...(input.userId !== 'anonymous'
-          ? [{ user: { equals: Number(input.userId) || input.userId } }]
-          : []),
+        ...(userNumeric != null ? [{ user: { equals: userNumeric } }] : []),
       ],
     },
     limit: 200,
@@ -104,10 +110,7 @@ export async function syncStudentProfile(
 
   const data = {
     userKey: input.userId,
-    user:
-      input.userId !== 'anonymous' && Number(input.userId)
-        ? Number(input.userId)
-        : undefined,
+    user: numericUserId(input.userId) ?? undefined,
     tenant: input.tenantId ? Number(input.tenantId) || input.tenantId : undefined,
     course: Number(catalog.courseId) || catalog.courseId,
     enrolledCourseIds: [catalog.courseId],
@@ -199,10 +202,7 @@ export async function syncLearningProfile(
 
   const data = {
     userKey: input.userId,
-    user:
-      input.userId !== 'anonymous' && Number(input.userId)
-        ? Number(input.userId)
-        : undefined,
+    user: numericUserId(input.userId) ?? undefined,
     course: Number(courseId) || courseId,
     level: profile.level,
     masteredTopics: profile.masteredTopics,

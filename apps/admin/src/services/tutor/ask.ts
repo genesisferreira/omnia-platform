@@ -27,14 +27,14 @@ export async function createTutorService(payload: Payload): Promise<TutorService
     },
     signals: {
       async listRecentQuestions({ userId, courseId, limit = 30 }) {
+        const userNumeric =
+          userId && userId !== 'anonymous' && /^\d+$/.test(userId) ? Number(userId) : null;
         const sessions = await payload.find({
           collection: 'ai-sessions',
           where: {
             and: [
               { course: { equals: courseId } },
-              ...(userId !== 'anonymous'
-                ? [{ user: { equals: Number(userId) || userId } }]
-                : []),
+              ...(userNumeric != null ? [{ user: { equals: userNumeric } }] : []),
             ],
           },
           limit,
@@ -48,14 +48,14 @@ export async function createTutorService(payload: Payload): Promise<TutorService
         }));
       },
       async countNegativeFeedback({ userId, courseId }) {
+        const userNumeric =
+          userId && userId !== 'anonymous' && /^\d+$/.test(userId) ? Number(userId) : null;
         const sessions = await payload.find({
           collection: 'ai-sessions',
           where: {
             and: [
               { course: { equals: courseId } },
-              ...(userId !== 'anonymous'
-                ? [{ user: { equals: Number(userId) || userId } }]
-                : []),
+              ...(userNumeric != null ? [{ user: { equals: userNumeric } }] : []),
             ],
           },
           limit: 100,
@@ -128,7 +128,7 @@ export async function runTutorAsk(
         objective: result.studyPlan.objective,
         userKey: body.userId || 'anonymous',
         user:
-          body.userId && body.userId !== 'anonymous' && Number(body.userId)
+          body.userId && body.userId !== 'anonymous' && /^\d+$/.test(body.userId)
             ? Number(body.userId)
             : undefined,
         course: Number(result.studyPlan.courseId) || result.studyPlan.courseId,
