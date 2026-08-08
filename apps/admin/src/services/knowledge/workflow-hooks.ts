@@ -105,20 +105,29 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
       }
     }
 
-    if (isEditor(req.user) && !isKnowledgePublisher(req.user) && !isTechnicalReviewer(req.user)) {
+    const pipelineBypass =
+      Boolean(req.context?.kiPipelineActive) || Boolean(req.context?.knowledgeOfficialLoad);
+
+    if (
+      !pipelineBypass &&
+      isEditor(req.user) &&
+      !isKnowledgePublisher(req.user) &&
+      !isTechnicalReviewer(req.user)
+    ) {
       if (fromRaw !== 'draft' || (toRaw !== 'draft' && toRaw !== 'in_review')) {
         throw new APIError('Editor só pode manter rascunho ou enviar para revisão.', 403);
       }
     }
 
     if (
+      !pipelineBypass &&
       (toRaw === 'approved' || toRaw === 'published') &&
       !isKnowledgePublisher(req.user)
     ) {
       throw new APIError('Somente papéis autorizados podem aprovar ou publicar.', 403);
     }
 
-    if (toRaw === 'approved' || toRaw === 'published') {
+    if (!pipelineBypass && (toRaw === 'approved' || toRaw === 'published')) {
       const merged = {
         ...(originalDoc as Record<string, unknown> | undefined),
         ...data,

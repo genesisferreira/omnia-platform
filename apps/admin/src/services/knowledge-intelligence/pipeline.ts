@@ -438,9 +438,12 @@ export async function processLearningResource(args: {
       allowedAgents: hubOverrides?.allowedAgents,
       tags: mergedTags.map((tag) => ({ tag })),
       authorName: (resource.author as string) || undefined,
-      status: hubOverrides?.status || 'draft',
+      // Sempre cria em draft; publicação oficial sobe via transições válidas.
+      status: 'draft' as const,
       processingStatus: publishForAi ? ('succeeded' as const) : ('queued' as const),
-      publicationStatus: hubOverrides?.publicationStatus || ('unpublished' as const),
+      publicationStatus: publishForAi
+        ? ('unpublished' as const)
+        : hubOverrides?.publicationStatus || ('unpublished' as const),
       securityClassification:
         hubOverrides?.securityClassification || ('INTERNAL_RESTRICTED' as const),
       allowAiUse: hubOverrides?.allowAiUse ?? false,
@@ -466,7 +469,7 @@ export async function processLearningResource(args: {
         draft: useDraft,
         overrideAccess: true,
         req,
-        context: { kiPipelineActive: true },
+        context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
       });
     } else {
       // slug conflict → append hash
@@ -477,7 +480,7 @@ export async function processLearningResource(args: {
           draft: useDraft,
           overrideAccess: true,
           req,
-          context: { kiPipelineActive: true },
+          context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
         });
         knowledgeDocumentId = created.id;
       } catch {
@@ -490,9 +493,29 @@ export async function processLearningResource(args: {
           draft: useDraft,
           overrideAccess: true,
           req,
-          context: { kiPipelineActive: true },
+          context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
         });
         knowledgeDocumentId = created.id;
+      }
+    }
+
+    if (publishForAi && knowledgeDocumentId != null) {
+      const ctx = { kiPipelineActive: true, knowledgeOfficialLoad: true };
+      for (const status of ['in_review', 'approved', 'published'] as const) {
+        await payload.update({
+          collection: 'knowledge-documents',
+          id: knowledgeDocumentId,
+          data: {
+            status,
+            allowAiUse: true,
+            publicationStatus: status === 'published' ? 'published' : 'unpublished',
+            humanReviewRequired: false,
+          },
+          draft: false,
+          overrideAccess: true,
+          req,
+          context: ctx,
+        });
       }
     }
 
