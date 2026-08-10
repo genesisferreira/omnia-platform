@@ -17,10 +17,13 @@ export type AskAiContext = {
 type AssistantOption = {
   id: string;
   key: string;
+  slug?: string;
   name: string;
   description?: string;
   category?: string;
   icon?: string | null;
+  avatar?: string | null;
+  color?: string | null;
 };
 
 type Source = {
@@ -219,13 +222,18 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <label className="block text-sm font-medium" htmlFor="ask-ai-assistant">
-                Fale com a Omnia AI
+                Conversar com
               </label>
               <select
                 id="ask-ai-assistant"
                 value={assistantId}
                 onChange={(e) => changeAssistant(e.target.value)}
                 className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm"
+                style={
+                  selected?.color
+                    ? { borderColor: selected.color }
+                    : undefined
+                }
               >
                 <option value="auto">Automático (recomendado)</option>
                 {assistants.map((a) => (

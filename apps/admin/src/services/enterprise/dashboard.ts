@@ -70,6 +70,7 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
   const byAssistant = new Map<string, number>();
   const byCompany = new Map<string, number>();
   const byModel = new Map<string, number>();
+  const byProvider = new Map<string, number>();
   const costByAssistant = new Map<string, number>();
   const costByCompany = new Map<string, number>();
   const costByCourse = new Map<string, number>();
@@ -104,7 +105,18 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
 
     const model = String(d.model || 'unknown');
     byModel.set(model, (byModel.get(model) || 0) + 1);
+
+    const provider = String(d.provider || filters.providerUsed || 'unknown');
+    byProvider.set(provider, (byProvider.get(provider) || 0) + 1);
   }
+
+  const activeAssistants = await payload.find({
+    collection: 'ai-assistants',
+    where: { status: { equals: 'active' } },
+    limit: 1,
+    overrideAccess: true,
+  });
+  const activeAssistantsCount = activeAssistants.totalDocs;
 
   const tokensToday = today.docs.reduce((s, d) => s + Number(d.totalTokens || 0), 0);
   const tokensMonth = month.docs.reduce((s, d) => s + Number(d.totalTokens || 0), 0);
@@ -151,6 +163,9 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
       usageByAssistant: [...byAssistant.entries()].map(([key, count]) => ({ key, count })),
       usageByCompany: [...byCompany.entries()].map(([key, count]) => ({ key, count })),
       modelsUsed: [...byModel.entries()].map(([key, count]) => ({ key, count })),
+      usageByProvider: [...byProvider.entries()].map(([key, count]) => ({ key, count })),
+      activeAssistantsCount,
+      satisfactionScore: avgFeedbackScore,
       deepseekStatus,
       tokensToday,
       tokensMonth,

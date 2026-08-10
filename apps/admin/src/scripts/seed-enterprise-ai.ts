@@ -1,5 +1,5 @@
 /**
- * Seed Epic 08 — Enterprise AI Platform (5 assistentes + prompts + modelos + políticas).
+ * Seed Epic 08/11 — Enterprise AI Platform (7 assistentes + prompts + modelos + políticas).
  */
 export {};
 
@@ -50,6 +50,7 @@ async function main() {
     model: 'grounded-extractive-v1',
     estimatedCostPer1kTokens: 0,
     maxContextTokens: 8000,
+    defaultTemperature: 0.2,
     capabilities: ['extractive', 'citations'],
     status: 'active',
     priority: 100,
@@ -62,6 +63,9 @@ async function main() {
     description: string;
     capabilities: string[];
     defaultContext: string;
+    temperature: number;
+    color: string;
+    visibility: string;
   }> = [
     {
       key: 'tutor',
@@ -70,6 +74,9 @@ async function main() {
       description: 'Tutor de aprendizagem ancorado no material do curso.',
       capabilities: ['rag', 'citations', 'study_plan'],
       defaultContext: 'Foque em educação técnica e progressão do aluno.',
+      temperature: 0.2,
+      color: '#0B6E4F',
+      visibility: 'public',
     },
     {
       key: 'commercial',
@@ -78,6 +85,9 @@ async function main() {
       description: 'Assistente comercial para propostas e posicionamento técnico-comercial.',
       capabilities: ['rag', 'citations'],
       defaultContext: 'Foque em benefícios, escopo e clareza comercial sem inventar preços.',
+      temperature: 0.5,
+      color: '#1D4ED8',
+      visibility: 'internal',
     },
     {
       key: 'engineering',
@@ -86,6 +96,9 @@ async function main() {
       description: 'Assistente de engenharia para parâmetros e boas práticas técnicas.',
       capabilities: ['rag', 'citations'],
       defaultContext: 'Foque em precisão técnica, parâmetros e segurança operacional.',
+      temperature: 0.15,
+      color: '#0F766E',
+      visibility: 'internal',
     },
     {
       key: 'support',
@@ -94,6 +107,9 @@ async function main() {
       description: 'Assistente de suporte para troubleshooting com fontes autorizadas.',
       capabilities: ['rag', 'citations'],
       defaultContext: 'Foque em diagnóstico passo a passo e resolução de incidentes.',
+      temperature: 0.25,
+      color: '#B45309',
+      visibility: 'public',
     },
     {
       key: 'command',
@@ -102,6 +118,31 @@ async function main() {
       description: 'Assistente operacional para orientações de comando e procedimento.',
       capabilities: ['rag', 'citations'],
       defaultContext: 'Foque em checklists operacionais e conformidade com o material.',
+      temperature: 0.1,
+      color: '#7C2D12',
+      visibility: 'restricted',
+    },
+    {
+      key: 'concierge',
+      name: 'Concierge IA',
+      category: 'concierge',
+      description: 'Assistente de acolhimento e navegação na plataforma.',
+      capabilities: ['rag', 'citations', 'routing'],
+      defaultContext: 'Foque em orientar o usuário para o assistente/conteúdo adequado.',
+      temperature: 0.35,
+      color: '#4338CA',
+      visibility: 'public',
+    },
+    {
+      key: 'evaluator',
+      name: 'Evaluator IA',
+      category: 'evaluator',
+      description: 'Assistente de avaliação formativa com base no material autorizado.',
+      capabilities: ['rag', 'citations', 'assessment'],
+      defaultContext: 'Foque em rubricas, feedback formativo e integridade avaliativa.',
+      temperature: 0.15,
+      color: '#9D174D',
+      visibility: 'internal',
     },
   ];
 
@@ -109,19 +150,25 @@ async function main() {
   for (const a of assistants) {
     const id = await upsertByKey('ai-assistants', 'key', a.key, {
       key: a.key,
+      slug: a.key,
       name: a.name,
       description: a.description,
       category: a.category,
-      version: '1.0.0',
+      version: '1.1.0',
       status: 'active',
       icon: a.key,
+      avatar: a.key,
+      color: a.color,
+      visibility: a.visibility,
       language: 'pt-BR',
+      promptVersion: '1',
+      modelProfile: 'grounded-default',
       allowedModels: [modelId],
       defaultContext: a.defaultContext,
       capabilities: a.capabilities,
       config: {
         defaultModel: modelId,
-        temperature: 0.2,
+        temperature: a.temperature,
         maxContextChunks: 6,
         maxPromptTokens: 3500,
         maxCompletionTokens: 800,
@@ -165,6 +212,18 @@ async function main() {
       style: 'Tom operacional, checklist e ordem de execução.',
       domain: 'Domínio: procedimentos e conformidade operacional.',
     },
+    concierge: {
+      system: 'Você é o Concierge IA Omnia. Acolha e oriente o usuário na plataforma.',
+      security: 'Não invente funcionalidades fora das FONTES. Não execute ferramentas.',
+      style: 'Tom acolhedor, claro e breve.',
+      domain: 'Domínio: navegação, onboarding e encaminhamento a especialistas.',
+    },
+    evaluator: {
+      system: 'Você é o Evaluator IA Omnia. Avalie com rubricas e material autorizado.',
+      security: 'Não invente critérios fora das FONTES. Preserve integridade avaliativa.',
+      style: 'Tom formativo, objetivo e justo.',
+      domain: 'Domínio: avaliação formativa e feedback técnico.',
+    },
   };
 
   for (const [key, bodies] of Object.entries(promptBodies)) {
@@ -191,7 +250,9 @@ async function main() {
         version: 1,
         body: bodies[kind],
         active: true,
-        changelog: 'seed enterprise-ai v1',
+        status: 'active',
+        author: 'seed-enterprise-ai',
+        changelog: 'seed enterprise-ai epic11 v1.1',
       };
       if (existing.docs[0]) {
         await payload.update({
@@ -211,13 +272,19 @@ async function main() {
   }
 
   const allAssistantIds = [...assistantIds.values()];
-  const studentAssistants = [assistantIds.get('tutor')!, assistantIds.get('support')!];
+  const studentAssistants = [
+    assistantIds.get('tutor')!,
+    assistantIds.get('support')!,
+    assistantIds.get('concierge')!,
+  ];
 
   await upsertByKey('ai-policies', 'name', 'Student default assistants', {
     name: 'Student default assistants',
     assistants: studentAssistants,
     roles: ['student'],
     allowedModels: [modelId],
+    requireGrounding: true,
+    requireExplainability: true,
     priority: 20,
     enabled: true,
   });
@@ -227,6 +294,8 @@ async function main() {
     assistants: allAssistantIds,
     roles: ['admin', 'teacher', 'super_admin', 'publisher'],
     allowedModels: [modelId],
+    requireGrounding: true,
+    requireExplainability: true,
     priority: 50,
     enabled: true,
   });
@@ -268,6 +337,20 @@ async function main() {
     },
   });
 
+  const conciergeAsk = await runNeurofrigoAsk(payload, {
+    question: 'Para quem eu falo sobre proposta comercial?',
+    assistantId: 'concierge',
+    identity: {
+      userId: 'enterprise-student',
+      role: 'student',
+      language: 'pt-BR',
+    },
+    course: {
+      courseId: String(course.id),
+      courseTitle: String(course.title || ''),
+    },
+  });
+
   let forbiddenOk = false;
   try {
     await runNeurofrigoAsk(payload, {
@@ -291,10 +374,10 @@ async function main() {
   });
 
   const assistantCount = (
-    await payload.find({ collection: 'ai-assistants', limit: 20, overrideAccess: true })
+    await payload.find({ collection: 'ai-assistants', limit: 50, overrideAccess: true })
   ).totalDocs;
   const promptCount = (
-    await payload.find({ collection: 'ai-prompts', limit: 100, overrideAccess: true })
+    await payload.find({ collection: 'ai-prompts', limit: 200, overrideAccess: true })
   ).totalDocs;
 
   console.log(
@@ -306,28 +389,38 @@ async function main() {
       tutorKey: tutorAsk.assistantKey,
       engineeringStatus: engineeringAsk.answer.status,
       engineeringKey: engineeringAsk.assistantKey,
+      conciergeStatus: conciergeAsk.answer.status,
+      conciergeKey: conciergeAsk.assistantKey,
+      tutorPolicy: tutorAsk.policyDecision?.reason ?? null,
       studentAllowed: allowedStudent.allowedAssistants.map((a: { key: string }) => a.key),
       adminAllowed: allowedAdmin.allowedAssistants.map((a: { key: string }) => a.key),
       forbiddenOk,
       dashboardSessions: dash.sessionsCount,
+      activeAssistantsCount: dash.activeAssistantsCount,
     }),
   );
 
-  if (assistantCount < 5) throw new Error('EXPECTED_5_ASSISTANTS');
-  if (promptCount < 20) throw new Error('EXPECTED_VERSIONED_PROMPTS');
+  if (assistantCount < 7) throw new Error('EXPECTED_7_ASSISTANTS');
+  if (promptCount < 28) throw new Error('EXPECTED_VERSIONED_PROMPTS');
   if (!forbiddenOk) throw new Error('EXPECTED_POLICY_FORBIDDEN_COMMERCIAL_FOR_STUDENT');
   if (!allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'tutor')) {
     throw new Error('EXPECTED_STUDENT_TUTOR');
   }
+  if (!allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'concierge')) {
+    throw new Error('EXPECTED_STUDENT_CONCIERGE');
+  }
   if (allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'commercial')) {
     throw new Error('UNEXPECTED_STUDENT_COMMERCIAL');
   }
-  if (allowedAdmin.allowedAssistants.length < 5) {
+  if (allowedAdmin.allowedAssistants.length < 7) {
     throw new Error('EXPECTED_ADMIN_ALL_ASSISTANTS');
   }
   if (tutorAsk.assistantKey !== 'tutor') throw new Error('EXPECTED_TUTOR_KEY');
   if (engineeringAsk.assistantKey !== 'engineering') {
     throw new Error('EXPECTED_ENGINEERING_KEY');
+  }
+  if (conciergeAsk.assistantKey !== 'concierge') {
+    throw new Error('EXPECTED_CONCIERGE_KEY');
   }
 
   console.log('ENTERPRISE_AI_SEED_OK');

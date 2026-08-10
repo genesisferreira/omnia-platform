@@ -7,7 +7,7 @@ export const AiPrompts: CollectionConfig = {
   labels: { singular: 'AI Prompt', plural: 'AI Prompts' },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['assistant', 'kind', 'version', 'active', 'updatedAt'],
+    defaultColumns: ['assistant', 'kind', 'version', 'status', 'active', 'updatedAt'],
     group: 'Enterprise AI',
     description: 'Prompt Registry versionado (system/security/style/domain).',
   },
@@ -17,6 +17,18 @@ export const AiPrompts: CollectionConfig = {
     create: kiPublisherAccess,
     update: kiPublisherAccess,
     delete: kiPublisherAccess,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        if (data.status === 'active') data.active = true;
+        if (data.status === 'retired' || data.status === 'draft') data.active = false;
+        if (data.active === true && !data.status) data.status = 'active';
+        if (data.active === false && data.status === 'active') data.status = 'retired';
+        return data;
+      },
+    ],
   },
   fields: [
     { name: 'title', type: 'text', required: true },
@@ -42,12 +54,23 @@ export const AiPrompts: CollectionConfig = {
     { name: 'version', type: 'number', required: true, defaultValue: 1, min: 1 },
     { name: 'body', type: 'textarea', required: true },
     {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'active',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Active', value: 'active' },
+        { label: 'Retired', value: 'retired' },
+      ],
+    },
+    {
       name: 'active',
       type: 'checkbox',
       defaultValue: true,
       label: 'Versão ativa',
       admin: { description: 'Desative para rollback (ative versão anterior).' },
     },
+    { name: 'author', type: 'text', label: 'Autor' },
     { name: 'changelog', type: 'text', label: 'Changelog' },
   ],
 };

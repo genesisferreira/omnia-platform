@@ -24,6 +24,19 @@ export const EnterpriseAiDashboard: GlobalConfig = {
     { name: 'usageByAssistant', type: 'json', admin: { readOnly: true } },
     { name: 'usageByCompany', type: 'json', admin: { readOnly: true } },
     { name: 'modelsUsed', type: 'json', admin: { readOnly: true } },
+    { name: 'usageByProvider', type: 'json', admin: { readOnly: true } },
+    {
+      name: 'activeAssistantsCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: { readOnly: true },
+    },
+    {
+      name: 'satisfactionScore',
+      type: 'number',
+      defaultValue: 0,
+      admin: { readOnly: true },
+    },
     {
       name: 'deepseekStatus',
       type: 'text',

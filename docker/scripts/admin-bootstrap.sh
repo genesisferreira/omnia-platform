@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | deepseek-agents
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | deepseek-agents
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -71,6 +71,14 @@ run_enterprise_ai() {
   echo "==> Seed Enterprise AI (assistants, prompts, models, policies)..."
   pnpm --filter @omnia/admin seed:enterprise-ai
   echo "==> Seed enterprise-ai concluído."
+}
+
+run_enterprise_ai_epic11() {
+  echo "==> EPIC 11 — migrate + enterprise-ai + homolog..."
+  run_migrate
+  run_enterprise_ai
+  pnpm --filter @omnia/admin homolog:e11-enterprise-ai
+  echo "==> Homolog EPIC 11 concluído."
 }
 
 run_deepseek_agents() {
@@ -162,11 +170,14 @@ case "$MODE" in
   enterprise-ai)
     run_enterprise_ai
     ;;
+  enterprise-ai-epic11)
+    run_enterprise_ai_epic11
+    ;;
   deepseek-agents)
     run_deepseek_agents
     ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|deepseek-agents]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|deepseek-agents]"
     exit 1
     ;;
 esac

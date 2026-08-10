@@ -1,6 +1,7 @@
 import type {
   AiModelRecord,
   AssistantRecord,
+  PolicyDecision,
   PromptVersionRecord,
   ResolvedAssistantRuntime,
 } from '../domain/types';
@@ -17,6 +18,9 @@ export function resolveAssistantRuntime(input: {
   models: AiModelRecord[];
   prompts: PromptVersionRecord[];
   allowedModelKeys?: string[];
+  requireGrounding?: boolean;
+  requireExplainability?: boolean;
+  policyDecision?: PolicyDecision;
 }): ResolvedAssistantRuntime {
   const { assistant } = input;
   const prompts = pickActivePromptVersions(input.prompts, assistant.key);
@@ -29,17 +33,37 @@ export function resolveAssistantRuntime(input: {
   if (assistant.config.defaultModelKey) {
     allowed.add(assistant.config.defaultModelKey);
   }
+  if (assistant.modelProfile) {
+    allowed.add(assistant.modelProfile);
+  }
 
   const candidates = input.models
     .filter((m) => m.status === 'active')
     .filter((m) => allowed.size === 0 || allowed.has(m.key))
     .sort((a, b) => b.priority - a.priority);
 
-  const preferredKey = assistant.config.defaultModelKey;
+  const preferredKey = assistant.config.defaultModelKey || assistant.modelProfile;
   const model =
     (preferredKey ? candidates.find((m) => m.key === preferredKey) : null) ||
     candidates[0] ||
     null;
+
+  const temperature =
+    assistant.config.temperature ?? model?.defaultTemperature ?? 0.2;
+
+  const policyDecision: PolicyDecision =
+    input.policyDecision ||
+    ({
+      allowed: true,
+      assistantKey: assistant.key,
+      modelKey: model?.key ?? null,
+      matchedPolicyIds: [],
+      requireGrounding: input.requireGrounding !== false,
+      requireExplainability: input.requireExplainability !== false,
+      maxTokensPerDay: null,
+      reason: 'direct_resolve',
+      at: new Date().toISOString(),
+    } satisfies PolicyDecision);
 
   return {
     assistant,
@@ -56,9 +80,15 @@ export function resolveAssistantRuntime(input: {
       timeoutMs: 25_000,
       maxHistoryTurns: 4,
     },
-    temperature: assistant.config.temperature ?? 0.2,
+    temperature,
     requireCitations: assistant.config.requireCitations !== false,
+    requireGrounding: input.requireGrounding !== false,
+    requireExplainability: input.requireExplainability !== false,
     fallbackBehavior: assistant.config.fallbackBehavior || 'not_found',
     language: assistant.config.defaultLanguage || assistant.language || 'pt-BR',
+    policyDecision: {
+      ...policyDecision,
+      modelKey: model?.key ?? policyDecision.modelKey,
+    },
   };
 }

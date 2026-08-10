@@ -7,7 +7,7 @@ export const AiPolicies: CollectionConfig = {
   labels: { singular: 'AI Policy', plural: 'AI Policies' },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'priority', 'enabled', 'updatedAt'],
+    defaultColumns: ['name', 'priority', 'enabled', 'requireGrounding', 'updatedAt'],
     group: 'Enterprise AI',
     description: 'Policy Engine — acesso por empresa/perfil/curso/tenant.',
   },
@@ -60,6 +60,23 @@ export const AiPolicies: CollectionConfig = {
       relationTo: 'ai-models',
       hasMany: true,
       label: 'Modelos autorizados',
+    },
+    {
+      name: 'requireGrounding',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Grounding obrigatório',
+    },
+    {
+      name: 'requireExplainability',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Explainability obrigatória',
+    },
+    {
+      name: 'maxTokensPerDay',
+      type: 'number',
+      label: 'Limite tokens/dia (opcional)',
     },
     { name: 'priority', type: 'number', defaultValue: 10 },
     { name: 'enabled', type: 'checkbox', defaultValue: true },

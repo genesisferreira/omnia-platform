@@ -1,12 +1,22 @@
 import type {
   AiPolicyRecord,
   AssistantRecord,
+  PolicyDecision,
   PolicySubject,
 } from '../domain/types';
 
 function asIdSet(values: Array<string | number> | undefined): Set<string> {
   return new Set((values || []).map((v) => String(v)));
 }
+
+export type PolicyEvaluation = {
+  allowedAssistants: AssistantRecord[];
+  allowedModelKeys: string[];
+  matchedPolicyIds: string[];
+  requireGrounding: boolean;
+  requireExplainability: boolean;
+  maxTokensPerDay: number | null;
+};
 
 /**
  * AI Policy Engine — decide quais assistentes/modelos o subject pode usar.
@@ -15,11 +25,7 @@ export function evaluatePolicies(input: {
   policies: AiPolicyRecord[];
   assistants: AssistantRecord[];
   subject: PolicySubject;
-}): {
-  allowedAssistants: AssistantRecord[];
-  allowedModelKeys: string[];
-  matchedPolicyIds: string[];
-} {
+}): PolicyEvaluation {
   const enabled = input.policies
     .filter((p) => p.enabled)
     .sort((a, b) => b.priority - a.priority);
@@ -52,12 +58,22 @@ export function evaluatePolicies(input: {
   // Sem política específica: assistentes ativos públicos (ownerCompany null)
   if (!matched.length) {
     const allowedAssistants = input.assistants.filter(
-      (a) => a.status === 'active' && !a.ownerCompanyId,
+      (a) =>
+        a.status === 'active' &&
+        !a.ownerCompanyId &&
+        (a.visibility === 'public' || !a.visibility),
     );
     const allowedModelKeys = [
       ...new Set(allowedAssistants.flatMap((a) => a.allowedModelKeys)),
     ];
-    return { allowedAssistants, allowedModelKeys, matchedPolicyIds: [] };
+    return {
+      allowedAssistants,
+      allowedModelKeys,
+      matchedPolicyIds: [],
+      requireGrounding: true,
+      requireExplainability: true,
+      maxTokensPerDay: null,
+    };
   }
 
   const assistantKeys = new Set(matched.flatMap((p) => p.assistantKeys));
@@ -68,13 +84,23 @@ export function evaluatePolicies(input: {
   const allowedAssistants = input.assistants.filter((a) => {
     if (a.status !== 'active') return false;
     if (assistantKeys.size === 0) return true;
-    return assistantKeys.has(a.key);
+    return assistantKeys.has(a.key) || assistantKeys.has(a.slug);
   });
+
+  const requireGrounding = matched.every((p) => p.requireGrounding !== false);
+  const requireExplainability = matched.every((p) => p.requireExplainability !== false);
+  const tokenLimits = matched
+    .map((p) => p.maxTokensPerDay)
+    .filter((n): n is number => typeof n === 'number' && n > 0);
+  const maxTokensPerDay = tokenLimits.length ? Math.min(...tokenLimits) : null;
 
   return {
     allowedAssistants,
     allowedModelKeys,
     matchedPolicyIds: matched.map((p) => p.id),
+    requireGrounding,
+    requireExplainability,
+    maxTokensPerDay,
   };
 }
 
@@ -82,9 +108,37 @@ export function assertAssistantAllowed(
   assistantKey: string,
   allowed: AssistantRecord[],
 ): AssistantRecord {
-  const found = allowed.find((a) => a.key === assistantKey || a.id === assistantKey);
+  const found = allowed.find(
+    (a) => a.key === assistantKey || a.slug === assistantKey || a.id === assistantKey,
+  );
   if (!found) {
     throw new Error(`ASSISTANT_FORBIDDEN:${assistantKey}`);
   }
   return found;
+}
+
+export function buildPolicyDecision(input: {
+  allowed: boolean;
+  assistantKey: string | null;
+  modelKey: string | null;
+  evaluation: Pick<
+    PolicyEvaluation,
+    | 'matchedPolicyIds'
+    | 'requireGrounding'
+    | 'requireExplainability'
+    | 'maxTokensPerDay'
+  >;
+  reason: string;
+}): PolicyDecision {
+  return {
+    allowed: input.allowed,
+    assistantKey: input.assistantKey,
+    modelKey: input.modelKey,
+    matchedPolicyIds: input.evaluation.matchedPolicyIds,
+    requireGrounding: input.evaluation.requireGrounding,
+    requireExplainability: input.evaluation.requireExplainability,
+    maxTokensPerDay: input.evaluation.maxTokensPerDay,
+    reason: input.reason,
+    at: new Date().toISOString(),
+  };
 }

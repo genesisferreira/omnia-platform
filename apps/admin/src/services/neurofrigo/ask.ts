@@ -29,6 +29,8 @@ export type AskResult = {
   sessionId: string | number;
   assistantKey?: string;
   specialistLabel?: string;
+  modelKey?: string | null;
+  policyDecision?: import('@omnia/enterprise-ai').PolicyDecision | null;
   orchestrator?: {
     intent: string;
     blocked: boolean;
@@ -397,6 +399,7 @@ export async function runNeurofrigoAsk(
     budget,
     resolvedId: resolved?.assistant.id ?? null,
     modelKey: resolved?.model?.key ?? null,
+    policyDecision: resolved?.policyDecision ?? null,
   });
 
   return {
@@ -404,6 +407,8 @@ export async function runNeurofrigoAsk(
     sessionId,
     assistantKey: resolved?.assistant.key ?? assistantKey,
     specialistLabel,
+    modelKey: resolved?.model?.key ?? null,
+    policyDecision: resolved?.policyDecision ?? null,
     orchestrator: plan
       ? {
           intent: plan.intent,
@@ -438,6 +443,7 @@ async function persistSession(
     budget?: ReturnType<typeof evaluateBudget>;
     resolvedId?: string | null;
     modelKey?: string | null;
+    policyDecision?: import('@omnia/enterprise-ai').PolicyDecision | null;
   },
 ): Promise<string | number> {
   const nextTurn: ConversationTurn = {
@@ -511,6 +517,7 @@ async function persistSession(
       providerRequested: args.providerMeta?.providerRequested ?? null,
       providerUsed: args.providerMeta?.providerUsed ?? args.answer.provider,
       fallbackReason: args.providerMeta?.fallbackReason ?? null,
+      policyDecision: args.policyDecision ?? null,
       orchestratorIntent: args.plan?.intent ?? null,
       auditEvents: args.plan?.events ?? [],
       budget: args.budget

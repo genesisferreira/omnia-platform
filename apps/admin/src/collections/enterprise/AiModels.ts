@@ -36,6 +36,12 @@ export const AiModels: CollectionConfig = {
     },
     { name: 'capabilities', type: 'json', label: 'Capacidades' },
     {
+      name: 'defaultTemperature',
+      type: 'number',
+      defaultValue: 0.2,
+      label: 'Temperatura padrão',
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

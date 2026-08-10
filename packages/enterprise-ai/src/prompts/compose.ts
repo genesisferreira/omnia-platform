@@ -17,7 +17,8 @@ export function composeSystemPrompt(
 ): string {
   const byKind = new Map<PromptKind, PromptVersionRecord>();
   for (const p of prompts) {
-    if (!p.active) continue;
+    const isActive = p.active || p.status === 'active';
+    if (!isActive || p.status === 'retired' || p.status === 'draft') continue;
     const prev = byKind.get(p.kind);
     if (!prev || p.version > prev.version) byKind.set(p.kind, p);
   }
@@ -38,5 +39,11 @@ export function pickActivePromptVersions(
   all: PromptVersionRecord[],
   assistantKey: string,
 ): PromptVersionRecord[] {
-  return all.filter((p) => p.assistantKey === assistantKey && p.active);
+  return all.filter(
+    (p) =>
+      p.assistantKey === assistantKey &&
+      (p.active || p.status === 'active') &&
+      p.status !== 'retired' &&
+      p.status !== 'draft',
+  );
 }

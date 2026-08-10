@@ -4,6 +4,8 @@ export const ASSISTANT_CATEGORIES = [
   'engineering',
   'support',
   'command',
+  'concierge',
+  'evaluator',
   'general',
   'refrigeration',
   'technology',
@@ -18,6 +20,9 @@ export type AssistantCategory = (typeof ASSISTANT_CATEGORIES)[number];
 export const ASSISTANT_STATUSES = ['draft', 'active', 'deprecated', 'disabled'] as const;
 export type AssistantStatus = (typeof ASSISTANT_STATUSES)[number];
 
+export const ASSISTANT_VISIBILITIES = ['public', 'internal', 'restricted'] as const;
+export type AssistantVisibility = (typeof ASSISTANT_VISIBILITIES)[number];
+
 export const PROMPT_KINDS = [
   'system',
   'security',
@@ -27,6 +32,9 @@ export const PROMPT_KINDS = [
 ] as const;
 export type PromptKind = (typeof PROMPT_KINDS)[number];
 
+export const PROMPT_STATUSES = ['draft', 'active', 'retired'] as const;
+export type PromptStatus = (typeof PROMPT_STATUSES)[number];
+
 export type AiModelRecord = {
   id: string;
   key: string;
@@ -34,6 +42,7 @@ export type AiModelRecord = {
   model: string;
   estimatedCostPer1kTokens: number;
   maxContextTokens: number;
+  defaultTemperature: number;
   capabilities: string[];
   status: 'active' | 'disabled';
   priority: number;
@@ -46,6 +55,9 @@ export type PromptVersionRecord = {
   version: number;
   body: string;
   active: boolean;
+  status: PromptStatus;
+  author?: string | null;
+  changelog?: string | null;
   createdAt?: string;
 };
 
@@ -64,6 +76,7 @@ export type AssistantConfigRecord = {
 export type AssistantRecord = {
   id: string;
   key: string;
+  slug: string;
   name: string;
   description: string;
   ownerCompanyId: string | null;
@@ -71,7 +84,12 @@ export type AssistantRecord = {
   version: string;
   status: AssistantStatus;
   icon: string | null;
+  avatar: string | null;
+  color: string | null;
+  visibility: AssistantVisibility;
   language: string;
+  promptVersion: string | null;
+  modelProfile: string | null;
   allowedModelKeys: string[];
   defaultContext: string | null;
   capabilities: string[];
@@ -87,6 +105,9 @@ export type AiPolicyRecord = {
   courseIds: string[];
   tenantIds: string[];
   allowedModelKeys: string[];
+  requireGrounding: boolean;
+  requireExplainability: boolean;
+  maxTokensPerDay: number | null;
   priority: number;
   enabled: boolean;
 };
@@ -97,6 +118,18 @@ export type PolicySubject = {
   tenantId?: string | null;
   companyIds?: Array<string | number>;
   courseId?: string | null;
+};
+
+export type PolicyDecision = {
+  allowed: boolean;
+  assistantKey: string | null;
+  modelKey: string | null;
+  matchedPolicyIds: string[];
+  requireGrounding: boolean;
+  requireExplainability: boolean;
+  maxTokensPerDay: number | null;
+  reason: string;
+  at: string;
 };
 
 export type ResolvedAssistantRuntime = {
@@ -113,6 +146,9 @@ export type ResolvedAssistantRuntime = {
   };
   temperature: number;
   requireCitations: boolean;
+  requireGrounding: boolean;
+  requireExplainability: boolean;
   fallbackBehavior: AssistantConfigRecord['fallbackBehavior'];
   language: string;
+  policyDecision: PolicyDecision;
 };

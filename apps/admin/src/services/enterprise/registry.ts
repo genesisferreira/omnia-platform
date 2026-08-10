@@ -4,6 +4,7 @@ import type {
   AiPolicyRecord,
   AssistantRecord,
   PromptKind,
+  PromptStatus,
   PromptVersionRecord,
 } from '@omnia/enterprise-ai';
 
@@ -45,6 +46,7 @@ export async function loadAiModels(payload: Payload): Promise<AiModelRecord[]> {
     model: String(d.model),
     estimatedCostPer1kTokens: Number(d.estimatedCostPer1kTokens || 0),
     maxContextTokens: Number(d.maxContextTokens || 8000),
+    defaultTemperature: Number(d.defaultTemperature ?? 0.2),
     capabilities: Array.isArray(d.capabilities)
       ? d.capabilities.map(String)
       : [],
@@ -69,9 +71,11 @@ export async function loadAssistants(payload: Payload): Promise<AssistantRecord[
       .map((id) => byId.get(id)?.key)
       .filter(Boolean) as string[];
     const defaultModelKey = modelKeyFromRel(cfg.defaultModel, byId);
+    const key = String(d.key);
     return {
       id: String(d.id),
-      key: String(d.key),
+      key,
+      slug: String(d.slug || key),
       name: String(d.name),
       description: String(d.description || ''),
       ownerCompanyId: relId(d.ownerCompany),
@@ -79,7 +83,12 @@ export async function loadAssistants(payload: Payload): Promise<AssistantRecord[
       version: String(d.version || '1.0.0'),
       status: d.status as AssistantRecord['status'],
       icon: d.icon != null ? String(d.icon) : null,
+      avatar: d.avatar != null ? String(d.avatar) : null,
+      color: d.color != null ? String(d.color) : null,
+      visibility: (d.visibility as AssistantRecord['visibility']) || 'public',
       language: String(d.language || 'pt-BR'),
+      promptVersion: d.promptVersion != null ? String(d.promptVersion) : null,
+      modelProfile: d.modelProfile != null ? String(d.modelProfile) : null,
       allowedModelKeys: allowed,
       defaultContext: d.defaultContext != null ? String(d.defaultContext) : null,
       capabilities: Array.isArray(d.capabilities) ? d.capabilities.map(String) : [],
@@ -119,13 +128,17 @@ export async function loadPrompts(payload: Payload): Promise<PromptVersionRecord
       const assistantId = relId(d.assistant);
       const assistantKey = assistantId ? keyById.get(assistantId) : null;
       if (!assistantKey) return null;
+      const status = (d.status as PromptStatus) || (d.active ? 'active' : 'retired');
       return {
         id: String(d.id),
         assistantKey,
         kind: d.kind as PromptKind,
         version: Number(d.version || 1),
         body: String(d.body || ''),
-        active: Boolean(d.active),
+        active: Boolean(d.active) || status === 'active',
+        status,
+        author: d.author != null ? String(d.author) : null,
+        changelog: d.changelog != null ? String(d.changelog) : null,
         createdAt: d.createdAt ? String(d.createdAt) : undefined,
       };
     })
@@ -160,6 +173,12 @@ export async function loadPolicies(payload: Payload): Promise<AiPolicyRecord[]> 
     allowedModelKeys: relIds(d.allowedModels)
       .map((id) => mKey.get(id))
       .filter(Boolean) as string[],
+    requireGrounding: d.requireGrounding !== false,
+    requireExplainability: d.requireExplainability !== false,
+    maxTokensPerDay:
+      d.maxTokensPerDay != null && Number(d.maxTokensPerDay) > 0
+        ? Number(d.maxTokensPerDay)
+        : null,
     priority: Number(d.priority || 0),
     enabled: d.enabled !== false,
   }));

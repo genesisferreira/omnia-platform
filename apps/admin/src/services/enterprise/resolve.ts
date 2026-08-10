@@ -1,8 +1,6 @@
 import type { Payload } from 'payload';
 import {
-  assertAssistantAllowed,
-  evaluatePolicies,
-  resolveAssistantRuntime,
+  defaultAssistantRouter,
   type PolicySubject,
   type ResolvedAssistantRuntime,
 } from '@omnia/enterprise-ai';
@@ -17,8 +15,10 @@ export async function listAllowedAssistants(
     loadAssistants(payload),
     loadPolicies(payload),
   ]);
-  const evaluated = evaluatePolicies({ policies, assistants, subject });
-  return evaluated;
+  return defaultAssistantRouter.listAllowed({
+    subject,
+    registries: { assistants, policies },
+  });
 }
 
 export async function resolveAssistantForAsk(
@@ -35,23 +35,9 @@ export async function resolveAssistantForAsk(
     loadPolicies(payload),
   ]);
 
-  if (!assistants.length) {
-    throw new Error('ENTERPRISE_REGISTRY_EMPTY');
-  }
-
-  const evaluated = evaluatePolicies({
-    policies,
-    assistants,
+  return defaultAssistantRouter.route({
+    assistantId: input.assistantId,
     subject: input.subject,
-  });
-
-  const key = (input.assistantId || 'tutor').trim() || 'tutor';
-  const assistant = assertAssistantAllowed(key, evaluated.allowedAssistants);
-
-  return resolveAssistantRuntime({
-    assistant,
-    models,
-    prompts,
-    allowedModelKeys: evaluated.allowedModelKeys,
+    registries: { assistants, models, prompts, policies },
   });
 }

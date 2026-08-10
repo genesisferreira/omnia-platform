@@ -93,7 +93,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
       throw err;
     }
 
-    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta } =
+    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta, modelKey, policyDecision } =
       result;
 
     return json({
@@ -101,6 +101,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
       data: {
         sessionId,
         assistantId: assistantKey || (body.assistantId != null ? String(body.assistantId) : 'auto'),
+        assistant: assistantKey || null,
         specialistLabel: specialistLabel || null,
         text: answer.formattedText || answer.text,
         rawText: answer.text,
@@ -108,6 +109,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
         confidence: answer.confidence,
         tookMs: answer.tookMs,
         model: answer.model,
+        modelKey: modelKey || answer.model || null,
         provider: answer.provider,
         tokens: {
           prompt: answer.promptTokens,
@@ -121,6 +123,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
         grounding: answer.grounding,
         explainability: answer.explainability,
         sourceCount: answer.sources.length,
+        policyDecision: policyDecision || null,
         orchestrator: orchestrator || null,
         providerMeta: providerMeta || null,
       },

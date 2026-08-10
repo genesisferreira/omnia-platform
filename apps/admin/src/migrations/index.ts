@@ -24,6 +24,7 @@ import * as migration_20260806_180000_ai_experience from './20260806_180000_ai_e
 import * as migration_20260807_120000_tutor_ia from './20260807_120000_tutor_ia';
 import * as migration_20260807_180000_enterprise_ai from './20260807_180000_enterprise_ai';
 import * as migration_20260807_220000_deepseek_agents from './20260807_220000_deepseek_agents';
+import * as migration_20260810_140000_enterprise_ai_epic11 from './20260810_140000_enterprise_ai_epic11';
 
 export const migrations = [
   {
@@ -155,5 +156,10 @@ export const migrations = [
     up: migration_20260807_220000_deepseek_agents.up,
     down: migration_20260807_220000_deepseek_agents.down,
     name: '20260807_220000_deepseek_agents',
+  },
+  {
+    up: migration_20260810_140000_enterprise_ai_epic11.up,
+    down: migration_20260810_140000_enterprise_ai_epic11.down,
+    name: '20260810_140000_enterprise_ai_epic11',
   },
 ];

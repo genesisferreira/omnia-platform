@@ -7,7 +7,7 @@ export const AiAssistants: CollectionConfig = {
   labels: { singular: 'Assistant', plural: 'Assistants' },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['key', 'name', 'category', 'status', 'version'],
+    defaultColumns: ['key', 'slug', 'name', 'category', 'status', 'version'],
     group: 'Enterprise AI',
     description: 'Assistant Registry — catálogo multiassistente.',
   },
@@ -18,8 +18,25 @@ export const AiAssistants: CollectionConfig = {
     update: kiPublisherAccess,
     delete: kiPublisherAccess,
   },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        if (data.key && !data.slug) data.slug = data.key;
+        if (data.slug && !data.key) data.key = data.slug;
+        return data;
+      },
+    ],
+  },
   fields: [
     { name: 'key', type: 'text', required: true, unique: true, index: true },
+    {
+      name: 'slug',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: { description: 'Espelha key; usado como assistantId estável.' },
+    },
     { name: 'name', type: 'text', required: true },
     { name: 'description', type: 'textarea' },
     {
@@ -40,6 +57,8 @@ export const AiAssistants: CollectionConfig = {
         { label: 'Engenharia', value: 'engineering' },
         { label: 'Suporte', value: 'support' },
         { label: 'Command', value: 'command' },
+        { label: 'Concierge', value: 'concierge' },
+        { label: 'Evaluator', value: 'evaluator' },
         { label: 'Geral', value: 'general' },
         { label: 'Refrigeração', value: 'refrigeration' },
         { label: 'Tecnologia', value: 'technology' },
@@ -64,7 +83,31 @@ export const AiAssistants: CollectionConfig = {
       ],
     },
     { name: 'icon', type: 'text' },
+    { name: 'avatar', type: 'text', label: 'Avatar (URL ou key)' },
+    { name: 'color', type: 'text', label: 'Cor (hex)' },
+    {
+      name: 'visibility',
+      type: 'select',
+      defaultValue: 'public',
+      options: [
+        { label: 'Public', value: 'public' },
+        { label: 'Internal', value: 'internal' },
+        { label: 'Restricted', value: 'restricted' },
+      ],
+    },
     { name: 'language', type: 'text', defaultValue: 'pt-BR' },
+    {
+      name: 'promptVersion',
+      type: 'text',
+      label: 'Prompt version pin',
+      admin: { description: 'Ex.: 1.0 — referência de governança.' },
+    },
+    {
+      name: 'modelProfile',
+      type: 'text',
+      label: 'Model profile',
+      admin: { description: 'Ex.: grounded-default / deepseek-chat' },
+    },
     {
       name: 'allowedModels',
       type: 'relationship',

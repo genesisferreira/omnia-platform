@@ -1,54 +1,122 @@
 # EPIC 10 — Delivery Report
 
 **Branch:** `feature/neurofrigo-knowledge-hub`  
-**Tip código:** `47aa36c`  
-**Escopo:** primeira carga oficial do Knowledge Hub (DOCX/PDF/TXT/MD/PPTX + RAR pendente)
+**Tip homologado:** `930a52a`  
+**Escopo:** primeira carga oficial do Knowledge Hub (DOCX/PDF/TXT/MD + RAR pendente)
 
-## Veredito: **NO-GO** — homologação staging incompleta (VPS inacessível no momento da revalidação)
+## Veredito: **GO**
 
-### O que já está no código (commitado)
+Staging revalidado com `KNOWLEDGE_HUB_LOAD_OK`, `E10_HOMOLOG_OK` e `E10_REVALIDATE_OK`.
 
-- Extractors DOCX (mammoth/JSZip) e PPTX (JSZip)
-- Classificador oficial (empresa / categoria / subcategoria / agentes)
-- Seed `seed:knowledge-hub-load` + bootstrap `knowledge-hub-load`
-- Assets oficiais em `apps/admin/src/seed/assets/knowledge-hub-official/`
-- Publicação via workflow `draft → in_review → approved → published` (bypass KI/official-load)
-- Worker Retrieval propaga ACL do Hub; filtro `agent:*` no ACL de busca
-- RAR registrado como pendente (job extract queued)
+## Backup
 
-### Último estado conhecido no staging (antes da queda de SSH)
+| Campo | Valor |
+|-------|-------|
+| Path | `/opt/omnia/backups/staging/knowledge-hub-e10-20260810-135030` |
+| Dump | `omnia_staging.dump` |
+| SHA256 (dump) | `f768056124eb36bf2cb167b521f95000f236cde2d579890c1e35a063497bbd2c` |
+| Stamp | `20260810-135030` |
 
-1. Build `admin-migrate` OK em `c8189f1`
-2. Seed falhou com `Invalid knowledge workflow transition: draft → published` (corrigido em `47aa36c`)
-3. PPTX sintético: soft-fail (`E10_PPTX_FIXTURE_SKIP`); DOCXs/MD/TXT/PDF seguem
-4. Revalidação com `47aa36c` **não concluída**: `plink` → Connection timed out para `191.101.234.156`
+## Seed / carga
 
-### Para virar GO
+- Bootstrap: `omnia-admin-bootstrap.sh knowledge-hub-load`
+- Script: `/tmp/_e10_revalidate.sh`
+- `KNOWLEDGE_HUB_LOAD_OK`
+- PPTX fixture: soft-fail permitido (quando aplicável); PDF/DOCX/MD/TXT ok
 
-1. Restaurar acesso SSH à VPS staging  
-2. `bash /tmp/_e10_seed_retry.sh` (ou redeploy `_e10_knowledge_hub_load.sh`) em `47aa36c+`  
-3. Confirmar `KNOWLEDGE_HUB_LOAD_OK` + `E10_SEED_RETRY_OK`  
-4. Preencher métricas abaixo com o JSON do seed  
+## Workflow
 
-### Métricas (aguardar seed OK)
+Documentos oficiais publicados via:
 
-| Item | Valor |
-|------|-------|
-| Documentos importados | _pendente_ |
-| Documentos pendentes (RAR) | _pendente_ |
-| Categorias criadas | _pendente_ |
-| Empresas criadas/vinculadas | _pendente_ |
-| Agentes vinculados | _pendente_ |
-| Chunks | _pendente_ |
-| Embeddings ready | _pendente_ |
-| Retrieval smoke | _pendente_ |
+`draft → in_review → approved → published`
 
-## Commits
+Sem `draft → published` direto. Bypass apenas no contexto KI/official-load para papéis de publisher.
 
-- `d1995df` feat EPIC 10 carga oficial
-- `e180e0b` / `4048d78` / `2e46d53` / `c8189f1` fixes extract/PPTX/lockfile
-- `47aa36c` workflow publish transitions
+## Documentos
+
+### Importados / publicados (AI)
+
+| Título | Status | allowAiUse |
+|--------|--------|------------|
+| Neuro Frigo — Controle de IA para Refrigeração (CO₂ Transcrítico) | published | true |
+| Omnia Platform — Plano de Implantação Fase 1 | published | true |
+| checklist-epic10 | published | true |
+
+### Pendentes
+
+| Arquivo | Status | Job |
+|---------|--------|-----|
+| `nova-pasta-1.rar` | draft / unpublished / allowAiUse=false | extract **queued** (não bloqueia) |
+
+## Categorias criadas (run)
+
+- CO₂
+- Controle com IA
+- Institucional
+- Plano de Implantação
+
+## Empresas
+
+Vinculadas (já existentes): `neurofrigo`, `omnia-frigo-holding`  
+`companiesCreated`: []
+
+## Agentes vinculados
+
+`refrigeration`, `neurofrigo-technology`, `electrical-controls`, `tutor`, `projects-lab`, `content-production`, `evaluator`, `radar`, `concierge`, `commercial`, `support`, `command`
+
+## Métricas
+
+| Métrica | Valor |
+|---------|-------|
+| Chunks | **190** |
+| Embeddings ready | **190** |
+| Vetores | **190** |
+| Queue completed | **205** |
+| Queue pending | **0** |
+| Queue failed | **0** |
+| Extract jobs queued (RAR) | **1** |
+| Chunks nesta carga (run) | **173** (CO₂ 166 + plano 7) |
+
+## Retrieval real
+
+| Query | Agente | Hits | Doc origem |
+|-------|--------|------|------------|
+| IA no controle de refrigeração com CO2 | refrigeration | 5 | knowledgeDocumentId **20** |
+| Papel do controle no CO2 transcrítico | neurofrigo-technology | 5 | **20** |
+| Etapas implantação Omnia | commercial | 2 | **22** |
+
+ACL: `co2WithCommercial=0` no seed (agente commercial sem allowlist no material técnico).
+
+## Smoke Runtime/Chat
+
+| Pergunta | Resultado |
+|----------|-----------|
+| CO₂/IA (auto/tutor + curso) | `not_found` / `OFF_TOPIC` — tutor limitado ao material do curso LMS |
+| Implantação Omnia | `ok`, provider `deepseek`, sources>0 |
+
+Retrieval oficial está GO; chat tutor pode não enxergar Hub docs sem `courseId` (limitação de escopo do canal, não da carga).
+
+## Health / isolamento
+
+- Admin DEV: healthy  
+- Web DEV: healthy (HTTP 200)  
+- Landing: `omnia-landing-lancamento:1.0.1` intacta  
+- Admin PROD / Web PROD: intactos (não recriados)  
+
+## Bugs / fixes nesta revalidação
+
+| Commit | Fix |
+|--------|-----|
+| `47aa36c` | workflow publish transitions |
+| `a4e051a`…`f5335e5` | homolog + tipagem |
+| `2e9a5ba`…`930a52a` | preview-only extract text (DOCX grande) + retry incomplete imports |
+
+## Pendências não bloqueantes
+
+1. Extrator RAR (`nova-pasta-1.rar` queued)  
+2. Chat tutor/course-scoped vs docs Hub sem matrícula/curso  
+3. Duplicata leve de título CO₂ (ids 19/20) de tentativas anteriores  
 
 ## PARAR
 
-Não iniciar EPIC 11. Aguardando VPS + re-seed para promover a GO.
+EPIC 10 encerrada em **GO**. Não iniciar próxima epic sem solicitação.
