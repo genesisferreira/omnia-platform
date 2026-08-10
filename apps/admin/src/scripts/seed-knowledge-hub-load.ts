@@ -330,22 +330,38 @@ async function main() {
       continue;
     }
 
-    // Idempotência por checksum em learning-resources
+    // Idempotência por checksum — só pula se pipeline já completou.
     const existingRes = await payload.find({
       collection: 'learning-resources',
       where: { fileHash: { equals: fileHash } },
       limit: 1,
       overrideAccess: true,
     });
-    if (existingRes.docs[0]) {
-      const doc = existingRes.docs[0] as { id: string | number; title?: string };
+    const existingDoc = existingRes.docs[0] as
+      | { id: string | number; title?: string; processingStatus?: string }
+      | undefined;
+    if (existingDoc?.processingStatus === 'completed') {
       imported.push({
         filename,
         status: 'already_imported',
-        learningResourceId: doc.id,
-        title: doc.title,
+        learningResourceId: existingDoc.id,
+        title: existingDoc.title,
       });
       continue;
+    }
+    // Se existe mas falhou/incompleto, remove o hash para recriar (evita conflito unique).
+    if (existingDoc) {
+      await payload.update({
+        collection: 'learning-resources',
+        id: existingDoc.id,
+        data: {
+          fileHash: `${fileHash}-retry-${Date.now()}`,
+          processingStatus: 'failed',
+          lastError: 'superseded_by_epic10_reload',
+        },
+        overrideAccess: true,
+        context: { kiPipelineActive: true },
+      });
     }
 
     let preExtracted: { text: string; meta: Record<string, unknown> } | undefined;
