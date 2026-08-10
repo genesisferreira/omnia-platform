@@ -28,6 +28,12 @@ Portal (Comercial IA)
 6. Global `commercial-ai-dashboard`
 7. Seed/homolog `commercial-ia` / `commercial-ia-epic12`
 
+## Homologação
+
+Tip: `cd8e9a9` · `COMMERCIAL_IA_SEED_OK` · `E12_HOMOLOG_OK` · `E12_DEPLOY_OK` · **GO**
+
+Ver relatório: [EPIC_12_DELIVERY_REPORT.md](./EPIC_12_DELIVERY_REPORT.md)
+
 ## Fora de escopo
 
 CRM · pipeline · orçamentos · ERP · WhatsApp · e-mail · PDF · contratos

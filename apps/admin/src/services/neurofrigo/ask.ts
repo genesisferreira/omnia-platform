@@ -32,6 +32,8 @@ export type AskResult = {
   modelKey?: string | null;
   policyDecision?: import('@omnia/enterprise-ai').PolicyDecision | null;
   proposalMarkdown?: string | null;
+  troubleshootingMarkdown?: string | null;
+  comparisonMarkdown?: string | null;
   recommendations?: unknown;
   orchestrator?: {
     intent: string;
@@ -153,6 +155,8 @@ export async function runNeurofrigoAsk(
     orchestrate?: boolean;
     /** Evita loop CommercialService → ask → CommercialService */
     skipCommercialEnrichment?: boolean;
+    /** Evita loop EngineeringService → ask → EngineeringService */
+    skipEngineeringEnrichment?: boolean;
   },
 ): Promise<AskResult> {
   let existing: SessionDoc | null = null;
@@ -289,7 +293,9 @@ export async function runNeurofrigoAsk(
   const assistantKey =
     preferred === 'commercial'
       ? 'commercial'
-      : plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
+      : preferred === 'engineering'
+        ? 'engineering'
+        : plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
 
   if (assistantKey === 'commercial' && !request.skipCommercialEnrichment) {
     const { runCommercialAsk } = await import('../commercial/ask');
@@ -311,6 +317,30 @@ export async function runNeurofrigoAsk(
       requestProposal: /\b(proposta|gerar\s+proposta|montar\s+oferta)\b/i.test(
         request.question,
       ),
+    });
+  }
+
+  if (assistantKey === 'engineering' && !request.skipEngineeringEnrichment) {
+    const { runEngineeringAsk } = await import('../engineering/ask');
+    return runEngineeringAsk(payload, {
+      question: request.question,
+      sessionId: request.sessionId,
+      userId: request.identity.userId,
+      role: request.identity.role,
+      tenantId: request.identity.tenantId,
+      language: request.identity.language,
+      companyIds: request.identity.companyIds,
+      courseId: request.course.courseId,
+      courseTitle: request.course.courseTitle,
+      moduleId: request.course.moduleId,
+      moduleTitle: request.course.moduleTitle,
+      lessonId: request.course.lessonId,
+      lessonTitle: request.course.lessonTitle,
+      ownerCompanyId: request.course.ownerCompanyId,
+      requestTroubleshooting:
+        /\b(troubleshoot|diagn[oó]stic|falha|alarme|defeito)\b/i.test(request.question),
+      requestComparison:
+        /\b(compar(e|ar|a[cç][aã]o)|versus|\bv[sx]\.?\b)\b/i.test(request.question),
     });
   }
 

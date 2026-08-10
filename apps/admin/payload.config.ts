@@ -49,6 +49,7 @@ import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
 import { AiSessions, AiFeedback, StudentProfiles, LearningProfiles, TutorStudyPlans } from './src/collections/neurofrigo';
 import { AiModels, AiAssistants, AiPrompts, AiPolicies } from './src/collections/enterprise';
 import { CommercialProfiles } from './src/collections/commercial';
+import { EngineeringProfiles } from './src/collections/engineering';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -90,6 +91,7 @@ import { NeurofrigoAiDashboard } from './src/globals/NeurofrigoAiDashboard';
 import { NeurofrigoTutorDashboard } from './src/globals/NeurofrigoTutorDashboard';
 import { EnterpriseAiDashboard } from './src/globals/EnterpriseAiDashboard';
 import { CommercialAiDashboard } from './src/globals/CommercialAiDashboard';
+import { EngineeringAiDashboard } from './src/globals/EngineeringAiDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
@@ -165,6 +167,7 @@ export default buildConfig({
     AiPrompts,
     AiPolicies,
     CommercialProfiles,
+    EngineeringProfiles,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -185,6 +188,7 @@ export default buildConfig({
     NeurofrigoTutorDashboard,
     EnterpriseAiDashboard,
     CommercialAiDashboard,
+    EngineeringAiDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,

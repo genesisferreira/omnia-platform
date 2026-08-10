@@ -176,6 +176,9 @@ importers:
       '@omnia/neurofrigo-commercial':
         specifier: workspace:*
         version: link:../../packages/neurofrigo-commercial
+      '@omnia/neurofrigo-engineering':
+        specifier: workspace:*
+        version: link:../../packages/neurofrigo-engineering
       '@omnia/neurofrigo-knowledge':
         specifier: workspace:*
         version: link:../../packages/neurofrigo-knowledge
@@ -794,6 +797,28 @@ importers:
         version: 5.9.3
 
   packages/neurofrigo-commercial:
+    dependencies:
+      '@omnia/neurofrigo-runtime':
+        specifier: workspace:*
+        version: link:../neurofrigo-runtime
+    devDependencies:
+      '@omnia/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.0
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/neurofrigo-engineering:
     dependencies:
       '@omnia/neurofrigo-runtime':
         specifier: workspace:*

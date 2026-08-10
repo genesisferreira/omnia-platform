@@ -76,10 +76,16 @@ type ChatData = {
   explainability?: Explainability | null;
   sourceCount?: number;
   proposalMarkdown?: string | null;
+  troubleshootingMarkdown?: string | null;
+  comparisonMarkdown?: string | null;
   recommendations?: {
     products?: Array<{ title: string; reason?: string }>;
     services?: Array<{ title: string; reason?: string }>;
     courses?: Array<{ title: string; reason?: string }>;
+    trainings?: Array<{ title: string; reason?: string }>;
+    documents?: Array<{ title: string; reason?: string }>;
+    procedures?: Array<{ title: string; reason?: string }>;
+    norms?: Array<{ title: string; reason?: string }>;
   } | null;
 };
 
@@ -294,10 +300,34 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                       </div>
                     </div>
                   ) : null}
+                  {turn.answer.troubleshootingMarkdown ? (
+                    <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Troubleshooting (Markdown)
+                      </p>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {turn.answer.troubleshootingMarkdown}
+                      </div>
+                    </div>
+                  ) : null}
+                  {turn.answer.comparisonMarkdown ? (
+                    <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Comparação técnica (Markdown)
+                      </p>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {turn.answer.comparisonMarkdown}
+                      </div>
+                    </div>
+                  ) : null}
                   {turn.answer.recommendations &&
                   ((turn.answer.recommendations.products?.length || 0) > 0 ||
                     (turn.answer.recommendations.services?.length || 0) > 0 ||
-                    (turn.answer.recommendations.courses?.length || 0) > 0) ? (
+                    (turn.answer.recommendations.courses?.length || 0) > 0 ||
+                    (turn.answer.recommendations.trainings?.length || 0) > 0 ||
+                    (turn.answer.recommendations.documents?.length || 0) > 0 ||
+                    (turn.answer.recommendations.procedures?.length || 0) > 0 ||
+                    (turn.answer.recommendations.norms?.length || 0) > 0) ? (
                     <div className="mt-2 text-xs text-muted-foreground">
                       <p className="font-medium text-foreground">Recomendações (fontes)</p>
                       <ul className="mt-1 list-disc space-y-0.5 pl-4">
@@ -309,6 +339,18 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                         ))}
                         {(turn.answer.recommendations.courses || []).map((p) => (
                           <li key={`c-${p.title}`}>Curso: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.trainings || []).map((p) => (
+                          <li key={`t-${p.title}`}>Treinamento: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.documents || []).map((p) => (
+                          <li key={`d-${p.title}`}>Documento: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.procedures || []).map((p) => (
+                          <li key={`pr-${p.title}`}>Procedimento: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.norms || []).map((p) => (
+                          <li key={`n-${p.title}`}>Norma: {p.title}</li>
                         ))}
                       </ul>
                     </div>

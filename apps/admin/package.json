@@ -63,6 +63,9 @@
     "seed:commercial-ia": "tsx src/scripts/seed-commercial-ia.ts",
     "homolog:e12-commercial-ia": "tsx src/scripts/homolog-e12-commercial-ia.ts",
     "test:commercial-ia": "tsx --test ../../packages/neurofrigo-commercial/src/**/test-*.ts && tsx --test src/scripts/test-commercial-ia.ts",
+    "seed:engineering-ia": "tsx src/scripts/seed-engineering-ia.ts",
+    "homolog:e13-engineering-ia": "tsx src/scripts/homolog-e13-engineering-ia.ts",
+    "test:engineering-ia": "tsx --test ../../packages/neurofrigo-engineering/src/**/test-*.ts && tsx --test src/scripts/test-engineering-ia.ts",
     "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
     "test:deepseek-agents": "tsx --test ../../packages/neurofrigo-orchestrator/src/**/test-*.ts && tsx --test src/scripts/test-deepseek-agents.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
@@ -82,6 +85,7 @@
     "@omnia/neurofrigo-runtime": "workspace:*",
     "@omnia/neurofrigo-tutor": "workspace:*",
     "@omnia/neurofrigo-commercial": "workspace:*",
+    "@omnia/neurofrigo-engineering": "workspace:*",
     "@omnia/enterprise-ai": "workspace:*",
     "@omnia/neurofrigo-orchestrator": "workspace:*",
     "@omnia/shared": "workspace:*",
