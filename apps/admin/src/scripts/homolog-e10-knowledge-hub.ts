@@ -134,33 +134,28 @@ async function main() {
       overrideAccess: true,
     })
   ).docs[0];
+  if (!course) throw new Error('E10_HOMOLOG_REQUIRES_COURSE');
 
-  const askCo2 = await runNeurofrigoAsk(
-    payload,
-    course
-      ? {
-          question:
-            'Com base no material Neuro Frigo, como a IA se relaciona ao controle de sistemas transcríticos de CO2?',
-          assistantId: 'auto',
-          identity: { userId: 'e10-homolog', role: 'student', language: 'pt-BR' },
-          course: {
-            courseId: String(course.id),
-            courseTitle: String((course as { title?: string }).title || ''),
-          },
-        }
-      : {
-          question:
-            'Com base no material Neuro Frigo, como a IA se relaciona ao controle de sistemas transcríticos de CO2?',
-          assistantId: 'auto',
-          identity: { userId: 'e10-homolog', role: 'student', language: 'pt-BR' },
-        },
-  );
+  const askCo2 = await runNeurofrigoAsk(payload, {
+    question:
+      'Com base no material Neuro Frigo, como a IA se relaciona ao controle de sistemas transcríticos de CO2?',
+    assistantId: 'auto',
+    identity: { userId: 'e10-homolog', role: 'student', language: 'pt-BR' },
+    course: {
+      courseId: String(course.id),
+      courseTitle: String((course as { title?: string }).title || ''),
+    },
+  });
 
   const askOmnia = await runNeurofrigoAsk(payload, {
     question:
       'Quais etapas e módulos principais aparecem no plano de implantação da Omnia Platform Fase 1?',
     assistantId: 'auto',
     identity: { userId: 'e10-homolog', role: 'admin', language: 'pt-BR' },
+    course: {
+      courseId: String(course.id),
+      courseTitle: String((course as { title?: string }).title || ''),
+    },
   });
 
   const report = {
