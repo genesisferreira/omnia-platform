@@ -362,8 +362,16 @@ export async function processLearningResource(args: {
       id: learningResourceId,
       data: {
         processingStatus: 'normalizing',
-        extractedText: sanitizeStoredText(extracted.text),
-        extractMeta: extracted.meta,
+        // Não persistir o corpus completo no textarea do Admin (limites/validação Payload).
+        extractedText: sanitizeStoredText(
+          `extract_ok chars=${extracted.text.length} checksum=${fileHash}\n\n${extracted.text.slice(0, 2000)}`,
+          8_000,
+        ),
+        extractMeta: {
+          ...extracted.meta,
+          storedPreviewChars: Math.min(2000, extracted.text.length),
+          fullTextChars: extracted.text.length,
+        },
         fileHash,
         language: (resource.language as string) || extracted.meta.language || 'pt-BR',
       },
@@ -387,7 +395,10 @@ export async function processLearningResource(args: {
       id: learningResourceId,
       data: {
         processingStatus: 'chunking',
-        normalizedText: sanitizeStoredText(normalized),
+        normalizedText: sanitizeStoredText(
+          `normalize_ok chars=${normalized.length}\n\n${normalized.slice(0, 2000)}`,
+          8_000,
+        ),
       },
       overrideAccess: true,
       req,
