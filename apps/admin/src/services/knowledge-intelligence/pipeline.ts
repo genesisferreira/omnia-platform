@@ -27,6 +27,13 @@ function sanitizeError(err: unknown): string {
   return msg.replace(/[A-Za-z0-9+/]{20,}={0,2}/g, '[redacted]').slice(0, 800);
 }
 
+/** Texto completo vai para chunks; Payload textarea pode rejeitar null bytes / payloads enormes. */
+function sanitizeStoredText(text: string, maxChars = 60_000): string {
+  const cleaned = text.replace(/\u0000/g, '');
+  if (cleaned.length <= maxChars) return cleaned;
+  return `${cleaned.slice(0, maxChars)}\n\n[truncated_for_admin_storage]`;
+}
+
 function sourceTypeFor(resourceType: string): string {
   if (resourceType === 'pdf') return 'pdf';
   if (resourceType === 'markdown') return 'markdown';
@@ -355,7 +362,7 @@ export async function processLearningResource(args: {
       id: learningResourceId,
       data: {
         processingStatus: 'normalizing',
-        extractedText: extracted.text,
+        extractedText: sanitizeStoredText(extracted.text),
         extractMeta: extracted.meta,
         fileHash,
         language: (resource.language as string) || extracted.meta.language || 'pt-BR',
@@ -380,7 +387,7 @@ export async function processLearningResource(args: {
       id: learningResourceId,
       data: {
         processingStatus: 'chunking',
-        normalizedText: normalized,
+        normalizedText: sanitizeStoredText(normalized),
       },
       overrideAccess: true,
       req,
