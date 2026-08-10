@@ -6,6 +6,10 @@ cd /opt/omnia/platform
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="/opt/omnia/backups/staging/enterprise-ai-e11-${STAMP}"
 
+env_get() {
+  grep -E "^${1}=" .env.staging | head -n1 | cut -d= -f2- | sed 's/^"//;s/"$//'
+}
+
 echo "=== PRE ==="
 hostname
 pwd
@@ -23,18 +27,42 @@ fi
 
 echo "=== BACKUP ==="
 mkdir -p "$BACKUP_DIR"
-PG="$(docker ps --filter name=omnia-postgres --format '{{.Names}}' | head -n1)"
-DB_NAME="${POSTGRES_DB:-omnia_staging}"
-docker exec "$PG" pg_dump -U postgres -Fc "$DB_NAME" > "$BACKUP_DIR/omnia_staging.dump"
-sha256sum "$BACKUP_DIR/omnia_staging.dump" > "$BACKUP_DIR/SHA256.txt"
+DATABASE_URL="$(env_get DATABASE_URL)"
+python3 - <<'PY' "$DATABASE_URL" > /tmp/_e11_db_meta.env
+import sys, urllib.parse
+u = urllib.parse.urlparse(sys.argv[1])
+db = (u.path or "").lstrip("/").split("?")[0]
+if db != "omnia_staging":
+    raise SystemExit(f"ABORT unexpected db={db!r}")
+print(f"DB_NAME={db}")
+print(f"DB_USER={u.username or 'postgres'}")
+print(f"DB_PASS={u.password or ''}")
+PY
+# shellcheck disable=SC1091
+source /tmp/_e11_db_meta.env
+rm -f /tmp/_e11_db_meta.env
+
+PG_CONT="$(docker ps --format '{{.Names}}' | grep -E 'postgres|pg' | grep -vi prod | head -n1 || true)"
+if [ -z "$PG_CONT" ]; then echo "ABORT no staging postgres"; exit 21; fi
+if [[ "$PG_CONT" == *prod* ]]; then echo "ABORT refusing prod postgres"; exit 21; fi
+echo "PG_CONT=$PG_CONT DB_NAME=$DB_NAME DB_USER=$DB_USER"
+
+export PGPASSWORD="$DB_PASS"
+docker exec -e PGPASSWORD="$PGPASSWORD" "$PG_CONT" \
+  pg_dump -U "$DB_USER" -d "$DB_NAME" -Fc -f "/tmp/omnia_staging_e11_${STAMP}.dump"
+docker cp "$PG_CONT:/tmp/omnia_staging_e11_${STAMP}.dump" "$BACKUP_DIR/omnia_staging.dump"
+docker exec "$PG_CONT" rm -f "/tmp/omnia_staging_e11_${STAMP}.dump"
+unset PGPASSWORD
+cp -a .env.staging "$BACKUP_DIR/env.staging.copy" 2>/dev/null || true
 {
   echo "stamp=$STAMP"
   echo "prev_head=$PREV"
   echo "branch=$(git branch --show-current)"
-  echo "pg_cont=$PG"
+  echo "pg_cont=$PG_CONT"
   echo "db=$DB_NAME"
-  cat "$BACKUP_DIR/SHA256.txt"
-} > "$BACKUP_DIR/MANIFEST.txt"
+  sha256sum "$BACKUP_DIR/omnia_staging.dump"
+  ls -lah "$BACKUP_DIR"
+} | tee "$BACKUP_DIR/MANIFEST.txt"
 echo "BACKUP_DIR=$BACKUP_DIR"
 
 echo "=== PULL ==="
