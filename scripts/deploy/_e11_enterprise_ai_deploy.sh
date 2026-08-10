@@ -6,8 +6,17 @@ cd /opt/omnia/platform
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="/opt/omnia/backups/staging/enterprise-ai-e11-${STAMP}"
 
+# Resolve staging postgres from DATABASE_URL without sourcing whole env (special chars).
 env_get() {
-  grep -E "^${1}=" .env.staging | head -n1 | cut -d= -f2- | sed 's/^"//;s/"$//'
+  local key="$1"
+  local line
+  line="$(grep -E "^${key}=" .env.staging | tail -n1 || true)"
+  [ -z "$line" ] && { echo ""; return 0; }
+  local val="${line#*=}"
+  val="${val%$'\r'}"
+  if [[ "$val" == \"*\" ]]; then val="${val:1:-1}"; fi
+  if [[ "$val" == \'*\' ]]; then val="${val:1:-1}"; fi
+  printf '%s' "$val"
 }
 
 echo "=== PRE ==="
