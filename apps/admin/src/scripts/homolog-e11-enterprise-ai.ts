@@ -48,6 +48,7 @@ async function main() {
     const ask = await runNeurofrigoAsk(payload, {
       question: `Homolog EPIC11 ${row.id}: o que é o ciclo de compressão?`,
       assistantId: row.assistantId,
+      orchestrate: false,
       identity: {
         userId: `e11-${row.role}`,
         role: row.role,
