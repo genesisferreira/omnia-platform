@@ -76,9 +76,13 @@ export function evaluatePolicies(input: {
     };
   }
 
-  const assistantKeys = new Set(matched.flatMap((p) => p.assistantKeys));
+  // Prioridade efetiva: só a faixa de maior prioridade (não unir policies conflitantes).
+  const topPriority = matched[0]!.priority;
+  const effective = matched.filter((p) => p.priority === topPriority);
+
+  const assistantKeys = new Set(effective.flatMap((p) => p.assistantKeys));
   const allowedModelKeys = [
-    ...new Set(matched.flatMap((p) => p.allowedModelKeys)),
+    ...new Set(effective.flatMap((p) => p.allowedModelKeys)),
   ];
 
   const allowedAssistants = input.assistants.filter((a) => {
@@ -87,9 +91,9 @@ export function evaluatePolicies(input: {
     return assistantKeys.has(a.key) || assistantKeys.has(a.slug);
   });
 
-  const requireGrounding = matched.every((p) => p.requireGrounding !== false);
-  const requireExplainability = matched.every((p) => p.requireExplainability !== false);
-  const tokenLimits = matched
+  const requireGrounding = effective.every((p) => p.requireGrounding !== false);
+  const requireExplainability = effective.every((p) => p.requireExplainability !== false);
+  const tokenLimits = effective
     .map((p) => p.maxTokensPerDay)
     .filter((n): n is number => typeof n === 'number' && n > 0);
   const maxTokensPerDay = tokenLimits.length ? Math.min(...tokenLimits) : null;
@@ -97,7 +101,7 @@ export function evaluatePolicies(input: {
   return {
     allowedAssistants,
     allowedModelKeys,
-    matchedPolicyIds: matched.map((p) => p.id),
+    matchedPolicyIds: effective.map((p) => p.id),
     requireGrounding,
     requireExplainability,
     maxTokensPerDay,

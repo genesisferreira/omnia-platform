@@ -271,12 +271,19 @@ async function main() {
     }
   }
 
-  const allAssistantIds = [...assistantIds.values()];
   const studentAssistants = [
     assistantIds.get('tutor')!,
     assistantIds.get('support')!,
     assistantIds.get('concierge')!,
   ];
+
+  const allActiveAssistants = await payload.find({
+    collection: 'ai-assistants',
+    where: { status: { equals: 'active' } },
+    limit: 100,
+    overrideAccess: true,
+  });
+  const allAssistantIds = allActiveAssistants.docs.map((d: { id: string | number }) => d.id);
 
   await upsertByKey('ai-policies', 'name', 'Student default assistants', {
     name: 'Student default assistants',
@@ -285,7 +292,7 @@ async function main() {
     allowedModels: [modelId],
     requireGrounding: true,
     requireExplainability: true,
-    priority: 20,
+    priority: 100,
     enabled: true,
   });
 
@@ -296,9 +303,33 @@ async function main() {
     allowedModels: [modelId],
     requireGrounding: true,
     requireExplainability: true,
-    priority: 50,
+    priority: 90,
     enabled: true,
   });
+
+  // Desativa policies legadas de student que liberavam catálogo amplo (DeepSeek seed).
+  const legacyStudent = await payload.find({
+    collection: 'ai-policies',
+    where: {
+      and: [
+        { enabled: { equals: true } },
+        { name: { not_equals: 'Student default assistants' } },
+      ],
+    },
+    limit: 100,
+    overrideAccess: true,
+  });
+  for (const pol of legacyStudent.docs) {
+    const roles = Array.isArray(pol.roles) ? pol.roles.map(String) : [];
+    if (!roles.map((r: string) => r.toLowerCase()).includes('student')) continue;
+    if (Number(pol.priority || 0) >= 100) continue;
+    await payload.update({
+      collection: 'ai-policies',
+      id: pol.id,
+      data: { enabled: false },
+      overrideAccess: true,
+    });
+  }
 
   const courses = await payload.find({
     collection: 'courses',
@@ -412,8 +443,20 @@ async function main() {
   if (allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'commercial')) {
     throw new Error('UNEXPECTED_STUDENT_COMMERCIAL');
   }
+  const studentKeys = new Set(
+    allowedStudent.allowedAssistants.map((a: { key: string }) => a.key),
+  );
+  if (![...studentKeys].every((k) => ['tutor', 'support', 'concierge'].includes(k))) {
+    throw new Error(`UNEXPECTED_STUDENT_SET:${[...studentKeys].join(',')}`);
+  }
+  if (!allowedAdmin.allowedAssistants.some((a: { key: string }) => a.key === 'evaluator')) {
+    throw new Error('EXPECTED_ADMIN_EVALUATOR');
+  }
+  if (!allowedAdmin.allowedAssistants.some((a: { key: string }) => a.key === 'command')) {
+    throw new Error('EXPECTED_ADMIN_COMMAND');
+  }
   if (allowedAdmin.allowedAssistants.length < 7) {
-    throw new Error('EXPECTED_ADMIN_ALL_ASSISTANTS');
+    throw new Error('EXPECTED_ADMIN_MIN_7');
   }
   if (tutorAsk.assistantKey !== 'tutor') throw new Error('EXPECTED_TUTOR_KEY');
   if (engineeringAsk.assistantKey !== 'engineering') {

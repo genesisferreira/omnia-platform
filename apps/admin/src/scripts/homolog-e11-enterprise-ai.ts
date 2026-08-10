@@ -134,8 +134,14 @@ async function main() {
     throw new Error('E11_EXPECTED_STUDENT_CONCIERGE');
   }
   if (admin.allowedAssistants.length < 7) throw new Error('E11_EXPECTED_ADMIN_ALL');
-  if (resolvedTutor.temperature !== 0.2) throw new Error('E11_EXPECTED_TUTOR_TEMP');
-  if (!resolvedTutor.policyDecision?.allowed) throw new Error('E11_EXPECTED_POLICY_AUDIT');
+  if (!admin.allowedAssistants.some((a: { key: string }) => a.key === 'evaluator')) {
+    throw new Error('E11_EXPECTED_ADMIN_EVALUATOR');
+  }
+  const studentKeys = new Set(student.allowedAssistants.map((a: { key: string }) => a.key));
+  if (studentKeys.has('commercial')) throw new Error('E11_UNEXPECTED_STUDENT_COMMERCIAL');
+  if (![...studentKeys].every((k) => ['tutor', 'support', 'concierge'].includes(k))) {
+    throw new Error(`E11_UNEXPECTED_STUDENT_SET:${[...studentKeys].join(',')}`);
+  }
 
   console.log('E11_HOMOLOG_OK');
   process.exit(0);

@@ -248,4 +248,47 @@ describe('enterprise-ai', () => {
       }),
     );
   });
+
+  it('uses highest-priority policy only', () => {
+    const policies: AiPolicyRecord[] = [
+      {
+        id: 'low',
+        name: 'Broad student',
+        assistantKeys: ['tutor', 'commercial'],
+        companyIds: [],
+        roles: ['student'],
+        courseIds: [],
+        tenantIds: [],
+        allowedModelKeys: ['grounded-default'],
+        requireGrounding: true,
+        requireExplainability: true,
+        maxTokensPerDay: null,
+        priority: 10,
+        enabled: true,
+      },
+      {
+        id: 'high',
+        name: 'Strict student',
+        assistantKeys: ['tutor'],
+        companyIds: [],
+        roles: ['student'],
+        courseIds: [],
+        tenantIds: [],
+        allowedModelKeys: ['grounded-default'],
+        requireGrounding: true,
+        requireExplainability: true,
+        maxTokensPerDay: null,
+        priority: 100,
+        enabled: true,
+      },
+    ];
+    const student = evaluatePolicies({
+      policies,
+      assistants: [tutor, commercial],
+      subject: { role: 'student' },
+    });
+    assert.equal(student.allowedAssistants.length, 1);
+    assert.equal(student.allowedAssistants[0]!.key, 'tutor');
+    assert.deepEqual(student.matchedPolicyIds, ['high']);
+  });
 });
