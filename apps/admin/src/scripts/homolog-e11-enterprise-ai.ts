@@ -74,6 +74,7 @@ async function main() {
     await runNeurofrigoAsk(payload, {
       question: 'forbidden commercial',
       assistantId: 'commercial',
+      orchestrate: false,
       identity: { userId: 'e11-student', role: 'student', language: 'pt-BR' },
       course: courseCtx,
     });

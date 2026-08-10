@@ -387,6 +387,7 @@ async function main() {
     await runNeurofrigoAsk(payload, {
       question: 'teste política',
       assistantId: 'commercial',
+      orchestrate: false,
       identity: { userId: 'enterprise-student', role: 'student', language: 'pt-BR' },
       course: { courseId: String(course.id), courseTitle: String(course.title || '') },
     });
