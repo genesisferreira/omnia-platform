@@ -29,7 +29,7 @@ function sanitizeError(err: unknown): string {
 
 /** Texto completo vai para chunks; Payload textarea pode rejeitar null bytes / payloads enormes. */
 function sanitizeStoredText(text: string, maxChars = 60_000): string {
-  const cleaned = text.replace(/\u0000/g, '');
+  const cleaned = text.split('\0').join('');
   if (cleaned.length <= maxChars) return cleaned;
   return `${cleaned.slice(0, maxChars)}\n\n[truncated_for_admin_storage]`;
 }
