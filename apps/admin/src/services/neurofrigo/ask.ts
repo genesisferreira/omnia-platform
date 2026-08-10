@@ -31,6 +31,8 @@ export type AskResult = {
   specialistLabel?: string;
   modelKey?: string | null;
   policyDecision?: import('@omnia/enterprise-ai').PolicyDecision | null;
+  proposalMarkdown?: string | null;
+  recommendations?: unknown;
   orchestrator?: {
     intent: string;
     blocked: boolean;
@@ -149,6 +151,8 @@ export async function runNeurofrigoAsk(
     assistantId?: string | null;
     /** auto = orquestrador escolhe */
     orchestrate?: boolean;
+    /** Evita loop CommercialService → ask → CommercialService */
+    skipCommercialEnrichment?: boolean;
   },
 ): Promise<AskResult> {
   let existing: SessionDoc | null = null;
@@ -282,7 +286,33 @@ export async function runNeurofrigoAsk(
     };
   }
 
-  const assistantKey = plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
+  const assistantKey =
+    preferred === 'commercial'
+      ? 'commercial'
+      : plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
+
+  if (assistantKey === 'commercial' && !request.skipCommercialEnrichment) {
+    const { runCommercialAsk } = await import('../commercial/ask');
+    return runCommercialAsk(payload, {
+      question: request.question,
+      sessionId: request.sessionId,
+      userId: request.identity.userId,
+      role: request.identity.role,
+      tenantId: request.identity.tenantId,
+      language: request.identity.language,
+      companyIds: request.identity.companyIds,
+      courseId: request.course.courseId,
+      courseTitle: request.course.courseTitle,
+      moduleId: request.course.moduleId,
+      moduleTitle: request.course.moduleTitle,
+      lessonId: request.course.lessonId,
+      lessonTitle: request.course.lessonTitle,
+      ownerCompanyId: request.course.ownerCompanyId,
+      requestProposal: /\b(proposta|gerar\s+proposta|montar\s+oferta)\b/i.test(
+        request.question,
+      ),
+    });
+  }
 
   let resolved = null as Awaited<ReturnType<typeof resolveAssistantForAsk>> | null;
   try {

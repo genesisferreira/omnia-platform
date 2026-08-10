@@ -93,7 +93,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
       throw err;
     }
 
-    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta, modelKey, policyDecision } =
+    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta, modelKey, policyDecision, proposalMarkdown, recommendations } =
       result;
 
     return json({
@@ -124,6 +124,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
         explainability: answer.explainability,
         sourceCount: answer.sources.length,
         policyDecision: policyDecision || null,
+        proposalMarkdown: proposalMarkdown || null,
+        recommendations: recommendations || null,
         orchestrator: orchestrator || null,
         providerMeta: providerMeta || null,
       },

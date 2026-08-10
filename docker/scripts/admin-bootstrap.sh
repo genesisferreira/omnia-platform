@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | deepseek-agents
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | commercial-ia | commercial-ia-epic12 | deepseek-agents
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -79,6 +79,20 @@ run_enterprise_ai_epic11() {
   run_enterprise_ai
   pnpm --filter @omnia/admin homolog:e11-enterprise-ai
   echo "==> Homolog EPIC 11 concluído."
+}
+
+run_commercial_ia() {
+  echo "==> Seed Comercial IA (profile, prompts, proposal)..."
+  pnpm --filter @omnia/admin seed:commercial-ia
+  echo "==> Seed commercial-ia concluído."
+}
+
+run_commercial_ia_epic12() {
+  echo "==> EPIC 12 — migrate + commercial-ia + homolog..."
+  run_migrate
+  run_commercial_ia
+  pnpm --filter @omnia/admin homolog:e12-commercial-ia
+  echo "==> Homolog EPIC 12 concluído."
 }
 
 run_deepseek_agents() {
@@ -173,11 +187,17 @@ case "$MODE" in
   enterprise-ai-epic11)
     run_enterprise_ai_epic11
     ;;
+  commercial-ia)
+    run_commercial_ia
+    ;;
+  commercial-ia-epic12)
+    run_commercial_ia_epic12
+    ;;
   deepseek-agents)
     run_deepseek_agents
     ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|deepseek-agents]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|commercial-ia|commercial-ia-epic12|deepseek-agents]"
     exit 1
     ;;
 esac

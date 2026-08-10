@@ -75,6 +75,12 @@ type ChatData = {
   grounding?: { score: number } | null;
   explainability?: Explainability | null;
   sourceCount?: number;
+  proposalMarkdown?: string | null;
+  recommendations?: {
+    products?: Array<{ title: string; reason?: string }>;
+    services?: Array<{ title: string; reason?: string }>;
+    courses?: Array<{ title: string; reason?: string }>;
+  } | null;
 };
 
 type Turn = { question: string; answer: ChatData };
@@ -278,6 +284,35 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                       'Omnia AI'}
                   </p>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{turn.answer.text}</div>
+                  {turn.answer.proposalMarkdown ? (
+                    <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Proposta (Markdown)
+                      </p>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {turn.answer.proposalMarkdown}
+                      </div>
+                    </div>
+                  ) : null}
+                  {turn.answer.recommendations &&
+                  ((turn.answer.recommendations.products?.length || 0) > 0 ||
+                    (turn.answer.recommendations.services?.length || 0) > 0 ||
+                    (turn.answer.recommendations.courses?.length || 0) > 0) ? (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      <p className="font-medium text-foreground">Recomendações (fontes)</p>
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                        {(turn.answer.recommendations.products || []).map((p) => (
+                          <li key={`p-${p.title}`}>Produto: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.services || []).map((p) => (
+                          <li key={`s-${p.title}`}>Serviço: {p.title}</li>
+                        ))}
+                        {(turn.answer.recommendations.courses || []).map((p) => (
+                          <li key={`c-${p.title}`}>Curso: {p.title}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{turn.answer.tookMs} ms</span>
                     <span>·</span>

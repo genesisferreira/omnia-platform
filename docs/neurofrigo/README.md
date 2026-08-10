@@ -66,6 +66,8 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [EPIC_10_DELIVERY_REPORT.md](EPIC_10_DELIVERY_REPORT.md) | **Epic 10** — Delivery / GO |
 | [EPIC_11_ENTERPRISE_AI.md](EPIC_11_ENTERPRISE_AI.md) | **Epic 11** — Enterprise AI gap-close (sobre EPIC 08) |
 | [EPIC_11_DELIVERY_REPORT.md](EPIC_11_DELIVERY_REPORT.md) | **Epic 11** — Delivery / GO |
+| [EPIC_12_COMMERCIAL_IA.md](EPIC_12_COMMERCIAL_IA.md) | **Epic 12** — Comercial IA |
+| [EPIC_12_DELIVERY_REPORT.md](EPIC_12_DELIVERY_REPORT.md) | **Epic 12** — Delivery / GO |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |
