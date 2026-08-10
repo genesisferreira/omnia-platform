@@ -34,6 +34,12 @@ Portal (Engenharia IA)
 
 Somente `POST /api/ai/chat` com `assistantId: "engineering"`.
 
+## Homologação
+
+Tip: `0e338ad` · `ENGINEERING_IA_SEED_OK` · `E13_HOMOLOG_OK` · `E13_DEPLOY_OK` · **GO**
+
+Ver relatório: [EPIC_13_DELIVERY_REPORT.md](./EPIC_13_DELIVERY_REPORT.md)
+
 ## Fora de escopo
 
 CAD · BIM · simulações · dimensionamento · CLP · SCADA · ERP · WhatsApp · agentes
