@@ -142,6 +142,8 @@ async function main() {
   if (![...studentKeys].every((k) => ['tutor', 'support', 'concierge'].includes(k))) {
     throw new Error(`E11_UNEXPECTED_STUDENT_SET:${[...studentKeys].join(',')}`);
   }
+  if (resolvedTutor.temperature !== 0.2) throw new Error('E11_EXPECTED_TUTOR_TEMP');
+  if (!resolvedTutor.policyDecision?.allowed) throw new Error('E11_EXPECTED_POLICY_AUDIT');
 
   console.log('E11_HOMOLOG_OK');
   process.exit(0);
