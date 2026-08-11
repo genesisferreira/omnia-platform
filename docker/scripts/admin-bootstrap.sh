@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | commercial-ia | commercial-ia-epic12 | engineering-ia | engineering-ia-epic13 | student-intelligence | student-intelligence-epic14 | deepseek-agents
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | commercial-ia | commercial-ia-epic12 | engineering-ia | engineering-ia-epic13 | student-intelligence | student-intelligence-epic14 | adaptive-learning | adaptive-learning-epic15 | deepseek-agents
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -123,6 +123,20 @@ run_student_intelligence_epic14() {
   echo "==> Homolog EPIC 14 concluído."
 }
 
+run_adaptive_learning() {
+  echo "==> Seed Adaptive Learning Engine..."
+  pnpm --filter @omnia/admin seed:adaptive-learning
+  echo "==> Seed adaptive-learning concluído."
+}
+
+run_adaptive_learning_epic15() {
+  echo "==> EPIC 15 — migrate + adaptive-learning + homolog..."
+  run_migrate
+  run_adaptive_learning
+  pnpm --filter @omnia/admin homolog:e15-adaptive-learning
+  echo "==> Homolog EPIC 15 concluído."
+}
+
 run_deepseek_agents() {
   echo "==> Seed DeepSeek Live + Agent Library oficial..."
   pnpm --filter @omnia/admin seed:deepseek-agents
@@ -233,11 +247,17 @@ case "$MODE" in
   student-intelligence-epic14)
     run_student_intelligence_epic14
     ;;
+  adaptive-learning)
+    run_adaptive_learning
+    ;;
+  adaptive-learning-epic15)
+    run_adaptive_learning_epic15
+    ;;
   deepseek-agents)
     run_deepseek_agents
     ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|commercial-ia|commercial-ia-epic12|engineering-ia|engineering-ia-epic13|student-intelligence|student-intelligence-epic14|deepseek-agents]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|commercial-ia|commercial-ia-epic12|engineering-ia|engineering-ia-epic13|student-intelligence|student-intelligence-epic14|adaptive-learning|adaptive-learning-epic15|deepseek-agents]"
     exit 1
     ;;
 esac

@@ -28,6 +28,7 @@ import * as migration_20260810_140000_enterprise_ai_epic11 from './20260810_1400
 import * as migration_20260810_160000_commercial_ia from './20260810_160000_commercial_ia';
 import * as migration_20260810_180000_engineering_ia from './20260810_180000_engineering_ia';
 import * as migration_20260810_200000_student_intelligence from './20260810_200000_student_intelligence';
+import * as migration_20260811_120000_adaptive_learning from './20260811_120000_adaptive_learning';
 
 export const migrations = [
   {
@@ -179,5 +180,10 @@ export const migrations = [
     up: migration_20260810_200000_student_intelligence.up,
     down: migration_20260810_200000_student_intelligence.down,
     name: '20260810_200000_student_intelligence',
+  },
+  {
+    up: migration_20260811_120000_adaptive_learning.up,
+    down: migration_20260811_120000_adaptive_learning.down,
+    name: '20260811_120000_adaptive_learning',
   },
 ];

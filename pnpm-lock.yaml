@@ -146,6 +146,9 @@ importers:
       '@omnia/academic-provisioning':
         specifier: workspace:*
         version: link:../../packages/academic-provisioning
+      '@omnia/adaptive-learning':
+        specifier: workspace:*
+        version: link:../../packages/adaptive-learning
       '@omnia/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -370,6 +373,28 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 8.57.1
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/adaptive-learning:
+    dependencies:
+      '@omnia/student-intelligence':
+        specifier: workspace:*
+        version: link:../student-intelligence
+    devDependencies:
+      '@omnia/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.0
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3

@@ -3,6 +3,7 @@ import { TutorService } from '@omnia/neurofrigo-tutor';
 
 import { runNeurofrigoAsk } from '../neurofrigo/ask';
 import { getSipAssistantContext, recalculateSipProfile } from '../sip/profile';
+import { runAdaptiveDecide } from '../adaptive/decide';
 import { loadCourseCatalog } from './catalog';
 import {
   recordLearningUsage,
@@ -104,6 +105,7 @@ export async function runTutorAsk(
 ) {
   const userKey = body.userId || 'anonymous';
   let sipBlock = '';
+  let adaptiveBlock = '';
   if (userKey !== 'anonymous') {
     try {
       const ctx = await getSipAssistantContext(payload, {
@@ -114,6 +116,15 @@ export async function runTutorAsk(
       if (ctx?.summaryText) sipBlock = ctx.summaryText;
     } catch {
       /* SIP opcional no primeiro contato */
+    }
+    try {
+      const adaptive = await runAdaptiveDecide(payload, {
+        userKey,
+        courseId: String(body.courseId),
+      });
+      adaptiveBlock = adaptive.tutorHint;
+    } catch {
+      /* Adaptive opcional */
     }
   }
 
@@ -132,7 +143,7 @@ export async function runTutorAsk(
     moduleTitle: body.moduleTitle,
     lessonId: body.lessonId,
     lessonTitle: body.lessonTitle,
-    lessonObjectives: [baseObjectives, sipBlock].filter(Boolean).join('\n\n'),
+    lessonObjectives: [baseObjectives, sipBlock, adaptiveBlock].filter(Boolean).join('\n\n'),
     ownerCompanyId: body.ownerCompanyId,
     requestStudyPlan: body.requestStudyPlan,
     objective: body.objective,

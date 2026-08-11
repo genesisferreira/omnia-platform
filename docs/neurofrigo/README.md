@@ -72,6 +72,9 @@ n8n = executor de automações internas — **não** cérebro nem canal inicial 
 | [EPIC_13_DELIVERY_REPORT.md](EPIC_13_DELIVERY_REPORT.md) | **Epic 13** — Delivery / GO |
 | [EPIC_14_STUDENT_INTELLIGENCE.md](EPIC_14_STUDENT_INTELLIGENCE.md) | **Epic 14** — Student Intelligence Platform |
 | [EPIC_14_DELIVERY_REPORT.md](EPIC_14_DELIVERY_REPORT.md) | **Epic 14** — Delivery / GO |
+| [EPIC_15_AUDIT.md](EPIC_15_AUDIT.md) | **Epic 15** — Auditoria prévia |
+| [EPIC_15_ADAPTIVE_LEARNING.md](EPIC_15_ADAPTIVE_LEARNING.md) | **Epic 15** — Adaptive Learning Engine |
+| [EPIC_15_DELIVERY_REPORT.md](EPIC_15_DELIVERY_REPORT.md) | **Epic 15** — Delivery / GO |
 | [NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md](NEUROFRIGO_KNOWLEDGE_DATA_MODEL.md) | **ME01** — Modelo de dados Payload |
 | [NEUROFRIGO_KNOWLEDGE_WORKFLOW.md](NEUROFRIGO_KNOWLEDGE_WORKFLOW.md) | **ME01** — Workflow editorial |
 | [NEUROFRIGO_KNOWLEDGE_ACL.md](NEUROFRIGO_KNOWLEDGE_ACL.md) | **ME01** — ACL Admin + retrieval futuro |

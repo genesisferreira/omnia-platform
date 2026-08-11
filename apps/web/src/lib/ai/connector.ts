@@ -157,6 +157,25 @@ export async function fetchTutorProfile(courseId: string | number): Promise<AiCh
   return { ok: true, status: response.status, data };
 }
 
+export async function fetchAdaptiveNext(courseId: string | number): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/adaptive/next?courseId=${encodeURIComponent(String(courseId))}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'ADAPTIVE_NEXT_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
 export async function fetchSipProfile(courseId: string | number): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
   if ('error' in built) {

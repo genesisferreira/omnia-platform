@@ -69,6 +69,9 @@
     "seed:student-intelligence": "tsx src/scripts/seed-student-intelligence.ts",
     "homolog:e14-student-intelligence": "tsx src/scripts/homolog-e14-student-intelligence.ts",
     "test:student-intelligence": "tsx --test ../../packages/student-intelligence/src/**/test-*.ts && tsx --test src/scripts/test-student-intelligence.ts",
+    "seed:adaptive-learning": "tsx src/scripts/seed-adaptive-learning.ts",
+    "homolog:e15-adaptive-learning": "tsx src/scripts/homolog-e15-adaptive-learning.ts",
+    "test:adaptive-learning": "tsx --test ../../packages/adaptive-learning/src/**/test-*.ts && tsx --test src/scripts/test-adaptive-learning.ts",
     "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
     "test:deepseek-agents": "tsx --test ../../packages/neurofrigo-orchestrator/src/**/test-*.ts && tsx --test src/scripts/test-deepseek-agents.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
@@ -90,6 +93,7 @@
     "@omnia/neurofrigo-commercial": "workspace:*",
     "@omnia/neurofrigo-engineering": "workspace:*",
     "@omnia/student-intelligence": "workspace:*",
+    "@omnia/adaptive-learning": "workspace:*",
     "@omnia/enterprise-ai": "workspace:*",
     "@omnia/neurofrigo-orchestrator": "workspace:*",
     "@omnia/shared": "workspace:*",

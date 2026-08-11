@@ -13,6 +13,25 @@ type PortalView = {
   updatedAt?: string;
 };
 
+type AdaptiveNext = {
+  nextBest?: {
+    actionType?: string;
+    reasonFriendly?: string;
+    lessonTitle?: string | null;
+    lessonSlug?: string | null;
+    confidence?: number;
+  } | null;
+  why?: { summary?: string; factors?: string[] } | null;
+  plan?: {
+    steps?: Array<{
+      when: string;
+      actionType: string;
+      reasonFriendly: string;
+      lessonTitle?: string | null;
+    }>;
+  };
+};
+
 const GOAL_OPTIONS = [
   'emprego',
   'empresa_propria',
@@ -22,8 +41,21 @@ const GOAL_OPTIONS = [
   'consultoria',
 ];
 
+const ACTION_CTA: Record<string, string> = {
+  CONTINUE_LESSON: 'Continuar aula',
+  REVIEW_LESSON: 'Revisar conteúdo',
+  REVIEW_TOPIC: 'Revisar tópico',
+  NEXT_MODULE: 'Ir ao próximo módulo',
+  PRACTICE: 'Praticar',
+  ASSESSMENT: 'Realizar avaliação',
+  REVISIT_CONTENT: 'Revisitar conteúdo',
+  ASK_TUTOR: 'Conversar com Tutor',
+};
+
 export function SipProfilePanel({ courseId }: { courseId: string }) {
   const [view, setView] = useState<PortalView | null>(null);
+  const [adaptive, setAdaptive] = useState<AdaptiveNext | null>(null);
+  const [showWhy, setShowWhy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
@@ -31,9 +63,14 @@ export function SipProfilePanel({ courseId }: { courseId: string }) {
   const load = () => {
     startTransition(async () => {
       setError(null);
-      const res = await fetch(`/api/sip/profile?courseId=${encodeURIComponent(courseId)}`, {
-        cache: 'no-store',
-      });
+      const [res, adaptRes] = await Promise.all([
+        fetch(`/api/sip/profile?courseId=${encodeURIComponent(courseId)}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/adaptive/next?courseId=${encodeURIComponent(courseId)}`, {
+          cache: 'no-store',
+        }),
+      ]);
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.ok) {
         setError(json?.error || 'Não foi possível carregar o perfil inteligente.');
@@ -42,6 +79,11 @@ export function SipProfilePanel({ courseId }: { courseId: string }) {
       const data = (json.data || json) as PortalView;
       setView(data);
       setGoals(Array.isArray(data.objectives?.goals) ? data.objectives!.goals! : []);
+
+      const adaptJson = await adaptRes.json().catch(() => null);
+      if (adaptRes.ok && adaptJson?.ok) {
+        setAdaptive((adaptJson.data || adaptJson) as AdaptiveNext);
+      }
     });
   };
 
@@ -77,6 +119,67 @@ export function SipProfilePanel({ courseId }: { courseId: string }) {
 
       {view ? (
         <>
+          {adaptive?.nextBest ? (
+            <section className="space-y-3 rounded-lg border border-border p-4">
+              <h2 className="text-lg font-semibold text-omnia-deep-blue">Seu próximo passo</h2>
+              <p className="text-sm">
+                <strong>
+                  {ACTION_CTA[adaptive.nextBest.actionType || ''] || adaptive.nextBest.actionType}
+                </strong>
+                {adaptive.nextBest.lessonTitle
+                  ? ` — ${adaptive.nextBest.lessonTitle}`
+                  : null}
+              </p>
+              <p className="text-sm text-omnia-graphite-light">
+                {adaptive.nextBest.reasonFriendly}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {adaptive.nextBest.actionType === 'ASK_TUTOR' ? (
+                  <a
+                    href={`/cursos`}
+                    className="rounded bg-omnia-deep-blue px-4 py-2 text-sm text-white"
+                  >
+                    Conversar com Tutor
+                  </a>
+                ) : adaptive.nextBest.lessonSlug ? (
+                  <span className="rounded bg-omnia-deep-blue px-4 py-2 text-sm text-white">
+                    {ACTION_CTA[adaptive.nextBest.actionType || ''] || 'Abrir conteúdo'}
+                  </span>
+                ) : (
+                  <span className="rounded bg-omnia-deep-blue px-4 py-2 text-sm text-white">
+                    {ACTION_CTA[adaptive.nextBest.actionType || ''] || 'Próximo passo'}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="rounded border border-border px-3 py-2 text-sm"
+                  onClick={() => setShowWhy((v) => !v)}
+                >
+                  Por que isso foi recomendado?
+                </button>
+              </div>
+              {showWhy && adaptive.why ? (
+                <div className="text-xs text-muted-foreground">
+                  <p>{adaptive.why.summary}</p>
+                  {adaptive.why.factors?.length ? (
+                    <p className="mt-1">Fatores: {adaptive.why.factors.join(', ')}</p>
+                  ) : null}
+                </div>
+              ) : null}
+              {adaptive.plan?.steps && adaptive.plan.steps.length > 1 ? (
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-omnia-graphite-light">
+                  {adaptive.plan.steps.map((s) => (
+                    <li key={`${s.when}-${s.actionType}`}>
+                      <span className="uppercase text-xs tracking-wide">{s.when}</span>
+                      {' — '}
+                      {s.reasonFriendly}
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+            </section>
+          ) : null}
+
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-omnia-deep-blue">Visão geral</h2>
             <p className="text-sm text-omnia-graphite-light">
