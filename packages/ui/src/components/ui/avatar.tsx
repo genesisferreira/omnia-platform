@@ -28,7 +28,6 @@ export function Avatar({ name, src, size = 'md', className, ...props }: AvatarPr
       {...props}
     >
       {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="h-full w-full object-cover" />
       ) : (
         <span>{initials(name)}</span>

@@ -8,7 +8,6 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const result = await fetchEnterpriseAssistants({
     courseId: url.searchParams.get('courseId'),
-    role: url.searchParams.get('role'),
     companyId: url.searchParams.get('companyId'),
   });
 

@@ -1,7 +1,11 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
-import { isKiStaff } from '../access/knowledge-intelligence';
 import { runNeurofrigoAsk, submitAiFeedback } from '../services/neurofrigo/ask';
+import {
+  isAuthResponse,
+  requireNeurofrigoAuth,
+  requireNeurofrigoServiceOrStaff,
+} from '../services/neurofrigo/auth-context';
 import { refreshNeurofrigoAiDashboard } from '../services/neurofrigo/dashboard';
 
 function json(data: unknown, status = 200): Response {
@@ -9,29 +13,6 @@ function json(data: unknown, status = 200): Response {
     status,
     headers: { 'Cache-Control': 'no-store' },
   });
-}
-
-function authorize(req: PayloadRequest): { ok: true; userId?: string; role?: string } | Response {
-  const secret = process.env.OMNIA_INTERNAL_API_SECRET;
-  const key = req.headers.get('x-omnia-internal-key') || req.headers.get('x-omnia-internal-secret');
-  if (secret && key && key === secret) {
-    return {
-      ok: true,
-      userId: req.headers.get('x-omnia-user-id') || undefined,
-      role: req.headers.get('x-omnia-lms-role') || 'student',
-    };
-  }
-  if (req.user) {
-    return {
-      ok: true,
-      userId: String(req.user.id),
-      role: String((req.user as { role?: string }).role || 'student'),
-    };
-  }
-  if (isKiStaff(req.user as { role?: unknown } | null)) {
-    return { ok: true, role: 'admin' };
-  }
-  return { ok: true, role: 'anonymous' };
 }
 
 async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
@@ -48,8 +29,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
   path: '/omnia/ai/chat',
   method: 'post',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
 
     const body = await readJson(req);
     const question = String(body.question || body.text || '').trim();
@@ -63,8 +44,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
         assistantId: body.assistantId != null ? String(body.assistantId) : 'auto',
         orchestrate: body.orchestrate !== false,
         identity: {
-          userId: (body.userId != null ? String(body.userId) : auth.userId) || null,
-          role: (body.role != null ? String(body.role) : auth.role) || null,
+          userId: auth.userId,
+          role: auth.role,
           tenantId: body.tenantId != null ? String(body.tenantId) : null,
           companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
           language: body.language != null ? String(body.language) : 'pt-BR',
@@ -93,8 +74,20 @@ export const neurofrigoChatEndpoint: Endpoint = {
       throw err;
     }
 
-    const { answer, sessionId, assistantKey, specialistLabel, orchestrator, providerMeta, modelKey, policyDecision, proposalMarkdown, troubleshootingMarkdown, comparisonMarkdown, recommendations } =
-      result;
+    const {
+      answer,
+      sessionId,
+      assistantKey,
+      specialistLabel,
+      orchestrator,
+      providerMeta,
+      modelKey,
+      policyDecision,
+      proposalMarkdown,
+      troubleshootingMarkdown,
+      comparisonMarkdown,
+      recommendations,
+    } = result;
 
     return json({
       ok: true,
@@ -139,8 +132,8 @@ export const neurofrigoFeedbackEndpoint: Endpoint = {
   path: '/omnia/ai/feedback',
   method: 'post',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
     const body = await readJson(req);
     const sessionId = body.sessionId;
     const rating = String(body.rating || '');
@@ -151,7 +144,7 @@ export const neurofrigoFeedbackEndpoint: Endpoint = {
       sessionId: sessionId as string | number,
       rating,
       comment: body.comment != null ? String(body.comment) : null,
-      userId: auth.userId ?? null,
+      userId: auth.userId,
     });
     return json({ ok: true, data: { id: created.id } });
   },
@@ -161,11 +154,8 @@ export const neurofrigoDashboardRefreshEndpoint: Endpoint = {
   path: '/omnia/ai/dashboard/refresh',
   method: 'post',
   handler: async (req) => {
-    const secret = process.env.OMNIA_INTERNAL_API_SECRET;
-    const key = req.headers.get('x-omnia-internal-key') || req.headers.get('x-omnia-internal-secret');
-    if (!(secret && key === secret) && !isKiStaff(req.user as { role?: unknown } | null)) {
-      return json({ ok: false, error: 'UNAUTHORIZED' }, 401);
-    }
+    const service = requireNeurofrigoServiceOrStaff(req);
+    if (isAuthResponse(service)) return service;
     await refreshNeurofrigoAiDashboard(req.payload);
     const dash = await req.payload.findGlobal({
       slug: 'neurofrigo-ai-dashboard',

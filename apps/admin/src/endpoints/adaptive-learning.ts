@@ -1,6 +1,12 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
-import { isKiStaff } from '../access/knowledge-intelligence';
+import {
+  forbidden,
+  isAuthResponse,
+  requireNeurofrigoAuth,
+  requireNeurofrigoServiceOrStaff,
+  resolveSubjectUserKey,
+} from '../services/neurofrigo/auth-context';
 import { recordAdaptiveOutcome, runAdaptiveDecide } from '../services/adaptive/decide';
 import { refreshAdaptiveDashboard } from '../services/adaptive/dashboard';
 
@@ -9,29 +15,6 @@ function json(data: unknown, status = 200): Response {
     status,
     headers: { 'Cache-Control': 'no-store' },
   });
-}
-
-function authorize(req: PayloadRequest): { ok: true; userId?: string; role?: string } | Response {
-  const secret = process.env.OMNIA_INTERNAL_API_SECRET;
-  const key = req.headers.get('x-omnia-internal-key') || req.headers.get('x-omnia-internal-secret');
-  if (secret && key && key === secret) {
-    return {
-      ok: true,
-      userId: req.headers.get('x-omnia-user-id') || undefined,
-      role: req.headers.get('x-omnia-lms-role') || 'student',
-    };
-  }
-  if (req.user) {
-    return {
-      ok: true,
-      userId: String(req.user.id),
-      role: String((req.user as { role?: string }).role || 'student'),
-    };
-  }
-  if (isKiStaff(req.user as { role?: unknown } | null)) {
-    return { ok: true, role: 'admin' };
-  }
-  return { ok: true, role: 'anonymous' };
 }
 
 async function readJson(req: PayloadRequest): Promise<Record<string, unknown>> {
@@ -83,17 +66,19 @@ export const adaptiveNextEndpoint: Endpoint = {
   path: '/omnia/adaptive/next',
   method: 'get',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
     const url = new URL(req.url || 'http://local');
     const courseId = url.searchParams.get('courseId') || '';
-    const userKey = url.searchParams.get('userKey') || auth.userId || '';
-    if (!courseId || !userKey) return json({ ok: false, error: 'courseId and userKey required' }, 400);
-    // ACL: student só o próprio userKey
-    if ((auth.role || '').toLowerCase() === 'student' && auth.userId && userKey !== auth.userId) {
-      return json({ ok: false, error: 'FORBIDDEN' }, 403);
-    }
-    const result = await runAdaptiveDecide(req.payload, { userKey, courseId });
+    if (!courseId) return json({ ok: false, error: 'courseId and userKey required' }, 400);
+
+    const subject = resolveSubjectUserKey(auth, url.searchParams.get('userKey'));
+    if (isAuthResponse(subject)) return subject;
+
+    const result = await runAdaptiveDecide(req.payload, {
+      userKey: subject.userKey,
+      courseId,
+    });
     return json({ ok: true, data: portalSafe(result) });
   },
 };
@@ -102,22 +87,25 @@ export const adaptiveDecideEndpoint: Endpoint = {
   path: '/omnia/adaptive/decide',
   method: 'post',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
     const body = await readJson(req);
     const courseId = body.courseId != null ? String(body.courseId) : '';
-    const userKey = (body.userKey != null ? String(body.userKey) : auth.userId) || '';
-    if (!courseId || !userKey) return json({ ok: false, error: 'courseId and userKey required' }, 400);
-    if ((auth.role || '').toLowerCase() === 'student' && auth.userId && userKey !== auth.userId) {
-      return json({ ok: false, error: 'FORBIDDEN' }, 403);
-    }
+    if (!courseId) return json({ ok: false, error: 'courseId and userKey required' }, 400);
+
+    const subject = resolveSubjectUserKey(
+      auth,
+      body.userKey != null ? String(body.userKey) : null,
+    );
+    if (isAuthResponse(subject)) return subject;
+
     const result = await runAdaptiveDecide(req.payload, {
-      userKey,
+      userKey: subject.userKey,
       courseId,
       tenantId: body.tenantId != null ? String(body.tenantId) : null,
       assessmentAvailable: Boolean(body.assessmentAvailable),
     });
-    const technical = Boolean(body.technical) || (auth.role || '').toLowerCase() === 'admin';
+    const technical = Boolean(body.technical) && auth.isStaff;
     return json({
       ok: true,
       data: technical
@@ -137,14 +125,26 @@ export const adaptiveOutcomeEndpoint: Endpoint = {
   path: '/omnia/adaptive/outcome',
   method: 'post',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
     const body = await readJson(req);
     const decisionId = body.decisionId;
     const outcome = String(body.outcome || '');
     if (decisionId == null || !['accepted', 'ignored', 'completed'].includes(outcome)) {
       return json({ ok: false, error: 'decisionId and outcome required' }, 400);
     }
+
+    const existing = await req.payload.findByID({
+      collection: 'adaptive-decisions',
+      id: decisionId as string | number,
+      overrideAccess: true,
+      depth: 0,
+    });
+    const ownerKey = String((existing as { userKey?: string }).userKey || '');
+    if (!auth.isStaff && ownerKey && ownerKey !== auth.userId) {
+      return forbidden();
+    }
+
     await recordAdaptiveOutcome(req.payload, {
       decisionId: decisionId as string | number,
       outcome: outcome as 'accepted' | 'ignored' | 'completed',
@@ -157,15 +157,8 @@ export const adaptiveDashboardEndpoint: Endpoint = {
   path: '/omnia/adaptive/dashboard/refresh',
   method: 'post',
   handler: async (req) => {
-    const auth = authorize(req);
-    if (auth instanceof Response) return auth;
-    if (!isKiStaff(req.user as { role?: unknown } | null)) {
-      const secret = process.env.OMNIA_INTERNAL_API_SECRET;
-      const key = req.headers.get('x-omnia-internal-key');
-      if (!(secret && key && key === secret)) {
-        return json({ ok: false, error: 'FORBIDDEN' }, 403);
-      }
-    }
+    const service = requireNeurofrigoServiceOrStaff(req);
+    if (isAuthResponse(service)) return service;
     await refreshAdaptiveDashboard(req.payload);
     const dash = await req.payload.findGlobal({
       slug: 'adaptive-learning-dashboard',

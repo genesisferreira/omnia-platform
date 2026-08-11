@@ -72,6 +72,7 @@
     "seed:adaptive-learning": "tsx src/scripts/seed-adaptive-learning.ts",
     "homolog:e15-adaptive-learning": "tsx src/scripts/homolog-e15-adaptive-learning.ts",
     "test:adaptive-learning": "tsx --test ../../packages/adaptive-learning/src/**/test-*.ts && tsx --test src/scripts/test-adaptive-learning.ts",
+    "test:neurofrigo-auth-acl": "tsx --test src/scripts/test-neurofrigo-auth-acl.ts",
     "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
     "test:deepseek-agents": "tsx --test ../../packages/neurofrigo-orchestrator/src/**/test-*.ts && tsx --test src/scripts/test-deepseek-agents.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"

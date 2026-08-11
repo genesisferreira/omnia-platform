@@ -3,6 +3,7 @@ import { getInternalApiConfig } from '@omnia/config';
 import { getAdminBaseUrl } from '@/lib/auth/admin-url';
 import { fetchMe } from '@/lib/auth/payload-client';
 import { getSessionToken } from '@/lib/auth/session';
+import type { PortalUser } from '@/lib/auth/types';
 
 export type AiChatPayload = {
   question: string;
@@ -26,49 +27,63 @@ export type AiChatResult =
   | { ok: true; status: number; data: unknown }
   | { ok: false; status: number; data: unknown; error: string };
 
-async function buildInternalHeaders(): Promise<{
-  headers: Record<string, string>;
-  adminBase: string;
-} | { error: string }> {
-  let secret: string;
-  try {
-    secret = getInternalApiConfig().secret;
-  } catch {
-    return { error: 'INTERNAL_MISCONFIGURED' };
-  }
-
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'x-omnia-internal-key': secret,
-  };
-
-  const token = await getSessionToken();
-  if (token) {
-    const me = await fetchMe(token);
-    if (me.ok) {
-      headers['x-omnia-user-id'] = me.data.id;
-      headers['x-omnia-lms-role'] =
-        me.data.role === 'super_admin' || me.data.role === 'admin'
-          ? 'admin'
-          : me.data.role === 'instructor'
-            ? 'teacher'
-            : 'student';
-    }
-  }
-
-  return { headers, adminBase: getAdminBaseUrl() };
+function mapRole(role: string | null | undefined): string {
+  if (role === 'super_admin' || role === 'admin') return 'admin';
+  if (role === 'editor') return 'manager';
+  if (role === 'instructor') return 'teacher';
+  return 'student';
 }
 
 /**
  * Bridge S2S Portal → Admin Neurofrigo Runtime.
- * Nunca expõe OMNIA_INTERNAL_API_SECRET ao browser.
+ * Requires portal session. Never exposes OMNIA_INTERNAL_API_SECRET to the browser.
  */
+async function buildInternalHeaders(options: {
+  user?: PortalUser;
+} = {}): Promise<
+  | { headers: Record<string, string>; adminBase: string }
+  | { error: string; status: number }
+> {
+  const token = await getSessionToken();
+  if (!token) {
+    return { error: 'UNAUTHORIZED', status: 401 };
+  }
+
+  let user = options.user;
+  if (!user) {
+    const me = await fetchMe(token);
+    if (!me.ok) {
+      return { error: 'UNAUTHORIZED', status: 401 };
+    }
+    user = me.data;
+  }
+
+  let secret: string;
+  try {
+    secret = getInternalApiConfig().secret;
+  } catch {
+    return { error: 'INTERNAL_MISCONFIGURED', status: 503 };
+  }
+
+  return {
+    adminBase: getAdminBaseUrl(),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-omnia-internal-key': secret,
+      'x-omnia-user-id': user.id,
+      'x-omnia-lms-role': mapRole(user.role),
+    },
+  };
+}
+
+function mapBuildError(built: { error: string; status: number }): AiChatResult {
+  return { ok: false, status: built.status, data: null, error: built.error };
+}
+
 export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/ai/chat`;
   const response = await fetch(url, {
@@ -97,13 +112,11 @@ export async function fetchEnterpriseAssistants(params?: {
   companyId?: string | number | null;
 }): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const qs = new URLSearchParams();
   if (params?.courseId != null) qs.set('courseId', String(params.courseId));
-  if (params?.role) qs.set('role', String(params.role));
+  // Role is derived server-side from session; ignore client role elevation.
   if (params?.companyId != null) qs.set('companyId', String(params.companyId));
   const url = `${built.adminBase}/api/omnia/enterprise/assistants${qs.size ? `?${qs}` : ''}`;
   const response = await fetch(url, {
@@ -120,9 +133,7 @@ export async function fetchEnterpriseAssistants(params?: {
 
 export async function fetchTutorChat(body: AiChatPayload): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/tutor/chat`;
   const response = await fetch(url, {
@@ -140,9 +151,7 @@ export async function fetchTutorChat(body: AiChatPayload): Promise<AiChatResult>
 
 export async function fetchTutorProfile(courseId: string | number): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/tutor/profile?courseId=${encodeURIComponent(String(courseId))}`;
   const response = await fetch(url, {
@@ -159,9 +168,7 @@ export async function fetchTutorProfile(courseId: string | number): Promise<AiCh
 
 export async function fetchAdaptiveNext(courseId: string | number): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/adaptive/next?courseId=${encodeURIComponent(String(courseId))}`;
   const response = await fetch(url, {
@@ -178,9 +185,7 @@ export async function fetchAdaptiveNext(courseId: string | number): Promise<AiCh
 
 export async function fetchSipProfile(courseId: string | number): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/sip/profile?courseId=${encodeURIComponent(String(courseId))}`;
   const response = await fetch(url, {
@@ -201,9 +206,7 @@ export async function fetchSipMotivation(body: {
   notes?: string | null;
 }): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/sip/motivation`;
   const response = await fetch(url, {
@@ -225,9 +228,7 @@ export async function fetchAiFeedback(body: {
   comment?: string;
 }): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
-  if ('error' in built) {
-    return { ok: false, status: 503, data: null, error: built.error };
-  }
+  if ('error' in built) return mapBuildError(built);
 
   const url = `${built.adminBase}/api/omnia/ai/feedback`;
   const response = await fetch(url, {
