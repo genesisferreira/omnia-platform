@@ -31,17 +31,21 @@ const { Client } = require(pgModulePath) as {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const adminRoot = path.resolve(__dirname, '../..');
+const repoRoot = path.resolve(adminRoot, '../..');
 
 const INSTITUTIONAL_MIGRATION_NAME = '20260716_172340_pages_institutional';
 const PAGES_BASE_MIGRATION_NAME = '20260716_124305_pages';
-/** Migration posterior não relacionada — deve sobreviver a rollback só institucional. */
+/** Migration posterior não relacionada — registry check only. */
 const IDENTITY_CRM_MIGRATION_NAME = '20260720_120000_identity_crm_foundation';
 
-const runAdmin = (args: string[]): void => {
+const runAdminMigrate = (): void => {
   const command = process.platform === 'win32' ? 'corepack' : 'pnpm';
-  const commandArgs = process.platform === 'win32' ? ['pnpm', ...args] : args;
+  const commandArgs =
+    process.platform === 'win32'
+      ? ['pnpm', '--filter', '@omnia/admin', 'exec', 'payload', 'migrate']
+      : ['--filter', '@omnia/admin', 'exec', 'payload', 'migrate'];
   const result = spawnSync(command, commandArgs, {
-    cwd: adminRoot,
+    cwd: repoRoot,
     env: process.env,
     stdio: 'pipe',
     shell: process.platform === 'win32',
@@ -49,7 +53,7 @@ const runAdmin = (args: string[]): void => {
   });
   if (result.status !== 0) {
     throw new Error(
-      `command failed: pnpm ${args.join(' ')}\n${result.stderr ?? result.stdout ?? ''}`,
+      `command failed: pnpm --filter @omnia/admin exec payload migrate\n${result.stdout ?? ''}\n${result.stderr ?? ''}`,
     );
   }
 };
@@ -79,7 +83,7 @@ const test = async (name: string, fn: () => Promise<void>): Promise<void> => {
 
 try {
   console.log('==> Aplicando migrations (fresh)...');
-  runAdmin(['migrate']);
+  runAdminMigrate();
 
   await test('tabela pages existe com colunas essenciais', async () => {
     const cols = await client.query(`
