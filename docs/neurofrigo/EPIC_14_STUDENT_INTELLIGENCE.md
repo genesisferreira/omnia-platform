@@ -27,6 +27,12 @@ Portal / Assistentes
 
 Portal: `/meu-perfil-inteligente`
 
+## Homologação
+
+Tip: `3e0b4c2` · `SIP_SEED_OK` · `E14_HOMOLOG_OK` · `E14_DEPLOY_OK` · **GO**
+
+Ver relatório: [EPIC_14_DELIVERY_REPORT.md](./EPIC_14_DELIVERY_REPORT.md)
+
 ## Fora de escopo
 
 Testes psicológicos · diagnósticos clínicos · CRM · ERP · WhatsApp · agentes · certificados
