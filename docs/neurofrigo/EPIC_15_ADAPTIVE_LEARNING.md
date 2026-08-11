@@ -30,6 +30,12 @@ Portal: bloco **Seu próximo passo** em `/meu-perfil-inteligente`.
 
 Ver [EPIC_15_AUDIT.md](./EPIC_15_AUDIT.md)
 
+## Homologação
+
+Tip: `3421a86` · `ADAPTIVE_LEARNING_SEED_OK` · `E15_HOMOLOG_OK` · `E15_DEPLOY_OK` · **GO**
+
+Ver relatório: [EPIC_15_DELIVERY_REPORT.md](./EPIC_15_DELIVERY_REPORT.md)
+
 ## Fora de escopo
 
 CRM · ERP · WhatsApp · agentes · diagnósticos clínicos · certificados · microlessons · fine-tuning
