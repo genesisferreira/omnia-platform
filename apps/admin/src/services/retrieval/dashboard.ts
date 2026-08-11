@@ -15,14 +15,7 @@ function topCounts(values: string[], limit = 10): Array<{ key: string; count: nu
 }
 
 export async function refreshRetrievalDashboard(payload: Payload): Promise<void> {
-  const [
-    ready,
-    failedEmb,
-    pending,
-    processing,
-    failedQ,
-    sessions,
-  ] = await Promise.all([
+  const [ready, failedEmb, pending, processing, failedQ, sessions] = await Promise.all([
     payload.count({
       collection: 'embedding-records',
       where: { status: { equals: 'ready' } },
@@ -68,13 +61,9 @@ export async function refreshRetrievalDashboard(payload: Payload): Promise<void>
   }
 
   const took = sessions.docs.map((s) => Number(s.tookMs || 0));
-  const avgSearchMs = took.length
-    ? Math.round(took.reduce((a, b) => a + b, 0) / took.length)
-    : 0;
+  const avgSearchMs = took.length ? Math.round(took.reduce((a, b) => a + b, 0) / took.length) : 0;
 
-  const topQueries = topCounts(
-    sessions.docs.map((s) => String(s.query || '').slice(0, 120)),
-  );
+  const topQueries = topCounts(sessions.docs.map((s) => String(s.query || '').slice(0, 120)));
 
   const docIds: string[] = [];
   for (const s of sessions.docs) {

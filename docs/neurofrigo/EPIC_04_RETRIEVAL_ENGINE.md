@@ -15,14 +15,14 @@ Learning Resource → Chunks → Embeddings → Vector Index
 
 Package: `@omnia/retrieval`
 
-| Componente | Contrato | Adapter inicial |
-|------------|----------|-----------------|
-| Embeddings | `EmbeddingProviderPort` | `DeterministicEmbeddingProvider` (default) / OpenAI-compatible (opcional) |
-| Vector Store | `VectorStorePort` | `PgVectorStore` (`pgvector` ou `float_array`) / `InMemoryVectorStore` |
-| ACL | `AclFilterPort` | `DefaultAclFilter` |
-| Ranking | `RankerPort` | `WeightedRanker` |
-| Citations | `CitationBuilderPort` | `CitationBuilder` |
-| Orquestração | `Retriever` | Admin service `runSemanticSearch` |
+| Componente   | Contrato                | Adapter inicial                                                           |
+| ------------ | ----------------------- | ------------------------------------------------------------------------- |
+| Embeddings   | `EmbeddingProviderPort` | `DeterministicEmbeddingProvider` (default) / OpenAI-compatible (opcional) |
+| Vector Store | `VectorStorePort`       | `PgVectorStore` (`pgvector` ou `float_array`) / `InMemoryVectorStore`     |
+| ACL          | `AclFilterPort`         | `DefaultAclFilter`                                                        |
+| Ranking      | `RankerPort`            | `WeightedRanker`                                                          |
+| Citations    | `CitationBuilderPort`   | `CitationBuilder`                                                         |
+| Orquestração | `Retriever`             | Admin service `runSemanticSearch`                                         |
 
 Nenhum serviço de domínio importa Payload, pgvector ou SDK de provider.
 
@@ -42,15 +42,15 @@ Auth: staff KI ou header `x-omnia-internal-secret`.
 
 ## Config
 
-| Env | Default | Descrição |
-|-----|---------|-----------|
-| `RETRIEVAL_EMBEDDING_PROVIDER` | `deterministic` | `deterministic` \| `openai` \| `openai-compatible` |
-| `RETRIEVAL_EMBEDDING_MODEL` | provider default | Modelo |
-| `RETRIEVAL_EMBEDDING_DIMENSIONS` | `384` | Dimensões |
-| `RETRIEVAL_EMBEDDING_API_KEY` | — | Se provider HTTP |
-| `RETRIEVAL_EMBEDDING_BASE_URL` | OpenAI | Base URL |
-| `RETRIEVAL_VECTOR_MODE` | `auto` | `auto` \| `pgvector` \| `float_array` |
-| `RETRIEVAL_EMBEDDING_MAX_ATTEMPTS` | `3` | Retry da fila |
+| Env                                | Default          | Descrição                                          |
+| ---------------------------------- | ---------------- | -------------------------------------------------- |
+| `RETRIEVAL_EMBEDDING_PROVIDER`     | `deterministic`  | `deterministic` \| `openai` \| `openai-compatible` |
+| `RETRIEVAL_EMBEDDING_MODEL`        | provider default | Modelo                                             |
+| `RETRIEVAL_EMBEDDING_DIMENSIONS`   | `384`            | Dimensões                                          |
+| `RETRIEVAL_EMBEDDING_API_KEY`      | —                | Se provider HTTP                                   |
+| `RETRIEVAL_EMBEDDING_BASE_URL`     | OpenAI           | Base URL                                           |
+| `RETRIEVAL_VECTOR_MODE`            | `auto`           | `auto` \| `pgvector` \| `float_array`              |
+| `RETRIEVAL_EMBEDDING_MAX_ATTEMPTS` | `3`              | Retry da fila                                      |
 
 ## Homologação
 

@@ -9,7 +9,11 @@ import type { VectorStorePort } from '../../ports';
 
 function matchesFilters(record: VectorRecord, filters: VectorSearchFilters): boolean {
   if (filters.tenantId && record.tenantId && record.tenantId !== filters.tenantId) return false;
-  if (filters.ownerCompanyId && record.ownerCompanyId && record.ownerCompanyId !== filters.ownerCompanyId)
+  if (
+    filters.ownerCompanyId &&
+    record.ownerCompanyId &&
+    record.ownerCompanyId !== filters.ownerCompanyId
+  )
     return false;
   if (filters.courseId && record.courseId && record.courseId !== filters.courseId) return false;
   if (filters.lessonId && record.lessonId && record.lessonId !== filters.lessonId) return false;

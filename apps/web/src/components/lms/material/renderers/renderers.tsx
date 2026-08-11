@@ -10,10 +10,7 @@ export type MaterialRendererProps = {
 
 function Placeholder(props: { title: string; message?: string | null }) {
   return (
-    <div
-      className="rounded-md border border-dashed border-border bg-muted/40 p-4"
-      role="note"
-    >
+    <div className="rounded-md border border-dashed border-border bg-muted/40 p-4" role="note">
       <p className="font-medium text-foreground">{props.title}</p>
       {props.message ? <p className="mt-1 text-sm text-muted-foreground">{props.message}</p> : null}
     </div>
@@ -82,10 +79,7 @@ export function VideoRenderer(props: MaterialRendererProps) {
 export function ExternalLinkRenderer(props: MaterialRendererProps) {
   if (!props.externalUrl) {
     return (
-      <Placeholder
-        title="Link externo"
-        message={props.fallbackMessage || 'Link indisponível.'}
-      />
+      <Placeholder title="Link externo" message={props.fallbackMessage || 'Link indisponível.'} />
     );
   }
   return (

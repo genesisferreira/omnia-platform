@@ -31,14 +31,14 @@ Grafana dashboards
 
 ## Componentes
 
-| Peça | Local | Função |
-|------|-------|--------|
-| Prometheus registry | `packages/monitoring/src/metrics` | Counters/Gauges/Histograms |
-| Tracing | `packages/monitoring/src/tracing` | AsyncLocalStorage + W3C + OTLP HTTP |
-| Logger | `packages/logger` | JSON sanitizado |
-| `/api/metrics` | `apps/admin/.../api/metrics` | Scrape Prometheus |
-| Health expandido | `/api/omnia/lms/health` | Connector/Redis/DB/Moodle/Cache/Sessions/Policies |
-| Stack DEV | `docker/observability/` | Prometheus + Grafana + OTel Collector |
+| Peça                | Local                             | Função                                            |
+| ------------------- | --------------------------------- | ------------------------------------------------- |
+| Prometheus registry | `packages/monitoring/src/metrics` | Counters/Gauges/Histograms                        |
+| Tracing             | `packages/monitoring/src/tracing` | AsyncLocalStorage + W3C + OTLP HTTP               |
+| Logger              | `packages/logger`                 | JSON sanitizado                                   |
+| `/api/metrics`      | `apps/admin/.../api/metrics`      | Scrape Prometheus                                 |
+| Health expandido    | `/api/omnia/lms/health`           | Connector/Redis/DB/Moodle/Cache/Sessions/Policies |
+| Stack DEV           | `docker/observability/`           | Prometheus + Grafana + OTel Collector             |
 
 ## Segurança
 

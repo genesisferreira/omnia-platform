@@ -4,12 +4,12 @@
 
 ## Componentes
 
-| Peça | Função |
-| --- | --- |
-| `AssessmentProvider` | Engine + sink Learning Engine + security stubs |
-| `AssessmentViewer` | Metadata, status, renderers, conclusão local |
+| Peça                   | Função                                             |
+| ---------------------- | -------------------------------------------------- |
+| `AssessmentProvider`   | Engine + sink Learning Engine + security stubs     |
+| `AssessmentViewer`     | Metadata, status, renderers, conclusão local       |
 | `AssessmentExperience` | Host na Lesson Page (quando `modName` quiz/assign) |
-| `AssessmentNav` | Prev/next atividade · aula · módulo · curso |
+| `AssessmentNav`        | Prev/next atividade · aula · módulo · curso        |
 
 ## Dados Connector (RO)
 

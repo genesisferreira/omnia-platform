@@ -15,8 +15,7 @@ export const ASSESSMENT_RENDERER_LOADERS: Record<
 > = {
   quiz: () => import('./renderers').then((m) => ({ default: m.QuizRenderer })),
   assignment: () => import('./renderers').then((m) => ({ default: m.AssignmentRenderer })),
-  unknown: () =>
-    import('./renderers').then((m) => ({ default: m.UnknownAssessmentRenderer })),
+  unknown: () => import('./renderers').then((m) => ({ default: m.UnknownAssessmentRenderer })),
 };
 
 const cache = new Map<AssessmentType, ComponentType<AssessmentRendererProps>>();

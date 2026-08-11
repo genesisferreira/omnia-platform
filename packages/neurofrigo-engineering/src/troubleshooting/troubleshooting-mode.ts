@@ -47,9 +47,7 @@ export function buildTroubleshootingMarkdown(input: {
     '',
     '## 2. Informações disponíveis',
     '',
-    hasSources
-      ? groundedBody
-      : '_Sem conteúdo recuperado no Knowledge Hub autorizado._',
+    hasSources ? groundedBody : '_Sem conteúdo recuperado no Knowledge Hub autorizado._',
     '',
     '## 3. Hipóteses suportadas pela base',
     '',

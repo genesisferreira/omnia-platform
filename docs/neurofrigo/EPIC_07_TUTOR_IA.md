@@ -20,12 +20,12 @@ Portal (TutorPanel)
 
 ## Entregáveis
 
-1. `@omnia/neurofrigo-tutor` — TutorService + personalização + recomendações + plano + gaps  
-2. Collections: `student-profiles`, `learning-profiles`, `tutor-study-plans`  
-3. Global: `neurofrigo-tutor-dashboard`  
-4. Endpoints: `POST /omnia/tutor/chat`, `GET /omnia/tutor/profile`, `POST /omnia/tutor/dashboard/refresh`  
-5. Portal: botão **Conversar com o Tutor**  
-6. Migration `20260807_120000_tutor_ia`  
+1. `@omnia/neurofrigo-tutor` — TutorService + personalização + recomendações + plano + gaps
+2. Collections: `student-profiles`, `learning-profiles`, `tutor-study-plans`
+3. Global: `neurofrigo-tutor-dashboard`
+4. Endpoints: `POST /omnia/tutor/chat`, `GET /omnia/tutor/profile`, `POST /omnia/tutor/dashboard/refresh`
+5. Portal: botão **Conversar com o Tutor**
+6. Migration `20260807_120000_tutor_ia`
 7. Bootstrap mode `tutor-ia`
 
 ## Não implementado

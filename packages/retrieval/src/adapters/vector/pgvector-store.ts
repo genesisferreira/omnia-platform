@@ -361,11 +361,7 @@ export class PgVectorStore implements VectorStorePort {
         ORDER BY embedding <=> $1::vector
         LIMIT $2
       `;
-      const res = await this.sql.query(sql, [
-        toVectorLiteral(embedding),
-        limit,
-        ...where.params,
-      ]);
+      const res = await this.sql.query(sql, [toVectorLiteral(embedding), limit, ...where.params]);
       return res.rows.map((row) => ({
         record: this.rowToRecord(row),
         similarity: Math.max(0, Math.min(1, Number(row.similarity ?? 0))),
@@ -373,10 +369,7 @@ export class PgVectorStore implements VectorStorePort {
     }
 
     const where = this.buildWhere(filters, 1);
-    const res = await this.sql.query(
-      `SELECT * FROM ${this.table} ${where.clause}`,
-      where.params,
-    );
+    const res = await this.sql.query(`SELECT * FROM ${this.table} ${where.clause}`, where.params);
     const hits = res.rows.map((row) => {
       const record = this.rowToRecord(row);
       return {

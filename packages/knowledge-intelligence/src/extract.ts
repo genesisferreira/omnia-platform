@@ -126,9 +126,5 @@ export async function extractByType(
 }
 
 export { extractDocx, extractPptx } from './extract-office';
-export {
-  classifyOfficialDocument,
-  isPendingArchive,
-  mimeForFilename,
-} from './classify-official';
+export { classifyOfficialDocument, isPendingArchive, mimeForFilename } from './classify-official';
 export type { OfficialClassification } from './classify-official';

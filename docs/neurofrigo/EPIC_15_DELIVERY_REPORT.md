@@ -46,10 +46,10 @@ Unit: **7/7**. Homolog: A/B/E/I + isolamento + decideMs médio **47ms** (seed 62
 ```json
 {
   "results": [
-    {"id":"A","actionType":"REVIEW_LESSON","decideMs":57,"planSteps":3},
-    {"id":"B","actionType":"REVIEW_LESSON","decideMs":41,"planSteps":3},
-    {"id":"E","actionType":"REVIEW_LESSON","decideMs":53,"planSteps":3},
-    {"id":"I","actionType":"REVIEW_LESSON","decideMs":47,"planSteps":3}
+    { "id": "A", "actionType": "REVIEW_LESSON", "decideMs": 57, "planSteps": 3 },
+    { "id": "B", "actionType": "REVIEW_LESSON", "decideMs": 41, "planSteps": 3 },
+    { "id": "E", "actionType": "REVIEW_LESSON", "decideMs": 53, "planSteps": 3 },
+    { "id": "I", "actionType": "REVIEW_LESSON", "decideMs": 47, "planSteps": 3 }
   ],
   "isolationOk": true,
   "dashDecisions": 15,

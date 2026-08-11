@@ -119,10 +119,11 @@ describe('SMTP parsing', () => {
 
   it('importmap/build sem SMTP_HOST adia a config', () => {
     assert.equal(
-      isSmtpConfigDeferred(
-        { DOCKER_BUILD: 'true', NODE_ENV: 'production' },
-        ['node', 'payload', 'generate:importmap'],
-      ),
+      isSmtpConfigDeferred({ DOCKER_BUILD: 'true', NODE_ENV: 'production' }, [
+        'node',
+        'payload',
+        'generate:importmap',
+      ]),
       true,
     );
     assert.equal(
@@ -176,10 +177,7 @@ describe('SMTP parsing', () => {
 describe('reset password URL e e-mail', () => {
   it('URL de reset usa NEXT_PUBLIC_ADMIN_URL', () => {
     const url = buildResetPasswordURL('https://admin.omniafrigo.com.br', 'tok+en/1');
-    assert.equal(
-      url,
-      'https://admin.omniafrigo.com.br/redefinir-senha?token=tok%2Ben%2F1',
-    );
+    assert.equal(url, 'https://admin.omniafrigo.com.br/redefinir-senha?token=tok%2Ben%2F1');
   });
 
   it('template inclui URL e não expõe token cru em subject', () => {

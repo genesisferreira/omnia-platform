@@ -4,12 +4,12 @@ Políticas resolvidas por `MediaPolicyResolver` com precedência material > curs
 
 ## Capacidades
 
-| Campo | Default corporativo |
-|-------|---------------------|
-| `canView` | true (salvo force deny) |
+| Campo         | Default corporativo                    |
+| ------------- | -------------------------------------- |
+| `canView`     | true (salvo force deny)                |
 | `canDownload` | false (`downloadsAllowed` LmsSettings) |
-| `canPrint` | false |
-| `canShare` | false |
+| `canPrint`    | false                                  |
+| `canShare`    | false                                  |
 
 ## Decisões
 

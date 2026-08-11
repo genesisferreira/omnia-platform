@@ -12,12 +12,12 @@
 
 ## Tokens LMS (`@omnia/ui` globals)
 
-| Token | Uso |
-| --- | --- |
-| `--lms-sidebar` / `--lms-sidebar-foreground` | Shell lateral |
-| `--lms-surface` | Fundo da área de estudos |
-| `--lms-progress` | Barra de progresso |
-| `--lms-success` / `--lms-warning` | Feedback de estado |
+| Token                                        | Uso                      |
+| -------------------------------------------- | ------------------------ |
+| `--lms-sidebar` / `--lms-sidebar-foreground` | Shell lateral            |
+| `--lms-surface`                              | Fundo da área de estudos |
+| `--lms-progress`                             | Barra de progresso       |
+| `--lms-success` / `--lms-warning`            | Feedback de estado       |
 
 Tailwind: `bg-lms-sidebar`, `bg-lms-surface`, `text-lms-progress`, `shadow-lms-card`, `animate-lms-fade-in`.
 

@@ -18,13 +18,13 @@ Aluno → Lesson Page (Experience)
 
 ## Layout
 
-| Zona | Componente | Função |
-| --- | --- | --- |
-| Sidebar L2 | `LessonSidebar` | Módulos → aulas (SPA links + prefetch) |
-| Principal | `LessonWorkspace` | Meta, status, progresso, conteúdo, conclusão |
-| Conteúdo | `LessonContent` | Texto / HTML sanitizado / links / placeholders |
-| Nav | `LessonNav` | Anterior · Próxima · Módulo · Curso |
-| Loading | `LessonSkeleton` + `loading.tsx` | Skeleton |
+| Zona       | Componente                       | Função                                         |
+| ---------- | -------------------------------- | ---------------------------------------------- |
+| Sidebar L2 | `LessonSidebar`                  | Módulos → aulas (SPA links + prefetch)         |
+| Principal  | `LessonWorkspace`                | Meta, status, progresso, conteúdo, conclusão   |
+| Conteúdo   | `LessonContent`                  | Texto / HTML sanitizado / links / placeholders |
+| Nav        | `LessonNav`                      | Anterior · Próxima · Módulo · Curso            |
+| Loading    | `LessonSkeleton` + `loading.tsx` | Skeleton                                       |
 
 ## Fluxo da Aula
 
@@ -40,12 +40,12 @@ Aluno → Lesson Page (Experience)
 
 Delegados à **Material Experience** (`MaterialViewer` + renderers). Ver [`OMNIA_LMS_MATERIAL_EXPERIENCE.md`](OMNIA_LMS_MATERIAL_EXPERIENCE.md).
 
-| Tipo | Comportamento |
-| --- | --- |
-| Texto / HTML | Summary do módulo sanitizado |
-| Link externo | Só HTTPS/HTTP **sem** host Moodle |
-| Vídeo / PDF / H5P / Arquivos | Placeholder (sem streaming CDN) |
-| Imagem | URL autorizada / preview futuro |
+| Tipo                         | Comportamento                     |
+| ---------------------------- | --------------------------------- |
+| Texto / HTML                 | Summary do módulo sanitizado      |
+| Link externo                 | Só HTTPS/HTTP **sem** host Moodle |
+| Vídeo / PDF / H5P / Arquivos | Placeholder (sem streaming CDN)   |
+| Imagem                       | URL autorizada / preview futuro   |
 
 ## Estados
 

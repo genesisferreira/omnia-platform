@@ -7,8 +7,7 @@ export const NeurofrigoTutorDashboard: GlobalConfig = {
   label: 'Dashboard Tutor IA',
   admin: {
     group: 'Neurofrigo Tutor',
-    description:
-      'Progresso médio, uso do Tutor, dúvidas, sugestões, planos e feedback.',
+    description: 'Progresso médio, uso do Tutor, dúvidas, sugestões, planos e feedback.',
   },
   access: {
     read: kiStaffAccess,

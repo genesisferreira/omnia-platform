@@ -8,12 +8,12 @@ Fábrica de conhecimento entre LMS Core e Neurofrigo Knowledge Hub.
 
 ## Entidades
 
-| Slug | Admin | Papel |
-|------|-------|-------|
-| `learning-resources` | Resources | Ponte canônica Media → IA (nunca Media direta) |
-| `knowledge-chunks` | Chunks | Fragmentos + proveniência LMS |
-| `embedding-queue` | Queue | Fila status-only (`pending`…`failed`, provider=`none`) |
-| `ki-processing-runs` | Processing | Histórico extract→…→queue |
+| Slug                               | Admin        | Papel                                                       |
+| ---------------------------------- | ------------ | ----------------------------------------------------------- |
+| `learning-resources`               | Resources    | Ponte canônica Media → IA (nunca Media direta)              |
+| `knowledge-chunks`                 | Chunks       | Fragmentos + proveniência LMS                               |
+| `embedding-queue`                  | Queue        | Fila status-only (`pending`…`failed`, provider=`none`)      |
+| `ki-processing-runs`               | Processing   | Histórico extract→…→queue                                   |
 | Global `ki-intelligence-dashboard` | Dashboard KI | Arquivos / processados / pendentes / falhas / chunks / fila |
 
 Grupo admin: **Knowledge Intelligence**.

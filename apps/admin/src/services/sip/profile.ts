@@ -121,7 +121,9 @@ function mapDocToTwin(doc: Record<string, unknown>): SipDigitalTwin {
       updatedByStudentAt: null,
     }) as MotivationProfile,
     learningProfile: {
-      preferences: (Array.isArray(doc.preferences) ? doc.preferences : []) as SipDigitalTwin['learningProfile']['preferences'],
+      preferences: (Array.isArray(doc.preferences)
+        ? doc.preferences
+        : []) as SipDigitalTwin['learningProfile']['preferences'],
       recommendedLevel: String(doc.technicalLevel || 'beginner'),
     },
     evidenceSummary: (doc.evidenceSummary || {
@@ -159,7 +161,11 @@ export async function recalculateSipProfile(
     motivation?: MotivationProfile | null;
     displayName?: string | null;
   },
-): Promise<{ twin: SipDigitalTwin; context: SipAssistantContext; portal: ReturnType<typeof toPortalView> }> {
+): Promise<{
+  twin: SipDigitalTwin;
+  context: SipAssistantContext;
+  portal: ReturnType<typeof toPortalView>;
+}> {
   const signals = await loadSignals(payload, {
     userKey: input.userKey,
     courseId: input.courseId,
@@ -168,10 +174,7 @@ export async function recalculateSipProfile(
   const existing = await payload.find({
     collection: 'sip-profiles',
     where: {
-      and: [
-        { userKey: { equals: input.userKey } },
-        { course: { equals: input.courseId } },
-      ],
+      and: [{ userKey: { equals: input.userKey } }, { course: { equals: input.courseId } }],
     },
     limit: 1,
     overrideAccess: true,
@@ -182,9 +185,7 @@ export async function recalculateSipProfile(
     : [];
 
   const motivation =
-    input.motivation ||
-    (existing.docs[0]?.objectives as MotivationProfile | undefined) ||
-    null;
+    input.motivation || (existing.docs[0]?.objectives as MotivationProfile | undefined) || null;
 
   const catalog = await loadCourseCatalog(payload, input.courseId);
   const catalogHints = (catalog?.lessons || []).slice(0, 12).map((l) => ({
@@ -211,10 +212,7 @@ export async function recalculateSipProfile(
   const oldEvidence = await payload.find({
     collection: 'sip-evidence',
     where: {
-      and: [
-        { userKey: { equals: input.userKey } },
-        { course: { equals: input.courseId } },
-      ],
+      and: [{ userKey: { equals: input.userKey } }, { course: { equals: input.courseId } }],
     },
     limit: 200,
     overrideAccess: true,
@@ -312,10 +310,7 @@ export async function getSipAssistantContext(
   const found = await payload.find({
     collection: 'sip-profiles',
     where: {
-      and: [
-        { userKey: { equals: input.userKey } },
-        { course: { equals: input.courseId } },
-      ],
+      and: [{ userKey: { equals: input.userKey } }, { course: { equals: input.courseId } }],
     },
     limit: 1,
     overrideAccess: true,
@@ -324,8 +319,7 @@ export async function getSipAssistantContext(
   const stale =
     !found.docs[0] ||
     !found.docs[0].lastRecalculatedAt ||
-    Date.now() - new Date(String(found.docs[0].lastRecalculatedAt)).getTime() >
-      1000 * 60 * 30;
+    Date.now() - new Date(String(found.docs[0].lastRecalculatedAt)).getTime() > 1000 * 60 * 30;
 
   if (input.ensureFresh !== false && stale) {
     const { context } = await recalculateSipProfile(payload, {

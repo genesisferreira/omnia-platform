@@ -24,21 +24,21 @@ Material Experience
 
 ## Componentes
 
-| Peça | Função |
-|------|--------|
-| `MediaAuthorizationService` | Orquestra authorize |
-| `MediaPolicyResolver` | canView/Download/Print/Share |
-| `SignedAccessService` | Token mock `controlled://` |
-| `MediaDecision` | Resultado imutável |
-| Cache | TTL configurável (memory → Redis-ready) |
+| Peça                        | Função                                  |
+| --------------------------- | --------------------------------------- |
+| `MediaAuthorizationService` | Orquestra authorize                     |
+| `MediaPolicyResolver`       | canView/Download/Print/Share            |
+| `SignedAccessService`       | Token mock `controlled://`              |
+| `MediaDecision`             | Resultado imutável                      |
+| Cache                       | TTL configurável (memory → Redis-ready) |
 
 ## Endpoints (Admin, S2S only)
 
-| Method | Path |
-|--------|------|
-| POST | `/api/omnia/lms/internal/media/authorize` |
-| POST | `/api/omnia/lms/internal/media/sign` |
-| POST | `/api/omnia/lms/internal/media/revoke` |
+| Method | Path                                      |
+| ------ | ----------------------------------------- |
+| POST   | `/api/omnia/lms/internal/media/authorize` |
+| POST   | `/api/omnia/lms/internal/media/sign`      |
+| POST   | `/api/omnia/lms/internal/media/revoke`    |
 
 ## Restrições
 

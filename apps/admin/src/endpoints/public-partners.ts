@@ -12,10 +12,7 @@ import {
 } from '@omnia/shared';
 
 import { getGeocodingProvider } from '../lib/geocoding/provider';
-import {
-  lookupPostalCode,
-  normalizeBrazilianPostalCode,
-} from '../lib/postal-code/provider';
+import { lookupPostalCode, normalizeBrazilianPostalCode } from '../lib/postal-code/provider';
 
 const CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=30';
 
@@ -66,9 +63,7 @@ function clampRadiusKm(raw: string | null, hasOrigin: boolean): number | null {
   return Math.min(n, PUBLIC_PARTNER_MAX_RADIUS_KM);
 }
 
-async function resolveOriginFromQuery(
-  url: URL,
-): Promise<{
+async function resolveOriginFromQuery(url: URL): Promise<{
   origin: { lat: number; lng: number } | null;
   originSource: 'gps' | 'postalCode' | 'city' | null;
 }> {

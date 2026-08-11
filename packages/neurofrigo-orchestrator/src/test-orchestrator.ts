@@ -6,12 +6,7 @@ import { evaluateBudget } from './budget/evaluate';
 import { applyComplianceGuard } from './guards/security';
 import { OFFICIAL_SPECIALIST_KEYS } from './domain/types';
 
-const ALLOWED = [
-  ...OFFICIAL_SPECIALIST_KEYS,
-  'commercial',
-  'support',
-  'engineering',
-];
+const ALLOWED = [...OFFICIAL_SPECIALIST_KEYS, 'commercial', 'support', 'engineering'];
 
 describe('neurofrigo-orchestrator', () => {
   it('routes refrigeration to hvac', () => {

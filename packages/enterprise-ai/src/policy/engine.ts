@@ -26,9 +26,7 @@ export function evaluatePolicies(input: {
   assistants: AssistantRecord[];
   subject: PolicySubject;
 }): PolicyEvaluation {
-  const enabled = input.policies
-    .filter((p) => p.enabled)
-    .sort((a, b) => b.priority - a.priority);
+  const enabled = input.policies.filter((p) => p.enabled).sort((a, b) => b.priority - a.priority);
 
   const companyIds = asIdSet(input.subject.companyIds);
   const role = (input.subject.role || 'anonymous').toLowerCase();
@@ -43,10 +41,7 @@ export function evaluatePolicies(input: {
     if (policy.tenantIds.length && (!tenantId || !policy.tenantIds.includes(tenantId))) {
       continue;
     }
-    if (
-      policy.companyIds.length &&
-      ![...companyIds].some((id) => policy.companyIds.includes(id))
-    ) {
+    if (policy.companyIds.length && ![...companyIds].some((id) => policy.companyIds.includes(id))) {
       continue;
     }
     if (policy.courseIds.length && (!courseId || !policy.courseIds.includes(courseId))) {
@@ -59,13 +54,9 @@ export function evaluatePolicies(input: {
   if (!matched.length) {
     const allowedAssistants = input.assistants.filter(
       (a) =>
-        a.status === 'active' &&
-        !a.ownerCompanyId &&
-        (a.visibility === 'public' || !a.visibility),
+        a.status === 'active' && !a.ownerCompanyId && (a.visibility === 'public' || !a.visibility),
     );
-    const allowedModelKeys = [
-      ...new Set(allowedAssistants.flatMap((a) => a.allowedModelKeys)),
-    ];
+    const allowedModelKeys = [...new Set(allowedAssistants.flatMap((a) => a.allowedModelKeys))];
     return {
       allowedAssistants,
       allowedModelKeys,
@@ -81,9 +72,7 @@ export function evaluatePolicies(input: {
   const effective = matched.filter((p) => p.priority === topPriority);
 
   const assistantKeys = new Set(effective.flatMap((p) => p.assistantKeys));
-  const allowedModelKeys = [
-    ...new Set(effective.flatMap((p) => p.allowedModelKeys)),
-  ];
+  const allowedModelKeys = [...new Set(effective.flatMap((p) => p.allowedModelKeys))];
 
   const allowedAssistants = input.assistants.filter((a) => {
     if (a.status !== 'active') return false;
@@ -127,10 +116,7 @@ export function buildPolicyDecision(input: {
   modelKey: string | null;
   evaluation: Pick<
     PolicyEvaluation,
-    | 'matchedPolicyIds'
-    | 'requireGrounding'
-    | 'requireExplainability'
-    | 'maxTokensPerDay'
+    'matchedPolicyIds' | 'requireGrounding' | 'requireExplainability' | 'maxTokensPerDay'
   >;
   reason: string;
 }): PolicyDecision {

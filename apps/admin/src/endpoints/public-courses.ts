@@ -14,7 +14,14 @@ const json = (status: number, body: unknown, cache = true): Response =>
   });
 
 const badRequest = () =>
-  json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'Parâmetros inválidos.' } } satisfies ErrorBody, false);
+  json(
+    400,
+    {
+      ok: false,
+      error: { code: 'BAD_REQUEST', message: 'Parâmetros inválidos.' },
+    } satisfies ErrorBody,
+    false,
+  );
 
 const notFound = (message: string) =>
   json(404, { ok: false, error: { code: 'NOT_FOUND', message } } satisfies ErrorBody);
@@ -57,7 +64,11 @@ async function loadPublishedCourseBySlug(req: PayloadRequest, slug: string) {
   const result = await req.payload.find({
     collection: 'courses' as CollectionSlug,
     where: {
-      and: [{ slug: { equals: slug } }, { status: { equals: 'published' } }, { visibility: { equals: 'public' } }],
+      and: [
+        { slug: { equals: slug } },
+        { status: { equals: 'published' } },
+        { visibility: { equals: 'public' } },
+      ],
     },
     limit: 1,
     depth: 1,
@@ -74,7 +85,10 @@ export const publicCoursesEndpoint: Endpoint = {
     try {
       const url = new URL(req.url || 'http://localhost');
       const page = Math.max(1, Number(url.searchParams.get('page') || 1) || 1);
-      const pageSize = Math.min(50, Math.max(1, Number(url.searchParams.get('pageSize') || 12) || 12));
+      const pageSize = Math.min(
+        50,
+        Math.max(1, Number(url.searchParams.get('pageSize') || 12) || 12),
+      );
       const q = url.searchParams.get('q')?.trim() || null;
 
       const and: Where[] = [
@@ -281,7 +295,9 @@ export const publicLessonEndpoint: Endpoint = {
         overrideAccess: true,
       });
 
-      const moduleDoc = modules.docs.find((m) => String(m.id) === String(relationId(lesson.module)));
+      const moduleDoc = modules.docs.find(
+        (m) => String(m.id) === String(relationId(lesson.module)),
+      );
 
       return json(200, {
         ok: true,

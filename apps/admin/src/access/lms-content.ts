@@ -1,12 +1,6 @@
 import type { Access, FieldAccess, Where } from 'payload';
 
-import {
-  getRelationId,
-  getUserRole,
-  isEditor,
-  isPlatformAdmin,
-  isSuperAdmin,
-} from './rbac';
+import { getRelationId, getUserRole, isEditor, isPlatformAdmin, isSuperAdmin } from './rbac';
 
 type AuthUser = {
   id?: string | number;
@@ -16,12 +10,7 @@ type AuthUser = {
 };
 
 /** Staff editorial LMS + instructors (conteúdo próprio/empresa). */
-export const LMS_CONTENT_STAFF_ROLES = [
-  'super_admin',
-  'admin',
-  'editor',
-  'instructor',
-] as const;
+export const LMS_CONTENT_STAFF_ROLES = ['super_admin', 'admin', 'editor', 'instructor'] as const;
 
 export const LMS_PUBLISHER_ROLES = ['super_admin', 'admin'] as const;
 

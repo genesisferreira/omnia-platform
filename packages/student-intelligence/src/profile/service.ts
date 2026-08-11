@@ -2,10 +2,7 @@ import { computeCompetencies } from '../competency/competency-engine';
 import { collectEvidenceFromSignals } from '../evidence/collect';
 import { computeInsights } from '../insights';
 import { inferPreferences, recommendLevel } from '../learning/preferences';
-import {
-  buildSipRecommendations,
-  nextStepsFromRecommendations,
-} from '../recommendations';
+import { buildSipRecommendations, nextStepsFromRecommendations } from '../recommendations';
 import type {
   MotivationProfile,
   SipAssistantContext,

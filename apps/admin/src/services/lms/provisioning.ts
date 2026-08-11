@@ -14,11 +14,7 @@ import {
   type ProvisionUserCommand,
   type WriteCapability,
 } from '@omnia/academic-provisioning';
-import {
-  MoodleClient,
-  MOODLE_WRITE_FUNCTIONS,
-  type RedisLike,
-} from '@omnia/lms-connector';
+import { MoodleClient, MOODLE_WRITE_FUNCTIONS, type RedisLike } from '@omnia/lms-connector';
 import {
   provisionFailureTotal,
   provisionLatencySeconds,
@@ -361,9 +357,7 @@ export async function tickProvisionWorker(
     try {
       let result: ProvisionResult;
       if (job.type === 'user') {
-        result = await executorProvision.handleUser(
-          job.payload as unknown as ProvisionUserCommand,
-        );
+        result = await executorProvision.handleUser(job.payload as unknown as ProvisionUserCommand);
       } else {
         result = await executorEnrollment.handleEnrollment(
           job.payload as unknown as EnrollmentCommand,
@@ -373,10 +367,7 @@ export async function tickProvisionWorker(
       results.push({ ...result, jobId: job.id });
     } catch (err) {
       runtime.metrics.incRetry();
-      await runtime.queue.fail(
-        job.id,
-        err instanceof Error ? err.message : String(err),
-      );
+      await runtime.queue.fail(job.id, err instanceof Error ? err.message : String(err));
       results.push({
         ok: false,
         mode: 'dry-run',

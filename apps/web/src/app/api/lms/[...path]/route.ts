@@ -25,8 +25,7 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
   const forwardHeaders: Record<string, string> = {};
   const idem = request.headers.get('idempotency-key') || request.headers.get('Idempotency-Key');
   if (idem) forwardHeaders['Idempotency-Key'] = idem;
-  const corr =
-    request.headers.get('x-correlation-id') || request.headers.get('x-request-id');
+  const corr = request.headers.get('x-correlation-id') || request.headers.get('x-request-id');
   if (corr) forwardHeaders['x-correlation-id'] = corr;
 
   const result = await fetchLmsConnector(joined, {

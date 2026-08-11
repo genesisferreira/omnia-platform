@@ -108,9 +108,7 @@ export function forbidden(message = 'FORBIDDEN'): Response {
   );
 }
 
-export function requireNeurofrigoAuth(
-  req: PayloadRequest,
-): NeurofrigoAuthContext | Response {
+export function requireNeurofrigoAuth(req: PayloadRequest): NeurofrigoAuthContext | Response {
   const ctx = resolveNeurofrigoAuth(req);
   if (!ctx) return unauthorized();
   return ctx;

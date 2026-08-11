@@ -23,13 +23,7 @@ export type AssistantStatus = (typeof ASSISTANT_STATUSES)[number];
 export const ASSISTANT_VISIBILITIES = ['public', 'internal', 'restricted'] as const;
 export type AssistantVisibility = (typeof ASSISTANT_VISIBILITIES)[number];
 
-export const PROMPT_KINDS = [
-  'system',
-  'security',
-  'style',
-  'domain',
-  'compliance',
-] as const;
+export const PROMPT_KINDS = ['system', 'security', 'style', 'domain', 'compliance'] as const;
 export type PromptKind = (typeof PROMPT_KINDS)[number];
 
 export const PROMPT_STATUSES = ['draft', 'active', 'retired'] as const;

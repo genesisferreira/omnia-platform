@@ -30,16 +30,10 @@ export async function refreshEngineeringAiDashboard(payload: Payload): Promise<v
     .map((d) => Number(d.groundingScore || 0))
     .filter((n) => n > 0);
   const avgGroundingScore = groundingValues.length
-    ? Number(
-        (
-          groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length
-        ).toFixed(3),
-      )
+    ? Number((groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length).toFixed(3))
     : 0;
   const avgTookMs = engineering.length
-    ? Math.round(
-        engineering.reduce((s, d) => s + Number(d.tookMs || 0), 0) / engineering.length,
-      )
+    ? Math.round(engineering.reduce((s, d) => s + Number(d.tookMs || 0), 0) / engineering.length)
     : 0;
 
   const docMap = new Map<string, number>();

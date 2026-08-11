@@ -1,13 +1,6 @@
 import type { Access, FieldAccess } from 'payload';
 
-import {
-  adminsOnly,
-  getUserRole,
-  hasRole,
-  isEditor,
-  isPlatformAdmin,
-  isSuperAdmin,
-} from './rbac';
+import { adminsOnly, getUserRole, hasRole, isEditor, isPlatformAdmin, isSuperAdmin } from './rbac';
 
 type AuthUser = {
   id?: string | number;
@@ -18,11 +11,7 @@ type AuthUser = {
 export const KNOWLEDGE_EXTRA_ROLES = ['neurofrigo_admin', 'technical_reviewer'] as const;
 export type KnowledgeExtraRole = (typeof KNOWLEDGE_EXTRA_ROLES)[number];
 
-export const KNOWLEDGE_PUBLISHER_ROLES = [
-  'super_admin',
-  'admin',
-  'neurofrigo_admin',
-] as const;
+export const KNOWLEDGE_PUBLISHER_ROLES = ['super_admin', 'admin', 'neurofrigo_admin'] as const;
 
 export const KNOWLEDGE_READER_ROLES = [
   'super_admin',

@@ -15,12 +15,12 @@ O **Omnia LMS** é a plataforma de educação profissional do ecossistema Omnia 
 
 Não é “um Moodle com tema”. É um **produto Omnia** que usa o Moodle exclusivamente como **motor educacional** (engine) e o **Neurofrigo** como camada de inteligência artificial.
 
-| Camada | Responsabilidade |
-| --- | --- |
-| **Omnia Platform / Omnia LMS UI** | Toda experiência do usuário (aluno, professor, gestor, parceiro), branding, marketplace, CRM educacional, mobile, white-label |
-| **Moodle Engine** | Fonte de verdade acadêmica: cursos, módulos, aulas, matrículas, progresso, avaliações, grades, competências, certificados nativos |
-| **Neurofrigo** | Toda IA: tutor, professor assistente, corretor, recomendações, geração de conteúdo, analytics preditivo |
-| **Serviços externos** | Streaming de vídeo, salas ao vivo (ex.: Jitsi), SMTP, storage, pagamento, WhatsApp, push |
+| Camada                            | Responsabilidade                                                                                                                  |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Omnia Platform / Omnia LMS UI** | Toda experiência do usuário (aluno, professor, gestor, parceiro), branding, marketplace, CRM educacional, mobile, white-label     |
+| **Moodle Engine**                 | Fonte de verdade acadêmica: cursos, módulos, aulas, matrículas, progresso, avaliações, grades, competências, certificados nativos |
+| **Neurofrigo**                    | Toda IA: tutor, professor assistente, corretor, recomendações, geração de conteúdo, analytics preditivo                           |
+| **Serviços externos**             | Streaming de vídeo, salas ao vivo (ex.: Jitsi), SMTP, storage, pagamento, WhatsApp, push                                          |
 
 ---
 
@@ -56,13 +56,13 @@ Não é “um Moodle com tema”. É um **produto Omnia** que usa o Moodle exclu
 
 ## 4. Público e mercado
 
-| Persona | Necessidade principal |
-| --- | --- |
+| Persona                      | Necessidade principal                                         |
+| ---------------------------- | ------------------------------------------------------------- |
 | Aluno técnico / profissional | Estudar no celular, retomar aula, certificado válido, tutoria |
-| Professor / especialista | Produzir conteúdo rápido, avaliar, acompanhar turmas |
-| Gestor educacional / holding | KPIs, multiempresa, compliance, receita |
-| Empresa cliente (B2B) | Trilhas corporativas, branding, relatórios de RH |
-| Parceiro Omnia | Cursos exclusivos, comissões, ranking |
+| Professor / especialista     | Produzir conteúdo rápido, avaliar, acompanhar turmas          |
+| Gestor educacional / holding | KPIs, multiempresa, compliance, receita                       |
+| Empresa cliente (B2B)        | Trilhas corporativas, branding, relatórios de RH              |
+| Parceiro Omnia               | Cursos exclusivos, comissões, ranking                         |
 
 **Mercado:** educação técnica HVAC-R / refrigeração no Brasil e expansão LATAM; B2C + B2B + B2B2C via parceiros.
 
@@ -106,32 +106,32 @@ Detalhamento: [`OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md`](OMNIA_LMS_ARCHITECTURE_FU
 
 ## 7. Posicionamento dos domínios
 
-| Domínio | Papel |
-| --- | --- |
-| `lms.omniafrigo.com.br` / `lms.dev…` | Produto Omnia LMS (UI) |
-| `moodle.omniafrigo.com.br` / `moodle.dev…` | Engine (ops / WS) |
-| `omniafrigo.com.br` | Hub holding / marketing |
-| Platform Admin | CMS, CRM, parceiros, governança |
+| Domínio                                    | Papel                           |
+| ------------------------------------------ | ------------------------------- |
+| `lms.omniafrigo.com.br` / `lms.dev…`       | Produto Omnia LMS (UI)          |
+| `moodle.omniafrigo.com.br` / `moodle.dev…` | Engine (ops / WS)               |
+| `omniafrigo.com.br`                        | Hub holding / marketing         |
+| Platform Admin                             | CMS, CRM, parceiros, governança |
 
 ---
 
 ## 8. Documentos oficiais deste Blueprint
 
-| Documento | Conteúdo |
-| --- | --- |
-| [`OMNIA_LMS_BLUEPRINT.md`](OMNIA_LMS_BLUEPRINT.md) | Este sumário executivo |
-| [`OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md`](OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md) | Módulos 1–18 (metodologia completa) |
-| [`OMNIA_LMS_RESPONSIBILITY_MATRIX.md`](OMNIA_LMS_RESPONSIBILITY_MATRIX.md) | Matriz RACI de responsabilidades |
-| [`OMNIA_LMS_ROADMAP.md`](OMNIA_LMS_ROADMAP.md) | Roadmap Sprint 2.4 → 3.0 |
-| [`OMNIA_LMS_USER_JOURNEYS.md`](OMNIA_LMS_USER_JOURNEYS.md) | Jornadas de usuário |
-| [`OMNIA_LMS_INFORMATION_ARCHITECTURE.md`](OMNIA_LMS_INFORMATION_ARCHITECTURE.md) | IA de informação / navegação |
-| [`OMNIA_LMS_API_MAP.md`](OMNIA_LMS_API_MAP.md) | Mapa de APIs lógicas |
-| [`OMNIA_LMS_SESSION_POLICY.md`](OMNIA_LMS_SESSION_POLICY.md) | Sessões concurrentes (adendo) |
-| [`OMNIA_LMS_CONTENT_PROTECTION_POLICY.md`](OMNIA_LMS_CONTENT_PROTECTION_POLICY.md) | Proteção de conteúdo (adendo) |
-| [`OMNIA_LMS_INTEGRATION_SPEC.md`](OMNIA_LMS_INTEGRATION_SPEC.md) | Contratos Connector / sessão / mídia |
-| [`OMNIA_LMS_SECURITY_CHECKLIST.md`](OMNIA_LMS_SECURITY_CHECKLIST.md) | Checklist de segurança |
-| [`OMNIA_LMS_DECISION_LOG.md`](OMNIA_LMS_DECISION_LOG.md) | Log de decisões |
-| [`../neurofrigo/README.md`](../neurofrigo/README.md) | **Neurofrigo Runtime** (Sprint 3.1) — agentes, guards, RAG, roadmap |
+| Documento                                                                          | Conteúdo                                                            |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [`OMNIA_LMS_BLUEPRINT.md`](OMNIA_LMS_BLUEPRINT.md)                                 | Este sumário executivo                                              |
+| [`OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md`](OMNIA_LMS_ARCHITECTURE_FUNCTIONAL.md)     | Módulos 1–18 (metodologia completa)                                 |
+| [`OMNIA_LMS_RESPONSIBILITY_MATRIX.md`](OMNIA_LMS_RESPONSIBILITY_MATRIX.md)         | Matriz RACI de responsabilidades                                    |
+| [`OMNIA_LMS_ROADMAP.md`](OMNIA_LMS_ROADMAP.md)                                     | Roadmap Sprint 2.4 → 3.0                                            |
+| [`OMNIA_LMS_USER_JOURNEYS.md`](OMNIA_LMS_USER_JOURNEYS.md)                         | Jornadas de usuário                                                 |
+| [`OMNIA_LMS_INFORMATION_ARCHITECTURE.md`](OMNIA_LMS_INFORMATION_ARCHITECTURE.md)   | IA de informação / navegação                                        |
+| [`OMNIA_LMS_API_MAP.md`](OMNIA_LMS_API_MAP.md)                                     | Mapa de APIs lógicas                                                |
+| [`OMNIA_LMS_SESSION_POLICY.md`](OMNIA_LMS_SESSION_POLICY.md)                       | Sessões concurrentes (adendo)                                       |
+| [`OMNIA_LMS_CONTENT_PROTECTION_POLICY.md`](OMNIA_LMS_CONTENT_PROTECTION_POLICY.md) | Proteção de conteúdo (adendo)                                       |
+| [`OMNIA_LMS_INTEGRATION_SPEC.md`](OMNIA_LMS_INTEGRATION_SPEC.md)                   | Contratos Connector / sessão / mídia                                |
+| [`OMNIA_LMS_SECURITY_CHECKLIST.md`](OMNIA_LMS_SECURITY_CHECKLIST.md)               | Checklist de segurança                                              |
+| [`OMNIA_LMS_DECISION_LOG.md`](OMNIA_LMS_DECISION_LOG.md)                           | Log de decisões                                                     |
+| [`../neurofrigo/README.md`](../neurofrigo/README.md)                               | **Neurofrigo Runtime** (Sprint 3.1) — agentes, guards, RAG, roadmap |
 
 Infra Docker já existente (engine): `docs/09-infrastructure/OMNIA_LMS_*.md` — **não substitui** este Blueprint de produto.
 

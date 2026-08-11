@@ -6,11 +6,7 @@ import type {
   ReplayProtectionPort,
 } from './ports';
 import { MediaPolicyResolver } from './policy-resolver';
-import type {
-  MediaAuthorizeCommand,
-  MediaDecision,
-  MediaDecisionReason,
-} from './types';
+import type { MediaAuthorizeCommand, MediaDecision, MediaDecisionReason } from './types';
 
 export type MediaAuthorizationServiceOptions = {
   policyResolver?: MediaPolicyResolver;

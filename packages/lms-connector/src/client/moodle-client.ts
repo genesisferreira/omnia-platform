@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import {
-  formatTraceparent,
-  getTraceContext,
-  withSpan,
-} from '@omnia/monitoring/tracing';
+import { formatTraceparent, getTraceContext, withSpan } from '@omnia/monitoring/tracing';
 
 import type { LmsConnectorConfig } from '../config/load-lms-config';
 import { redactToken } from '../config/load-lms-config';
@@ -230,8 +226,7 @@ export class MoodleClient {
     const trace = getTraceContext();
     const correlationId = options.correlationId || trace?.requestId || randomUUID();
     const idempotent = IDEMPOTENT_MOODLE_FUNCTIONS.has(wsfunction);
-    const attempts =
-      options.skipRetry || !idempotent ? 1 : Math.max(1, this.maxRetries + 1);
+    const attempts = options.skipRetry || !idempotent ? 1 : Math.max(1, this.maxRetries + 1);
 
     let lastError: unknown;
 
@@ -304,10 +299,7 @@ export class MoodleClient {
     appendFormParams(body, params);
 
     const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      this.config.moodleRequestTimeoutMs,
-    );
+    const timeout = setTimeout(() => controller.abort(), this.config.moodleRequestTimeoutMs);
 
     const onAbort = () => controller.abort();
     if (options.signal) {

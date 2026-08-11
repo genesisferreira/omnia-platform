@@ -26,10 +26,7 @@ export function resolveAssistantRuntime(input: {
   const prompts = pickActivePromptVersions(input.prompts, assistant.key);
   const systemPrompt = composeSystemPrompt(prompts, DEFAULT_SYSTEM);
 
-  const allowed = new Set([
-    ...assistant.allowedModelKeys,
-    ...(input.allowedModelKeys || []),
-  ]);
+  const allowed = new Set([...assistant.allowedModelKeys, ...(input.allowedModelKeys || [])]);
   if (assistant.config.defaultModelKey) {
     allowed.add(assistant.config.defaultModelKey);
   }
@@ -44,12 +41,9 @@ export function resolveAssistantRuntime(input: {
 
   const preferredKey = assistant.config.defaultModelKey || assistant.modelProfile;
   const model =
-    (preferredKey ? candidates.find((m) => m.key === preferredKey) : null) ||
-    candidates[0] ||
-    null;
+    (preferredKey ? candidates.find((m) => m.key === preferredKey) : null) || candidates[0] || null;
 
-  const temperature =
-    assistant.config.temperature ?? model?.defaultTemperature ?? 0.2;
+  const temperature = assistant.config.temperature ?? model?.defaultTemperature ?? 0.2;
 
   const policyDecision: PolicyDecision =
     input.policyDecision ||
@@ -68,10 +62,9 @@ export function resolveAssistantRuntime(input: {
   return {
     assistant,
     model,
-    systemPrompt:
-      assistant.defaultContext?.trim()
-        ? `${systemPrompt}\n\n## DEFAULT_CONTEXT\n${assistant.defaultContext.trim()}`
-        : systemPrompt,
+    systemPrompt: assistant.defaultContext?.trim()
+      ? `${systemPrompt}\n\n## DEFAULT_CONTEXT\n${assistant.defaultContext.trim()}`
+      : systemPrompt,
     limits: {
       maxContextChunks: assistant.config.maxContextChunks || 6,
       maxPromptTokens: assistant.config.maxPromptTokens || 3500,

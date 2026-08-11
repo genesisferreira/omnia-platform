@@ -81,7 +81,11 @@ class NominatimGeocodingProvider implements GeocodingProvider {
       if (!res.ok) {
         return null;
       }
-      const data = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
+      const data = (await res.json()) as Array<{
+        lat?: string;
+        lon?: string;
+        display_name?: string;
+      }>;
       const first = data[0];
       if (!first?.lat || !first?.lon) {
         return null;

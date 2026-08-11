@@ -27,7 +27,10 @@ export function Footer() {
             </p>
           </div>
 
-          <nav aria-label="Rodapé" className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-6">
+          <nav
+            aria-label="Rodapé"
+            className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-6"
+          >
             {footerLinks.map((item) => (
               <InstitutionalNavLink
                 key={`${item.href}-${item.label}`}

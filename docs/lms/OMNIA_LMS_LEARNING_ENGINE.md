@@ -18,15 +18,15 @@ Aluno → Experience (UI)
 
 ### Responsabilidades
 
-| Módulo | Função |
-| --- | --- |
+| Módulo            | Função                                                                        |
+| ----------------- | ----------------------------------------------------------------------------- |
 | Continue Learning | Resolve alvo via pointer + progresso; **sem** regra acoplada a `localStorage` |
-| Learning Timeline | Itens derivados de eventos (Hoje → aula → material → conclusão) |
-| Learning Events | Envelope do Event Catalog + store |
-| Learning State | Snapshot: continue, progress, completion, timeline |
-| Learning Cache | Cache TTL in-memory de snapshots |
-| Progress Sync | Agrega completion Moodle → % + evento `progress.updated` |
-| Completion Sync | Curso completed → `course.completed` |
+| Learning Timeline | Itens derivados de eventos (Hoje → aula → material → conclusão)               |
+| Learning Events   | Envelope do Event Catalog + store                                             |
+| Learning State    | Snapshot: continue, progress, completion, timeline                            |
+| Learning Cache    | Cache TTL in-memory de snapshots                                              |
+| Progress Sync     | Agrega completion Moodle → % + evento `progress.updated`                      |
+| Completion Sync   | Curso completed → `course.completed`                                          |
 
 ### Persistência
 

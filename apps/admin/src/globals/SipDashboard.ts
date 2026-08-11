@@ -7,7 +7,8 @@ export const SipDashboard: GlobalConfig = {
   label: 'Dashboard SIP',
   admin: {
     group: 'Student Intelligence',
-    description: 'Distribuição de competências, risco, retenção e uso do Tutor (sem dados clínicos).',
+    description:
+      'Distribuição de competências, risco, retenção e uso do Tutor (sem dados clínicos).',
   },
   access: {
     read: kiStaffAccess,

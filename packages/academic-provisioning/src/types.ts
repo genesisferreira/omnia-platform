@@ -5,26 +5,11 @@
 
 export type ProvisionMode = 'dry-run' | 'execute';
 
-export type ProvisionUserAction =
-  | 'create'
-  | 'update'
-  | 'disable'
-  | 'enable'
-  | 'sync';
+export type ProvisionUserAction = 'create' | 'update' | 'disable' | 'enable' | 'sync';
 
-export type EnrollmentAction =
-  | 'enroll'
-  | 'unenroll'
-  | 'suspend'
-  | 'reactivate'
-  | 'sync';
+export type EnrollmentAction = 'enroll' | 'unenroll' | 'suspend' | 'reactivate' | 'sync';
 
-export type ProvisionJobStatus =
-  | 'queued'
-  | 'processing'
-  | 'succeeded'
-  | 'failed'
-  | 'dead_letter';
+export type ProvisionJobStatus = 'queued' | 'processing' | 'succeeded' | 'failed' | 'dead_letter';
 
 export type ProvisionActor = {
   omniaUserId: string;

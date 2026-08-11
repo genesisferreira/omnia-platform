@@ -9,10 +9,7 @@ export async function findIdentityLink(
   const result = await payload.find({
     collection: 'lms-identity-links',
     where: {
-      and: [
-        { omniaUserId: { equals: omniaUserId } },
-        { status: { equals: 'active' } },
-      ],
+      and: [{ omniaUserId: { equals: omniaUserId } }, { status: { equals: 'active' } }],
     },
     limit: 1,
     depth: 0,
@@ -27,14 +24,9 @@ export async function findIdentityLink(
     moodleUserId: Number(doc.moodleUserId),
     moodleUsername: typeof doc.moodleUsername === 'string' ? doc.moodleUsername : null,
     status: (doc.status as LmsIdentityLink['status']) || 'active',
-    linkedAt:
-      doc.linkedAt != null
-        ? new Date(doc.linkedAt as string | Date).toISOString()
-        : null,
+    linkedAt: doc.linkedAt != null ? new Date(doc.linkedAt as string | Date).toISOString() : null,
     lastSyncedAt:
-      doc.lastSyncedAt != null
-        ? new Date(doc.lastSyncedAt as string | Date).toISOString()
-        : null,
+      doc.lastSyncedAt != null ? new Date(doc.lastSyncedAt as string | Date).toISOString() : null,
     syncStatus: (doc.syncStatus as LmsIdentityLink['syncStatus']) || 'never',
   };
 }

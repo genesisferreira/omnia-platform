@@ -10,14 +10,14 @@ Curso (Portal) → Perguntar à IA → Retrieval → Runtime → Resposta + Font
 
 ## Componentes
 
-| Camada | Artefato |
-|--------|----------|
-| Runtime | `@omnia/neurofrigo-runtime` |
-| LLM | `GroundedExtractiveProvider` (default) / OpenAI-compatible |
-| Prompt | `PromptBuilder` |
-| Context | `ContextBuilder` |
-| Admin | `ai-sessions`, `neurofrigo-ai-dashboard`, `POST /api/omnia/ai/chat` |
-| Portal | `AskAiPanel` + `POST /api/ai/chat` (BFF) |
+| Camada  | Artefato                                                            |
+| ------- | ------------------------------------------------------------------- |
+| Runtime | `@omnia/neurofrigo-runtime`                                         |
+| LLM     | `GroundedExtractiveProvider` (default) / OpenAI-compatible          |
+| Prompt  | `PromptBuilder`                                                     |
+| Context | `ContextBuilder`                                                    |
+| Admin   | `ai-sessions`, `neurofrigo-ai-dashboard`, `POST /api/omnia/ai/chat` |
+| Portal  | `AskAiPanel` + `POST /api/ai/chat` (BFF)                            |
 
 ## Fluxo
 
@@ -36,12 +36,12 @@ Runtime **não** acessa Payload/pgvector diretamente — só ports.
 
 ## Config
 
-| Env | Default | Descrição |
-|-----|---------|-----------|
-| `NEUROFRIGO_LLM_PROVIDER` | `grounded` | `grounded` \| `openai` \| `deepseek` |
-| `NEUROFRIGO_LLM_MODEL` | provider default | Modelo |
-| `NEUROFRIGO_LLM_API_KEY` | — | Se provider HTTP |
-| `NEUROFRIGO_LLM_BASE_URL` | OpenAI/DeepSeek | Base URL |
+| Env                       | Default          | Descrição                            |
+| ------------------------- | ---------------- | ------------------------------------ |
+| `NEUROFRIGO_LLM_PROVIDER` | `grounded`       | `grounded` \| `openai` \| `deepseek` |
+| `NEUROFRIGO_LLM_MODEL`    | provider default | Modelo                               |
+| `NEUROFRIGO_LLM_API_KEY`  | —                | Se provider HTTP                     |
+| `NEUROFRIGO_LLM_BASE_URL` | OpenAI/DeepSeek  | Base URL                             |
 
 ## Homologação
 

@@ -20,13 +20,13 @@ Portal (seleção de assistente)
 
 ## Entregáveis
 
-1. `@omnia/enterprise-ai` — compose prompts, Policy Engine, resolve runtime config  
-2. Collections: `ai-models`, `ai-assistants`, `ai-prompts`, `ai-policies`  
-3. Global: `enterprise-ai-dashboard`  
-4. Endpoints: `GET /omnia/enterprise/assistants`, `POST /omnia/enterprise/dashboard/refresh`  
-5. Chat unificado: `assistantId` em `POST /omnia/ai/chat`  
-6. Portal: seletor **Conversar com** (lista filtrada por política)  
-7. Migration `20260807_180000_enterprise_ai`  
+1. `@omnia/enterprise-ai` — compose prompts, Policy Engine, resolve runtime config
+2. Collections: `ai-models`, `ai-assistants`, `ai-prompts`, `ai-policies`
+3. Global: `enterprise-ai-dashboard`
+4. Endpoints: `GET /omnia/enterprise/assistants`, `POST /omnia/enterprise/dashboard/refresh`
+5. Chat unificado: `assistantId` em `POST /omnia/ai/chat`
+6. Portal: seletor **Conversar com** (lista filtrada por política)
+7. Migration `20260807_180000_enterprise_ai`
 8. Bootstrap mode `enterprise-ai`
 
 ## Assistentes seed

@@ -23,8 +23,7 @@ export const enterpriseAssistantsEndpoint: Endpoint = {
     if (isAuthResponse(auth)) return auth;
     const url = new URL(req.url || 'http://local');
     const roleParam = url.searchParams.get('role');
-    const role =
-      auth.isStaff && roleParam ? roleParam : auth.role || 'student';
+    const role = auth.isStaff && roleParam ? roleParam : auth.role || 'student';
 
     const evaluated = await listAllowedAssistants(req.payload, {
       role,

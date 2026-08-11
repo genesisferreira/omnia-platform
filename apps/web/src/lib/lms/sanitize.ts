@@ -1,5 +1,4 @@
-const MOODLE_URL_RE =
-  /https?:\/\/[^\s"'<>]*moodle[^\s"'<>]*/gi;
+const MOODLE_URL_RE = /https?:\/\/[^\s"'<>]*moodle[^\s"'<>]*/gi;
 const WSTOKEN_RE = /([?&]wstoken=)[^&\s"'<>]+/gi;
 
 /** Remove URLs Moodle / wstoken de payloads destinados ao browser. */

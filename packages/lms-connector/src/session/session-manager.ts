@@ -232,11 +232,9 @@ export class LmsSessionManager {
 
     if (!this.memory) {
       recordSessionCreate(false);
-      throw new LmsConnectorError(
-        'SESSION_STORE_UNAVAILABLE',
-        'LMS session store unavailable',
-        { httpStatus: 503 },
-      );
+      throw new LmsConnectorError('SESSION_STORE_UNAVAILABLE', 'LMS session store unavailable', {
+        httpStatus: 503,
+      });
     }
 
     const revoked = this.claimWithMemory(session, input.policy);
@@ -252,10 +250,7 @@ export class LmsSessionManager {
     }
     this.assertActive(session);
     session.lastSeenAt = new Date().toISOString();
-    const ttl = Math.max(
-      60,
-      Math.ceil((Date.parse(session.expiresAt) - Date.now()) / 1000),
-    );
+    const ttl = Math.max(60, Math.ceil((Date.parse(session.expiresAt) - Date.now()) / 1000));
     await this.saveSession(session, ttl);
     return session;
   }
@@ -277,10 +272,7 @@ export class LmsSessionManager {
     session.revokedAt = new Date().toISOString();
     session.revokeReason = reason;
     session.replacementSessionId = replacementSessionId;
-    const ttl = Math.max(
-      60,
-      Math.ceil((Date.parse(session.expiresAt) - Date.now()) / 1000),
-    );
+    const ttl = Math.max(60, Math.ceil((Date.parse(session.expiresAt) - Date.now()) / 1000));
     await this.saveSession(session, ttl);
     if (this.redis) {
       await this.redis.srem(userIndexKey(this.ns, session.userId), sessionId);
@@ -399,10 +391,7 @@ export class LmsSessionManager {
     return [];
   }
 
-  private claimWithMemory(
-    session: LmsSessionRecord,
-    policy: LmsResolvedPolicy,
-  ): string[] {
+  private claimWithMemory(session: LmsSessionRecord, policy: LmsResolvedPolicy): string[] {
     if (!this.memory) return [];
     this.memory.sessions.set(session.sessionId, session);
     const set = this.memory.byUser.get(session.userId) ?? new Set();

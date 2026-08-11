@@ -25,26 +25,26 @@ Internal S2S Client
 
 ## Package
 
-| Módulo | Responsabilidade |
-|--------|------------------|
-| `ProvisionService` | create/update/disable/enable/sync user |
-| `EnrollmentService` | enroll/unenroll/suspend/reactivate/sync |
-| `IdentitySync` | dedupe por `omniaUserId` + link ativo |
-| `ProvisionQueue` | register / enqueue / dequeue / ack / nack / DLQ |
-| `RetryPolicy` | backoff `min(2^n * base, max)` |
-| `security` | RBAC admin\|manager + Idempotency-Key |
+| Módulo              | Responsabilidade                                |
+| ------------------- | ----------------------------------------------- |
+| `ProvisionService`  | create/update/disable/enable/sync user          |
+| `EnrollmentService` | enroll/unenroll/suspend/reactivate/sync         |
+| `IdentitySync`      | dedupe por `omniaUserId` + link ativo           |
+| `ProvisionQueue`    | register / enqueue / dequeue / ack / nack / DLQ |
+| `RetryPolicy`       | backoff `min(2^n * base, max)`                  |
+| `security`          | RBAC admin\|manager + Idempotency-Key           |
 
 Sem UI. Sem dependência de Next/Payload no package (portas injetadas).
 
 ## Endpoints (Admin only)
 
-| Method | Path | Ação |
-|--------|------|------|
-| POST | `/api/omnia/lms/internal/provision/users` | user commands |
-| POST | `/api/omnia/lms/internal/provision/enrollments` | enrollment commands |
-| GET | `/api/omnia/lms/internal/provision/jobs/:id` | status job |
-| GET | `/api/omnia/lms/internal/provision/capabilities` | write contracts |
-| POST | `/api/omnia/lms/internal/provision/worker/tick` | processa N jobs |
+| Method | Path                                             | Ação                |
+| ------ | ------------------------------------------------ | ------------------- |
+| POST   | `/api/omnia/lms/internal/provision/users`        | user commands       |
+| POST   | `/api/omnia/lms/internal/provision/enrollments`  | enrollment commands |
+| GET    | `/api/omnia/lms/internal/provision/jobs/:id`     | status job          |
+| GET    | `/api/omnia/lms/internal/provision/capabilities` | write contracts     |
+| POST   | `/api/omnia/lms/internal/provision/worker/tick`  | processa N jobs     |
 
 Auth: `x-omnia-internal-key` + `x-omnia-user-id` + `x-omnia-lms-role: admin|manager`.  
 Header `Idempotency-Key` obrigatório (8–128 chars). Cookie browser **recusado**.
@@ -56,11 +56,11 @@ IdentityLink **não** é criado/atualizado. Auditoria registra intenção.
 
 ## Flags
 
-| Env / Setting | Default | Nota |
-|---------------|---------|------|
-| `MOODLE_PROVISION_ENABLED` / `provisionEnabled` | true | Liga endpoints |
-| `MOODLE_PROVISION_DRY_RUN` / `provisionDryRun` | true | Dry-run |
-| `MOODLE_PROVISION_EXECUTE` | false | Bloqueado neste épico |
+| Env / Setting                                   | Default | Nota                  |
+| ----------------------------------------------- | ------- | --------------------- |
+| `MOODLE_PROVISION_ENABLED` / `provisionEnabled` | true    | Liga endpoints        |
+| `MOODLE_PROVISION_DRY_RUN` / `provisionDryRun`  | true    | Dry-run               |
+| `MOODLE_PROVISION_EXECUTE`                      | false   | Bloqueado neste épico |
 
 ## Referências
 

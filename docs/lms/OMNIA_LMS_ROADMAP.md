@@ -20,12 +20,12 @@
 
 ## Sprint 2.4 — Fundação engine + Blueprint
 
-| Item | Entrega |
-| --- | --- |
-| 2.4.1 | Infra Docker Moodle engine (DEV) — **feito** |
-| 2.4.2 | Instalação limpa validada + HTTPS — **em curso / baseline OK** |
+| Item  | Entrega                                                             |
+| ----- | ------------------------------------------------------------------- |
+| 2.4.1 | Infra Docker Moodle engine (DEV) — **feito**                        |
+| 2.4.2 | Instalação limpa validada + HTTPS — **em curso / baseline OK**      |
 | 2.4.3 | Blueprint aprovado + Auditoria Funcional Moodle + desenho Connector |
-| Fora | UI produto, SSO, IA, migração HostGator |
+| Fora  | UI produto, SSO, IA, migração HostGator                             |
 
 **Saída:** Blueprint oficial + mapa “nativo / config / Omnia / Neurofrigo / Ext”.
 
@@ -115,12 +115,12 @@
 
 ## Sprint 3.1 — Neurofrigo Runtime Blueprint (spec only)
 
-- Runtime Spec + Orchestrator + Agent Catalog  
-- Security / Compliance / Assessment Integrity Guards  
-- Context, Tool, Memory, Knowledge, RAG policies  
-- Portal Chat Journey + Adaptive Learning (níveis 1–2)  
-- Implementation Roadmap Fases 1–5  
-- **Sem** implementação de LLM / SDKs nesta sprint  
+- Runtime Spec + Orchestrator + Agent Catalog
+- Security / Compliance / Assessment Integrity Guards
+- Context, Tool, Memory, Knowledge, RAG policies
+- Portal Chat Journey + Adaptive Learning (níveis 1–2)
+- Implementation Roadmap Fases 1–5
+- **Sem** implementação de LLM / SDKs nesta sprint
 
 Docs: [`../neurofrigo/README.md`](../neurofrigo/README.md) · Decisões **D020**, **D021**.
 
@@ -132,15 +132,15 @@ Docs: [`../neurofrigo/README.md`](../neurofrigo/README.md) · Decisões **D020**
 
 ## Dependências críticas entre sprints
 
-| Antes | Depois |
-| --- | --- |
-| 2.4 Auditoria | 2.5 Connector (não inventar o que Moodle já faz) |
-| 2.5 Connector | 2.6 Aluno |
-| 2.6 Progresso | 2.7 Certificados |
-| 2.8 Vídeo | 3.0 Offline vídeo |
-| 2.9 Billing | 3.0 Assinaturas avançadas |
-| 3.0 Media Auth + Provisioning | 3.1 Neurofrigo Spec |
-| Write APIs acadêmicas (LMS) | Neurofrigo Fase 1+ com tools de escrita |
+| Antes                         | Depois                                           |
+| ----------------------------- | ------------------------------------------------ |
+| 2.4 Auditoria                 | 2.5 Connector (não inventar o que Moodle já faz) |
+| 2.5 Connector                 | 2.6 Aluno                                        |
+| 2.6 Progresso                 | 2.7 Certificados                                 |
+| 2.8 Vídeo                     | 3.0 Offline vídeo                                |
+| 2.9 Billing                   | 3.0 Assinaturas avançadas                        |
+| 3.0 Media Auth + Provisioning | 3.1 Neurofrigo Spec                              |
+| Write APIs acadêmicas (LMS)   | Neurofrigo Fase 1+ com tools de escrita          |
 
 ---
 

@@ -106,8 +106,7 @@ async function main() {
       name: 'Avaliador',
       category: 'assessor',
       description: 'Estruturação de avaliações para equipe autorizada.',
-      defaultContext:
-        'Ajude a estruturar avaliações. Nunca entregue gabarito a alunos.',
+      defaultContext: 'Ajude a estruturar avaliações. Nunca entregue gabarito a alunos.',
     },
     {
       key: 'tutor',

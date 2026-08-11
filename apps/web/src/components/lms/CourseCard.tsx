@@ -44,7 +44,9 @@ export function CourseCard({
           </Badge>
         </div>
         {summary ? (
-          <CardDescription className="line-clamp-2">{summary.replace(/<[^>]+>/g, '')}</CardDescription>
+          <CardDescription className="line-clamp-2">
+            {summary.replace(/<[^>]+>/g, '')}
+          </CardDescription>
         ) : null}
       </CardHeader>
       <CardContent className="flex-1">

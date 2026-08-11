@@ -67,10 +67,7 @@ export default async function LmsCoursesPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb
-        items={[
-          { label: 'LMS', href: '/lms' },
-          { label: 'Meus cursos' },
-        ]}
+        items={[{ label: 'LMS', href: '/lms' }, { label: 'Meus cursos' }]}
         linkComponent={Link}
       />
       <h1 className="font-heading text-3xl font-bold">Meus cursos</h1>

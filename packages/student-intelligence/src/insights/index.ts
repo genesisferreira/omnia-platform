@@ -21,8 +21,7 @@ export function computeInsights(input: {
 }): StudentInsights {
   const now = input.now || new Date().toISOString();
   const comps = input.competencies;
-  const avgScore =
-    comps.length === 0 ? 0 : comps.reduce((s, c) => s + c.score, 0) / comps.length;
+  const avgScore = comps.length === 0 ? 0 : comps.reduce((s, c) => s + c.score, 0) / comps.length;
   const avgConf =
     comps.length === 0 ? 0 : comps.reduce((s, c) => s + c.confidence, 0) / comps.length;
 
@@ -37,9 +36,7 @@ export function computeInsights(input: {
       Math.min(0.3, input.signals.difficultyTopics.length * 0.05) +
       Math.min(0.2, input.signals.masteredTopics.length * 0.03),
   );
-  const confidenceIndex = clamp01(
-    avgConf * 0.6 + clamp01(input.signals.avgGrounding) * 0.4,
-  );
+  const confidenceIndex = clamp01(avgConf * 0.6 + clamp01(input.signals.avgGrounding) * 0.4);
   const reviewRisk = clamp01(
     1 -
       knowledgeRetention * 0.5 -

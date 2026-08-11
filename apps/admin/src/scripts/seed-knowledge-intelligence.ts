@@ -32,10 +32,8 @@ async function main() {
 
   const { getPayload } = await import('payload');
   const { default: config } = await import('../../payload.config');
-  const {
-    processLearningResource,
-    refreshKiDashboard,
-  } = await import('../services/knowledge-intelligence/pipeline');
+  const { processLearningResource, refreshKiDashboard } =
+    await import('../services/knowledge-intelligence/pipeline');
 
   const payload = await getPayload({ config });
 

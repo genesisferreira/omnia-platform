@@ -108,9 +108,7 @@ async function main() {
     process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic';
 
   // Pré-gera PPTX fixture (sem boot Payload). Fallback se ZIP mínimo falhar.
-  const { buildMinimalPptx } = await import(
-    '../services/knowledge-intelligence/office-fixtures'
-  );
+  const { buildMinimalPptx } = await import('../services/knowledge-intelligence/office-fixtures');
   let pptxBytes: Buffer | null = null;
   let pptxExtracted: { text: string; meta: Record<string, unknown> } | null = null;
   try {
@@ -121,10 +119,7 @@ async function main() {
       filename: 'neurofrigo-epic10-carga.pptx',
     });
   } catch (err) {
-    console.warn(
-      'E10_PPTX_FIXTURE_SKIP',
-      err instanceof Error ? err.message : String(err),
-    );
+    console.warn('E10_PPTX_FIXTURE_SKIP', err instanceof Error ? err.message : String(err));
     pptxBytes = null;
     pptxExtracted = null;
   }
@@ -146,9 +141,8 @@ async function main() {
 
   const { getPayload } = await import('payload');
   const { default: config } = await import('../../payload.config');
-  const { processLearningResource, refreshKiDashboard } = await import(
-    '../services/knowledge-intelligence/pipeline'
-  );
+  const { processLearningResource, refreshKiDashboard } =
+    await import('../services/knowledge-intelligence/pipeline');
   const { processEmbeddingQueue } = await import('../services/retrieval/worker');
   const { runSemanticSearch } = await import('../services/retrieval/search');
   const { refreshRetrievalDashboard } = await import('../services/retrieval/dashboard');
@@ -338,8 +332,7 @@ async function main() {
       overrideAccess: true,
     });
     const existingDoc = existingRes.docs[0] as
-      | { id: string | number; title?: string; processingStatus?: string }
-      | undefined;
+      { id: string | number; title?: string; processingStatus?: string } | undefined;
     if (existingDoc?.processingStatus === 'completed') {
       imported.push({
         filename,
@@ -367,11 +360,7 @@ async function main() {
     let preExtracted: { text: string; meta: Record<string, unknown> } | undefined;
     if (resourceType === 'pdf' && pdfExtracted && filename.includes('epic10-carga.pdf')) {
       preExtracted = pdfExtracted;
-    } else if (
-      resourceType === 'pptx' &&
-      filename.includes('epic10-carga.pptx') &&
-      pptxExtracted
-    ) {
+    } else if (resourceType === 'pptx' && filename.includes('epic10-carga.pptx') && pptxExtracted) {
       preExtracted = pptxExtracted;
     } else if (resourceType === 'pdf') {
       preExtracted = await extractByType('pdf', buffer, { mimeType: mime, filename });
@@ -395,11 +384,7 @@ async function main() {
     categoriesCreated.add(classification.categoryName);
     let subcategoryId: string | number | null = null;
     if (classification.subcategoryName) {
-      subcategoryId = await ensureCategory(
-        payload,
-        classification.subcategoryName,
-        categoryId,
-      );
+      subcategoryId = await ensureCategory(payload, classification.subcategoryName, categoryId);
       categoriesCreated.add(classification.subcategoryName);
     }
     for (const a of classification.allowedAgents) agentsLinked.add(a);

@@ -88,10 +88,7 @@ export default async function LmsDashboardPage() {
 
   const items = coursesRes.data?.items || [];
   const hello =
-    meData?.user?.fullName ||
-    meData?.user?.firstName ||
-    portalUser.firstName ||
-    'aluno';
+    meData?.user?.fullName || meData?.user?.firstName || portalUser.firstName || 'aluno';
 
   const progressMap: Record<number, number> = {};
   await Promise.all(
@@ -116,7 +113,10 @@ export default async function LmsDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <Breadcrumb items={[{ label: 'LMS', href: '/lms' }, { label: 'Dashboard' }]} linkComponent={Link} />
+      <Breadcrumb
+        items={[{ label: 'LMS', href: '/lms' }, { label: 'Dashboard' }]}
+        linkComponent={Link}
+      />
 
       <section>
         <h1 className="font-heading text-3xl font-bold tracking-tight text-foreground">
@@ -184,8 +184,7 @@ export default async function LmsDashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.slice(0, 6).map((item) => {
               const pct = progressMap[item.moodleCourseId] || 0;
-              const status =
-                pct >= 100 ? 'concluido' : pct > 0 ? 'em_andamento' : 'nao_iniciado';
+              const status = pct >= 100 ? 'concluido' : pct > 0 ? 'em_andamento' : 'nao_iniciado';
               return (
                 <CourseCard
                   key={item.moodleCourseId}
@@ -219,7 +218,9 @@ export default async function LmsDashboardPage() {
             <CardTitle className="text-base">Horas estudadas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Placeholder — métrica de negócio em evolução</p>
+            <p className="text-sm text-muted-foreground">
+              Placeholder — métrica de negócio em evolução
+            </p>
           </CardContent>
         </Card>
       </section>

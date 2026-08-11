@@ -3,10 +3,7 @@ import type { Endpoint, PayloadRequest } from 'payload';
 import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared/rate-limit';
 
 import { isTrustedPartnerOrigin } from '../lib/partner-register';
-import {
-  lookupPostalCode,
-  normalizeBrazilianPostalCode,
-} from '../lib/postal-code/provider';
+import { lookupPostalCode, normalizeBrazilianPostalCode } from '../lib/postal-code/provider';
 
 const json = (status: number, body: unknown, cache = true): Response =>
   Response.json(body, {

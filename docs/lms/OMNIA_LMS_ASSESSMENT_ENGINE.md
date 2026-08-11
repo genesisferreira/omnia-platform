@@ -12,14 +12,14 @@ Aluno → Experience → Learning Engine → Assessment Engine → Connector →
 
 ## Responsabilidades
 
-| Módulo | Função |
-| --- | --- |
-| Assessment State | Snapshot resolvido (status, grade, feedback, completion) |
-| Assessment Timeline | Eventos via Learning Engine |
-| Assessment Events | `assessment.*`, `quiz.viewed`, `assignment.viewed`, `grade.viewed`, `feedback.viewed` |
-| Assessment Cache | TTL in-memory |
-| Assessment Metadata | Nome, tipo, instruções, estimativa |
-| Assessment Status | Disponível / Indisponível / Em andamento / Concluído / Nota / Feedback |
+| Módulo              | Função                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| Assessment State    | Snapshot resolvido (status, grade, feedback, completion)                              |
+| Assessment Timeline | Eventos via Learning Engine                                                           |
+| Assessment Events   | `assessment.*`, `quiz.viewed`, `assignment.viewed`, `grade.viewed`, `feedback.viewed` |
+| Assessment Cache    | TTL in-memory                                                                         |
+| Assessment Metadata | Nome, tipo, instruções, estimativa                                                    |
+| Assessment Status   | Disponível / Indisponível / Em andamento / Concluído / Nota / Feedback                |
 
 ## Security ready (stubs)
 

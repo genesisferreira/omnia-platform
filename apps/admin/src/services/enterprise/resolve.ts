@@ -7,10 +7,7 @@ import {
 
 import { loadAiModels, loadAssistants, loadPolicies, loadPrompts } from './registry';
 
-export async function listAllowedAssistants(
-  payload: Payload,
-  subject: PolicySubject,
-) {
+export async function listAllowedAssistants(payload: Payload, subject: PolicySubject) {
   const [assistants, policies] = await Promise.all([
     loadAssistants(payload),
     loadPolicies(payload),

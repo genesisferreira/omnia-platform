@@ -31,11 +31,7 @@ function mapRole(role: string | null | undefined): string {
 export default async function LmsLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePortalSession('/lms');
   return (
-    <LmsAppShell
-      omniaUserId={user.id}
-      userName={displayName(user)}
-      actorRole={mapRole(user.role)}
-    >
+    <LmsAppShell omniaUserId={user.id} userName={displayName(user)} actorRole={mapRole(user.role)}>
       {children}
     </LmsAppShell>
   );

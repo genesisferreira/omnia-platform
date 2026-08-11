@@ -68,9 +68,7 @@ export async function enrichPartnerLocationFromPostalCode(
   };
 }
 
-export async function resolvePartnerGeocode(
-  data: PartnerLocationFields,
-): Promise<{
+export async function resolvePartnerGeocode(data: PartnerLocationFields): Promise<{
   latitude: number | null;
   longitude: number | null;
   geocodingStatus: 'pending' | 'success' | 'failed' | 'manual';

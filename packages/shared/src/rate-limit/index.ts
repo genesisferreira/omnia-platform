@@ -206,10 +206,10 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
   const redisUrl = process.env.REDIS_URL?.trim();
   // APP_ENV/OMNIA_ENV=staging deve usar memory-fallback mesmo com NODE_ENV=production (imagem Next).
   const deployEnv = (process.env.APP_ENV || process.env.OMNIA_ENV || '').toLowerCase();
-  const isStrictProd = deployEnv === 'production' || (!deployEnv && process.env.NODE_ENV === 'production');
+  const isStrictProd =
+    deployEnv === 'production' || (!deployEnv && process.env.NODE_ENV === 'production');
   const unavailableMode =
-    options.onRedisUnavailable ??
-    (redisUrl && isStrictProd ? 'fail-closed' : 'memory-fallback');
+    options.onRedisUnavailable ?? (redisUrl && isStrictProd ? 'fail-closed' : 'memory-fallback');
 
   try {
     const result = await allowRedis(keys, max, windowMs);
@@ -285,7 +285,8 @@ export async function peekRateLimit(options: RateLimitOptions): Promise<RateLimi
   }
 
   const deployEnv = (process.env.APP_ENV || process.env.OMNIA_ENV || '').toLowerCase();
-  const isStrictProd = deployEnv === 'production' || (!deployEnv && process.env.NODE_ENV === 'production');
+  const isStrictProd =
+    deployEnv === 'production' || (!deployEnv && process.env.NODE_ENV === 'production');
   const unavailableMode =
     options.onRedisUnavailable ??
     (process.env.REDIS_URL && isStrictProd ? 'fail-closed' : 'memory-fallback');

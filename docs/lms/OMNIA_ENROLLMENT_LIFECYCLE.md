@@ -4,13 +4,13 @@
 
 ## Ações
 
-| Ação | Comportamento dry-run |
-|------|------------------------|
-| `enroll` | Simula `enrol_manual_enrol_users` |
-| `unenroll` | Simula `enrol_manual_unenrol_users` |
-| `suspend` | Simula status suspended (sem HTTP) |
-| `reactivate` | Simula status active (sem HTTP) |
-| `sync` | Trata como enroll simulado |
+| Ação         | Comportamento dry-run               |
+| ------------ | ----------------------------------- |
+| `enroll`     | Simula `enrol_manual_enrol_users`   |
+| `unenroll`   | Simula `enrol_manual_unenrol_users` |
+| `suspend`    | Simula status suspended (sem HTTP)  |
+| `reactivate` | Simula status active (sem HTTP)     |
+| `sync`       | Trata como enroll simulado          |
 
 ## Pré-requisitos
 

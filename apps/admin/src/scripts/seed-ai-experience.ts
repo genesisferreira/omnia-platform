@@ -93,7 +93,9 @@ async function main() {
 
   if (follow.sessionId !== first.sessionId) throw new Error('FOLLOWUP_SESSION_MISMATCH');
   if (first.answer.status !== 'ok') {
-    throw new Error(`EXPECTED_GROUNDED_FIRST got=${first.answer.status} code=${first.answer.errorCode}`);
+    throw new Error(
+      `EXPECTED_GROUNDED_FIRST got=${first.answer.status} code=${first.answer.errorCode}`,
+    );
   }
   if (empty.answer.status !== 'not_found') throw new Error('EXPECTED_NOT_FOUND');
   if (!first.answer.explainability) throw new Error('MISSING_EXPLAINABILITY');

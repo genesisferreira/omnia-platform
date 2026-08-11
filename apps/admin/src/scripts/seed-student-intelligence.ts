@@ -8,9 +8,7 @@ async function main() {
 
   const { getPayload } = await import('payload');
   const { default: config } = await import('../../payload.config');
-  const { recalculateSipProfile, getSipAssistantContext } = await import(
-    '../services/sip/profile'
-  );
+  const { recalculateSipProfile, getSipAssistantContext } = await import('../services/sip/profile');
   const { refreshSipDashboard } = await import('../services/sip/dashboard');
   const { runTutorAsk } = await import('../services/tutor/ask');
   const { runNeurofrigoAsk } = await import('../services/neurofrigo/ask');

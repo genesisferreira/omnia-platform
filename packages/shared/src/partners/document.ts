@@ -50,8 +50,7 @@ function cnpjCheckDigits(base: string): string {
 }
 
 export type DocumentValidation =
-  | { ok: true; digits: string; kind: 'cpf' | 'cnpj' }
-  | { ok: false; message: string };
+  { ok: true; digits: string; kind: 'cpf' | 'cnpj' } | { ok: false; message: string };
 
 export function validateBrazilianDocument(value: unknown): DocumentValidation {
   const digits = stripDocumentDigits(value);

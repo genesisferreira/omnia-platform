@@ -149,7 +149,10 @@ export function buildMaterialsFromLesson(input: BuildMaterialsInput): MaterialDe
         statusLabel: 'Disponível',
         mimeType: 'text/html',
       },
-      source: { body: summary, assetId: `omnia-material:${input.courseId}:${input.activity.moodleActivityId}:module-html` },
+      source: {
+        body: summary,
+        assetId: `omnia-material:${input.courseId}:${input.activity.moodleActivityId}:module-html`,
+      },
       permissions: basePerms,
     });
   }

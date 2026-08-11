@@ -6,7 +6,12 @@ import type {
   SignedAccessIssuer,
   SignedAccessStorePort,
 } from './ports';
-import type { MediaDecision, MediaRevokeCommand, MediaSignCommand, SignedAccessToken } from './types';
+import type {
+  MediaDecision,
+  MediaRevokeCommand,
+  MediaSignCommand,
+  SignedAccessToken,
+} from './types';
 
 export function createMemorySignedAccessStore(): SignedAccessStorePort {
   const byId = new Map<string, SignedAccessToken>();

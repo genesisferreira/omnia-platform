@@ -31,9 +31,7 @@ export async function runSemanticSearch(
   const userNumeric =
     session.userId && /^\d+$/.test(String(session.userId)) ? Number(session.userId) : null;
   const tenantNumeric =
-    session.tenantId && /^\d+$/.test(String(session.tenantId))
-      ? Number(session.tenantId)
-      : null;
+    session.tenantId && /^\d+$/.test(String(session.tenantId)) ? Number(session.tenantId) : null;
   const companyNumeric =
     session.ownerCompanyId && /^\d+$/.test(String(session.ownerCompanyId))
       ? Number(session.ownerCompanyId)

@@ -2,16 +2,17 @@
 
 ## Endpoints
 
-| Endpoint | Descrição |
-|----------|-----------|
-| `GET /api/metrics` | Prometheus text exposition |
+| Endpoint                    | Descrição                     |
+| --------------------------- | ----------------------------- |
+| `GET /api/metrics`          | Prometheus text exposition    |
 | `GET /api/omnia/lms/health` | Health expandido do connector |
-| `GET /api/health` | Health do processo Admin |
-| `GET /api/status` | Status da plataforma |
+| `GET /api/health`           | Health do processo Admin      |
+| `GET /api/status`           | Status da plataforma          |
 
 ## Métricas Prometheus (principais)
 
 ### Infra / HTTP
+
 - `http_requests_total`
 - `http_request_duration_seconds`
 - `http_errors_total`
@@ -22,6 +23,7 @@
 - `moodle_errors_total`
 
 ### Connector
+
 - `connector_cache_hit_total` / `connector_cache_miss_total`
 - `connector_active_sessions`
 - `connector_revoked_sessions`
@@ -30,6 +32,7 @@
 - `connector_health_status` (1 healthy / 0.5 degraded / 0.25 disabled / 0 unhealthy)
 
 ### Negócio (independentes do schema Moodle)
+
 - `lms_students_online`
 - `lms_courses_opened`
 - `lms_lessons_started` / `lms_lessons_completed`
@@ -41,6 +44,7 @@
 - `lms_api_errors`
 
 ### Academic Provisioning (Sprint 3.0)
+
 - `provision_success_total` / `provision_failure_total`
 - `enrollment_success_total` / `enrollment_failure_total`
 - `provision_retry_total`
@@ -48,6 +52,7 @@
 - `provision_latency_seconds`
 
 ### Media Authorization (Sprint 3.0B)
+
 - `media_authorize_total` / `media_authorize_denied_total`
 - `media_signed_total` / `media_revoked_total`
 - `media_cache_hits`
@@ -57,14 +62,14 @@
 
 Dashboards em `docker/observability/grafana/dashboards/`:
 
-| Arquivo | Foco |
-|---------|------|
-| `01-infraestrutura.json` | Infra |
-| `02-connector.json` | Connector / HTTP |
-| `03-sessoes.json` | Sessões |
-| `04-academico.json` | Academico RO |
-| `05-seguranca.json` | Segurança |
-| `06-provisioning.json` | Provision / enrollment |
+| Arquivo                       | Foco                           |
+| ----------------------------- | ------------------------------ |
+| `01-infraestrutura.json`      | Infra                          |
+| `02-connector.json`           | Connector / HTTP               |
+| `03-sessoes.json`             | Sessões                        |
+| `04-academico.json`           | Academico RO                   |
+| `05-seguranca.json`           | Segurança                      |
+| `06-provisioning.json`        | Provision / enrollment         |
 | `07-media-authorization.json` | Media authorize / sign / cache |
 
 ## Stack Docker (DEV)
@@ -81,13 +86,13 @@ Rede externa obrigatória: `omnia_internal` (mesma do staging).
 
 ## Variáveis
 
-| Var | Uso |
-|-----|-----|
-| `METRICS_SCRAPE_TOKEN` | Protege `/api/metrics` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Ex.: `http://omnia-otel-collector-dev:4318` |
-| `OTEL_SERVICE_NAME` | Default `omnia-admin` |
-| `OTEL_LOG_SPANS` | `true` para logar spans OK |
-| `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` | Grafana |
+| Var                                             | Uso                                         |
+| ----------------------------------------------- | ------------------------------------------- |
+| `METRICS_SCRAPE_TOKEN`                          | Protege `/api/metrics`                      |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`                   | Ex.: `http://omnia-otel-collector-dev:4318` |
+| `OTEL_SERVICE_NAME`                             | Default `omnia-admin`                       |
+| `OTEL_LOG_SPANS`                                | `true` para logar spans OK                  |
+| `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` | Grafana                                     |
 
 ## Dashboards Grafana
 

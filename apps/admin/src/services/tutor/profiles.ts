@@ -1,9 +1,5 @@
 import type { Payload } from 'payload';
-import type {
-  LearningProfile,
-  StudentProfile,
-  LearningLevel,
-} from '@omnia/neurofrigo-tutor';
+import type { LearningProfile, StudentProfile, LearningLevel } from '@omnia/neurofrigo-tutor';
 
 import { loadCourseCatalog } from './catalog';
 
@@ -81,10 +77,7 @@ export async function syncStudentProfile(
   const existing = await payload.find({
     collection: 'student-profiles',
     where: {
-      and: [
-        { userKey: { equals: input.userId } },
-        { course: { equals: catalog.courseId } },
-      ],
+      and: [{ userKey: { equals: input.userId } }, { course: { equals: catalog.courseId } }],
     },
     limit: 1,
     overrideAccess: true,
@@ -166,10 +159,7 @@ export async function syncLearningProfile(
   const existing = await payload.find({
     collection: 'learning-profiles',
     where: {
-      and: [
-        { userKey: { equals: input.userId } },
-        { course: { equals: courseId } },
-      ],
+      and: [{ userKey: { equals: input.userId } }, { course: { equals: courseId } }],
     },
     limit: 1,
     overrideAccess: true,
@@ -247,10 +237,7 @@ export async function recordLearningUsage(
   const found = await payload.find({
     collection: 'learning-profiles',
     where: {
-      and: [
-        { userKey: { equals: input.userId } },
-        { course: { equals: input.courseId } },
-      ],
+      and: [{ userKey: { equals: input.userId } }, { course: { equals: input.courseId } }],
     },
     limit: 1,
     overrideAccess: true,

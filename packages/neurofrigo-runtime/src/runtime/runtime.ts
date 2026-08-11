@@ -168,8 +168,7 @@ export class NeurofrigoRuntime {
         confidence,
         contextChars,
       });
-      const avgScore =
-        sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length);
+      const avgScore = sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length);
 
       const formattedText = formatResponse({
         text: completion.text,
@@ -188,8 +187,7 @@ export class NeurofrigoRuntime {
         promptTokens: completion.promptTokens || prompt.estimatedPromptTokens,
         completionTokens: completion.completionTokens,
         totalTokens:
-          completion.totalTokens ||
-          completion.promptTokens + completion.completionTokens,
+          completion.totalTokens || completion.promptTokens + completion.completionTokens,
         estimatedCostUsd: estimateCostUsd(
           completion.totalTokens || completion.promptTokens + completion.completionTokens,
           completion.provider || meta.name,

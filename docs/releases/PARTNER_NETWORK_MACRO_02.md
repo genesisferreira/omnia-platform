@@ -27,12 +27,12 @@ Experiência pública integrada do Partner Network:
 
 ## Arquitetura adotada
 
-| Camada | Responsabilidade |
-|--------|------------------|
-| `@omnia/shared/partners` | Contratos públicos, Haversine, CPF/CNPJ, publicação, map DTO |
-| `apps/admin` endpoints `/api/omnia/*` | Listagem, detalhe, taxonomias, register |
-| `apps/web` | UI Portal, SEO, nav, Home |
-| GeocodingProvider | Abstração (`none` \| `nominatim`) |
+| Camada                                | Responsabilidade                                             |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `@omnia/shared/partners`              | Contratos públicos, Haversine, CPF/CNPJ, publicação, map DTO |
+| `apps/admin` endpoints `/api/omnia/*` | Listagem, detalhe, taxonomias, register                      |
+| `apps/web`                            | UI Portal, SEO, nav, Home                                    |
+| GeocodingProvider                     | Abstração (`none` \| `nominatim`)                            |
 
 Padrões reutilizados: lead-capture (rate limit + honeypot + CORS), `buildPageMetadata`, soft-fail fetch, `nav-items`.
 
@@ -40,11 +40,11 @@ Padrões reutilizados: lead-capture (rate limit + honeypot + CORS), `buildPageMe
 
 ## Rotas públicas
 
-| Rota | Função |
-|------|--------|
-| `/parceiros` | Busca + filtros |
-| `/parceiros/cadastro` | Formulário (noindex) |
-| `/parceiros/[slug]` | Perfil (404 se não publicável) |
+| Rota                  | Função                         |
+| --------------------- | ------------------------------ |
+| `/parceiros`          | Busca + filtros                |
+| `/parceiros/cadastro` | Formulário (noindex)           |
+| `/parceiros/[slug]`   | Perfil (404 se não publicável) |
 
 Menu: **Parceiros** → Encontrar parceiros / Seja um parceiro.
 
@@ -52,24 +52,24 @@ Menu: **Parceiros** → Encontrar parceiros / Seja um parceiro.
 
 ## Collections / Globals
 
-| Slug | Alteração |
-|------|-----------|
-| `partner-specialties` | **Nova** |
-| `partners` | specialties, endereço detalhado, brandsServed, servicesDescription; `active` default false |
-| `partner-categories` | Sem mudança estrutural |
-| `partner-network-dashboard` | Sem mudança |
+| Slug                        | Alteração                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `partner-specialties`       | **Nova**                                                                                   |
+| `partners`                  | specialties, endereço detalhado, brandsServed, servicesDescription; `active` default false |
+| `partner-categories`        | Sem mudança estrutural                                                                     |
+| `partner-network-dashboard` | Sem mudança                                                                                |
 
 ---
 
 ## Endpoints
 
-| Método | Path |
-|--------|------|
-| GET | `/api/omnia/public-partners` |
-| GET | `/api/omnia/public-partner?slug=` |
-| GET | `/api/omnia/public-partner-categories` |
-| GET | `/api/omnia/public-partner-specialties` |
-| POST | `/api/omnia/partner-register` |
+| Método | Path                                    |
+| ------ | --------------------------------------- |
+| GET    | `/api/omnia/public-partners`            |
+| GET    | `/api/omnia/public-partner?slug=`       |
+| GET    | `/api/omnia/public-partner-categories`  |
+| GET    | `/api/omnia/public-partner-specialties` |
+| POST   | `/api/omnia/partner-register`           |
 
 ---
 
@@ -108,13 +108,13 @@ Cadastro público força: pending, active false, featured/verified false, plan f
 
 ## Variáveis de ambiente
 
-| Var | Uso |
-|-----|-----|
-| `GEOCODING_PROVIDER` | `none` (default) ou `nominatim` |
-| `GEOCODING_USER_AGENT` | Obrigatório para Nominatim |
-| `GEOCODING_API_KEY` | Reservado |
-| `NEXT_PUBLIC_PARTNER_GEO_ENABLED` | Documentado (UI pode usar depois) |
-| Existentes | `NEXT_PUBLIC_ADMIN_URL`, SMTP (e-mail confirmação best-effort) |
+| Var                               | Uso                                                            |
+| --------------------------------- | -------------------------------------------------------------- |
+| `GEOCODING_PROVIDER`              | `none` (default) ou `nominatim`                                |
+| `GEOCODING_USER_AGENT`            | Obrigatório para Nominatim                                     |
+| `GEOCODING_API_KEY`               | Reservado                                                      |
+| `NEXT_PUBLIC_PARTNER_GEO_ENABLED` | Documentado (UI pode usar depois)                              |
+| Existentes                        | `NEXT_PUBLIC_ADMIN_URL`, SMTP (e-mail confirmação best-effort) |
 
 ---
 

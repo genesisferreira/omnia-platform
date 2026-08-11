@@ -107,12 +107,17 @@ export function LmsShell({ userName, children }: LmsShellProps) {
             >
               Menu
             </Button>
-            <span className="hidden font-heading text-sm font-semibold sm:inline">Área de estudos</span>
+            <span className="hidden font-heading text-sm font-semibold sm:inline">
+              Área de estudos
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right text-sm sm:block">
               <p className="font-medium leading-tight">{userName}</p>
-              <Link href="/minha-conta" className="text-xs text-muted-foreground hover:text-foreground">
+              <Link
+                href="/minha-conta"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
                 Conta
               </Link>
             </div>

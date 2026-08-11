@@ -146,7 +146,9 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
               </p>
             </div>
             <div className="text-sm sm:col-span-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Próximas aulas</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Próximas aulas
+              </p>
               <ul className="mt-1 space-y-1 text-muted-foreground">
                 {nextLessons.length ? (
                   nextLessons.map((l) => <li key={l.slug}>· {l.title}</li>)
@@ -168,9 +170,14 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
 
           <div className="space-y-4">
             {turns.map((turn, idx) => (
-              <article key={`${turn.answer.sessionId}-${idx}`} className="space-y-2 border-b border-border/40 pb-4">
+              <article
+                key={`${turn.answer.sessionId}-${idx}`}
+                className="space-y-2 border-b border-border/40 pb-4"
+              >
                 <p className="text-sm font-medium text-foreground">Você: {turn.question}</p>
-                <div className="whitespace-pre-wrap text-sm text-muted-foreground">{turn.answer.text}</div>
+                <div className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {turn.answer.text}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {turn.answer.levelLabel || turn.answer.level || '—'} · {turn.answer.tookMs} ms ·
                   fontes {turn.answer.sourceCount ?? 0}
@@ -181,7 +188,9 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
                 ) : null}
                 {turn.answer.recommendations?.length ? (
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Recomendações</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Recomendações
+                    </p>
                     <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
                       {turn.answer.recommendations.map((r) => (
                         <li key={`${r.type}-${r.title}`}>
@@ -193,7 +202,9 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
                 ) : null}
                 {turn.answer.studyPlan?.steps?.length ? (
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Plano de estudo</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Plano de estudo
+                    </p>
                     <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
                       {turn.answer.studyPlan.steps.map((s) => (
                         <li key={s.order}>
@@ -219,9 +230,7 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
             ))}
           </div>
 
-          {pending ? (
-            <p className="text-sm text-muted-foreground">Tutor respondendo…</p>
-          ) : null}
+          {pending ? <p className="text-sm text-muted-foreground">Tutor respondendo…</p> : null}
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
           <div className="flex flex-col gap-2 sm:flex-row">

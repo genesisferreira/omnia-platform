@@ -1,8 +1,4 @@
-import type {
-  RetrievalQuery,
-  RetrievalResult,
-  SearchSessionInput,
-} from '../domain/types';
+import type { RetrievalQuery, RetrievalResult, SearchSessionInput } from '../domain/types';
 import { estimateTokens } from '../domain/utils';
 import type {
   AclFilterPort,

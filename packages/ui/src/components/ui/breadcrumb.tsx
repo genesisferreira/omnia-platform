@@ -21,7 +21,11 @@ export function Breadcrumb({ items, className, linkComponent: Link = 'a' }: Brea
           const last = index === items.length - 1;
           return (
             <li key={`${item.label}-${index}`} className="flex items-center gap-1">
-              {index > 0 ? <span aria-hidden className="px-1">/</span> : null}
+              {index > 0 ? (
+                <span aria-hidden className="px-1">
+                  /
+                </span>
+              ) : null}
               {item.href && !last ? (
                 <Link
                   href={item.href}

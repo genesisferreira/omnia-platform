@@ -47,8 +47,7 @@ export async function getVectorStore(): Promise<VectorStorePort> {
   if (vectorStore && schemaReady) return vectorStore;
 
   const dimensions = Number(
-    process.env.RETRIEVAL_EMBEDDING_DIMENSIONS ||
-      getEmbeddingProvider().metadata().dimensions,
+    process.env.RETRIEVAL_EMBEDDING_DIMENSIONS || getEmbeddingProvider().metadata().dimensions,
   );
   const modeEnv = (process.env.RETRIEVAL_VECTOR_MODE || 'auto').toLowerCase();
   const sql = createSqlExecutorFromUrl();

@@ -31,8 +31,4 @@ export {
   type ProvisionQueueStore,
 } from './queue';
 export { RetryPolicy, type RetryPolicyOptions } from './retry';
-export {
-  assertProvisionRole,
-  requireCorrelationId,
-  requireIdempotencyKey,
-} from './security';
+export { assertProvisionRole, requireCorrelationId, requireIdempotencyKey } from './security';

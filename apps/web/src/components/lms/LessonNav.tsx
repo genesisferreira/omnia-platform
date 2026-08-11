@@ -3,12 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@omnia/ui';
 
-import {
-  courseHref,
-  lessonHref,
-  moduleHref,
-  type FlatLesson,
-} from '@/lib/lms/lesson-nav';
+import { courseHref, lessonHref, moduleHref, type FlatLesson } from '@/lib/lms/lesson-nav';
 
 export type LessonNavProps = {
   courseId: number;
@@ -35,11 +30,7 @@ export function LessonNav(props: LessonNavProps) {
       <div className="flex flex-wrap gap-2">
         {props.prev ? (
           <Button asChild variant="outline" size="sm">
-            <Link
-              href={lessonHref(props.courseId, props.prev.activityId)}
-              prefetch
-              rel="prev"
-            >
+            <Link href={lessonHref(props.courseId, props.prev.activityId)} prefetch rel="prev">
               Aula anterior
             </Link>
           </Button>
@@ -55,11 +46,7 @@ export function LessonNav(props: LessonNavProps) {
             size="sm"
             className={props.nextHighlighted ? 'ring-2 ring-primary/40 ring-offset-2' : undefined}
           >
-            <Link
-              href={lessonHref(props.courseId, props.next.activityId)}
-              prefetch
-              rel="next"
-            >
+            <Link href={lessonHref(props.courseId, props.next.activityId)} prefetch rel="next">
               Próxima aula
               {props.nextHighlighted ? `: ${props.next.name}` : ''}
             </Link>

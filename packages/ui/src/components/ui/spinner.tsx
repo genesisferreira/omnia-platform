@@ -18,10 +18,7 @@ export function Spinner({ label = 'Carregando', size = 'md', className, ...props
       {...props}
     >
       <div
-        className={cn(
-          'animate-spin rounded-full border-muted border-t-primary',
-          sizeClass[size],
-        )}
+        className={cn('animate-spin rounded-full border-muted border-t-primary', sizeClass[size])}
       />
       <span className="sr-only">{label}</span>
     </div>

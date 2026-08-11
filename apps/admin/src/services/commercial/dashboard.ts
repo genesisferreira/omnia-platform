@@ -22,20 +22,12 @@ export async function refreshCommercialAiDashboard(payload: Payload): Promise<vo
     return Boolean(f.proposalGenerated);
   }).length;
 
-  const groundingValues = commercial
-    .map((d) => Number(d.groundingScore || 0))
-    .filter((n) => n > 0);
+  const groundingValues = commercial.map((d) => Number(d.groundingScore || 0)).filter((n) => n > 0);
   const avgGroundingScore = groundingValues.length
-    ? Number(
-        (
-          groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length
-        ).toFixed(3),
-      )
+    ? Number((groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length).toFixed(3))
     : 0;
   const avgTookMs = commercial.length
-    ? Math.round(
-        commercial.reduce((s, d) => s + Number(d.tookMs || 0), 0) / commercial.length,
-      )
+    ? Math.round(commercial.reduce((s, d) => s + Number(d.tookMs || 0), 0) / commercial.length)
     : 0;
 
   const productMap = new Map<string, number>();
@@ -66,10 +58,7 @@ export async function refreshCommercialAiDashboard(payload: Payload): Promise<vo
       payload.find({
         collection: 'ai-feedback',
         where: {
-          and: [
-            { rating: { equals: 'up' } },
-            { aiSession: { in: sessionIds } },
-          ],
+          and: [{ rating: { equals: 'up' } }, { aiSession: { in: sessionIds } }],
         },
         limit: 1,
         overrideAccess: true,
@@ -77,10 +66,7 @@ export async function refreshCommercialAiDashboard(payload: Payload): Promise<vo
       payload.find({
         collection: 'ai-feedback',
         where: {
-          and: [
-            { rating: { equals: 'down' } },
-            { aiSession: { in: sessionIds } },
-          ],
+          and: [{ rating: { equals: 'down' } }, { aiSession: { in: sessionIds } }],
         },
         limit: 1,
         overrideAccess: true,

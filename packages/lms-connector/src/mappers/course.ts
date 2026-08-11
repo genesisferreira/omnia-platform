@@ -69,10 +69,7 @@ export function mapMoodleCourses(raw: unknown): LmsCourse[] {
   return [];
 }
 
-export function mapUserCourseEnrollment(
-  raw: unknown,
-  moodleUserId: number,
-): LmsEnrollment | null {
+export function mapUserCourseEnrollment(raw: unknown, moodleUserId: number): LmsEnrollment | null {
   const course = mapMoodleCourse(raw);
   if (!course) return null;
   const enrolledAt =
@@ -88,10 +85,7 @@ export function mapUserCourseEnrollment(
   };
 }
 
-export function mapUserCourseEnrollments(
-  raw: unknown,
-  moodleUserId: number,
-): LmsEnrollment[] {
+export function mapUserCourseEnrollments(raw: unknown, moodleUserId: number): LmsEnrollment[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((item) => mapUserCourseEnrollment(item, moodleUserId))

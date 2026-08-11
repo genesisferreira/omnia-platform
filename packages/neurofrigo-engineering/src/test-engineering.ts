@@ -6,10 +6,7 @@ import {
   buildTroubleshootingMarkdown,
   wantsTroubleshooting,
 } from './troubleshooting/troubleshooting-mode';
-import {
-  buildComparisonMarkdown,
-  wantsComparison,
-} from './comparison/technical-comparison';
+import { buildComparisonMarkdown, wantsComparison } from './comparison/technical-comparison';
 import { buildEngineeringRecommendations } from './recommendations';
 import type { EngineeringProfile } from './domain/types';
 import type { RuntimeAnswer } from '@omnia/neurofrigo-runtime';

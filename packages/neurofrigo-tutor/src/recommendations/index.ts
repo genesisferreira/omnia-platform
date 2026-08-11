@@ -8,10 +8,7 @@ import type {
   StudyRecommendation,
 } from '../domain/types';
 
-function remainingLessons(
-  catalog: CourseCatalog,
-  student: StudentProfile,
-): CatalogLesson[] {
+function remainingLessons(catalog: CourseCatalog, student: StudentProfile): CatalogLesson[] {
   const done = new Set(student.completedLessonIds.map(String));
   return catalog.lessons
     .filter((l) => !done.has(String(l.id)))
@@ -77,9 +74,8 @@ export function buildRecommendations(input: {
 
   if (learning.difficultyTopics.length > 0 || learning.repeatedQuestions.length > 0) {
     const reviewLesson =
-      catalog.lessons.find((l) =>
-        student.completedLessonIds.map(String).includes(String(l.id)),
-      ) || catalog.lessons[0];
+      catalog.lessons.find((l) => student.completedLessonIds.map(String).includes(String(l.id))) ||
+      catalog.lessons[0];
     if (reviewLesson) {
       out.push({
         type: 'review',
@@ -122,9 +118,7 @@ export function buildStudyPlan(input: {
   scored.sort((a, b) => {
     if (a.pending !== b.pending) return a.pending ? -1 : 1;
     if (b.score !== a.score) return b.score - a.score;
-    return (
-      a.lesson.moduleOrder - b.lesson.moduleOrder || a.lesson.order - b.lesson.order
-    );
+    return a.lesson.moduleOrder - b.lesson.moduleOrder || a.lesson.order - b.lesson.order;
   });
 
   const selected = (scored.some((s) => s.score > 0) ? scored.filter((s) => s.score > 0) : scored)
@@ -167,9 +161,7 @@ export function detectGaps(input: {
   const gaps: LearningGap[] = [];
 
   for (const topic of learning.repeatedQuestions.slice(0, 3)) {
-    const match = catalog.lessons.find((l) =>
-      l.title.toLowerCase().includes(topic.slice(0, 12)),
-    );
+    const match = catalog.lessons.find((l) => l.title.toLowerCase().includes(topic.slice(0, 12)));
     gaps.push({
       topic,
       reason: 'Pergunta repetida na sessão/histórico recente do Tutor.',

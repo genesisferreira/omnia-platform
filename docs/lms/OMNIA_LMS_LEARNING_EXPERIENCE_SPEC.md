@@ -37,15 +37,15 @@ Login Omnia → /lms Dashboard → Continuar | Meus cursos
 
 ### 2.3 Telas (MVP)
 
-| Experiência | Rota | Conteúdo |
-| --- | --- | --- |
-| Dashboard | `/lms` | Saudação, Continuar, cards, progresso médio, placeholders |
-| Meus cursos | `/lms/cursos` | CourseCards |
-| Continuar | `/lms/continuar` | Resolve → redirect |
-| Curso | `/lms/cursos/[id]` | Summary, Progress, Tabs módulos/notas/conclusão |
-| Aula | `.../atividades/[id]` | Nome, tipo, status, placeholder conteúdo |
-| Progresso | `/lms/progresso` | Lista % por curso |
-| Notas | `/lms/notas` | Itens por curso |
+| Experiência | Rota                  | Conteúdo                                                  |
+| ----------- | --------------------- | --------------------------------------------------------- |
+| Dashboard   | `/lms`                | Saudação, Continuar, cards, progresso médio, placeholders |
+| Meus cursos | `/lms/cursos`         | CourseCards                                               |
+| Continuar   | `/lms/continuar`      | Resolve → redirect                                        |
+| Curso       | `/lms/cursos/[id]`    | Summary, Progress, Tabs módulos/notas/conclusão           |
+| Aula        | `.../atividades/[id]` | Nome, tipo, status, placeholder conteúdo                  |
+| Progresso   | `/lms/progresso`      | Lista % por curso                                         |
+| Notas       | `/lms/notas`          | Itens por curso                                           |
 
 ### 2.4 Fora do MVP (alvo aluno)
 
@@ -57,13 +57,13 @@ Player streaming, materiais view_only, certificados reais, agenda, mensagens, tu
 
 **Job:** orientar o aluno na estrutura e no status acadêmico.
 
-| Zona | Responsabilidade |
-| --- | --- |
-| Header | Título, summary sanitizado, Progress, CTA Continuar |
+| Zona       | Responsabilidade                                           |
+| ---------- | ---------------------------------------------------------- |
+| Header     | Título, summary sanitizado, Progress, CTA Continuar        |
 | ModuleTree | Módulos → atividades visíveis com badge Pendente/Concluída |
-| Notas | GradeCard list |
-| Conclusão | CompletionBadge + timestamp |
-| Empty/Erro | EmptyState / Alert |
+| Notas      | GradeCard list                                             |
+| Conclusão  | CompletionBadge + timestamp                                |
+| Empty/Erro | EmptyState / Alert                                         |
 
 **Regras UX:** uma job por seção; sem cards no “hero” do curso além do necessário à interação; breadcrumbs L1.
 
@@ -122,13 +122,13 @@ Não é jornada pedagógica; é **governança**.
 
 ## 8. Mapa emocional / estados
 
-| Momento | Emoção alvo | Resposta UX |
-| --- | --- | --- |
-| Sem vínculo | Confusão | EmptyState claro + caminho conta |
-| Sem cursos | Expectativa | Empty + mensagem matrícula |
-| Erro Connector | Frustração | Alert sanitizado + retry implícito |
-| Offline | Incerteza | OfflineBanner |
-| Concluído | Realização | Badge + revisão |
+| Momento        | Emoção alvo | Resposta UX                        |
+| -------------- | ----------- | ---------------------------------- |
+| Sem vínculo    | Confusão    | EmptyState claro + caminho conta   |
+| Sem cursos     | Expectativa | Empty + mensagem matrícula         |
+| Erro Connector | Frustração  | Alert sanitizado + retry implícito |
+| Offline        | Incerteza   | OfflineBanner                      |
+| Concluído      | Realização  | Badge + revisão                    |
 
 ---
 

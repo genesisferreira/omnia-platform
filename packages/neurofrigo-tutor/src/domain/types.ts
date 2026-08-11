@@ -1,11 +1,6 @@
 import type { RuntimeAnswer, RuntimeRequest } from '@omnia/neurofrigo-runtime';
 
-export const LEARNING_LEVELS = [
-  'beginner',
-  'intermediate',
-  'advanced',
-  'specialist',
-] as const;
+export const LEARNING_LEVELS = ['beginner', 'intermediate', 'advanced', 'specialist'] as const;
 export type LearningLevel = (typeof LEARNING_LEVELS)[number];
 
 export const LEVEL_LABELS: Record<LearningLevel, string> = {
@@ -142,9 +137,7 @@ export type TutorAnswer = {
 };
 
 export type TutorAskPort = {
-  ask: (
-    request: RuntimeRequest,
-  ) => Promise<{ answer: RuntimeAnswer; sessionId: string | number }>;
+  ask: (request: RuntimeRequest) => Promise<{ answer: RuntimeAnswer; sessionId: string | number }>;
 };
 
 export type StudentProfilePort = {

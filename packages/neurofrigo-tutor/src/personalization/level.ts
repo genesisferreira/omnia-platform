@@ -107,7 +107,6 @@ export function mergeLearningSignals(
     avgGrounding: Number(avgGrounding.toFixed(3)),
     negativeFeedbackCount: signals.negativeFeedbackCount,
     repeatedQuestions,
-    difficultyTopics:
-      difficultyTopics.length > 0 ? difficultyTopics : base.difficultyTopics,
+    difficultyTopics: difficultyTopics.length > 0 ? difficultyTopics : base.difficultyTopics,
   };
 }

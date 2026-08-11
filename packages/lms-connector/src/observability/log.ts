@@ -10,11 +10,7 @@ type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 const base = createLogger({ service: 'lms-connector' });
 
 /** Log estruturado sanitizado do LMS connector. */
-export function lmsLog(
-  level: LogLevel,
-  event: string,
-  fields: Record<string, unknown> = {},
-): void {
+export function lmsLog(level: LogLevel, event: string, fields: Record<string, unknown> = {}): void {
   const trace = getTraceContext();
   const enriched = {
     ...fields,

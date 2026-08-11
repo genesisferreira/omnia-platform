@@ -22,12 +22,7 @@ export type {
 } from './ports';
 
 export { MediaAuthorizationService } from './authorization-service';
-export {
-  createMemoryDecisionCache,
-  decisionCacheKey,
-  newDecisionId,
-  newGrantToken,
-} from './cache';
+export { createMemoryDecisionCache, decisionCacheKey, newDecisionId, newGrantToken } from './cache';
 export { createMemoryMediaAudit, createNoopMediaAudit } from './audit';
 export { MediaPolicyResolver, type ResolvedMediaPolicy } from './policy-resolver';
 export {

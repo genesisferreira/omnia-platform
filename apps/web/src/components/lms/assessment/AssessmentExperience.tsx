@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  buildAssessmentDescriptor,
-  isAssessmentMod,
-} from '@omnia/assessment-engine';
+import { buildAssessmentDescriptor, isAssessmentMod } from '@omnia/assessment-engine';
 
 import { AssessmentNav } from '@/components/lms/assessment/AssessmentNav';
 import { AssessmentProvider } from '@/components/lms/assessment/AssessmentProvider';

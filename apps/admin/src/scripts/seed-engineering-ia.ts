@@ -254,8 +254,7 @@ async function main() {
       course: { courseId: String(course.id), courseTitle: String(course.title || '') },
     });
   } catch (err) {
-    forbiddenOk =
-      err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
+    forbiddenOk = err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
   }
 
   const allowedStudent = await listAllowedAssistants(payload, { role: 'student' });

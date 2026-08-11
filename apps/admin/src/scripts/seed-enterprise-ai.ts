@@ -311,10 +311,7 @@ async function main() {
   const legacyStudent = await payload.find({
     collection: 'ai-policies',
     where: {
-      and: [
-        { enabled: { equals: true } },
-        { name: { not_equals: 'Student default assistants' } },
-      ],
+      and: [{ enabled: { equals: true } }, { name: { not_equals: 'Student default assistants' } }],
     },
     limit: 100,
     overrideAccess: true,
@@ -392,8 +389,7 @@ async function main() {
       course: { courseId: String(course.id), courseTitle: String(course.title || '') },
     });
   } catch (err) {
-    forbiddenOk =
-      err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
+    forbiddenOk = err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
   }
 
   const allowedStudent = await listAllowedAssistants(payload, { role: 'student' });
@@ -444,9 +440,7 @@ async function main() {
   if (allowedStudent.allowedAssistants.some((a: { key: string }) => a.key === 'commercial')) {
     throw new Error('UNEXPECTED_STUDENT_COMMERCIAL');
   }
-  const studentKeys = new Set(
-    allowedStudent.allowedAssistants.map((a: { key: string }) => a.key),
-  );
+  const studentKeys = new Set(allowedStudent.allowedAssistants.map((a: { key: string }) => a.key));
   if (![...studentKeys].every((k) => ['tutor', 'support', 'concierge'].includes(k))) {
     throw new Error(`UNEXPECTED_STUDENT_SET:${[...studentKeys].join(',')}`);
   }

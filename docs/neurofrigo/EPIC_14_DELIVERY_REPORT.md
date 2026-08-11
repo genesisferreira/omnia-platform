@@ -31,36 +31,36 @@ Backup: `/opt/omnia/backups/staging/student-intelligence-e14-20260811-104351`
 
 ## Entregáveis
 
-| # | Item | Status |
-|---|------|--------|
-| 1 | StudentProfile (Digital Twin / sip-profiles) | ✅ |
-| 2 | Competency Engine | ✅ |
-| 3 | Evidence Engine | ✅ |
-| 4 | Learning Intelligence Engine | ✅ |
-| 5 | Recommendation Engine | ✅ |
-| 6 | Student Insights | ✅ |
-| 7 | Portal Meu Perfil Inteligente | ✅ |
-| 8 | Dashboard SIP | ✅ |
-| 9 | Auditoria | ✅ |
-| 10 | Testes unitários (6/6) | ✅ |
-| 11 | Benchmarks staging | ✅ |
-| 12 | Commits | ✅ `2fcfb32` → `3e0b4c2` |
-| 13 | GO / NO-GO | **GO** |
+| #   | Item                                         | Status                   |
+| --- | -------------------------------------------- | ------------------------ |
+| 1   | StudentProfile (Digital Twin / sip-profiles) | ✅                       |
+| 2   | Competency Engine                            | ✅                       |
+| 3   | Evidence Engine                              | ✅                       |
+| 4   | Learning Intelligence Engine                 | ✅                       |
+| 5   | Recommendation Engine                        | ✅                       |
+| 6   | Student Insights                             | ✅                       |
+| 7   | Portal Meu Perfil Inteligente                | ✅                       |
+| 8   | Dashboard SIP                                | ✅                       |
+| 9   | Auditoria                                    | ✅                       |
+| 10  | Testes unitários (6/6)                       | ✅                       |
+| 11  | Benchmarks staging                           | ✅                       |
+| 12  | Commits                                      | ✅ `2fcfb32` → `3e0b4c2` |
+| 13  | GO / NO-GO                                   | **GO**                   |
 
 ## Critérios GO
 
-| Critério | Resultado |
-|----------|-----------|
-| Digital Twin | ✅ sip-profiles |
-| Competências automáticas | ✅ 7 competências |
-| Evidências automáticas | ✅ 29 evidências seed |
-| Recomendações automáticas | ✅ |
-| Dashboard | ✅ sip-dashboard |
-| Portal | ✅ /meu-perfil-inteligente |
-| Auditoria | ✅ sip-audit-events |
-| Integração Tutor | ✅ context + recalculate |
-| Integração Engenharia | ✅ studentContext + troubleshooting |
-| Staging healthy | ✅ |
+| Critério                  | Resultado                           |
+| ------------------------- | ----------------------------------- |
+| Digital Twin              | ✅ sip-profiles                     |
+| Competências automáticas  | ✅ 7 competências                   |
+| Evidências automáticas    | ✅ 29 evidências seed               |
+| Recomendações automáticas | ✅                                  |
+| Dashboard                 | ✅ sip-dashboard                    |
+| Portal                    | ✅ /meu-perfil-inteligente          |
+| Auditoria                 | ✅ sip-audit-events                 |
+| Integração Tutor          | ✅ context + recalculate            |
+| Integração Engenharia     | ✅ studentContext + troubleshooting |
+| Staging healthy           | ✅                                  |
 
 ## Commits relevantes
 

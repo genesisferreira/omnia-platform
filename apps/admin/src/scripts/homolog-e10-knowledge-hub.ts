@@ -91,10 +91,7 @@ async function main() {
   const jobsQueued = await payload.count({
     collection: 'knowledge-processing-jobs',
     where: {
-      and: [
-        { status: { equals: 'queued' } },
-        { operation: { equals: 'extract' } },
-      ],
+      and: [{ status: { equals: 'queued' } }, { operation: { equals: 'extract' } }],
     },
     overrideAccess: true,
   });
@@ -201,7 +198,10 @@ async function main() {
         providerUsed: askOmnia.providerMeta?.providerUsed,
         sourceCount: askOmnia.answer.sources?.length ?? 0,
         sourcesPreview: (askOmnia.answer.sources || []).slice(0, 3),
-        textPreview: String(askOmnia.answer.formattedText || askOmnia.answer.text || '').slice(0, 240),
+        textPreview: String(askOmnia.answer.formattedText || askOmnia.answer.text || '').slice(
+          0,
+          240,
+        ),
         errorCode: askOmnia.answer.errorCode ?? null,
       },
     },

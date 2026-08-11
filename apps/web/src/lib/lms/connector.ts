@@ -53,7 +53,11 @@ export async function fetchLmsConnector<T = unknown>(
 
   const adminBase = getAdminBaseUrl();
   const cleanPath = path.replace(/^\/+/, '');
-  const qs = options.search ? (options.search.startsWith('?') ? options.search : `?${options.search}`) : '';
+  const qs = options.search
+    ? options.search.startsWith('?')
+      ? options.search
+      : `?${options.search}`
+    : '';
   const url = `${adminBase}/api/omnia/lms/${cleanPath}${qs}`;
 
   const response = await fetch(url, {

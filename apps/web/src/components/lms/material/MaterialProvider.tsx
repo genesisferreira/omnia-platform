@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 import {
   createControlledSecurityPorts,
@@ -22,23 +17,17 @@ type MaterialProviderValue = {
 
 const MaterialContext = createContext<MaterialProviderValue | null>(null);
 
-export function MaterialProvider(props: {
-  children: ReactNode;
-  security?: MaterialSecurityPorts;
-}) {
+export function MaterialProvider(props: { children: ReactNode; security?: MaterialSecurityPorts }) {
   const security = props.security ?? createControlledSecurityPorts();
   const value = useMemo<MaterialProviderValue>(
     () => ({
       security,
-      resolve: (descriptor, opts) =>
-        resolveMaterial({ descriptor, offline: opts?.offline }),
+      resolve: (descriptor, opts) => resolveMaterial({ descriptor, offline: opts?.offline }),
     }),
     [security],
   );
 
-  return (
-    <MaterialContext.Provider value={value}>{props.children}</MaterialContext.Provider>
-  );
+  return <MaterialContext.Provider value={value}>{props.children}</MaterialContext.Provider>;
 }
 
 export function useMaterialProvider(): MaterialProviderValue {

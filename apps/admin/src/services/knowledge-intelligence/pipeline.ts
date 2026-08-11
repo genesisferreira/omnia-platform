@@ -95,8 +95,11 @@ async function resolveMediaBuffer(
   }
 
   // Fallback HTTP (Admin runtime / Traefik) — útil quando seed roda fora do volume de media
-  const base = (process.env.NEXT_PUBLIC_ADMIN_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || '')
-    .replace(/\/$/, '');
+  const base = (
+    process.env.NEXT_PUBLIC_ADMIN_URL ||
+    process.env.PAYLOAD_PUBLIC_SERVER_URL ||
+    ''
+  ).replace(/\/$/, '');
   const urlPath = media.url?.startsWith('http')
     ? media.url
     : base && media.url
@@ -265,7 +268,13 @@ export async function processLearningResource(args: {
     data: {
       learningResource: learningResourceId,
       status: 'running',
-      stages: { extract: 'pending', normalize: 'pending', chunk: 'pending', hub: 'pending', queue: 'pending' },
+      stages: {
+        extract: 'pending',
+        normalize: 'pending',
+        chunk: 'pending',
+        hub: 'pending',
+        queue: 'pending',
+      },
       chunkCount: 0,
       correlationId,
       startedAt,
@@ -430,7 +439,8 @@ export async function processLearningResource(args: {
       context: { kiPipelineActive: true },
     });
 
-    const title = hubOverrides?.title || String(resource.title || `Learning Resource ${learningResourceId}`);
+    const title =
+      hubOverrides?.title || String(resource.title || `Learning Resource ${learningResourceId}`);
     const baseSlug = `ki-${slugify(title)}-${learningResourceId}`;
     const tags = Array.isArray(resource.tags)
       ? (resource.tags as Array<{ tag?: string }>)
@@ -448,8 +458,7 @@ export async function processLearningResource(args: {
       sourceType: sourceTypeFor(resourceType),
       file: mediaId,
       language: (resource.language as string) || 'pt-BR',
-      ownerCompany:
-        hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel) ?? undefined,
+      ownerCompany: hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel) ?? undefined,
       knowledgeArea: hubOverrides?.knowledgeArea || 'cursos',
       category: hubOverrides?.category,
       subcategories: hubOverrides?.subcategories,
@@ -557,8 +566,7 @@ export async function processLearningResource(args: {
     const courseId = relId(resource.course as Rel);
     const moduleId = relId(resource.module as Rel);
     const lessonId = relId(resource.lesson as Rel);
-    const ownerCompanyId =
-      hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel);
+    const ownerCompanyId = hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel);
     const instructorId = relId(resource.instructor as Rel);
     const agentTags = (hubOverrides?.allowedAgents || []).map((a) => `agent:${a}`);
     const chunkTags = [...new Set([...mergedTags, ...agentTags])];
@@ -582,9 +590,7 @@ export async function processLearningResource(args: {
           language: (resource.language as string) || 'pt-BR',
           version: (resource.version as string) || '1.0.0',
           category:
-            (hubOverrides?.knowledgeArea as string) ||
-            (resource.category as string) ||
-            undefined,
+            (hubOverrides?.knowledgeArea as string) || (resource.category as string) || undefined,
           tags: chunkTags.map((tag) => ({ tag })),
         },
         overrideAccess: true,
@@ -653,7 +659,11 @@ export async function processLearningResource(args: {
       correlationId,
     });
 
-    return { ok: true, chunkCount: chunks.length, knowledgeDocumentId: knowledgeDocumentId ?? undefined };
+    return {
+      ok: true,
+      chunkCount: chunks.length,
+      knowledgeDocumentId: knowledgeDocumentId ?? undefined,
+    };
   } catch (err) {
     const message = sanitizeError(err);
     const finishedAt = new Date().toISOString();

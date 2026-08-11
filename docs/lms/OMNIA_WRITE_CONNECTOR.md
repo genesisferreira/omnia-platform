@@ -5,12 +5,12 @@
 
 ## Allowlist
 
-| Função | Constante | Uso |
-|--------|-----------|-----|
-| `core_user_create_users` | `MOODLE_WRITE_FUNCTIONS.createUsers` | Criar usuários |
-| `core_user_update_users` | `MOODLE_WRITE_FUNCTIONS.updateUsers` | Update / suspend |
-| `enrol_manual_enrol_users` | `MOODLE_WRITE_FUNCTIONS.enrolUsers` | Matricular |
-| `enrol_manual_unenrol_users` | `MOODLE_WRITE_FUNCTIONS.unenrolUsers` | Desmatricular |
+| Função                       | Constante                             | Uso              |
+| ---------------------------- | ------------------------------------- | ---------------- |
+| `core_user_create_users`     | `MOODLE_WRITE_FUNCTIONS.createUsers`  | Criar usuários   |
+| `core_user_update_users`     | `MOODLE_WRITE_FUNCTIONS.updateUsers`  | Update / suspend |
+| `enrol_manual_enrol_users`   | `MOODLE_WRITE_FUNCTIONS.enrolUsers`   | Matricular       |
+| `enrol_manual_unenrol_users` | `MOODLE_WRITE_FUNCTIONS.unenrolUsers` | Desmatricular    |
 
 Função fora da allowlist → `MoodleValidationError`.
 
@@ -37,8 +37,8 @@ Consulta allowlist local (+ notas). **Não** executa writes.
 ## Config
 
 ```ts
-provisionEnabled: boolean;      // default true
-provisionDryRun: boolean;       // default true
+provisionEnabled: boolean; // default true
+provisionDryRun: boolean; // default true
 provisionExecuteEnabled: boolean; // default false — MOODLE_PROVISION_EXECUTE
 ```
 

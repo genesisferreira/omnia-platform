@@ -4,11 +4,11 @@
 
 **Único canal de chat no MVP:** Portal Omnia (`/ai` e/ou widget).
 
-| Fora do MVP | Notas |
-|-------------|--------|
-| WhatsApp | Roadmap futuro — **não** implementar agora |
-| Telegram / app nativo | Roadmap futuro |
-| n8n como inbox | Proibido — n8n ≠ canal inicial |
+| Fora do MVP           | Notas                                      |
+| --------------------- | ------------------------------------------ |
+| WhatsApp              | Roadmap futuro — **não** implementar agora |
+| Telegram / app nativo | Roadmap futuro                             |
+| n8n como inbox        | Proibido — n8n ≠ canal inicial             |
 
 Neurofrigo Command é **outra superfície** (não esta jornada).
 
@@ -16,14 +16,14 @@ Neurofrigo Command é **outra superfície** (não esta jornada).
 
 ## Fluxo UX
 
-1. Usuário abre chat Portal  
-2. Omnia Auth / sessão (ou visitante)  
-3. Mensagem → Runtime  
-4. **Purpose Guard** — se fora do ecossistema Omnia → recusa padrão, fim  
-5. Intent Classifier → Security Guard  
-6. Se conteúdo acadêmico: matrícula + autorização  
-7. Context Builder → Tool Router → Specialist  
-8. Compliance → resposta + CTA Continuação Learning Engine (quando aplicável)  
+1. Usuário abre chat Portal
+2. Omnia Auth / sessão (ou visitante)
+3. Mensagem → Runtime
+4. **Purpose Guard** — se fora do ecossistema Omnia → recusa padrão, fim
+5. Intent Classifier → Security Guard
+6. Se conteúdo acadêmico: matrícula + autorização
+7. Context Builder → Tool Router → Specialist
+8. Compliance → resposta + CTA Continuação Learning Engine (quando aplicável)
 9. Observabilidade
 
 ---
@@ -58,6 +58,6 @@ Após resposta acadêmica autorizada: próximo módulo, revisão, prática, aval
 
 ## Fora desta jornada
 
-- Neurofrigo Command (`super_admin`)  
-- WhatsApp (futuro)  
+- Neurofrigo Command (`super_admin`)
+- WhatsApp (futuro)
 - Execução LMS via chat

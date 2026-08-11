@@ -14,13 +14,13 @@ Garantir controle configurável de **quantas sessões/dispositivos** um usuário
 
 ## 2. Política padrão
 
-| Perfil | Limite padrão de sessões concurrentes |
-| --- | ---: |
-| Aluno | **1** |
-| Professor | **2** |
-| Gestor | **2** |
-| Administrador | **2** |
-| Suporte | **2** (configurável; tipicamente igual admin) |
+| Perfil        |         Limite padrão de sessões concurrentes |
+| ------------- | --------------------------------------------: |
+| Aluno         |                                         **1** |
+| Professor     |                                         **2** |
+| Gestor        |                                         **2** |
+| Administrador |                                         **2** |
+| Suporte       | **2** (configurável; tipicamente igual admin) |
 
 Regras padrão:
 
@@ -43,31 +43,31 @@ Mensagem sugerida (i18n):
 
 ### 3.1 Entidade `OmniaLmsSession`
 
-| Campo | Descrição |
-| --- | --- |
-| `sessionId` | UUID opaco (público em auditoria; não é o token bruto) |
-| `sessionFamilyId` | Identifica o “navegador/app install”; abas compartilham a família |
-| `userId` | Usuário Omnia |
-| `moodleUserId` | Mirror Moodle (quando provisionado) |
-| `profile` | student \| teacher \| manager \| admin \| support |
-| `deviceFingerprint` | Hash estável (UA + instalação app + opcional hardware id) — **não** PII crua |
-| `userAgent` | Truncado |
-| `ipAddress` | Último IP conhecido |
-| `createdAt` | Início |
-| `lastActivityAt` | Heartbeat / última request autenticada |
-| `expiresAt` | Expiração absoluta ou sliding |
-| `status` | active \| revoked \| expired |
-| `revokedAt` / `revokedReason` | login_superseded \| admin_force \| logout \| security |
-| `moodleSessionKey` | Referência opaca da sessão Moodle (se aplicável) |
+| Campo                         | Descrição                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------------- |
+| `sessionId`                   | UUID opaco (público em auditoria; não é o token bruto)                       |
+| `sessionFamilyId`             | Identifica o “navegador/app install”; abas compartilham a família            |
+| `userId`                      | Usuário Omnia                                                                |
+| `moodleUserId`                | Mirror Moodle (quando provisionado)                                          |
+| `profile`                     | student \| teacher \| manager \| admin \| support                            |
+| `deviceFingerprint`           | Hash estável (UA + instalação app + opcional hardware id) — **não** PII crua |
+| `userAgent`                   | Truncado                                                                     |
+| `ipAddress`                   | Último IP conhecido                                                          |
+| `createdAt`                   | Início                                                                       |
+| `lastActivityAt`              | Heartbeat / última request autenticada                                       |
+| `expiresAt`                   | Expiração absoluta ou sliding                                                |
+| `status`                      | active \| revoked \| expired                                                 |
+| `revokedAt` / `revokedReason` | login_superseded \| admin_force \| logout \| security                        |
+| `moodleSessionKey`            | Referência opaca da sessão Moodle (se aplicável)                             |
 
 ### 3.2 Tokens
 
-| Token | Uso | Armazenamento | Revogação |
-| --- | --- | --- | --- |
-| Access token (curto) | API BFF | Memória / header | Lista de denylist por `sessionId` ou version bump |
-| Refresh token | Renovação | HttpOnly Secure cookie / secure storage mobile | Invalidado na revogação |
-| Moodle WS / sesscookie | Engine | Somente servidor Connector | Logout Moodle + destroy session |
-| Media token | Stream/viewer | Não persistir no client além do player | Amarrado a `sessionId`; inválido se sessão revogada |
+| Token                  | Uso           | Armazenamento                                  | Revogação                                           |
+| ---------------------- | ------------- | ---------------------------------------------- | --------------------------------------------------- |
+| Access token (curto)   | API BFF       | Memória / header                               | Lista de denylist por `sessionId` ou version bump   |
+| Refresh token          | Renovação     | HttpOnly Secure cookie / secure storage mobile | Invalidado na revogação                             |
+| Moodle WS / sesscookie | Engine        | Somente servidor Connector                     | Logout Moodle + destroy session                     |
+| Media token            | Stream/viewer | Não persistir no client além do player         | Amarrado a `sessionId`; inválido se sessão revogada |
 
 **Segurança dos tokens:** nunca logar secrets; rotacionar refresh; binding ao `sessionId`; HTTPS only; SameSite adequado; mobile: Keychain/Keystore.
 
@@ -114,12 +114,12 @@ Corrida entre dois logins simultâneos
 
 ## 5. Vínculo Omnia ↔ Moodle
 
-| Passo | Omnia | Moodle |
-| --- | --- | --- |
-| Login | Cria sessão | Connector cria/reutiliza login técnico ou user session conforme desenho SSO futuro |
-| Atividade | Heartbeat BFF | Opcional touch session Moodle |
-| Revogação | Marca revoked + denylist | `revokeSession` / logout user sessions via WS ou API admin session kill |
-| Logout | Revoga local | Sync logout |
+| Passo     | Omnia                    | Moodle                                                                             |
+| --------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| Login     | Cria sessão              | Connector cria/reutiliza login técnico ou user session conforme desenho SSO futuro |
+| Atividade | Heartbeat BFF            | Opcional touch session Moodle                                                      |
+| Revogação | Marca revoked + denylist | `revokeSession` / logout user sessions via WS ou API admin session kill            |
+| Logout    | Revoga local             | Sync logout                                                                        |
 
 **Regra:** o browser do aluno **não** mantém cookie Moodle de primeira parte em `moodle.*` na jornada produto; o Connector opera server-side. Assim, “sessão Moodle” é vínculo de autorização no Connector + eventual sessão server-side, não login UI Moodle.
 
@@ -178,21 +178,21 @@ Retenção: alinhada LGPD / política Omnia.
 
 ## 9. Responsabilidades
 
-| Capacidade | Dono |
-| --- | --- |
-| Limites, painel, tokens Omnia, UX mensagem | 🟦 Omnia |
-| Invalidar sessão acadêmica espelhada | 🟦 Connector → 🟢 Moodle |
-| IA | — (não decide sessão) |
-| Push aviso | 🟠 Ext |
+| Capacidade                                 | Dono                     |
+| ------------------------------------------ | ------------------------ |
+| Limites, painel, tokens Omnia, UX mensagem | 🟦 Omnia                 |
+| Invalidar sessão acadêmica espelhada       | 🟦 Connector → 🟢 Moodle |
+| IA                                         | — (não decide sessão)    |
+| Push aviso                                 | 🟠 Ext                   |
 
 ---
 
 ## 10. Critérios de aceite (documentais)
 
-1. Segundo login com limite 1 revoga o primeiro (Omnia + Moodle sync).  
-2. Abas do mesmo browser = uma sessão.  
-3. Sessões identificáveis e auditáveis.  
-4. Limites alteráveis no painel (global/perfil/usuário).  
-5. Logout e revogação imediata definidos.  
-6. Corrida de login tratada com lock.  
+1. Segundo login com limite 1 revoga o primeiro (Omnia + Moodle sync).
+2. Abas do mesmo browser = uma sessão.
+3. Sessões identificáveis e auditáveis.
+4. Limites alteráveis no painel (global/perfil/usuário).
+5. Logout e revogação imediata definidos.
+6. Corrida de login tratada com lock.
 7. Tokens de mídia inválidos após revogação.

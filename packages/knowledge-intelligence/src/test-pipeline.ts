@@ -15,9 +15,10 @@ describe('knowledge-intelligence pipeline units', () => {
   });
 
   it('chunks with overlap and estimates tokens', () => {
-    const text = Array.from({ length: 40 }, (_, i) => `Parágrafo número ${i}. Conteúdo de teste.`).join(
-      '\n\n',
-    );
+    const text = Array.from(
+      { length: 40 },
+      (_, i) => `Parágrafo número ${i}. Conteúdo de teste.`,
+    ).join('\n\n');
     const chunks = chunkText(text, { maxChars: 180, overlapChars: 40 });
     assert.ok(chunks.length >= 2);
     assert.equal(chunks[0]?.chunkIndex, 0);

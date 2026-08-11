@@ -46,21 +46,14 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
   const estimatedCostUsd = Number(
     docs.reduce((s, d) => s + Number(d.estimatedCostUsd || 0), 0).toFixed(6),
   );
-  const groundingValues = docs
-    .map((d) => Number(d.groundingScore || 0))
-    .filter((n) => n > 0);
+  const groundingValues = docs.map((d) => Number(d.groundingScore || 0)).filter((n) => n > 0);
   const avgGroundingScore = groundingValues.length
-    ? Number(
-        (
-          groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length
-        ).toFixed(3),
-      )
+    ? Number((groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length).toFixed(3))
     : 0;
   const avgTookMs = docs.length
     ? Math.round(docs.reduce((s, d) => s + Number(d.tookMs || 0), 0) / docs.length)
     : 0;
-  const errorCount = docs.filter((d) => d.status === 'error' || d.status === 'timeout')
-    .length;
+  const errorCount = docs.filter((d) => d.status === 'error' || d.status === 'timeout').length;
 
   const up = feedbackUp.totalDocs;
   const down = feedbackDown.totalDocs;
@@ -78,9 +71,7 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
   for (const d of docs) {
     const filters = (d.filters || {}) as Record<string, unknown>;
     const assistantKey =
-      (filters.assistantKey as string) ||
-      (filters.assistantId as string) ||
-      'default';
+      (filters.assistantKey as string) || (filters.assistantId as string) || 'default';
     byAssistant.set(assistantKey, (byAssistant.get(assistantKey) || 0) + 1);
     costByAssistant.set(
       assistantKey,
@@ -88,16 +79,14 @@ export async function refreshEnterpriseAiDashboard(payload: Payload): Promise<vo
     );
 
     const company =
-      (filters as { course?: { ownerCompanyId?: string } }).course?.ownerCompanyId ||
-      'n/d';
+      (filters as { course?: { ownerCompanyId?: string } }).course?.ownerCompanyId || 'n/d';
     byCompany.set(String(company), (byCompany.get(String(company)) || 0) + 1);
     costByCompany.set(
       String(company),
       (costByCompany.get(String(company)) || 0) + Number(d.estimatedCostUsd || 0),
     );
 
-    const course =
-      (filters as { course?: { courseId?: string } }).course?.courseId || 'n/d';
+    const course = (filters as { course?: { courseId?: string } }).course?.courseId || 'n/d';
     costByCourse.set(
       String(course),
       (costByCourse.get(String(course)) || 0) + Number(d.estimatedCostUsd || 0),

@@ -4,10 +4,10 @@ Artefatos **não** ficam versionados neste diretório.
 
 ## Destino na VPS
 
-| Ambiente | Path |
-| --- | --- |
-| DEV | `/opt/omnia/backups/lms/dev/` |
-| PROD | `/opt/omnia/backups/lms/production/` |
+| Ambiente | Path                                 |
+| -------- | ------------------------------------ |
+| DEV      | `/opt/omnia/backups/lms/dev/`        |
+| PROD     | `/opt/omnia/backups/lms/production/` |
 
 ## Conteúdo de um backup
 

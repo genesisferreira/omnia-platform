@@ -12,10 +12,7 @@ import {
   mapUserCourseEnrollments,
   checkConnectorHealth,
 } from '@omnia/lms-connector';
-import {
-  connectorIdentityLinks,
-  lmsIdentityLinksMetric,
-} from '@omnia/monitoring/metrics';
+import { connectorIdentityLinks, lmsIdentityLinksMetric } from '@omnia/monitoring/metrics';
 import { checkDatabaseConnection } from '@omnia/database';
 import type { PayloadRequest } from 'payload';
 
@@ -71,7 +68,10 @@ export function jsonError(err: unknown): Response {
     ) {
       return Response.json(
         { ok: false, error: { code, message: err.message } },
-        { status: code === 'MEDIA_FORBIDDEN' ? 403 : 400, headers: { 'Cache-Control': 'no-store' } },
+        {
+          status: code === 'MEDIA_FORBIDDEN' ? 403 : 400,
+          headers: { 'Cache-Control': 'no-store' },
+        },
       );
     }
   }
@@ -131,7 +131,7 @@ export async function loadAdminPolicyDefaults(
 export async function buildHealthResponse(req: PayloadRequest): Promise<Response> {
   const config = getRuntimeLmsConfig();
   const admin = await loadAdminPolicyDefaults(req);
-  const effectiveEnabled = config.connectorEnabled && (admin?.connectorEnabled !== false);
+  const effectiveEnabled = config.connectorEnabled && admin?.connectorEnabled !== false;
   const client = effectiveEnabled ? await getMoodleClient() : null;
   const sessions = await getLmsSessionManager();
   const cache = await getLmsCache();

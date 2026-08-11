@@ -17,12 +17,12 @@ Não usa Redis do Moodle.
 
 ## Regras
 
-| Perfil | Default |
-|--------|---------|
-| student | 1 |
-| teacher | 2 |
-| manager | 2 |
-| admin | 2 |
+| Perfil  | Default |
+| ------- | ------- |
+| student | 1       |
+| teacher | 2       |
+| manager | 2       |
+| admin   | 2       |
 
 - Mesma `sessionFamilyId` (abas) → reutiliza sessão ativa.
 - Novo login acima do limite → revoga a mais antiga (`SESSION_LIMIT`) se `revokeOldestOnExceed`.

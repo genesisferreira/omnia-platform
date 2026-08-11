@@ -32,14 +32,7 @@ type AdaptiveNext = {
   };
 };
 
-const GOAL_OPTIONS = [
-  'emprego',
-  'empresa_propria',
-  'co2',
-  'industrial',
-  'hvac',
-  'consultoria',
-];
+const GOAL_OPTIONS = ['emprego', 'empresa_propria', 'co2', 'industrial', 'hvac', 'consultoria'];
 
 const ACTION_CTA: Record<string, string> = {
   CONTINUE_LESSON: 'Continuar aula',
@@ -126,9 +119,7 @@ export function SipProfilePanel({ courseId }: { courseId: string }) {
                 <strong>
                   {ACTION_CTA[adaptive.nextBest.actionType || ''] || adaptive.nextBest.actionType}
                 </strong>
-                {adaptive.nextBest.lessonTitle
-                  ? ` — ${adaptive.nextBest.lessonTitle}`
-                  : null}
+                {adaptive.nextBest.lessonTitle ? ` — ${adaptive.nextBest.lessonTitle}` : null}
               </p>
               <p className="text-sm text-omnia-graphite-light">
                 {adaptive.nextBest.reasonFriendly}

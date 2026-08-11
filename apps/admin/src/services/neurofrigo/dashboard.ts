@@ -21,23 +21,25 @@ export async function refreshNeurofrigoAiDashboard(payload: Payload): Promise<vo
       depth: 0,
       overrideAccess: true,
     }),
-    payload.count({
-      collection: 'ai-feedback',
-      where: { rating: { equals: 'up' } },
-      overrideAccess: true,
-    }).catch(() => ({ totalDocs: 0 })),
-    payload.count({
-      collection: 'ai-feedback',
-      where: { rating: { equals: 'down' } },
-      overrideAccess: true,
-    }).catch(() => ({ totalDocs: 0 })),
+    payload
+      .count({
+        collection: 'ai-feedback',
+        where: { rating: { equals: 'up' } },
+        overrideAccess: true,
+      })
+      .catch(() => ({ totalDocs: 0 })),
+    payload
+      .count({
+        collection: 'ai-feedback',
+        where: { rating: { equals: 'down' } },
+        overrideAccess: true,
+      })
+      .catch(() => ({ totalDocs: 0 })),
   ]);
 
   const docs = sessions.docs;
   const took = docs.map((d) => Number(d.tookMs || 0));
-  const avgTookMs = took.length
-    ? Math.round(took.reduce((a, b) => a + b, 0) / took.length)
-    : 0;
+  const avgTookMs = took.length ? Math.round(took.reduce((a, b) => a + b, 0) / took.length) : 0;
   const totalTokens = docs.reduce((s, d) => s + Number(d.totalTokens || 0), 0);
   const estimatedCostUsd = Number(
     docs.reduce((s, d) => s + Number(d.estimatedCostUsd || 0), 0).toFixed(6),
@@ -48,15 +50,9 @@ export async function refreshNeurofrigoAiDashboard(payload: Payload): Promise<vo
     .map((d) => Number(d.groundingScore || 0))
     .filter((n) => Number.isFinite(n));
   const avgGroundingScore = groundingValues.length
-    ? Number(
-        (
-          groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length
-        ).toFixed(3),
-      )
+    ? Number((groundingValues.reduce((a, b) => a + b, 0) / groundingValues.length).toFixed(3))
     : 0;
-  const noContextRate = docs.length
-    ? Number((notFoundCount / docs.length).toFixed(3))
-    : 0;
+  const noContextRate = docs.length ? Number((notFoundCount / docs.length).toFixed(3)) : 0;
 
   const courseKeys = docs.map((d) => {
     const c = d.course;

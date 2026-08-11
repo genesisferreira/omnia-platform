@@ -72,15 +72,11 @@ function isProductionLike(env: string): boolean {
  * Em produção: exige configuração completa quando o connector está habilitado.
  * Em DEV: permite desabilitar explicitamente.
  */
-export function loadLmsConnectorConfig(
-  env: Record<string, string | undefined> = process.env,
-): { config: LmsConnectorConfig; issues: LmsConfigIssue[] } {
-  const appEnv = (
-    env.APP_ENV ||
-    env.OMNIA_ENV ||
-    env.NODE_ENV ||
-    'development'
-  ).toLowerCase();
+export function loadLmsConnectorConfig(env: Record<string, string | undefined> = process.env): {
+  config: LmsConnectorConfig;
+  issues: LmsConfigIssue[];
+} {
+  const appEnv = (env.APP_ENV || env.OMNIA_ENV || env.NODE_ENV || 'development').toLowerCase();
   const issues: LmsConfigIssue[] = [];
 
   const connectorEnabled = parseBool(env.MOODLE_CONNECTOR_ENABLED, false);
@@ -92,9 +88,7 @@ export function loadLmsConnectorConfig(
   const sessionPolicyEnabled = parseBool(env.LMS_SESSION_POLICY_ENABLED, true);
 
   const moodleBaseUrl = normalizeBaseUrl(env.MOODLE_BASE_URL || '');
-  const moodleInternalUrl = normalizeBaseUrl(
-    env.MOODLE_INTERNAL_URL || env.MOODLE_BASE_URL || '',
-  );
+  const moodleInternalUrl = normalizeBaseUrl(env.MOODLE_INTERNAL_URL || env.MOODLE_BASE_URL || '');
   const moodleRestToken = (env.MOODLE_REST_TOKEN || '').trim();
   const moodleServiceName = (env.MOODLE_SERVICE_NAME || 'omnia_lms_readonly').trim();
   const moodleRequestTimeoutMs = parsePositiveInt(
@@ -164,10 +158,7 @@ export function loadLmsConnectorConfig(
 }
 
 /** Lança erro sanitizado se issues críticas existirem e connector estiver enabled. */
-export function assertLmsConfigUsable(
-  config: LmsConnectorConfig,
-  issues: LmsConfigIssue[],
-): void {
+export function assertLmsConfigUsable(config: LmsConnectorConfig, issues: LmsConfigIssue[]): void {
   if (!config.connectorEnabled) {
     return;
   }
@@ -180,9 +171,7 @@ export function assertLmsConfigUsable(
     ].includes(i.code),
   );
   if (blocking.length > 0) {
-    throw new Error(
-      `LMS connector misconfigured: ${blocking.map((b) => b.code).join(', ')}`,
-    );
+    throw new Error(`LMS connector misconfigured: ${blocking.map((b) => b.code).join(', ')}`);
   }
 }
 

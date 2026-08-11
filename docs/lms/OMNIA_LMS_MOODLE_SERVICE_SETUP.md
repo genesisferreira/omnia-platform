@@ -23,17 +23,17 @@ REST read-only com privilégio mínimo para o Connector Omnia.
 
 4. **Funções (whitelist read-only desta entrega)**
 
-| Função | Uso |
-|--------|-----|
-| `core_webservice_get_site_info` | Health / versão |
-| `core_user_get_users_by_field` | Localizar usuário |
-| `core_enrol_get_users_courses` | Cursos do usuário |
-| `core_course_get_courses` | Catálogo |
-| `core_course_get_courses_by_field` | Curso por id |
-| `core_course_get_contents` | Estrutura |
-| `core_completion_get_activities_completion_status` | Progresso |
-| `core_completion_get_course_completion_status` | Completion |
-| `gradereport_user_get_grade_items` | Notas |
+| Função                                             | Uso               |
+| -------------------------------------------------- | ----------------- |
+| `core_webservice_get_site_info`                    | Health / versão   |
+| `core_user_get_users_by_field`                     | Localizar usuário |
+| `core_enrol_get_users_courses`                     | Cursos do usuário |
+| `core_course_get_courses`                          | Catálogo          |
+| `core_course_get_courses_by_field`                 | Curso por id      |
+| `core_course_get_contents`                         | Estrutura         |
+| `core_completion_get_activities_completion_status` | Progresso         |
+| `core_completion_get_course_completion_status`     | Completion        |
+| `gradereport_user_get_grade_items`                 | Notas             |
 
 5. **Token**
    - Criar token exclusivo para o usuário + serviço

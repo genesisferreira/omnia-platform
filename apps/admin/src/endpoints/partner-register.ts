@@ -38,12 +38,7 @@ function json(status: number, body: ApiBody, extraHeaders?: Record<string, strin
   return Response.json(body, { status, headers });
 }
 
-function fail(
-  status: number,
-  code: string,
-  message: string,
-  retryAfter?: number,
-): Response {
+function fail(status: number, code: string, message: string, retryAfter?: number): Response {
   return json(status, {
     success: false,
     ok: false,
@@ -106,10 +101,7 @@ export const partnerRegisterEndpoint: Endpoint = {
           );
         }
         // Resposta neutra — não revela honeypot.
-        return ok(
-          'Cadastro enviado com sucesso. Nossa equipe fará a análise.',
-          'REGISTERED',
-        );
+        return ok('Cadastro enviado com sucesso. Nossa equipe fará a análise.', 'REGISTERED');
       }
 
       const validated = validatePartnerRegisterBody(body);
@@ -143,10 +135,7 @@ export const partnerRegisterEndpoint: Endpoint = {
         const doc = existing.docs[0] as { status?: string };
         const status = typeof doc.status === 'string' ? doc.status : '';
         if (status === 'pending' || status === 'approved' || status === 'draft') {
-          return ok(
-            'Seu cadastro já foi recebido e está em análise.',
-            'ALREADY_RECEIVED',
-          );
+          return ok('Seu cadastro já foi recebido e está em análise.', 'ALREADY_RECEIVED');
         }
         return fail(
           409,
@@ -159,7 +148,12 @@ export const partnerRegisterEndpoint: Endpoint = {
       if (!quota.allowed) {
         const retryAfter = quota.retryAfterSeconds ?? 120;
         if (quota.reason === 'redis_unavailable') {
-          return fail(503, 'SERVICE_UNAVAILABLE', 'Serviço temporariamente indisponível.', retryAfter);
+          return fail(
+            503,
+            'SERVICE_UNAVAILABLE',
+            'Serviço temporariamente indisponível.',
+            retryAfter,
+          );
         }
         return fail(
           429,

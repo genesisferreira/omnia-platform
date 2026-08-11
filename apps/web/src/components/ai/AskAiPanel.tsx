@@ -241,11 +241,7 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                 value={assistantId}
                 onChange={(e) => changeAssistant(e.target.value)}
                 className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm"
-                style={
-                  selected?.color
-                    ? { borderColor: selected.color }
-                    : undefined
-                }
+                style={selected?.color ? { borderColor: selected.color } : undefined}
               >
                 <option value="auto">Automático (recomendado)</option>
                 {assistants.map((a) => (
@@ -278,7 +274,10 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
           {turns.length > 0 ? (
             <div className="mt-4 max-h-[28rem] space-y-4 overflow-y-auto pr-1">
               {turns.map((turn, idx) => (
-                <div key={`${turn.answer.sessionId}-${idx}`} className="space-y-2 border-b border-border/60 pb-4">
+                <div
+                  key={`${turn.answer.sessionId}-${idx}`}
+                  className="space-y-2 border-b border-border/60 pb-4"
+                >
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Você
                   </p>
@@ -289,7 +288,9 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                       turn.answer.assistantId ||
                       'Omnia AI'}
                   </p>
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">{turn.answer.text}</div>
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {turn.answer.text}
+                  </div>
                   {turn.answer.proposalMarkdown ? (
                     <div className="mt-3 rounded-md border border-border bg-muted/30 p-3">
                       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -378,18 +379,14 @@ export function AskAiPanel({ context }: { context: AskAiContext }) {
                     <button
                       type="button"
                       className="rounded border border-border px-2 py-1 text-xs"
-                      onClick={() =>
-                        setShowSourcesFor((v) => (v === idx ? null : idx))
-                      }
+                      onClick={() => setShowSourcesFor((v) => (v === idx ? null : idx))}
                     >
                       Ver Fontes
                     </button>
                     <button
                       type="button"
                       className="rounded border border-border px-2 py-1 text-xs"
-                      onClick={() =>
-                        setShowExplainFor((v) => (v === idx ? null : idx))
-                      }
+                      onClick={() => setShowExplainFor((v) => (v === idx ? null : idx))}
                     >
                       Como esta resposta foi construída?
                     </button>

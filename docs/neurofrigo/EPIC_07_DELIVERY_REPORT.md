@@ -25,20 +25,20 @@ Staging: `TUTOR_IA_SEED_OK` · admin healthy · `admin_http=200`
 
 ## Entregáveis
 
-| # | Item | Status |
-|---|------|--------|
-| 1 | StudentProfile | ✅ |
-| 2 | LearningProfile | ✅ |
-| 3 | TutorService (`@omnia/neurofrigo-tutor`) | ✅ |
-| 4 | Personalização por nível | ✅ |
-| 5 | Recomendações LMS | ✅ |
-| 6 | Plano de estudo | ✅ |
-| 7 | Dashboard Tutor | ✅ |
-| 8 | Portal TutorPanel | ✅ |
-| 9 | Testes unitários (4/4) | ✅ |
-| 10 | Seed / benchmarks staging | ✅ |
-| 11 | Commits | ✅ `0fe74ca` → `e605458` |
-| 12 | GO / NO-GO | **GO** |
+| #   | Item                                     | Status                   |
+| --- | ---------------------------------------- | ------------------------ |
+| 1   | StudentProfile                           | ✅                       |
+| 2   | LearningProfile                          | ✅                       |
+| 3   | TutorService (`@omnia/neurofrigo-tutor`) | ✅                       |
+| 4   | Personalização por nível                 | ✅                       |
+| 5   | Recomendações LMS                        | ✅                       |
+| 6   | Plano de estudo                          | ✅                       |
+| 7   | Dashboard Tutor                          | ✅                       |
+| 8   | Portal TutorPanel                        | ✅                       |
+| 9   | Testes unitários (4/4)                   | ✅                       |
+| 10  | Seed / benchmarks staging                | ✅                       |
+| 11  | Commits                                  | ✅ `0fe74ca` → `e605458` |
+| 12  | GO / NO-GO                               | **GO**                   |
 
 ## Commits relevantes
 

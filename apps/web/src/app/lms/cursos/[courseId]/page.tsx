@@ -33,10 +33,9 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
   const user = await requirePortalSession(`/lms/cursos/${courseId}`);
 
   const [courseRes, contentRes, progressRes, gradesRes, completionRes] = await Promise.all([
-    fetchLmsConnector<{ course?: { displayName?: string; fullName?: string; summary?: string | null } }>(
-      `courses/${courseId}`,
-      { user },
-    ),
+    fetchLmsConnector<{
+      course?: { displayName?: string; fullName?: string; summary?: string | null };
+    }>(`courses/${courseId}`, { user }),
     fetchLmsConnector<{
       sections?: Array<{
         sectionId: number;
@@ -54,7 +53,11 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
       progress?: { activities: Array<{ moodleActivityId: number; state: number }> };
     }>(`courses/${courseId}/progress`, { user }),
     fetchLmsConnector<{
-      grades?: Array<{ itemName: string; gradeFormatted: string | null; percentage: number | null }>;
+      grades?: Array<{
+        itemName: string;
+        gradeFormatted: string | null;
+        percentage: number | null;
+      }>;
     }>(`grades`, { user, search: `courseId=${courseId}` }),
     fetchLmsConnector<{
       completion?: { completed: boolean; timeCompleted: string | null };
@@ -149,8 +152,7 @@ export default async function LmsCoursePage({ params }: CoursePageProps) {
             <li key={`${g.itemName}-${i}`} className="flex justify-between gap-2 px-4 py-3 text-sm">
               <span>{g.itemName}</span>
               <span className="font-medium">
-                {g.gradeFormatted ||
-                  (g.percentage != null ? `${Math.round(g.percentage)}%` : '—')}
+                {g.gradeFormatted || (g.percentage != null ? `${Math.round(g.percentage)}%` : '—')}
               </span>
             </li>
           ))}

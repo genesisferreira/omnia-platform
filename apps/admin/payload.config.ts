@@ -7,11 +7,7 @@ import { buildConfig } from 'payload';
 
 import { wrapJwtStrategyRejectBlocked } from './src/auth/account-status';
 import { buildNodemailerEmailAdapter } from './src/email/build-email-adapter';
-import {
-  isSmtpConfigDeferred,
-  loadRootEnvFile,
-  smtpConfigForLog,
-} from './src/email/smtp-config';
+import { isSmtpConfigDeferred, loadRootEnvFile, smtpConfigForLog } from './src/email/smtp-config';
 import { Activities } from './src/collections/Activities';
 import { Authors } from './src/collections/Authors';
 import { Categories } from './src/collections/Categories';
@@ -33,12 +29,7 @@ import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
 import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
-import {
-  CourseModules,
-  Courses,
-  LessonAssets,
-  Lessons,
-} from './src/collections/lms';
+import { CourseModules, Courses, LessonAssets, Lessons } from './src/collections/lms';
 import {
   EmbeddingQueue,
   KiProcessingRuns,
@@ -46,7 +37,13 @@ import {
   LearningResources,
 } from './src/collections/knowledge-intelligence';
 import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
-import { AiSessions, AiFeedback, StudentProfiles, LearningProfiles, TutorStudyPlans } from './src/collections/neurofrigo';
+import {
+  AiSessions,
+  AiFeedback,
+  StudentProfiles,
+  LearningProfiles,
+  TutorStudyPlans,
+} from './src/collections/neurofrigo';
 import { AiModels, AiAssistants, AiPrompts, AiPolicies } from './src/collections/enterprise';
 import { CommercialProfiles } from './src/collections/commercial';
 import { EngineeringProfiles } from './src/collections/engineering';

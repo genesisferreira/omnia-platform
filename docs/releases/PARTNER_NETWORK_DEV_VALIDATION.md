@@ -3,6 +3,7 @@
 **Data:** 2026-07-24  
 **Branch:** `feature/2.3-partner-network`  
 **Commits relevantes:**
+
 - `33955c9` — `feat(partners): consolidate partner network data model` (Checkpoint 01)
 - `fcc1310` — `feat(partners): deliver public partner network experience` (Macroentrega 02)
 
@@ -12,29 +13,30 @@
 
 ## 1. Diagnóstico inicial
 
-| Item | Resultado |
-|------|-----------|
-| Branch | `feature/2.3-partner-network` |
-| HEAD (Macro 02) | `fcc1310a0a75bc4ea36798d63cf0a8244ebf649c` |
-| Compose oficial | `docker/compose/development.yml` |
-| Script oficial | `pnpm docker:dev` / `docker compose -f docker/compose/development.yml --env-file .env up -d` |
-| `.env` local | presente (não versionado) |
-| `.env.production` | **não utilizado** |
+| Item              | Resultado                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| Branch            | `feature/2.3-partner-network`                                                                |
+| HEAD (Macro 02)   | `fcc1310a0a75bc4ea36798d63cf0a8244ebf649c`                                                   |
+| Compose oficial   | `docker/compose/development.yml`                                                             |
+| Script oficial    | `pnpm docker:dev` / `docker compose -f docker/compose/development.yml --env-file .env up -d` |
+| `.env` local      | presente (não versionado)                                                                    |
+| `.env.production` | **não utilizado**                                                                            |
 
 ### Serviços previstos no compose de desenvolvimento
 
-| Serviço | Container | Porta host |
-|---------|-----------|------------|
-| postgres | `omnia-postgres` | `5432` |
-| redis | `omnia-redis` | `6379` |
-| mailpit | `omnia-mailpit` | `1025` / `8025` |
-| pgadmin | `omnia-pgadmin` | `5050` |
-| minio | `omnia-minio` | `9000` / `9001` |
-| n8n | `omnia-n8n` | `5678` |
+| Serviço  | Container        | Porta host      |
+| -------- | ---------------- | --------------- |
+| postgres | `omnia-postgres` | `5432`          |
+| redis    | `omnia-redis`    | `6379`          |
+| mailpit  | `omnia-mailpit`  | `1025` / `8025` |
+| pgadmin  | `omnia-pgadmin`  | `5050`          |
+| minio    | `omnia-minio`    | `9000` / `9001` |
+| n8n      | `omnia-n8n`      | `5678`          |
 
 Volumes locais: `omnia_postgres_data`, `omnia_redis_data`, `omnia_mailpit_data`, `omnia_pgadmin_data`, `omnia_minio_data`, `omnia_n8n_data`.
 
 Apps locais (fora do compose de infra):
+
 - Admin: `pnpm --filter @omnia/admin dev` → porta `3001`
 - Portal: `pnpm --filter @omnia/web dev` → porta `3000`
 
@@ -42,12 +44,12 @@ Apps locais (fora do compose de infra):
 
 ## 2. Proteção de dados e ambiente
 
-| Verificação | Resultado |
-|-------------|-----------|
-| `DATABASE_URL` aponta para host local | **Confirmado** (`localhost` / `127.0.0.1` / padrão compose) |
-| Uso de `.env.production` | **Não** |
-| Alteração de compose/infra de produção | **Não** |
-| Secrets impressos nos logs | **Não** (valores sensíveis redigidos) |
+| Verificação                            | Resultado                                                   |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `DATABASE_URL` aponta para host local  | **Confirmado** (`localhost` / `127.0.0.1` / padrão compose) |
+| Uso de `.env.production`               | **Não**                                                     |
+| Alteração de compose/infra de produção | **Não**                                                     |
+| Secrets impressos nos logs             | **Não** (valores sensíveis redigidos)                       |
 
 ---
 
@@ -58,6 +60,7 @@ Apps locais (fora do compose de infra):
 **Bloqueado:** Docker CLI / Docker Desktop **não encontrados** neste host.
 
 Evidências:
+
 - `docker` ausente do PATH
 - `C:\Program Files\Docker\Docker\resources\bin\docker.exe` → inexistente
 - Nenhum serviço Docker instalado/visível
@@ -90,20 +93,20 @@ Busca por cidade/UF funciona sem provedor externo.
 
 ## 4. O que foi validado sem banco (offline)
 
-| Item | Resultado |
-|------|-----------|
-| Branch / commits | Confirmados |
-| `DATABASE_URL` local | Confirmado (não produção) |
-| Compose de desenvolvimento | Identificado e reutilizável |
-| Lint Admin | OK (warnings pré-existentes) |
-| Lint Web | OK (warning pré-existente) |
-| Typecheck shared | OK |
-| Typecheck admin | OK |
-| Typecheck web | OK |
-| Testes `@omnia/shared test:partners` | **13 pass** |
-| Testes `@omnia/admin test:partner-register` | **3 pass** |
-| Build web | Compilou + typecheck; falhou no `standalone` por **EPERM symlink** (Windows) |
-| Build admin | Compilou + typecheck; falhou no `standalone` por **EPERM symlink** (Windows) |
+| Item                                        | Resultado                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| Branch / commits                            | Confirmados                                                                  |
+| `DATABASE_URL` local                        | Confirmado (não produção)                                                    |
+| Compose de desenvolvimento                  | Identificado e reutilizável                                                  |
+| Lint Admin                                  | OK (warnings pré-existentes)                                                 |
+| Lint Web                                    | OK (warning pré-existente)                                                   |
+| Typecheck shared                            | OK                                                                           |
+| Typecheck admin                             | OK                                                                           |
+| Typecheck web                               | OK                                                                           |
+| Testes `@omnia/shared test:partners`        | **13 pass**                                                                  |
+| Testes `@omnia/admin test:partner-register` | **3 pass**                                                                   |
+| Build web                                   | Compilou + typecheck; falhou no `standalone` por **EPERM symlink** (Windows) |
+| Build admin                                 | Compilou + typecheck; falhou no `standalone` por **EPERM symlink** (Windows) |
 
 ---
 
@@ -111,21 +114,21 @@ Busca por cidade/UF funciona sem provedor externo.
 
 Por ausência de Docker Desktop e Postgres/Redis locais:
 
-| Item | Status |
-|------|--------|
-| Subir Postgres/Redis/Mailpit | **Bloqueado** |
-| Executar migration `20260724_120000_partner_network` | **Não executada** |
-| Login Admin / menu Partner Network | **Não validado** |
-| CRUD Admin (parceiros/categorias/especialidades) | **Não validado** |
-| Cadastro público ponta a ponta | **Não validado** |
-| Aprovação → publicação | **Não validado** |
-| Busca / filtros / paginação live | **Não validado** |
-| GPS / fallback live | **Não validado** |
-| Seção Home live | **Não validado** |
-| Privacidade no JSON da API live | **Não validado** (coberto por testes unitários do mapper) |
-| Permissões editor vs admin live | **Não validado** |
-| SEO live no browser | **Não validado** (metadata implementada no código) |
-| Responsividade no browser | **Não validada** |
+| Item                                                 | Status                                                    |
+| ---------------------------------------------------- | --------------------------------------------------------- |
+| Subir Postgres/Redis/Mailpit                         | **Bloqueado**                                             |
+| Executar migration `20260724_120000_partner_network` | **Não executada**                                         |
+| Login Admin / menu Partner Network                   | **Não validado**                                          |
+| CRUD Admin (parceiros/categorias/especialidades)     | **Não validado**                                          |
+| Cadastro público ponta a ponta                       | **Não validado**                                          |
+| Aprovação → publicação                               | **Não validado**                                          |
+| Busca / filtros / paginação live                     | **Não validado**                                          |
+| GPS / fallback live                                  | **Não validado**                                          |
+| Seção Home live                                      | **Não validado**                                          |
+| Privacidade no JSON da API live                      | **Não validado** (coberto por testes unitários do mapper) |
+| Permissões editor vs admin live                      | **Não validado**                                          |
+| SEO live no browser                                  | **Não validado** (metadata implementada no código)        |
+| Responsividade no browser                            | **Não validada**                                          |
 
 ---
 

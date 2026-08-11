@@ -6,11 +6,7 @@ export function LessonStatusBadge(props: { status: LessonUiStatus }) {
   const label = lessonStatusLabel(props.status);
   let variant: 'default' | 'secondary' | 'outline' | 'muted' | 'accent' = 'secondary';
   if (props.status === 'completed') variant = 'default';
-  else if (
-    props.status === 'error' ||
-    props.status === 'forbidden' ||
-    props.status === 'blocked'
-  ) {
+  else if (props.status === 'error' || props.status === 'forbidden' || props.status === 'blocked') {
     variant = 'outline';
   } else if (props.status === 'offline') variant = 'muted';
 

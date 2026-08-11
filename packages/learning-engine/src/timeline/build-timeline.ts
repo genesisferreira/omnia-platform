@@ -1,4 +1,9 @@
-import type { LearningEventEnvelope, LearningEventType, TimelineItem, TimelineItemKind } from '../types';
+import type {
+  LearningEventEnvelope,
+  LearningEventType,
+  TimelineItem,
+  TimelineItemKind,
+} from '../types';
 
 const KIND_BY_TYPE: Partial<Record<LearningEventType, TimelineItemKind>> = {
   'lesson.opened': 'lesson',

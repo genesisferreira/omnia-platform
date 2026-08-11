@@ -220,8 +220,7 @@ export function resolveSmtpConfig(options: ResolveSmtpOptions = {}): ResolvedSmt
   const env = options.env ?? process.env;
   const nodeEnv = options.nodeEnv ?? env.NODE_ENV ?? 'development';
   const buildPhase = isBuildToolingPhase(env);
-  const isProdLike =
-    (nodeEnv === 'production' || nodeEnv === 'staging') && !buildPhase;
+  const isProdLike = (nodeEnv === 'production' || nodeEnv === 'staging') && !buildPhase;
 
   const host = (env.SMTP_HOST || '').trim();
   if (!host) {
@@ -263,13 +262,9 @@ export function resolveSmtpConfig(options: ResolveSmtpOptions = {}): ResolvedSmt
   if (user && pass) {
     transport.auth = { user, pass };
   } else if (isProdLike) {
-    throw new Error(
-      'SMTP incompleto: SMTP_USER e SMTP_PASS são obrigatórios em staging/produção.',
-    );
+    throw new Error('SMTP incompleto: SMTP_USER e SMTP_PASS são obrigatórios em staging/produção.');
   } else if (!isLocalSmtpHost(host)) {
-    throw new Error(
-      'SMTP_USER e SMTP_PASS são obrigatórios para hosts SMTP remotos (ex.: Titan).',
-    );
+    throw new Error('SMTP_USER e SMTP_PASS são obrigatórios para hosts SMTP remotos (ex.: Titan).');
   }
   // Mailpit / SMTP local sem autenticação permitido em development.
 

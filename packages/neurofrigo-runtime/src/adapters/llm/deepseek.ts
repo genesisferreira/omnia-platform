@@ -59,12 +59,11 @@ export class DeepSeekChatProvider implements LLMProviderPort {
     this.timeoutMs = config.timeoutMs ?? 25_000;
     this.maxRetries = Math.max(0, config.maxRetries ?? 2);
     this.correlationId =
-      config.correlationId || `ds-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      config.correlationId ||
+      `ds-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     this.fetchImpl = config.fetchImpl ?? fetch;
     this.apiKey = config.apiKey;
-    this.baseUrl = normalizeDeepseekBaseUrl(
-      config.baseUrl || 'https://api.deepseek.com/v1',
-    );
+    this.baseUrl = normalizeDeepseekBaseUrl(config.baseUrl || 'https://api.deepseek.com/v1');
     this.thinking = config.thinking === 'enabled' ? 'enabled' : 'disabled';
   }
 
@@ -186,10 +185,7 @@ export class DeepSeekChatProvider implements LLMProviderPort {
       };
 
       const message = json.choices?.[0]?.message;
-      const text =
-        message?.content?.trim() ||
-        message?.reasoning_content?.trim() ||
-        '';
+      const text = message?.content?.trim() || message?.reasoning_content?.trim() || '';
       if (!text) throw new Error('LLM_EMPTY_COMPLETION');
 
       return {

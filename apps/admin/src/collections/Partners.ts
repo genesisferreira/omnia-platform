@@ -1,11 +1,7 @@
 import type { CollectionConfig, FieldAccess } from 'payload';
 
 import { adminsOnly, isPlatformAdmin, staffOnly } from '../access/rbac';
-import {
-  partnerAfterChange,
-  partnerBeforeChange,
-  partnerBeforeValidate,
-} from './partners/hooks';
+import { partnerAfterChange, partnerBeforeChange, partnerBeforeValidate } from './partners/hooks';
 
 /** Campos de governança: somente admin altera (moderador = leitura via access da collection). */
 const adminFieldUpdate: FieldAccess = ({ req: { user } }) => isPlatformAdmin(user);

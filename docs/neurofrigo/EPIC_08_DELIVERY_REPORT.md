@@ -27,20 +27,20 @@ Staging: `ENTERPRISE_AI_SEED_OK` · admin healthy · `web_http=200` · landing/p
 
 ## Entregáveis
 
-| # | Item | Status |
-|---|------|--------|
-| 1 | Assistant Registry (`ai-assistants`) | ✅ |
-| 2 | Prompt Registry versionado (`ai-prompts`) | ✅ |
-| 3 | Model Registry (`ai-models`) | ✅ |
-| 4 | AI Policy Engine (`ai-policies` + `@omnia/enterprise-ai`) | ✅ |
-| 5 | Enterprise Dashboard | ✅ |
-| 6 | Admin Enterprise AI (collections/global) | ✅ |
-| 7 | Portal seleção de assistentes | ✅ |
-| 8 | API unificada `POST /api/ai/chat` + `assistantId` | ✅ |
-| 9 | Testes unitários (3/3 package + smoke) | ✅ |
-| 10 | Seed / benchmarks staging | ✅ |
-| 11 | Commits | ✅ `5e035d3` → `30d292c` |
-| 12 | GO / NO-GO | **GO** |
+| #   | Item                                                      | Status                   |
+| --- | --------------------------------------------------------- | ------------------------ |
+| 1   | Assistant Registry (`ai-assistants`)                      | ✅                       |
+| 2   | Prompt Registry versionado (`ai-prompts`)                 | ✅                       |
+| 3   | Model Registry (`ai-models`)                              | ✅                       |
+| 4   | AI Policy Engine (`ai-policies` + `@omnia/enterprise-ai`) | ✅                       |
+| 5   | Enterprise Dashboard                                      | ✅                       |
+| 6   | Admin Enterprise AI (collections/global)                  | ✅                       |
+| 7   | Portal seleção de assistentes                             | ✅                       |
+| 8   | API unificada `POST /api/ai/chat` + `assistantId`         | ✅                       |
+| 9   | Testes unitários (3/3 package + smoke)                    | ✅                       |
+| 10  | Seed / benchmarks staging                                 | ✅                       |
+| 11  | Commits                                                   | ✅ `5e035d3` → `30d292c` |
+| 12  | GO / NO-GO                                                | **GO**                   |
 
 ## Commits relevantes
 

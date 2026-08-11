@@ -52,10 +52,7 @@ function clampSessions(n: number): number {
   return Math.min(10, Math.floor(n));
 }
 
-function roleDefaultSessions(
-  role: LmsProfileRole,
-  defaults: LmsPolicyContext['defaults'],
-): number {
+function roleDefaultSessions(role: LmsProfileRole, defaults: LmsPolicyContext['defaults']): number {
   switch (role) {
     case 'student':
       return defaults.studentSessions;

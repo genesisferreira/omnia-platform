@@ -75,7 +75,8 @@ export const EmbeddingQueue: CollectionConfig = {
       defaultValue: 'deterministic',
       label: 'Provider',
       admin: {
-        description: 'Provider configurável via RETRIEVAL_EMBEDDING_PROVIDER (default deterministic).',
+        description:
+          'Provider configurável via RETRIEVAL_EMBEDDING_PROVIDER (default deterministic).',
       },
     },
     {

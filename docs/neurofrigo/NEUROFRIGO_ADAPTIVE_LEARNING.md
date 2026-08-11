@@ -6,25 +6,25 @@ Learning Events · progresso · completion · notas · erros recorrentes · tent
 
 ## Componentes
 
-| Componente | Função |
-|------------|--------|
-| Student Mastery Model | Domínio por tópico |
-| Gap Detector | Lacunas |
-| Recommendation Engine | Conteúdo existente |
-| Study Planner | Plano |
-| Microlesson Generator | Microaulas (níveis ≥3) |
-| Safety Validator | Risco técnico / pedagógico |
-| Teacher Approval Workflow | Revisão humana |
+| Componente                | Função                     |
+| ------------------------- | -------------------------- |
+| Student Mastery Model     | Domínio por tópico         |
+| Gap Detector              | Lacunas                    |
+| Recommendation Engine     | Conteúdo existente         |
+| Study Planner             | Plano                      |
+| Microlesson Generator     | Microaulas (níveis ≥3)     |
+| Safety Validator          | Risco técnico / pedagógico |
+| Teacher Approval Workflow | Revisão humana             |
 
 ## Níveis
 
-| Nível | Capacidade | MVP |
-|------:|------------|:---:|
-| 1 | Recomendar conteúdo existente | ● |
-| 2 | Reforço, resumo, exercício treino | ● |
-| 3 | Microaula personalizada | Supervisão |
-| 4 | Trilha individual | Futuro |
-| 5 | Autonomia supervisionada | Futuro |
+| Nível | Capacidade                        |    MVP     |
+| ----: | --------------------------------- | :--------: |
+|     1 | Recomendar conteúdo existente     |     ●      |
+|     2 | Reforço, resumo, exercício treino |     ●      |
+|     3 | Microaula personalizada           | Supervisão |
+|     4 | Trilha individual                 |   Futuro   |
+|     5 | Autonomia supervisionada          |   Futuro   |
 
 ## Conteúdo de alto risco → revisão humana
 

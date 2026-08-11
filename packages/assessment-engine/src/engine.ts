@@ -1,21 +1,11 @@
 import { AssessmentCache } from './cache/assessment-cache';
-import {
-  buildAssessmentDescriptor,
-  resolveAssessment,
-  type BuildAssessmentInput,
-} from './resolve';
-import {
-  createStubAssessmentSecurityPorts,
-  type AssessmentSecurityPorts,
-} from './security-ports';
+import { buildAssessmentDescriptor, resolveAssessment, type BuildAssessmentInput } from './resolve';
+import { createStubAssessmentSecurityPorts, type AssessmentSecurityPorts } from './security-ports';
 import type { AssessmentDescriptor, AssessmentEventType, ResolvedAssessment } from './types';
 
 /** Porta mínima para emitir no Learning Engine (anti-acoplamento). */
 export type AssessmentEventSink = {
-  emitAssessmentEvent: (
-    type: AssessmentEventType,
-    payload: Record<string, unknown>,
-  ) => void;
+  emitAssessmentEvent: (type: AssessmentEventType, payload: Record<string, unknown>) => void;
   updateContinue?: (pointer: {
     courseId: number;
     activityId: number;

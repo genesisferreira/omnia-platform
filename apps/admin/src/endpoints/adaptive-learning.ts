@@ -93,10 +93,7 @@ export const adaptiveDecideEndpoint: Endpoint = {
     const courseId = body.courseId != null ? String(body.courseId) : '';
     if (!courseId) return json({ ok: false, error: 'courseId and userKey required' }, 400);
 
-    const subject = resolveSubjectUserKey(
-      auth,
-      body.userKey != null ? String(body.userKey) : null,
-    );
+    const subject = resolveSubjectUserKey(auth, body.userKey != null ? String(body.userKey) : null);
     if (isAuthResponse(subject)) return subject;
 
     const result = await runAdaptiveDecide(req.payload, {

@@ -20,7 +20,10 @@ const DISPLAY: Record<string, string> = {
   command: 'Command',
 };
 
-const INTENT_TO_AGENT: Record<OrchestratorIntent, OfficialSpecialistKey | 'commercial' | 'support' | 'content'> = {
+const INTENT_TO_AGENT: Record<
+  OrchestratorIntent,
+  OfficialSpecialistKey | 'commercial' | 'support' | 'content'
+> = {
   institutional: 'content',
   courses: 'tutor',
   enrollment: 'support',
@@ -73,7 +76,11 @@ export function routePortalAgent(input: {
   if (
     input.profile === 'student' &&
     !input.enrolled &&
-    (key === 'tutor' || key === 'hvac' || key === 'electrical' || key === 'neurofrigo-tech' || key === 'lab')
+    (key === 'tutor' ||
+      key === 'hvac' ||
+      key === 'electrical' ||
+      key === 'neurofrigo-tech' ||
+      key === 'lab')
   ) {
     key = 'support';
   }

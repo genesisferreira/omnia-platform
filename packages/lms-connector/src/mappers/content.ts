@@ -62,9 +62,7 @@ export function mapMoodleSection(raw: unknown): LmsCourseSection | null {
     name: asString(s.name) || '',
     summary: asString(s.summary),
     visible: asBool(s.visible, true),
-    activities: modules
-      .map(mapMoodleActivity)
-      .filter((a): a is LmsActivity => a != null),
+    activities: modules.map(mapMoodleActivity).filter((a): a is LmsActivity => a != null),
   };
 }
 

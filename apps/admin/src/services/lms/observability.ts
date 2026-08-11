@@ -34,9 +34,7 @@ function routeLabel(route: string): string {
 function resolveTrace(req: PayloadRequest): TraceContext {
   const parent = parseTraceparent(req.headers.get('traceparent'));
   const requestId =
-    req.headers.get('x-request-id') ||
-    req.headers.get('x-correlation-id') ||
-    undefined;
+    req.headers.get('x-request-id') || req.headers.get('x-correlation-id') || undefined;
   return createTraceContext({
     traceId: parent?.traceId,
     parentSpanId: parent?.parentSpanId ?? null,

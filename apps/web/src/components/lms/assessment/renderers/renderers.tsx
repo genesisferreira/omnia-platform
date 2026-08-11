@@ -69,8 +69,7 @@ export function GradeRenderer(props: AssessmentRendererProps) {
     <Panel title="Nota">
       <p className="text-foreground">
         <span className="font-medium">{g.itemName}: </span>
-        {g.gradeFormatted ||
-          (g.percentage != null ? `${Math.round(g.percentage)}%` : '—')}
+        {g.gradeFormatted || (g.percentage != null ? `${Math.round(g.percentage)}%` : '—')}
       </p>
     </Panel>
   );
@@ -97,7 +96,8 @@ export function UnknownAssessmentRenderer(props: AssessmentRendererProps) {
   return (
     <Panel title="Atividade">
       <p>
-        Tipo “{props.assessment.metadata.modName}” sem renderer dedicado — UnknownAssessmentRenderer.
+        Tipo “{props.assessment.metadata.modName}” sem renderer dedicado —
+        UnknownAssessmentRenderer.
       </p>
       <p>{props.assessment.metadata.instructions}</p>
     </Panel>

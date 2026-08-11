@@ -82,7 +82,10 @@ export default async function PartnerProfilePage({ params }: PageProps) {
 
         {partner.description ? (
           <section aria-labelledby="about-heading" className="space-y-2">
-            <h2 id="about-heading" className="font-heading text-xl font-semibold text-omnia-deep-blue">
+            <h2
+              id="about-heading"
+              className="font-heading text-xl font-semibold text-omnia-deep-blue"
+            >
               Sobre
             </h2>
             <p className="whitespace-pre-line text-sm leading-relaxed text-omnia-graphite-light">
@@ -102,9 +105,7 @@ export default async function PartnerProfilePage({ params }: PageProps) {
             {partner.showFullAddress && partner.addressLine
               ? partner.addressLine
               : location || 'Localização sob consulta'}
-            {partner.coverageRadius != null
-              ? ` · Raio de ${partner.coverageRadius} km`
-              : ''}
+            {partner.coverageRadius != null ? ` · Raio de ${partner.coverageRadius} km` : ''}
           </p>
           {partner.serviceCities.length > 0 ? (
             <ul className="flex flex-wrap gap-2 text-sm">
@@ -171,7 +172,10 @@ export default async function PartnerProfilePage({ params }: PageProps) {
             <h2 className="font-heading text-xl font-semibold text-omnia-deep-blue">Galeria</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {partner.gallery.map((item) => (
-                <figure key={item.image.id} className="overflow-hidden border border-omnia-deep-blue/10">
+                <figure
+                  key={item.image.id}
+                  className="overflow-hidden border border-omnia-deep-blue/10"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image.url}

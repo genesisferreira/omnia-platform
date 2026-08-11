@@ -8,10 +8,10 @@ Orquestra: Identity → Context → Retrieval → Prompt → LLM → Guardrails 
 
 ## Ports
 
-| Port | Uso |
-|------|-----|
-| `RetrievalPort` | Busca semântica (adapter Admin → `@omnia/retrieval`) |
-| `LLMProviderPort` | Geração de resposta |
+| Port              | Uso                                                  |
+| ----------------- | ---------------------------------------------------- |
+| `RetrievalPort`   | Busca semântica (adapter Admin → `@omnia/retrieval`) |
+| `LLMProviderPort` | Geração de resposta                                  |
 
 ## Providers LLM
 

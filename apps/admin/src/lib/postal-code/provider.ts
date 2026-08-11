@@ -45,16 +45,14 @@ async function fetchJson(url: string): Promise<unknown | null> {
 }
 
 async function lookupViaCep(cep: string): Promise<PostalCodeLookupResult | null> {
-  const data = (await fetchJson(`https://viacep.com.br/ws/${cep}/json/`)) as
-    | {
-        erro?: boolean;
-        cep?: string;
-        logradouro?: string;
-        bairro?: string;
-        localidade?: string;
-        uf?: string;
-      }
-    | null;
+  const data = (await fetchJson(`https://viacep.com.br/ws/${cep}/json/`)) as {
+    erro?: boolean;
+    cep?: string;
+    logradouro?: string;
+    bairro?: string;
+    localidade?: string;
+    uf?: string;
+  } | null;
   if (!data || data.erro || !data.localidade || !data.uf) {
     return null;
   }
@@ -70,15 +68,13 @@ async function lookupViaCep(cep: string): Promise<PostalCodeLookupResult | null>
 }
 
 async function lookupBrasilApi(cep: string): Promise<PostalCodeLookupResult | null> {
-  const data = (await fetchJson(`https://brasilapi.com.br/api/cep/v1/${cep}`)) as
-    | {
-        cep?: string;
-        street?: string;
-        neighborhood?: string;
-        city?: string;
-        state?: string;
-      }
-    | null;
+  const data = (await fetchJson(`https://brasilapi.com.br/api/cep/v1/${cep}`)) as {
+    cep?: string;
+    street?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+  } | null;
   if (!data?.city || !data?.state) {
     return null;
   }
@@ -93,7 +89,9 @@ async function lookupBrasilApi(cep: string): Promise<PostalCodeLookupResult | nu
   };
 }
 
-export async function lookupPostalCode(postalCode: unknown): Promise<PostalCodeLookupResult | null> {
+export async function lookupPostalCode(
+  postalCode: unknown,
+): Promise<PostalCodeLookupResult | null> {
   const cep = normalizeBrazilianPostalCode(postalCode);
   if (!cep) {
     return null;

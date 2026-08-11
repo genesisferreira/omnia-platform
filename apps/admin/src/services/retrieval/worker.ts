@@ -1,8 +1,5 @@
 import type { Payload } from 'payload';
-import {
-  chunkChecksum,
-  type VectorRecord,
-} from '@omnia/retrieval';
+import { chunkChecksum, type VectorRecord } from '@omnia/retrieval';
 
 import {
   getEmbeddingProvider,
@@ -46,10 +43,7 @@ type ChunkDoc = {
   tags?: Array<{ tag?: string | null }> | null;
 };
 
-async function loadChunksForQueueItem(
-  payload: Payload,
-  item: QueueDoc,
-): Promise<ChunkDoc[]> {
+async function loadChunksForQueueItem(payload: Payload, item: QueueDoc): Promise<ChunkDoc[]> {
   const chunkId = relId(item.chunk);
   if (chunkId) {
     const doc = await payload.findByID({
@@ -138,11 +132,7 @@ async function upsertEmbeddingRecord(
   return created.id;
 }
 
-async function embedChunk(
-  payload: Payload,
-  chunk: ChunkDoc,
-  queueItem: QueueDoc,
-): Promise<void> {
+async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc): Promise<void> {
   const provider = getEmbeddingProvider();
   const meta = provider.metadata();
   const store = await getVectorStore();

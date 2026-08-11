@@ -4,10 +4,10 @@ Scripts para deploy da Omnia Platform por ambiente.
 
 ## DEV / staging
 
-| Script | Uso |
-| --- | --- |
-| `deploy-observability-dev.sh` | Observabilidade (admin + stack metrics) |
-| `deploy-lms-experience-dev.sh` | Experience MVP — **somente** `web` |
+| Script                         | Uso                                     |
+| ------------------------------ | --------------------------------------- |
+| `deploy-observability-dev.sh`  | Observabilidade (admin + stack metrics) |
+| `deploy-lms-experience-dev.sh` | Experience MVP — **somente** `web`      |
 
 ## Planejado
 

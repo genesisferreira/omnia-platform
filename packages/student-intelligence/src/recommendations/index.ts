@@ -86,12 +86,14 @@ export function buildSipRecommendations(input: {
 
   // Dedup by title
   const seen = new Set<string>();
-  return out.filter((r) => {
-    const k = r.title.toLowerCase();
-    if (seen.has(k)) return false;
-    seen.add(k);
-    return true;
-  }).slice(0, 8);
+  return out
+    .filter((r) => {
+      const k = r.title.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .slice(0, 8);
 }
 
 export function nextStepsFromRecommendations(recs: SipRecommendation[]): string[] {

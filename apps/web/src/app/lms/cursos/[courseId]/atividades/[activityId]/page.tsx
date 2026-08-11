@@ -167,13 +167,9 @@ export default async function LmsActivityPage({ params }: ActivityPageProps) {
   }
 
   const courseTitle =
-    courseRes.data?.course?.displayName ||
-    courseRes.data?.course?.fullName ||
-    `Curso ${courseId}`;
+    courseRes.data?.course?.displayName || courseRes.data?.course?.fullName || `Curso ${courseId}`;
 
-  const activitiesProgress = progressRes.ok
-    ? progressRes.data?.progress?.activities || []
-    : [];
+  const activitiesProgress = progressRes.ok ? progressRes.data?.progress?.activities || [] : [];
   const stateById: Record<number, number> = {};
   for (const a of activitiesProgress) {
     stateById[a.moodleActivityId] = a.state;

@@ -40,9 +40,7 @@
       "type": "timeseries",
       "title": "Decision cache hits",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-      "targets": [
-        { "expr": "sum(rate(media_cache_hits[5m]))", "legendFormat": "cache hits" }
-      ]
+      "targets": [{ "expr": "sum(rate(media_cache_hits[5m]))", "legendFormat": "cache hits" }]
     }
   ]
 }

@@ -32,9 +32,7 @@ export class ContextBuilder implements ContextBuilderPort {
       lessonId: request.course.lessonId ? String(request.course.lessonId) : null,
       lessonTitle: request.course.lessonTitle ?? null,
       lessonObjectives: request.course.lessonObjectives ?? null,
-      ownerCompanyId: request.course.ownerCompanyId
-        ? String(request.course.ownerCompanyId)
-        : null,
+      ownerCompanyId: request.course.ownerCompanyId ? String(request.course.ownerCompanyId) : null,
       language,
       role,
       userId: request.identity.userId ? String(request.identity.userId) : null,

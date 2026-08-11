@@ -18,7 +18,10 @@ export class DefaultAclFilter implements AclFilterPort {
 
       if (r.publicationStatus && r.publicationStatus !== 'published') return false;
 
-      if (r.status && !['published', 'ready', 'active', 'completed', 'indexed'].includes(r.status)) {
+      if (
+        r.status &&
+        !['published', 'ready', 'active', 'completed', 'indexed'].includes(r.status)
+      ) {
         return false;
       }
 

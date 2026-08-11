@@ -170,10 +170,7 @@ export async function peekPartnerRegisterQuota(args: {
 }): Promise<PartnerRegisterRateResult> {
   const decision = await peekRateLimit({
     scope: 'partner-register',
-    subjects: [
-      { value: args.ip },
-      { value: args.email, hash: true },
-    ],
+    subjects: [{ value: args.ip }, { value: args.email, hash: true }],
     max: PARTNER_REGISTER_RATE_LIMIT_MAX,
     windowMs: PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
     onRedisUnavailable: partnerRegisterRedisMode(),
@@ -195,10 +192,7 @@ export async function recordPartnerRegisterSuccess(args: {
 }): Promise<PartnerRegisterRateResult> {
   const decision = await checkRateLimit({
     scope: 'partner-register',
-    subjects: [
-      { value: args.ip },
-      { value: args.email, hash: true },
-    ],
+    subjects: [{ value: args.ip }, { value: args.email, hash: true }],
     max: PARTNER_REGISTER_RATE_LIMIT_MAX,
     windowMs: PARTNER_REGISTER_RATE_LIMIT_WINDOW_MS,
     onRedisUnavailable: partnerRegisterRedisMode(),
@@ -244,8 +238,7 @@ export function formatRetryAfterMinutes(seconds: number | undefined): string {
 }
 
 export type ValidatePartnerRegisterResult =
-  | { ok: true; data: NormalizedPartnerRegister }
-  | { ok: false; message: string };
+  { ok: true; data: NormalizedPartnerRegister } | { ok: false; message: string };
 
 export function validatePartnerRegisterBody(body: unknown): ValidatePartnerRegisterResult {
   if (!body || typeof body !== 'object') {
@@ -296,7 +289,11 @@ export function validatePartnerRegisterBody(body: unknown): ValidatePartnerRegis
   }
 
   let coverageRadius: number | null = null;
-  if (raw.coverageRadius !== undefined && raw.coverageRadius !== null && raw.coverageRadius !== '') {
+  if (
+    raw.coverageRadius !== undefined &&
+    raw.coverageRadius !== null &&
+    raw.coverageRadius !== ''
+  ) {
     const n = Number(raw.coverageRadius);
     if (!Number.isFinite(n) || n < 0) {
       return { ok: false, message: 'Raio de atendimento inválido.' };

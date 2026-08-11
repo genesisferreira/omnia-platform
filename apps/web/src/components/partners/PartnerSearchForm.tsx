@@ -110,9 +110,7 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
       () => {
         setGeoLoading(false);
         setGeoStatus('Localização negada');
-        setGeoError(
-          'Não foi possível obter sua localização. Busque por CEP ou cidade/UF.',
-        );
+        setGeoError('Não foi possível obter sua localização. Busque por CEP ou cidade/UF.');
       },
       { enableHighAccuracy: false, timeout: 10000 },
     );
@@ -165,7 +163,9 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-omnia-deep-blue">Cidade (sua localização)</span>
+          <span className="mb-1 block font-medium text-omnia-deep-blue">
+            Cidade (sua localização)
+          </span>
           <Input
             name="nearCity"
             value={form.nearCity}
@@ -238,7 +238,12 @@ export function PartnerSearchForm({ categories, specialties }: PartnerSearchForm
         <Button type="submit" disabled={pending}>
           {pending ? 'Buscando…' : 'Buscar parceiros'}
         </Button>
-        <Button type="button" variant="outline" onClick={useLocation} disabled={geoLoading || pending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={useLocation}
+          disabled={geoLoading || pending}
+        >
           {geoLoading ? 'Obtendo localização…' : 'Usar minha localização'}
         </Button>
       </div>

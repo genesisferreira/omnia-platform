@@ -38,11 +38,12 @@ function mapRole(role: string | null | undefined): string {
  * Bridge S2S Portal → Admin Neurofrigo Runtime.
  * Requires portal session. Never exposes OMNIA_INTERNAL_API_SECRET to the browser.
  */
-async function buildInternalHeaders(options: {
-  user?: PortalUser;
-} = {}): Promise<
-  | { headers: Record<string, string>; adminBase: string }
-  | { error: string; status: number }
+async function buildInternalHeaders(
+  options: {
+    user?: PortalUser;
+  } = {},
+): Promise<
+  { headers: Record<string, string>; adminBase: string } | { error: string; status: number }
 > {
   const token = await getSessionToken();
   if (!token) {

@@ -1,8 +1,4 @@
-import {
-  assertAssistantAllowed,
-  buildPolicyDecision,
-  evaluatePolicies,
-} from '../policy/engine';
+import { assertAssistantAllowed, buildPolicyDecision, evaluatePolicies } from '../policy/engine';
 import { resolveAssistantRuntime } from '../resolve/resolve-runtime';
 import type {
   AiModelRecord,

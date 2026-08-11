@@ -33,21 +33,10 @@ export type EvidenceSourceType =
   | 'engineering'
   | 'commercial';
 
-export type LearningPreference =
-  | 'visual'
-  | 'pratico'
-  | 'textual'
-  | 'analitico'
-  | 'experimental';
+export type LearningPreference = 'visual' | 'pratico' | 'textual' | 'analitico' | 'experimental';
 
 export type MotivationGoal =
-  | 'emprego'
-  | 'empresa_propria'
-  | 'co2'
-  | 'industrial'
-  | 'hvac'
-  | 'consultoria'
-  | string;
+  'emprego' | 'empresa_propria' | 'co2' | 'industrial' | 'hvac' | 'consultoria' | string;
 
 export type CompetencyState = {
   key: string;

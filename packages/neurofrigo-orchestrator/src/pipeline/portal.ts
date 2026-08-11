@@ -5,11 +5,7 @@ import { classifyOrchestratorIntent } from '../intent/classify';
 import { routePortalAgent } from '../router/agent-router';
 import type { OrchestratorPlan, OrchestratorTraceEvent, ProfileKind } from '../domain/types';
 
-function push(
-  events: OrchestratorTraceEvent[],
-  type: string,
-  detail?: Record<string, unknown>,
-) {
+function push(events: OrchestratorTraceEvent[], type: string, detail?: Record<string, unknown>) {
   events.push({ type, at: new Date().toISOString(), detail });
 }
 

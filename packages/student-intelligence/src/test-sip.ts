@@ -21,7 +21,11 @@ const signals: SipEvidenceInput = {
   avgGrounding: 0.72,
   negativeFeedbackCount: 1,
   recentQuestions: [
-    { question: 'Como funciona o ciclo de refrigeração com CO2?', groundingScore: 0.8, status: 'ok' },
+    {
+      question: 'Como funciona o ciclo de refrigeração com CO2?',
+      groundingScore: 0.8,
+      status: 'ok',
+    },
     { question: 'Explique termodinâmica do evaporador', groundingScore: 0.7, status: 'ok' },
     { question: 'Partida de motor elétrico em comandos', groundingScore: 0.4, status: 'ok' },
   ],

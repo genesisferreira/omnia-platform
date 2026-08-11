@@ -9,11 +9,11 @@
 
 ## 1. Estruturas implementadas
 
-| Slug Payload | Tipo | Menu Admin |
-|--------------|------|------------|
-| `partners` | Collection | Partner Network → Parceiros |
-| `partner-categories` | Collection | Partner Network → Categorias |
-| `partner-network-dashboard` | Global | Partner Network → Dashboard (placeholder) |
+| Slug Payload                | Tipo       | Menu Admin                                |
+| --------------------------- | ---------- | ----------------------------------------- |
+| `partners`                  | Collection | Partner Network → Parceiros               |
+| `partner-categories`        | Collection | Partner Network → Categorias              |
+| `partner-network-dashboard` | Global     | Partner Network → Dashboard (placeholder) |
 
 ---
 
@@ -21,38 +21,38 @@
 
 ### Confirmados (já existiam)
 
-| Campo | Tipo | Notas |
-|-------|------|--------|
-| `companyName` | text | Nome da empresa |
-| `tradeName` | text | Nome fantasia |
-| `partnerType` | select | `company` \| `professional` |
-| `document` | text | CNPJ/CPF |
-| `email`, `phone`, `whatsapp`, `website` | text/email | Contatos |
-| `social.*` | group | Instagram, LinkedIn, Facebook, YouTube |
-| `description` | textarea | |
-| `logo` | upload → media | |
-| `gallery` | array | image + caption |
-| `address`, `zipCode`, `city`, `state`, `country` | text | |
-| `latitude`, `longitude` | number | Preparados; sem geocode |
-| `status` | select | Ver workflow |
-| `featured` | checkbox | Default false; admin only |
-| `active` | checkbox | Default true |
-| `approvedAt` | date | Auto na aprovação |
-| `approvedBy` | relationship → users | Auto na aprovação |
-| `categories` | relationship hasMany → partner-categories | |
+| Campo                                            | Tipo                                      | Notas                                  |
+| ------------------------------------------------ | ----------------------------------------- | -------------------------------------- |
+| `companyName`                                    | text                                      | Nome da empresa                        |
+| `tradeName`                                      | text                                      | Nome fantasia                          |
+| `partnerType`                                    | select                                    | `company` \| `professional`            |
+| `document`                                       | text                                      | CNPJ/CPF                               |
+| `email`, `phone`, `whatsapp`, `website`          | text/email                                | Contatos                               |
+| `social.*`                                       | group                                     | Instagram, LinkedIn, Facebook, YouTube |
+| `description`                                    | textarea                                  |                                        |
+| `logo`                                           | upload → media                            |                                        |
+| `gallery`                                        | array                                     | image + caption                        |
+| `address`, `zipCode`, `city`, `state`, `country` | text                                      |                                        |
+| `latitude`, `longitude`                          | number                                    | Preparados; sem geocode                |
+| `status`                                         | select                                    | Ver workflow                           |
+| `featured`                                       | checkbox                                  | Default false; admin only              |
+| `active`                                         | checkbox                                  | Default true                           |
+| `approvedAt`                                     | date                                      | Auto na aprovação                      |
+| `approvedBy`                                     | relationship → users                      | Auto na aprovação                      |
+| `categories`                                     | relationship hasMany → partner-categories |                                        |
 
 ### Adicionados / ajustados no Checkpoint 01
 
-| Campo | Tipo | Notas |
-|-------|------|--------|
-| `slug` | text unique | URL pública futura; gerado do nome fantasia; editável; unicidade no hook |
-| `verified` | checkbox | Default false; independente do status; admin only |
-| `plan` | select | `free` (default), `professional`, `premium`, `enterprise` — sem cobrança |
-| `coverageRadius` | number ≥ 0 | Substitui `serviceRadius`; km; opcional |
-| `serviceCities` | array `{ city, state? }` | Estrutura reutilizável (não texto livre) |
-| `approvalNotes` | textarea | Interno; admin only update; não expor publicamente |
-| `ownerUser` | relationship → users | Responsável pelo cadastro (≠ approvedBy) |
-| `publishedAt` | date | Preenchido na **primeira** aprovação; não sobrescrito |
+| Campo            | Tipo                     | Notas                                                                    |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------ |
+| `slug`           | text unique              | URL pública futura; gerado do nome fantasia; editável; unicidade no hook |
+| `verified`       | checkbox                 | Default false; independente do status; admin only                        |
+| `plan`           | select                   | `free` (default), `professional`, `premium`, `enterprise` — sem cobrança |
+| `coverageRadius` | number ≥ 0               | Substitui `serviceRadius`; km; opcional                                  |
+| `serviceCities`  | array `{ city, state? }` | Estrutura reutilizável (não texto livre)                                 |
+| `approvalNotes`  | textarea                 | Interno; admin only update; não expor publicamente                       |
+| `ownerUser`      | relationship → users     | Responsável pelo cadastro (≠ approvedBy)                                 |
+| `publishedAt`    | date                     | Preenchido na **primeira** aprovação; não sobrescrito                    |
 
 ---
 
@@ -71,11 +71,11 @@
 
 ## 4. Permissões
 
-| Papel | Collection | Campos de governança* |
-|-------|------------|------------------------|
-| Admin (`super_admin`, `admin`) | CRUD | update permitido |
-| Moderador (`editor`) | read only | update negado (collection + field access) |
-| Parceiro / demais | sem acesso | — |
+| Papel                          | Collection | Campos de governança*                     |
+| ------------------------------ | ---------- | ----------------------------------------- |
+| Admin (`super_admin`, `admin`) | CRUD       | update permitido                          |
+| Moderador (`editor`)           | read only  | update negado (collection + field access) |
+| Parceiro / demais              | sem acesso | —                                         |
 
 \* `status`, `featured`, `verified`, `plan`, `approvalNotes`, `approvedAt`, `approvedBy`, `publishedAt`
 
@@ -85,8 +85,8 @@ API pública: **não existe nesta fase**. Campos internos (`approvalNotes`, etc.
 
 ## 5. Migration
 
-| Nome | Ação |
-|------|------|
+| Nome                              | Ação                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------ |
 | `20260724_120000_partner_network` | **Atualizada in-place** (nunca aplicada em banco; evita migration extra) |
 
 Inclui: tabelas `partner_categories`, `partners`, `partners_service_cities`, `partners_gallery`, `partners_rels`, global `partner_network_dashboard`, enums (`partner_type`, `status`, `plan`), FKs e índices (incl. `partners_slug_idx` unique).
@@ -97,14 +97,14 @@ Inclui: tabelas `partner_categories`, `partners`, `partners_service_cities`, `pa
 
 ## 6. Testes executados
 
-| Check | Resultado |
-|-------|-----------|
-| Lint (`@omnia/admin`) | OK (warnings pré-existentes em Users/migrations) |
-| Typecheck | OK |
-| `payload generate:types` | OK |
-| Build | Compilação Next OK; falha final **EPERM symlink** no output `standalone` (Windows) |
-| `payload migrate` | Não executado — Postgres indisponível |
-| CRUD Admin | Não validado — Postgres indisponível |
+| Check                    | Resultado                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| Lint (`@omnia/admin`)    | OK (warnings pré-existentes em Users/migrations)                                   |
+| Typecheck                | OK                                                                                 |
+| `payload generate:types` | OK                                                                                 |
+| Build                    | Compilação Next OK; falha final **EPERM symlink** no output `standalone` (Windows) |
+| `payload migrate`        | Não executado — Postgres indisponível                                              |
+| CRUD Admin               | Não validado — Postgres indisponível                                               |
 
 ---
 

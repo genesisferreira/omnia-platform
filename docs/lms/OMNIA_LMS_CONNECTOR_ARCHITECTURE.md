@@ -4,12 +4,12 @@
 
 ## Decisão de colocação
 
-| Camada | Local | Motivo |
-|--------|-------|--------|
-| Cliente Moodle, policy, session, cache, health | `packages/lms-connector` | Reutilizável, tipado, sem UI |
-| DTOs estáveis | `packages/shared/src/lms` | Contrato frontend/BFF |
-| Endpoints HTTP | `apps/admin` `/api/omnia/lms/*` | BFF existente (Payload) |
-| Vínculo + auditoria + políticas admin | Collections/Global Payload | Padrão Global/Collection |
+| Camada                                         | Local                           | Motivo                       |
+| ---------------------------------------------- | ------------------------------- | ---------------------------- |
+| Cliente Moodle, policy, session, cache, health | `packages/lms-connector`        | Reutilizável, tipado, sem UI |
+| DTOs estáveis                                  | `packages/shared/src/lms`       | Contrato frontend/BFF        |
+| Endpoints HTTP                                 | `apps/admin` `/api/omnia/lms/*` | BFF existente (Payload)      |
+| Vínculo + auditoria + políticas admin          | Collections/Global Payload      | Padrão Global/Collection     |
 
 **Não** foi criado um terceiro runtime. O Admin continua sendo o BFF.
 

@@ -20,7 +20,7 @@ Portal (Automático)
 
 ## Especialistas oficiais
 
-hvac · neurofrigo-tech · electrical · assessor · tutor · radar · lab · content  
+hvac · neurofrigo-tech · electrical · assessor · tutor · radar · lab · content
 
 Legado mantido: commercial · support · engineering · command (só super_admin)
 

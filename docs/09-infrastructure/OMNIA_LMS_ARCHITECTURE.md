@@ -17,22 +17,22 @@ Internet → Traefik (omnia_proxy)
 
 ## Isolamento vs Platform
 
-| Recurso | Platform | LMS |
-| --- | --- | --- |
-| Projeto Compose | `omnia-platform-*` | `omnia-lms-dev` / `omnia-lms-prod` |
-| Banco | PostgreSQL | MariaDB 11.4 |
-| Redis | próprio | próprio |
-| Volumes | `omnia_platform_*` | `omnia_lms_*` |
-| Traefik | compartilhado (`omnia_proxy`) | compartilhado |
+| Recurso         | Platform                      | LMS                                |
+| --------------- | ----------------------------- | ---------------------------------- |
+| Projeto Compose | `omnia-platform-*`            | `omnia-lms-dev` / `omnia-lms-prod` |
+| Banco           | PostgreSQL                    | MariaDB 11.4                       |
+| Redis           | próprio                       | próprio                            |
+| Volumes         | `omnia_platform_*`            | `omnia_lms_*`                      |
+| Traefik         | compartilhado (`omnia_proxy`) | compartilhado                      |
 
 ## Domínios
 
-| Hostname | Uso |
-| --- | --- |
-| `moodle.dev.omniafrigo.com.br` | Engine DEV |
-| `moodle.omniafrigo.com.br` | Engine PROD (preparado) |
-| `lms.dev.omniafrigo.com.br` | Reservado UI Omnia LMS |
-| `lms.omniafrigo.com.br` | Reservado UI Omnia LMS |
+| Hostname                       | Uso                     |
+| ------------------------------ | ----------------------- |
+| `moodle.dev.omniafrigo.com.br` | Engine DEV              |
+| `moodle.omniafrigo.com.br`     | Engine PROD (preparado) |
+| `lms.dev.omniafrigo.com.br`    | Reservado UI Omnia LMS  |
+| `lms.omniafrigo.com.br`        | Reservado UI Omnia LMS  |
 
 ## Componentes
 
@@ -40,11 +40,11 @@ Ver [`docker/lms/VERSIONS.md`](../../docker/lms/VERSIONS.md) e [`docker/lms/READ
 
 ## Logs
 
-| Origem | Onde |
-| --- | --- |
+| Origem            | Onde                                                         |
+| ----------------- | ------------------------------------------------------------ |
 | Apache/PHP/Moodle | `docker logs omnia-lms-moodle-*` + volume `omnia_lms_logs_*` |
-| Cron | `/var/log/omnia-lms/cron.log` (volume logs) |
-| MariaDB / Redis | `docker logs` dos containers (json-file rotativo) |
+| Cron              | `/var/log/omnia-lms/cron.log` (volume logs)                  |
+| MariaDB / Redis   | `docker logs` dos containers (json-file rotativo)            |
 
 ## Segurança
 

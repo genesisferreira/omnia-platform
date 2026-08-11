@@ -108,7 +108,9 @@ export default async function AulaPage({ params }: PageProps) {
                 <li key={asset.id} className="rounded-md border border-border p-4 text-sm">
                   <p className="font-medium">
                     {asset.title}{' '}
-                    <span className="text-xs uppercase text-muted-foreground">({asset.assetType})</span>
+                    <span className="text-xs uppercase text-muted-foreground">
+                      ({asset.assetType})
+                    </span>
                   </p>
                   {asset.description ? (
                     <p className="mt-1 text-muted-foreground">{asset.description}</p>

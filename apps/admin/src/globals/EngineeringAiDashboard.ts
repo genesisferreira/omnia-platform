@@ -7,8 +7,7 @@ export const EngineeringAiDashboard: GlobalConfig = {
   label: 'Dashboard Engenharia IA',
   admin: {
     group: 'Engineering IA',
-    description:
-      'Consultas técnicas, troubleshooting, comparações, grounding e satisfação.',
+    description: 'Consultas técnicas, troubleshooting, comparações, grounding e satisfação.',
   },
   access: {
     read: kiStaffAccess,

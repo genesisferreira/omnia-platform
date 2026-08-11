@@ -45,7 +45,12 @@ describe('deepseek adapter', () => {
       capturedThinking = body.thinking;
       return new Response(
         JSON.stringify({
-          choices: [{ message: { content: 'ok-deepseek', reasoning_content: 'think' }, finish_reason: 'stop' }],
+          choices: [
+            {
+              message: { content: 'ok-deepseek', reasoning_content: 'think' },
+              finish_reason: 'stop',
+            },
+          ],
           usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
@@ -68,7 +73,9 @@ describe('deepseek adapter', () => {
     const fetchImpl = (async () =>
       new Response(
         JSON.stringify({
-          choices: [{ message: { content: '', reasoning_content: 'only-cot' }, finish_reason: 'length' }],
+          choices: [
+            { message: { content: '', reasoning_content: 'only-cot' }, finish_reason: 'length' },
+          ],
           usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },

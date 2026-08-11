@@ -41,10 +41,7 @@ export const tutorChatEndpoint: Endpoint = {
     if (!question) return json({ ok: false, error: 'question is required' }, 400);
     if (!courseId) return json({ ok: false, error: 'courseId is required' }, 400);
 
-    const subject = resolveSubjectUserKey(
-      auth,
-      body.userId != null ? String(body.userId) : null,
-    );
+    const subject = resolveSubjectUserKey(auth, body.userId != null ? String(body.userId) : null);
     if (isAuthResponse(subject)) return subject;
 
     const result = await runTutorAsk(req.payload, {
@@ -60,8 +57,7 @@ export const tutorChatEndpoint: Endpoint = {
       moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
       lessonId: body.lessonId != null ? String(body.lessonId) : null,
       lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
-      lessonObjectives:
-        body.lessonObjectives != null ? String(body.lessonObjectives) : null,
+      lessonObjectives: body.lessonObjectives != null ? String(body.lessonObjectives) : null,
       ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
       requestStudyPlan: Boolean(body.requestStudyPlan),
       objective: body.objective != null ? String(body.objective) : null,

@@ -24,10 +24,7 @@ function numericUserId(userId: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-async function loadPolicy(
-  payload: Payload,
-  courseId: string,
-): Promise<AdaptivePolicy> {
+async function loadPolicy(payload: Payload, courseId: string): Promise<AdaptivePolicy> {
   const byCourse = await payload.find({
     collection: 'adaptive-policies',
     where: {
@@ -81,10 +78,7 @@ export async function createAdaptiveLearningService(
         const found = await payload.find({
           collection: 'sip-profiles',
           where: {
-            and: [
-              { userKey: { equals: userKey } },
-              { course: { equals: asCourseRel(courseId) } },
-            ],
+            and: [{ userKey: { equals: userKey } }, { course: { equals: asCourseRel(courseId) } }],
           },
           limit: 1,
           overrideAccess: true,
@@ -130,10 +124,7 @@ export async function createAdaptiveLearningService(
         const student = await payload.find({
           collection: 'student-profiles',
           where: {
-            and: [
-              { userKey: { equals: userKey } },
-              { course: { equals: asCourseRel(courseId) } },
-            ],
+            and: [{ userKey: { equals: userKey } }, { course: { equals: asCourseRel(courseId) } }],
           },
           limit: 1,
           overrideAccess: true,
@@ -152,9 +143,7 @@ export async function createAdaptiveLearningService(
           difficultyTopics: Array.isArray(lp?.difficultyTopics)
             ? lp.difficultyTopics.map(String)
             : [],
-          pendingTopics: Array.isArray(lp?.pendingTopics)
-            ? lp.pendingTopics.map(String)
-            : [],
+          pendingTopics: Array.isArray(lp?.pendingTopics) ? lp.pendingTopics.map(String) : [],
           lastActivityAt: s?.lastActivityAt ? String(s.lastActivityAt) : null,
         };
       },

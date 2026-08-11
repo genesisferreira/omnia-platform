@@ -10,13 +10,13 @@
 
 ## 1. Entidades criadas
 
-| Entidade | Slug | Grupo Admin |
-|----------|------|-------------|
-| Learning Resource | `learning-resources` | Knowledge Intelligence → Resources |
-| Knowledge Chunk | `knowledge-chunks` | Chunks |
-| Embedding Queue | `embedding-queue` | Queue |
-| Processing Run | `ki-processing-runs` | Processing |
-| Dashboard | `ki-intelligence-dashboard` | Dashboard KI |
+| Entidade          | Slug                        | Grupo Admin                        |
+| ----------------- | --------------------------- | ---------------------------------- |
+| Learning Resource | `learning-resources`        | Knowledge Intelligence → Resources |
+| Knowledge Chunk   | `knowledge-chunks`          | Chunks                             |
+| Embedding Queue   | `embedding-queue`           | Queue                              |
+| Processing Run    | `ki-processing-runs`        | Processing                         |
+| Dashboard         | `ki-intelligence-dashboard` | Dashboard KI                       |
 
 Package: `@omnia/knowledge-intelligence` (extract / normalize / chunk).  
 Migration: `20260805_180000_knowledge_intelligence` (aplicada em staging).
@@ -57,11 +57,11 @@ Stubs: DOCX, PPTX, HTML, video_transcript, OCR.
 
 ## 6. Testes (staging)
 
-| Suite | Resultado |
-|-------|-----------|
-| `@omnia/knowledge-intelligence` unit | PASS (4/4) |
-| `seed:knowledge-intelligence` | PASS — `pdfOk: true`, `txtOk: true` |
-| e2e Admin PDF+TXT | PASS (2/2) |
+| Suite                                | Resultado                           |
+| ------------------------------------ | ----------------------------------- |
+| `@omnia/knowledge-intelligence` unit | PASS (4/4)                          |
+| `seed:knowledge-intelligence`        | PASS — `pdfOk: true`, `txtOk: true` |
+| e2e Admin PDF+TXT                    | PASS (2/2)                          |
 
 Evidência seed: `completedResources≥8`, `chunks≥8`, `queuePending≥8`, Knowledge Documents criados.
 
@@ -79,12 +79,12 @@ Evidência seed: `completedResources≥8`, `chunks≥8`, `queuePending≥8`, Kno
 
 ## 8. Commits (principais)
 
-| SHA | Mensagem |
-|-----|----------|
-| `7197cdc` | feat(ki): deliver Knowledge Intelligence factory pipeline |
-| `14e2717` | fix(ki): drop .js extensions |
-| `c23a247` | fix(ki): cast Payload user ACL |
-| `dfed5bf`…`bf00497` | fixes PDF/preExtract/e2e isolation |
+| SHA                 | Mensagem                                                  |
+| ------------------- | --------------------------------------------------------- |
+| `7197cdc`           | feat(ki): deliver Knowledge Intelligence factory pipeline |
+| `14e2717`           | fix(ki): drop .js extensions                              |
+| `c23a247`           | fix(ki): cast Payload user ACL                            |
+| `dfed5bf`…`bf00497` | fixes PDF/preExtract/e2e isolation                        |
 
 Remote: `origin/feature/neurofrigo-knowledge-hub` @ **`bf00497`**
 
@@ -92,13 +92,13 @@ Remote: `origin/feature/neurofrigo-knowledge-hub` @ **`bf00497`**
 
 ## 9. GO / NO-GO
 
-| Critério | Status |
-|----------|--------|
-| Arquitetura extensível | GO |
-| PDF→chunks→doc→fila sem embeddings | GO (seed staging) |
-| TXT path | GO |
-| Sem Runtime/Chat/embeddings reais | GO |
-| Homologação staging | GO (migrate + seed + unit + e2e) |
+| Critério                           | Status                           |
+| ---------------------------------- | -------------------------------- |
+| Arquitetura extensível             | GO                               |
+| PDF→chunks→doc→fila sem embeddings | GO (seed staging)                |
+| TXT path                           | GO                               |
+| Sem Runtime/Chat/embeddings reais  | GO                               |
+| Homologação staging                | GO (migrate + seed + unit + e2e) |
 
 **Veredito: GO** — aguardar aprovação humana.
 

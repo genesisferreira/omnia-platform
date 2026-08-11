@@ -3,10 +3,7 @@ import { checkRateLimit } from '@omnia/shared/rate-limit';
 
 import { requireLmsAdmin, requireLmsAuth } from '../../services/lms/auth-context';
 import { writeLmsAudit } from '../../services/lms/identity';
-import {
-  recordBusinessRoute,
-  withLmsObservability,
-} from '../../services/lms/observability';
+import { recordBusinessRoute, withLmsObservability } from '../../services/lms/observability';
 import {
   assertUserEnrolled,
   buildHealthResponse,
@@ -114,7 +111,11 @@ export const lmsCoursesEndpoint: Endpoint = {
 
         const url = new URL(req.url || 'http://local', 'http://local');
         const page = parsePositiveIntParam(url.searchParams.get('page') ?? undefined, 1, 100);
-        const pageSize = parsePositiveIntParam(url.searchParams.get('pageSize') ?? undefined, 20, 50);
+        const pageSize = parsePositiveIntParam(
+          url.searchParams.get('pageSize') ?? undefined,
+          20,
+          50,
+        );
         const enrollments = await listUserCourses(linked.user.moodleUserId);
         const start = (page - 1) * pageSize;
         const slice = enrollments.slice(start, start + pageSize);

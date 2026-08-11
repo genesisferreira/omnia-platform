@@ -52,10 +52,7 @@ async function main() {
       await payload.find({
         collection: 'student-profiles',
         where: {
-          and: [
-            { userKey: { equals: 'tutor-advanced' } },
-            { course: { equals: courseId } },
-          ],
+          and: [{ userKey: { equals: 'tutor-advanced' } }, { course: { equals: courseId } }],
         },
         limit: 1,
         overrideAccess: true,
@@ -124,7 +121,9 @@ async function main() {
   if (!beginner.recommendations.length) throw new Error('EXPECTED_RECOMMENDATIONS');
   if ((plan.studyPlan?.steps.length ?? 0) < 1) throw new Error('EXPECTED_STUDY_PLAN');
   if (beginner.answer.status !== 'ok' && beginner.answer.status !== 'not_found') {
-    throw new Error(`EXPECTED_RUNTIME_OK got=${beginner.answer.status} code=${beginner.answer.errorCode}`);
+    throw new Error(
+      `EXPECTED_RUNTIME_OK got=${beginner.answer.status} code=${beginner.answer.errorCode}`,
+    );
   }
   if (!beginner.student.courseId) throw new Error('MISSING_STUDENT_PROFILE');
   if (!beginner.learning.userId) throw new Error('MISSING_LEARNING_PROFILE');

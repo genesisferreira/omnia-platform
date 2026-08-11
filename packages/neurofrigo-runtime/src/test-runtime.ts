@@ -13,7 +13,9 @@ import { NeurofrigoRuntime } from './runtime/runtime';
 import { DEFAULT_GUARDRAIL_LIMITS, NOT_FOUND_MESSAGE } from './domain/types';
 import type { RetrievalPort } from './ports';
 
-function citation(partial: Partial<CitationResult> & Pick<CitationResult, 'chunkId' | 'text'>): CitationResult {
+function citation(
+  partial: Partial<CitationResult> & Pick<CitationResult, 'chunkId' | 'text'>,
+): CitationResult {
   return {
     score: 0.9,
     similarity: 0.9,
@@ -38,7 +40,10 @@ describe('neurofrigo-runtime experience v2', () => {
   it('classifies intents', () => {
     assert.equal(classifyIntent('O que é um compressor scroll?'), 'definition');
     assert.equal(classifyIntent('Como instalar a válvula passo a passo?'), 'procedural');
-    assert.equal(classifyIntent('Diferença entre expansão termostática e eletrônica'), 'comparative');
+    assert.equal(
+      classifyIntent('Diferença entre expansão termostática e eletrônica'),
+      'comparative',
+    );
     assert.equal(classifyIntent('O equipamento não liga, qual a causa?'), 'troubleshooting');
   });
 
@@ -181,9 +186,7 @@ describe('neurofrigo-runtime experience v2', () => {
       question: 'Como funciona a válvula de expansão?',
       identity: { userId: '1', role: 'student' },
       course: { courseId: '1', courseTitle: 'Fundamentos' },
-      conversationHistory: [
-        { question: 'O que é refrigerante?', answer: 'Fluido do ciclo.' },
-      ],
+      conversationHistory: [{ question: 'O que é refrigerante?', answer: 'Fluido do ciclo.' }],
     });
 
     assert.equal(answer.status, 'ok');

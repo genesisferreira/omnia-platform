@@ -8,19 +8,12 @@ import { APIError } from 'payload';
 
 import { isPlatformAdmin } from '../../access/rbac';
 import { applyPartnerLocationResolution } from '../../lib/partners/resolve-partner-location';
-import {
-  isValidPartnerSlug,
-  normalizePartnerSlug,
-  slugSourceFromPartner,
-} from './partner-rules';
+import { isValidPartnerSlug, normalizePartnerSlug, slugSourceFromPartner } from './partner-rules';
 
 /**
  * beforeValidate — gera slug a partir do nome fantasia (ou razão social) se omitido.
  */
-export const partnerBeforeValidate: CollectionBeforeValidateHook = ({
-  data,
-  originalDoc,
-}) => {
+export const partnerBeforeValidate: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
   if (!data) {
     return data;
   }
@@ -53,9 +46,7 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
 
   const slugCandidate =
     normalizePartnerSlug(data.slug) ??
-    (typeof originalDoc?.slug === 'string'
-      ? normalizePartnerSlug(originalDoc.slug)
-      : undefined) ??
+    (typeof originalDoc?.slug === 'string' ? normalizePartnerSlug(originalDoc.slug) : undefined) ??
     slugSourceFromPartner({
       tradeName: data.tradeName ?? originalDoc?.tradeName,
       companyName: data.companyName ?? originalDoc?.companyName,
@@ -93,8 +84,7 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
   }
 
   if (req.context?.skipPartnerGeocode !== true) {
-    const force =
-      req.context?.forcePartnerGeocode === true || data.geocodingStatus === 'pending';
+    const force = req.context?.forcePartnerGeocode === true || data.geocodingStatus === 'pending';
     const previous = originalDoc
       ? {
           zipCode: originalDoc.zipCode as string | null | undefined,
@@ -105,12 +95,7 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
           state: originalDoc.state as string | null | undefined,
           country: originalDoc.country as string | null | undefined,
           geocodingStatus: originalDoc.geocodingStatus as
-            | 'pending'
-            | 'success'
-            | 'failed'
-            | 'manual'
-            | null
-            | undefined,
+            'pending' | 'success' | 'failed' | 'manual' | null | undefined,
         }
       : null;
 
@@ -124,12 +109,7 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
         state: data.state as string | null | undefined,
         country: data.country as string | null | undefined,
         geocodingStatus: data.geocodingStatus as
-          | 'pending'
-          | 'success'
-          | 'failed'
-          | 'manual'
-          | null
-          | undefined,
+          'pending' | 'success' | 'failed' | 'manual' | null | undefined,
       },
       previous,
       { force: force || operation === 'create' },
@@ -161,8 +141,7 @@ export const partnerBeforeChange: CollectionBeforeChangeHook = async ({
     return data;
   }
 
-  const previousStatus =
-    typeof originalDoc?.status === 'string' ? originalDoc.status : undefined;
+  const previousStatus = typeof originalDoc?.status === 'string' ? originalDoc.status : undefined;
 
   if (
     typeof data.status === 'string' &&

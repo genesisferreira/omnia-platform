@@ -45,18 +45,19 @@ export type LearningEventType =
   | 'course.opened'
   | 'continue.resolved';
 
-export type LearningEventEnvelope<TPayload extends Record<string, unknown> = Record<string, unknown>> =
-  {
-    eventId: string;
-    type: LearningEventType;
-    timestamp: string;
-    actor: LearningActor;
-    origin: LearningOrigin;
-    correlationId: string;
-    payload: TPayload;
-    tenantId?: string;
-    schemaVersion: number;
-  };
+export type LearningEventEnvelope<
+  TPayload extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  eventId: string;
+  type: LearningEventType;
+  timestamp: string;
+  actor: LearningActor;
+  origin: LearningOrigin;
+  correlationId: string;
+  payload: TPayload;
+  tenantId?: string;
+  schemaVersion: number;
+};
 
 export type ContinuePointer = {
   courseId: number;
@@ -87,14 +88,7 @@ export type CourseCompletionSnapshot = {
 };
 
 export type TimelineItemKind =
-  | 'lesson'
-  | 'module'
-  | 'material'
-  | 'quiz'
-  | 'activity'
-  | 'completion'
-  | 'progress'
-  | 'continue';
+  'lesson' | 'module' | 'material' | 'quiz' | 'activity' | 'completion' | 'progress' | 'continue';
 
 export type TimelineItem = {
   id: string;

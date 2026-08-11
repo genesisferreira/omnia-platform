@@ -3,7 +3,7 @@
 > **Sprint 2.6.5** — Modelo de domínio oficial do produto.  
 > **Status:** Aceito — fonte de verdade para entidades, estados e relacionamentos.  
 > **Não contradiz:** Blueprint, Connector, Experience MVP, Session Policy, Policy Engine.  
-> **Regra:** sprints futuras implementam *sobre* este modelo; mudanças exigem RFC.
+> **Regra:** sprints futuras implementam _sobre_ este modelo; mudanças exigem RFC.
 
 **Host de verdade acadêmica:** Moodle 4.5 LTS (engine).  
 **Host de verdade de produto/identidade/sessão/policy:** Omnia Platform.  
@@ -23,33 +23,33 @@
 
 ## 2. Catálogo de entidades
 
-| Entidade | Bounded Context | SoR | MVP 2.6 | Notas |
-| --- | --- | --- | :---: | --- |
-| User | Identity | Omnia Payload | ● | Conta plataforma |
-| Student | Learning | Papel sobre User | ● | Persona dominante MVP |
-| Teacher | Teaching | Papel | ○ | Modelo pronto; UI futura |
-| Manager | Governance | Papel | ○ | Idem |
-| Administrator | Platform Ops | Papel | ● | Policies / identity / sessions |
-| IdentityLink | Identity Bridge | Omnia DB | ● | Omnia user ↔ Moodle user |
-| Course | Academic Catalog | Moodle | ● | |
-| Enrollment | Academic Access | Moodle | ● | |
-| Module | Academic Structure | Moodle section | ● | |
-| Lesson | Academic Structure | Moodle activity (view) | ● | Experiência Omnia “aula” |
-| Material | Content | Moodle resource / file | ○ | Metadados; player futuro |
-| Activity | Academic Work | Moodle activity | ● | Inclui quiz/assign/page/… |
-| Quiz | Assessment | Moodle quiz | ○ | Subtipo Activity |
-| Assignment | Assessment | Moodle assign | ○ | Subtipo Activity |
-| Grade | Assessment | Moodle gradebook | ● | |
-| Completion | Academic Progress | Moodle | ● | Curso e/ou atividade |
-| Progress | Learning Analytics | Derivado Omnia+Moodle | ● | Agregação UX |
-| Certificate | Credentialing | Moodle + Omnia verify | ○ | Reservado emissão |
-| Session | Session Security | Omnia Redis | ● | Session Manager |
-| Policy | Policy | Omnia Global | ● | Policy Engine |
-| LearningPath | Catalog | Omnia (futuro) | — | Trilha multi-curso |
-| Notification | Engagement | Omnia (futuro) | — | |
-| LearningEvent | Telemetry | Omnia + OTel | ●* | *Catálogo definido; emissão parcial |
-| Recommendation | Intelligence | Neurofrigo | — | Reservado |
-| AiInteraction | Intelligence | Neurofrigo | — | Reservado |
+| Entidade       | Bounded Context    | SoR                    | MVP 2.6 | Notas                               |
+| -------------- | ------------------ | ---------------------- | :-----: | ----------------------------------- |
+| User           | Identity           | Omnia Payload          |    ●    | Conta plataforma                    |
+| Student        | Learning           | Papel sobre User       |    ●    | Persona dominante MVP               |
+| Teacher        | Teaching           | Papel                  |    ○    | Modelo pronto; UI futura            |
+| Manager        | Governance         | Papel                  |    ○    | Idem                                |
+| Administrator  | Platform Ops       | Papel                  |    ●    | Policies / identity / sessions      |
+| IdentityLink   | Identity Bridge    | Omnia DB               |    ●    | Omnia user ↔ Moodle user            |
+| Course         | Academic Catalog   | Moodle                 |    ●    |                                     |
+| Enrollment     | Academic Access    | Moodle                 |    ●    |                                     |
+| Module         | Academic Structure | Moodle section         |    ●    |                                     |
+| Lesson         | Academic Structure | Moodle activity (view) |    ●    | Experiência Omnia “aula”            |
+| Material       | Content            | Moodle resource / file |    ○    | Metadados; player futuro            |
+| Activity       | Academic Work      | Moodle activity        |    ●    | Inclui quiz/assign/page/…           |
+| Quiz           | Assessment         | Moodle quiz            |    ○    | Subtipo Activity                    |
+| Assignment     | Assessment         | Moodle assign          |    ○    | Subtipo Activity                    |
+| Grade          | Assessment         | Moodle gradebook       |    ●    |                                     |
+| Completion     | Academic Progress  | Moodle                 |    ●    | Curso e/ou atividade                |
+| Progress       | Learning Analytics | Derivado Omnia+Moodle  |    ●    | Agregação UX                        |
+| Certificate    | Credentialing      | Moodle + Omnia verify  |    ○    | Reservado emissão                   |
+| Session        | Session Security   | Omnia Redis            |    ●    | Session Manager                     |
+| Policy         | Policy             | Omnia Global           |    ●    | Policy Engine                       |
+| LearningPath   | Catalog            | Omnia (futuro)         |    —    | Trilha multi-curso                  |
+| Notification   | Engagement         | Omnia (futuro)         |    —    |                                     |
+| LearningEvent  | Telemetry          | Omnia + OTel           |   ●*    | *Catálogo definido; emissão parcial |
+| Recommendation | Intelligence       | Neurofrigo             |    —    | Reservado                           |
+| AiInteraction  | Intelligence       | Neurofrigo             |    —    | Reservado                           |
 
 ● = modelado e parcialmente/totalmente operacional · ○ = modelado, UI/API futura · — = reservado
 
@@ -66,23 +66,23 @@ Conta Omnia (Payload). Atributos mínimos: `id`, `email`, `name`, `role` platafo
 **Não** são tabelas separadas obrigatórias no MVP: são **papéis** (`LmsRole`) resolvidos em runtime (`x-omnia-lms-role` / mapping de role Payload).
 
 | Papel LMS | Origem típica Payload | Limite sessão (default) |
-| --- | --- | --- |
-| student | user / customer | 1 |
-| teacher | instructor | 3 (policy) |
-| manager | editor | policy |
-| admin | admin / super_admin | policy |
+| --------- | --------------------- | ----------------------- |
+| student   | user / customer       | 1                       |
+| teacher   | instructor            | 3 (policy)              |
+| manager   | editor                | policy                  |
+| admin     | admin / super_admin   | policy                  |
 
 ### 3.3 IdentityLink
 
 Vínculo 1:1 ativo Omnia User ↔ Moodle user.
 
-| Campo | Obrigatório | Descrição |
-| --- | :---: | --- |
-| omniaUserId | ● | FK lógica User |
-| moodleUserId | ● | ID Moodle |
-| status | ● | active / revoked / pending |
-| syncStatus | ● | synced / error / pending |
-| linkedAt | ● | |
+| Campo        | Obrigatório | Descrição                  |
+| ------------ | :---------: | -------------------------- |
+| omniaUserId  |      ●      | FK lógica User             |
+| moodleUserId |      ●      | ID Moodle                  |
+| status       |      ●      | active / revoked / pending |
+| syncStatus   |      ●      | synced / error / pending   |
+| linkedAt     |      ●      |                            |
 
 Sem link ativo → Connector retorna `MOODLE_IDENTITY_NOT_LINKED`.
 
@@ -189,15 +189,15 @@ User ── 0..* Certificate (futuro)
 Policy aplica-se a Session / Course / Material / User
 ```
 
-| Relação | Card. | Obrigatório |
-| --- | --- | :---: |
-| User → IdentityLink | 0..1 ativo | Não (gate LMS) |
-| Student → Enrollment | 0..* | Não |
-| Enrollment → Course | N:1 | Sim |
-| Course → Module | 1..* | Sim (pode ser vazio operacionalmente) |
-| Module → Activity | 0..* | Não |
-| Activity → Grade items | 0..* | Não |
-| User → Session LMS | 0..N (limitado por Policy) | Sim ao usar LMS |
+| Relação                | Card.                      |              Obrigatório              |
+| ---------------------- | -------------------------- | :-----------------------------------: |
+| User → IdentityLink    | 0..1 ativo                 |            Não (gate LMS)             |
+| Student → Enrollment   | 0..*                       |                  Não                  |
+| Enrollment → Course    | N:1                        |                  Sim                  |
+| Course → Module        | 1..*                       | Sim (pode ser vazio operacionalmente) |
+| Module → Activity      | 0..*                       |                  Não                  |
+| Activity → Grade items | 0..*                       |                  Não                  |
+| User → Session LMS     | 0..N (limitado por Policy) |            Sim ao usar LMS            |
 
 ---
 

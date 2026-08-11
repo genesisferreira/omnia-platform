@@ -1,69 +1,69 @@
-'use client'
+'use client';
 
-import { useCallback, useState } from 'react'
-import { Button, FieldLabel, useField, useForm } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import { useCallback, useState } from 'react';
+import { Button, FieldLabel, useField, useForm } from '@payloadcms/ui';
+import type { TextFieldClientComponent } from 'payload';
 
 /**
  * Campo CEP no Admin com botão "Buscar CEP".
  * Preenche endereço/bairro/cidade/UF; geocodificação completa ocorre no beforeChange ao salvar.
  */
 export const PartnerZipCodeField: TextFieldClientComponent = (props) => {
-  const { path, field, readOnly } = props
-  const { value, setValue } = useField<string>({ path })
-  const { dispatchFields } = useForm()
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
-  const [message, setMessage] = useState<string | null>(null)
+  const { path, field, readOnly } = props;
+  const { value, setValue } = useField<string>({ path });
+  const { dispatchFields } = useForm();
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [message, setMessage] = useState<string | null>(null);
 
   const lookup = useCallback(async () => {
-    const digits = String(value || '').replace(/\D/g, '')
+    const digits = String(value || '').replace(/\D/g, '');
     if (digits.length !== 8) {
-      setStatus('error')
-      setMessage('Informe um CEP com 8 dígitos.')
-      return
+      setStatus('error');
+      setMessage('Informe um CEP com 8 dígitos.');
+      return;
     }
-    setStatus('loading')
-    setMessage('Consultando CEP…')
+    setStatus('loading');
+    setMessage('Consultando CEP…');
     try {
       const res = await fetch(`/api/omnia/postal-code?cep=${encodeURIComponent(digits)}`, {
         credentials: 'include',
-      })
+      });
       const data = (await res.json()) as {
-        ok?: boolean
+        ok?: boolean;
         address?: {
-          zipCode?: string
-          address?: string | null
-          neighborhood?: string | null
-          city?: string
-          state?: string
-          country?: string
-        }
-        error?: { message?: string }
-      }
+          zipCode?: string;
+          address?: string | null;
+          neighborhood?: string | null;
+          city?: string;
+          state?: string;
+          country?: string;
+        };
+        error?: { message?: string };
+      };
       if (!res.ok || !data.ok || !data.address) {
-        setStatus('error')
-        setMessage(data.error?.message || 'CEP não encontrado.')
-        return
+        setStatus('error');
+        setMessage(data.error?.message || 'CEP não encontrado.');
+        return;
       }
-      const a = data.address
-      setValue(a.zipCode || digits)
-      const patches: Array<{ path: string; value: string }> = []
-      if (a.address) patches.push({ path: 'address', value: a.address })
-      if (a.neighborhood) patches.push({ path: 'neighborhood', value: a.neighborhood })
-      if (a.city) patches.push({ path: 'city', value: a.city })
-      if (a.state) patches.push({ path: 'state', value: a.state })
-      if (a.country) patches.push({ path: 'country', value: a.country })
-      patches.push({ path: 'geocodingStatus', value: 'pending' })
+      const a = data.address;
+      setValue(a.zipCode || digits);
+      const patches: Array<{ path: string; value: string }> = [];
+      if (a.address) patches.push({ path: 'address', value: a.address });
+      if (a.neighborhood) patches.push({ path: 'neighborhood', value: a.neighborhood });
+      if (a.city) patches.push({ path: 'city', value: a.city });
+      if (a.state) patches.push({ path: 'state', value: a.state });
+      if (a.country) patches.push({ path: 'country', value: a.country });
+      patches.push({ path: 'geocodingStatus', value: 'pending' });
       for (const p of patches) {
-        dispatchFields({ type: 'UPDATE', path: p.path, value: p.value })
+        dispatchFields({ type: 'UPDATE', path: p.path, value: p.value });
       }
-      setStatus('ok')
-      setMessage('CEP encontrado. Salve o documento para geocodificar latitude/longitude.')
+      setStatus('ok');
+      setMessage('CEP encontrado. Salve o documento para geocodificar latitude/longitude.');
     } catch {
-      setStatus('error')
-      setMessage('Erro temporário ao consultar o CEP.')
+      setStatus('error');
+      setMessage('Erro temporário ao consultar o CEP.');
     }
-  }, [value, setValue, dispatchFields])
+  }, [value, setValue, dispatchFields]);
 
   return (
     <div className="field-type text">
@@ -110,7 +110,7 @@ export const PartnerZipCodeField: TextFieldClientComponent = (props) => {
         </div>
       ) : null}
     </div>
-  )
-}
+  );
+};
 
-export default PartnerZipCodeField
+export default PartnerZipCodeField;

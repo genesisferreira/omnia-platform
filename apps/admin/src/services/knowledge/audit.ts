@@ -76,10 +76,7 @@ export async function writeKnowledgeAudit(
         reason: input.reason ?? null,
         correlationId: input.correlationId ?? null,
         environment:
-          input.environment ??
-          process.env.OMNIA_ENV ??
-          process.env.NODE_ENV ??
-          'development',
+          input.environment ?? process.env.OMNIA_ENV ?? process.env.NODE_ENV ?? 'development',
         eventAt: new Date().toISOString(),
       },
       overrideAccess: true,

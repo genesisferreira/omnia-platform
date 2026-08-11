@@ -45,9 +45,7 @@ export function MaterialMetadataPanel(props: { metadata: MaterialMetadata }) {
       <div>
         <dt className="text-xs text-muted-foreground">Último acesso</dt>
         <dd className="font-medium text-foreground">
-          {m.lastAccessedAt
-            ? new Date(m.lastAccessedAt).toLocaleString('pt-BR')
-            : 'Nesta sessão'}
+          {m.lastAccessedAt ? new Date(m.lastAccessedAt).toLocaleString('pt-BR') : 'Nesta sessão'}
         </dd>
       </div>
     </dl>

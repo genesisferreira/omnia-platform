@@ -12,17 +12,17 @@
 
 ## Deploy executado
 
-| Item | Valor |
-| --- | --- |
-| Commit anterior (VPS) | `a5bad91` (`feature/omnia-lms-observability`) |
-| Commit base solicitado | `f82abb6` |
-| Commit implantado (tip) | **`10fddfa`** (`f82abb6` + scrub Moodle URLs + fix ESLint build) |
-| Container | `omnia-platform-web-dev` |
-| Image digest (tip) | `sha256:28ebfd85bbf83e8f19947872804787c5d82dedd8caed23c5217e6a38a61fdf9a` |
-| Health | **healthy** |
-| 1º deploy `f82abb6` | `21:34:04Z` → `21:36:44Z` (`sha256:3fece73e…`) |
-| Redeploy tip `10fddfa` | `21:49:48Z` → `21:51:48Z` |
-| Serviços NÃO rebuildados | Moodle, Redis LMS, MariaDB, Admin/Connector, Traefik, PROD |
+| Item                     | Valor                                                                     |
+| ------------------------ | ------------------------------------------------------------------------- |
+| Commit anterior (VPS)    | `a5bad91` (`feature/omnia-lms-observability`)                             |
+| Commit base solicitado   | `f82abb6`                                                                 |
+| Commit implantado (tip)  | **`10fddfa`** (`f82abb6` + scrub Moodle URLs + fix ESLint build)          |
+| Container                | `omnia-platform-web-dev`                                                  |
+| Image digest (tip)       | `sha256:28ebfd85bbf83e8f19947872804787c5d82dedd8caed23c5217e6a38a61fdf9a` |
+| Health                   | **healthy**                                                               |
+| 1º deploy `f82abb6`      | `21:34:04Z` → `21:36:44Z` (`sha256:3fece73e…`)                            |
+| Redeploy tip `10fddfa`   | `21:49:48Z` → `21:51:48Z`                                                 |
+| Serviços NÃO rebuildados | Moodle, Redis LMS, MariaDB, Admin/Connector, Traefik, PROD                |
 
 ### Nota de auditoria
 
@@ -32,28 +32,28 @@ VPS tinha alteração local `docker/observability/prometheus/prometheus.yml` (aj
 
 ## Rotas MVP (pt-BR)
 
-| Rota | Sem sessão | Esperado |
-| --- | --- | --- |
-| `/` | 200 | OK |
-| `/lms` | 307 → login Admin `next=/lms` | Auth gate OK |
-| `/lms/cursos` | 307 login | OK |
-| `/lms/cursos/:id` | 307 login | OK |
-| `/lms/cursos/:id/atividades/:aid` | 307 login | OK |
-| `/lms/continuar` | 307 login | OK |
-| `/lms/progresso` `/lms/notas` | 307 login | OK |
-| `/lms/dashboard` `/lms/courses` | 404 | Aliases EN fora do MVP |
-| `/api/omnia/lms/health` (Admin) | 200 healthy | Connector OK |
-| `/api/lms/me` (Web proxy) | 401 | Sem cookie |
+| Rota                              | Sem sessão                    | Esperado               |
+| --------------------------------- | ----------------------------- | ---------------------- |
+| `/`                               | 200                           | OK                     |
+| `/lms`                            | 307 → login Admin `next=/lms` | Auth gate OK           |
+| `/lms/cursos`                     | 307 login                     | OK                     |
+| `/lms/cursos/:id`                 | 307 login                     | OK                     |
+| `/lms/cursos/:id/atividades/:aid` | 307 login                     | OK                     |
+| `/lms/continuar`                  | 307 login                     | OK                     |
+| `/lms/progresso` `/lms/notas`     | 307 login                     | OK                     |
+| `/lms/dashboard` `/lms/courses`   | 404                           | Aliases EN fora do MVP |
+| `/api/omnia/lms/health` (Admin)   | 200 healthy                   | Connector OK           |
+| `/api/lms/me` (Web proxy)         | 401                           | Sem cookie             |
 
 ## Connector (S2S user `1`)
 
-| Endpoint | Resultado |
-| --- | --- |
-| `me` | 200 connected |
-| `courses` | 200 (1 item) |
-| `courses/2` + content/progress/grades/completion | 200 |
-| `sessions` create/heartbeat/logout | 200 |
-| Token Moodle / wstoken nas respostas browser | **ausente** (scrub no proxy) |
+| Endpoint                                         | Resultado                    |
+| ------------------------------------------------ | ---------------------------- |
+| `me`                                             | 200 connected                |
+| `courses`                                        | 200 (1 item)                 |
+| `courses/2` + content/progress/grades/completion | 200                          |
+| `sessions` create/heartbeat/logout               | 200                          |
+| Token Moodle / wstoken nas respostas browser     | **ausente** (scrub no proxy) |
 
 ## Segurança — bug encontrado e corrigido
 
@@ -65,12 +65,12 @@ Built LMS server chunks: **0** hits `moodle.` / `wstoken` em `/lms` e `/api/lms`
 
 ## Testes
 
-| Suite | Resultado |
-| --- | --- |
-| `test:lms-continue` | PASS |
-| `test:lms-smoke` (+ CourseCard + sanitize) | PASS |
-| `typecheck` (@omnia/web) | PASS |
-| Build Docker Next 15 | PASS (warnings ESLint pré-existentes senha) |
+| Suite                                      | Resultado                                   |
+| ------------------------------------------ | ------------------------------------------- |
+| `test:lms-continue`                        | PASS                                        |
+| `test:lms-smoke` (+ CourseCard + sanitize) | PASS                                        |
+| `typecheck` (@omnia/web)                   | PASS                                        |
+| Build Docker Next 15                       | PASS (warnings ESLint pré-existentes senha) |
 
 ## Performance (build)
 
@@ -88,10 +88,10 @@ Built LMS server chunks: **0** hits `moodle.` / `wstoken` em `/lms` e `/api/lms`
 
 ## Produção
 
-| Container | Image (inalterada no deploy) |
-| --- | --- |
-| `omnia-platform-web-prod` | `sha256:c1041a90…` healthy |
-| `omnia-platform-admin-prod` | `sha256:0f5f909d…` healthy |
+| Container                   | Image (inalterada no deploy) |
+| --------------------------- | ---------------------------- |
+| `omnia-platform-web-prod`   | `sha256:c1041a90…` healthy   |
+| `omnia-platform-admin-prod` | `sha256:0f5f909d…` healthy   |
 
 ## Rollback
 

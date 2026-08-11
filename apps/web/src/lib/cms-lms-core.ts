@@ -61,7 +61,13 @@ export type PublicLessonDetail = {
     description: string | null;
     assetType: string;
     order: number;
-    media: { id: unknown; url: string; alt: string | null; mimeType: string | null; filename: string | null } | null;
+    media: {
+      id: unknown;
+      url: string;
+      alt: string | null;
+      mimeType: string | null;
+      filename: string | null;
+    } | null;
   }>;
 };
 

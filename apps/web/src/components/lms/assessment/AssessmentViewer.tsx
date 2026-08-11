@@ -49,7 +49,10 @@ function AssessmentViewerInner(props: AssessmentViewerProps) {
   const done = localCompleted || resolved.completion.completed;
 
   return (
-    <Card className="shadow-lms-card animate-lms-fade-in" aria-label={`Avaliação: ${resolved.metadata.name}`}>
+    <Card
+      className="shadow-lms-card animate-lms-fade-in"
+      aria-label={`Avaliação: ${resolved.metadata.name}`}
+    >
       <CardHeader className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle className="text-base">{resolved.metadata.name}</CardTitle>

@@ -58,8 +58,7 @@ export const neurofrigoChatEndpoint: Endpoint = {
           moduleTitle: body.moduleTitle != null ? String(body.moduleTitle) : null,
           lessonId: body.lessonId != null ? String(body.lessonId) : null,
           lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
-          lessonObjectives:
-            body.lessonObjectives != null ? String(body.lessonObjectives) : null,
+          lessonObjectives: body.lessonObjectives != null ? String(body.lessonObjectives) : null,
           ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
         },
         topK: body.topK != null ? Number(body.topK) : undefined,

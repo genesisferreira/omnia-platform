@@ -1,12 +1,6 @@
 export const PARTNER_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export const PARTNER_STATUSES = [
-  'draft',
-  'pending',
-  'approved',
-  'rejected',
-  'suspended',
-] as const;
+export const PARTNER_STATUSES = ['draft', 'pending', 'approved', 'rejected', 'suspended'] as const;
 
 export type PartnerStatus = (typeof PARTNER_STATUSES)[number];
 
@@ -14,12 +8,7 @@ export const PARTNER_PLANS = ['free', 'professional', 'premium', 'enterprise'] a
 
 export type PartnerPlan = (typeof PARTNER_PLANS)[number];
 
-export const PARTNER_WORKFLOW_STATUSES = [
-  'pending',
-  'approved',
-  'rejected',
-  'suspended',
-] as const;
+export const PARTNER_WORKFLOW_STATUSES = ['pending', 'approved', 'rejected', 'suspended'] as const;
 
 export const normalizePartnerSlug = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
@@ -48,7 +37,5 @@ export const slugSourceFromPartner = (data: {
   if (explicit) {
     return explicit;
   }
-  return (
-    normalizePartnerSlug(data.tradeName) ?? normalizePartnerSlug(data.companyName)
-  );
+  return normalizePartnerSlug(data.tradeName) ?? normalizePartnerSlug(data.companyName);
 };

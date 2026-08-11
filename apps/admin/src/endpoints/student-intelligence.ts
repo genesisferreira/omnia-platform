@@ -88,10 +88,7 @@ export const sipRecalculateEndpoint: Endpoint = {
     const courseId = body.courseId != null ? String(body.courseId) : '';
     if (!courseId) return json({ ok: false, error: 'courseId and userKey required' }, 400);
 
-    const subject = resolveSubjectUserKey(
-      auth,
-      body.userKey != null ? String(body.userKey) : null,
-    );
+    const subject = resolveSubjectUserKey(auth, body.userKey != null ? String(body.userKey) : null);
     if (isAuthResponse(subject)) return subject;
 
     const result = await recalculateSipProfile(req.payload, {
@@ -121,10 +118,7 @@ export const sipMotivationEndpoint: Endpoint = {
     const courseId = body.courseId != null ? String(body.courseId) : '';
     if (!courseId) return json({ ok: false, error: 'courseId and userKey required' }, 400);
 
-    const subject = resolveSubjectUserKey(
-      auth,
-      body.userKey != null ? String(body.userKey) : null,
-    );
+    const subject = resolveSubjectUserKey(auth, body.userKey != null ? String(body.userKey) : null);
     if (isAuthResponse(subject)) return subject;
 
     const goals = Array.isArray(body.goals) ? body.goals.map(String) : [];

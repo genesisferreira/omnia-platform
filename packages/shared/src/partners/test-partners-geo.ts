@@ -11,7 +11,8 @@ import {
 } from '../index';
 
 function partner(
-  partial: Partial<PublicPartnerListItemDto> & Pick<PublicPartnerListItemDto, 'slug' | 'distanceKm'>,
+  partial: Partial<PublicPartnerListItemDto> &
+    Pick<PublicPartnerListItemDto, 'slug' | 'distanceKm'>,
 ): PublicPartnerListItemDto {
   return {
     id: partial.id ?? partial.slug,

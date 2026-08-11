@@ -1,8 +1,6 @@
 /** Fixtures KI — PDF idêntico ao unit test que passa no Docker. */
 
-export function buildKiSeedPdf(
-  text = 'Omnia Knowledge Intelligence Seed PDF',
-): Buffer {
+export function buildKiSeedPdf(text = 'Omnia Knowledge Intelligence Seed PDF'): Buffer {
   const escaped = text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
   const stream = `BT /F1 12 Tf 72 720 Td (${escaped}) Tj ET`;
   const objects: string[] = [];

@@ -142,16 +142,13 @@ export function estimateCostUsd(
 ): number {
   if (provider === 'grounded' || provider === 'extractive') return 0;
   const rate =
-    costPer1kTokens != null && Number.isFinite(costPer1kTokens)
-      ? Number(costPer1kTokens)
-      : 0.0002;
+    costPer1kTokens != null && Number.isFinite(costPer1kTokens) ? Number(costPer1kTokens) : 0.0002;
   return Number(((totalTokens / 1000) * rate).toFixed(6));
 }
 
 export function computeConfidence(chunks: CitationResult[]): number {
   if (!chunks.length) return 0;
   const top = chunks.slice(0, 3);
-  const avg =
-    top.reduce((s, c) => s + (c.similarity ?? Math.min(1, c.score)), 0) / top.length;
+  const avg = top.reduce((s, c) => s + (c.similarity ?? Math.min(1, c.score)), 0) / top.length;
   return Math.max(0, Math.min(1, Number(avg.toFixed(3))));
 }

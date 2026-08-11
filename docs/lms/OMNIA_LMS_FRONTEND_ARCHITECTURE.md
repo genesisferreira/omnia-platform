@@ -69,16 +69,16 @@ Gate no Material Viewer via `createControlledSecurityPorts` → `/api/lms/intern
 
 ## Rotas
 
-| Rota | Tipo | Dados Connector |
-| --- | --- | --- |
-| `/lms` | RSC | `me`, `courses`, `progress` |
-| `/lms/cursos` | RSC | `courses`, `progress` |
-| `/lms/cursos/[id]` | RSC | `courses/:id`, `content`, `progress`, `grades`, `completion` |
-| `/lms/cursos/[id]/atividades/[aid]` | RSC + client | Lesson + Material **ou** Assessment Experience |
-| `/lms/continuar` | RSC + client | `courses` + Learning Engine continue |
-| `/lms/progresso` | RSC | `courses` + `progress` |
-| `/lms/notas` | RSC | `courses` + `grades` |
-| `/api/lms/[...path]` | Route Handler | Proxy S2S |
+| Rota                                | Tipo          | Dados Connector                                              |
+| ----------------------------------- | ------------- | ------------------------------------------------------------ |
+| `/lms`                              | RSC           | `me`, `courses`, `progress`                                  |
+| `/lms/cursos`                       | RSC           | `courses`, `progress`                                        |
+| `/lms/cursos/[id]`                  | RSC           | `courses/:id`, `content`, `progress`, `grades`, `completion` |
+| `/lms/cursos/[id]/atividades/[aid]` | RSC + client  | Lesson + Material **ou** Assessment Experience               |
+| `/lms/continuar`                    | RSC + client  | `courses` + Learning Engine continue                         |
+| `/lms/progresso`                    | RSC           | `courses` + `progress`                                       |
+| `/lms/notas`                        | RSC           | `courses` + `grades`                                         |
+| `/api/lms/[...path]`                | Route Handler | Proxy S2S                                                    |
 
 ## Performance
 

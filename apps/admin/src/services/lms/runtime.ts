@@ -97,8 +97,7 @@ export function mergePolicyDefaults(
     managerSessions: admin?.managerSessions ?? envConfig.defaultManagerSessions,
     adminSessions: admin?.adminSessions ?? envConfig.defaultAdminSessions,
     sessionTtlSeconds: admin?.sessionTtlSeconds ?? envConfig.sessionTtlSeconds,
-    sessionHeartbeatSeconds:
-      admin?.sessionHeartbeatSeconds ?? envConfig.sessionHeartbeatSeconds,
+    sessionHeartbeatSeconds: admin?.sessionHeartbeatSeconds ?? envConfig.sessionHeartbeatSeconds,
     revokeOldestOnExceed: admin?.revokeOldestOnExceed ?? true,
     downloadsAllowed: admin?.downloadsAllowed ?? false,
     watermarkEnabled: admin?.watermarkEnabled ?? true,

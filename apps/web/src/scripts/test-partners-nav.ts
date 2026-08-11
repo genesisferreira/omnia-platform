@@ -32,9 +32,15 @@ describe('partners nav items', () => {
         : [{ href: item.href, label: item.label }],
     );
 
-    assert.ok(footerLinks.some((link) => link.href === '/parceiros' && link.label === 'Encontrar parceiros'));
     assert.ok(
-      footerLinks.some((link) => link.href === '/parceiros/cadastro' && link.label === 'Seja um parceiro'),
+      footerLinks.some(
+        (link) => link.href === '/parceiros' && link.label === 'Encontrar parceiros',
+      ),
+    );
+    assert.ok(
+      footerLinks.some(
+        (link) => link.href === '/parceiros/cadastro' && link.label === 'Seja um parceiro',
+      ),
     );
   });
 });
@@ -77,7 +83,10 @@ describe('header partners dropdown regression', () => {
 
   it('does not use blur-timeout that unmounts links before click', () => {
     assert.equal(headerSource.includes('setTimeout'), false);
-    assert.equal(headerSource.includes('onBlur={() => {\n                    window.setTimeout'), false);
+    assert.equal(
+      headerSource.includes('onBlur={() => {\n                    window.setTimeout'),
+      false,
+    );
   });
 
   it('closes partners dropdown only when focus leaves the container', () => {

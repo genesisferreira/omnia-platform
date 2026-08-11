@@ -3,10 +3,7 @@
 import Link from 'next/link';
 import { cn } from '@omnia/ui';
 
-import {
-  lessonHref,
-  type LessonSection,
-} from '@/lib/lms/lesson-nav';
+import { lessonHref, type LessonSection } from '@/lib/lms/lesson-nav';
 
 export type LessonSidebarProps = {
   courseId: number;

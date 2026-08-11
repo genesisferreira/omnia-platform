@@ -18,9 +18,11 @@ export const redisOperationsTotal = defaultRegistry.register(
 );
 
 export const redisLatencySeconds = defaultRegistry.register(
-  new Histogram('redis_latency_seconds', 'Redis operation latency in seconds', [
-    0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1,
-  ]),
+  new Histogram(
+    'redis_latency_seconds',
+    'Redis operation latency in seconds',
+    [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 1],
+  ),
 );
 
 export const moodleRequestsTotal = defaultRegistry.register(

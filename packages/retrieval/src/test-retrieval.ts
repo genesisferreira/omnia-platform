@@ -10,7 +10,9 @@ import { Retriever } from './retriever/retriever';
 import { chunkChecksum, cosineSimilarity } from './domain/utils';
 import type { VectorRecord } from './domain/types';
 
-function sampleRecord(partial: Partial<VectorRecord> & Pick<VectorRecord, 'id' | 'chunkId' | 'text' | 'embedding'>): VectorRecord {
+function sampleRecord(
+  partial: Partial<VectorRecord> & Pick<VectorRecord, 'id' | 'chunkId' | 'text' | 'embedding'>,
+): VectorRecord {
   return {
     tokenEstimate: 10,
     allowAiUse: true,

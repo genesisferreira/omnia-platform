@@ -27,9 +27,7 @@ export function evaluateAssessmentIntegrity(input: {
   if (!hit) return { allow: true, triggered: false };
 
   const teacherish =
-    input.profile === 'teacher' ||
-    input.profile === 'admin' ||
-    input.profile === 'super_admin';
+    input.profile === 'teacher' || input.profile === 'admin' || input.profile === 'super_admin';
 
   // Professor no Avaliador pode pedir ajuda para estruturar — não pedir gabarito do aluno.
   if (teacherish && input.assistantKey === 'assessor') {

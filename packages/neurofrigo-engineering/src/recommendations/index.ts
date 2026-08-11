@@ -16,11 +16,7 @@ function emptyRecs(): EngineeringRecommendations {
   };
 }
 
-function pushUnique(
-  list: EngineeringRecommendation[],
-  item: EngineeringRecommendation,
-  max = 5,
-) {
+function pushUnique(list: EngineeringRecommendation[], item: EngineeringRecommendation, max = 5) {
   if (list.length >= max) return;
   const key = item.title.toLowerCase();
   if (list.some((x) => x.title.toLowerCase() === key)) return;

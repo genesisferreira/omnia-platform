@@ -136,9 +136,7 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
         technicalRiskLevel: merged.technicalRiskLevel as TechnicalRiskLevel | null | undefined,
         humanReviewRequired: merged.humanReviewRequired as boolean | null | undefined,
         securityClassification: merged.securityClassification as
-          | SecurityClassification
-          | null
-          | undefined,
+          SecurityClassification | null | undefined,
       });
       if (reviewNeeded) {
         if (toRaw === 'approved' && fromRaw !== 'in_review') {
@@ -183,7 +181,10 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
         >),
         reason: auditReason({
           operation: `status.${fromRaw}_to_${toRaw}`,
-          tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<string, unknown>),
+          tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<
+            string,
+            unknown
+          >),
           note: typeof data.revisionNotes === 'string' ? data.revisionNotes : null,
         }),
       },
@@ -221,7 +222,10 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
           >),
           reason: auditReason({
             operation: 'update',
-            tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<string, unknown>),
+            tenant: resolveTenantId({ ...(originalDoc as object), ...data } as Record<
+              string,
+              unknown
+            >),
           }),
         },
         req,
@@ -267,10 +271,7 @@ export const knowledgeDocumentAfterChange: CollectionAfterChangeHook = async ({
 /**
  * afterDelete: auditoria de exclusão com entityId + snapshot sanitizado.
  */
-export const knowledgeDocumentAfterDelete: CollectionAfterDeleteHook = async ({
-  doc,
-  req,
-}) => {
+export const knowledgeDocumentAfterDelete: CollectionAfterDeleteHook = async ({ doc, req }) => {
   if (!doc) {
     return;
   }

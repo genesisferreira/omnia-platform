@@ -118,8 +118,7 @@ async function main() {
         promptVersion: '2',
         modelProfile: 'grounded-default',
         allowedModels: [modelId],
-        defaultContext:
-          'Foque em benefícios, escopo e clareza comercial sem inventar preços.',
+        defaultContext: 'Foque em benefícios, escopo e clareza comercial sem inventar preços.',
         capabilities: ['rag', 'citations', 'proposal'],
         config: {
           defaultModel: modelId,
@@ -251,8 +250,7 @@ async function main() {
       course: { courseId: String(course.id), courseTitle: String(course.title || '') },
     });
   } catch (err) {
-    forbiddenOk =
-      err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
+    forbiddenOk = err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
   }
 
   const allowedStudent = await listAllowedAssistants(payload, { role: 'student' });

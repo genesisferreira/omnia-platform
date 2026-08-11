@@ -43,10 +43,7 @@ export default async function CursoDetailPage({ params }: PageProps) {
           {' / '}
           {course.title}
         </p>
-        <SectionTitle
-          title={course.title}
-          subtitle={course.shortDescription ?? undefined}
-        />
+        <SectionTitle title={course.title} subtitle={course.shortDescription ?? undefined} />
         <p className="mb-4 text-sm text-muted-foreground">
           {course.category ?? 'Curso'} · {course.level ?? '—'}
           {course.estimatedHours != null ? ` · ${course.estimatedHours}h` : ''}

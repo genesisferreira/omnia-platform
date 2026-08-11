@@ -55,9 +55,7 @@ export function buildProposalMarkdown(input: {
     '',
     '## 2. Problema do cliente',
     '',
-    hasSources
-      ? `Demanda expressa: ${input.question.trim()}`
-      : '_Não encontrado nas fontes._',
+    hasSources ? `Demanda expressa: ${input.question.trim()}` : '_Não encontrado nas fontes._',
     '',
     '## 3. Solução recomendada',
     '',

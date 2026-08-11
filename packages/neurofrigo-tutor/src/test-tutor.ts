@@ -4,18 +4,9 @@ import { describe, it } from 'node:test';
 import type { RuntimeAnswer } from '@omnia/neurofrigo-runtime';
 
 import { estimateLevel, levelInstruction } from './personalization/level';
-import {
-  buildRecommendations,
-  buildStudyPlan,
-  detectGaps,
-} from './recommendations';
+import { buildRecommendations, buildStudyPlan, detectGaps } from './recommendations';
 import { TutorService } from './tutor/tutor-service';
-import type {
-  CourseCatalog,
-  LearningProfile,
-  StudentProfile,
-  TutorAskPort,
-} from './domain/types';
+import type { CourseCatalog, LearningProfile, StudentProfile, TutorAskPort } from './domain/types';
 
 const catalog: CourseCatalog = {
   courseId: '1',
@@ -98,8 +89,24 @@ const learning: LearningProfile = {
 
 describe('neurofrigo-tutor', () => {
   it('estimates levels and instructions', () => {
-    assert.equal(estimateLevel({ progressPercent: 10, aiUsageCount: 0, avgGrounding: 0, negativeFeedbackCount: 0 }), 'beginner');
-    assert.equal(estimateLevel({ progressPercent: 90, aiUsageCount: 10, avgGrounding: 0.7, negativeFeedbackCount: 0 }), 'specialist');
+    assert.equal(
+      estimateLevel({
+        progressPercent: 10,
+        aiUsageCount: 0,
+        avgGrounding: 0,
+        negativeFeedbackCount: 0,
+      }),
+      'beginner',
+    );
+    assert.equal(
+      estimateLevel({
+        progressPercent: 90,
+        aiUsageCount: 10,
+        avgGrounding: 0.7,
+        negativeFeedbackCount: 0,
+      }),
+      'specialist',
+    );
     assert.ok(levelInstruction('beginner').includes('simples'));
     assert.ok(levelInstruction('specialist').includes('normas'));
   });
@@ -200,7 +207,11 @@ describe('neurofrigo-tutor', () => {
     });
     assert.equal(beginner.level, 'beginner');
     assert.ok(beginner.recommendations.length >= 1);
-    assert.ok(String((runtimeCalls[0] as { identity: { profileLabel: string } }).identity.profileLabel).includes('Iniciante'));
+    assert.ok(
+      String(
+        (runtimeCalls[0] as { identity: { profileLabel: string } }).identity.profileLabel,
+      ).includes('Iniciante'),
+    );
 
     const planAns = await tutor.ask({
       question: 'Quero aprender refrigeração industrial',

@@ -59,56 +59,80 @@ export class LmsConnectorError extends Error {
 }
 
 export class MoodleUnavailableError extends LmsConnectorError {
-  constructor(message = 'Moodle is temporarily unavailable', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Moodle is temporarily unavailable',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_UNAVAILABLE', message, { httpStatus: 503, retryable: true, ...opts });
     this.name = 'MoodleUnavailableError';
   }
 }
 
 export class MoodleAuthenticationError extends LmsConnectorError {
-  constructor(message = 'Moodle authentication failed', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Moodle authentication failed',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_AUTHENTICATION', message, { httpStatus: 502, retryable: false, ...opts });
     this.name = 'MoodleAuthenticationError';
   }
 }
 
 export class MoodlePermissionError extends LmsConnectorError {
-  constructor(message = 'Moodle permission denied', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Moodle permission denied',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_PERMISSION', message, { httpStatus: 403, retryable: false, ...opts });
     this.name = 'MoodlePermissionError';
   }
 }
 
 export class MoodleNotFoundError extends LmsConnectorError {
-  constructor(message = 'Resource not found in Moodle', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Resource not found in Moodle',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_NOT_FOUND', message, { httpStatus: 404, retryable: false, ...opts });
     this.name = 'MoodleNotFoundError';
   }
 }
 
 export class MoodleValidationError extends LmsConnectorError {
-  constructor(message = 'Invalid Moodle request parameters', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Invalid Moodle request parameters',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_VALIDATION', message, { httpStatus: 400, retryable: false, ...opts });
     this.name = 'MoodleValidationError';
   }
 }
 
 export class MoodleRateLimitError extends LmsConnectorError {
-  constructor(message = 'Moodle rate limit exceeded', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Moodle rate limit exceeded',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_RATE_LIMIT', message, { httpStatus: 429, retryable: true, ...opts });
     this.name = 'MoodleRateLimitError';
   }
 }
 
 export class MoodleUnexpectedResponseError extends LmsConnectorError {
-  constructor(message = 'Unexpected Moodle response', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Unexpected Moodle response',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_UNEXPECTED_RESPONSE', message, { httpStatus: 502, retryable: false, ...opts });
     this.name = 'MoodleUnexpectedResponseError';
   }
 }
 
 export class MoodleTimeoutError extends LmsConnectorError {
-  constructor(message = 'Moodle request timed out', opts?: ConstructorParameters<typeof LmsConnectorError>[2]) {
+  constructor(
+    message = 'Moodle request timed out',
+    opts?: ConstructorParameters<typeof LmsConnectorError>[2],
+  ) {
     super('MOODLE_TIMEOUT', message, { httpStatus: 504, retryable: true, ...opts });
     this.name = 'MoodleTimeoutError';
   }

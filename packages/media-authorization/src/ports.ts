@@ -1,4 +1,9 @@
-import type { MediaDecision, MediaSignCommand, MediaRevokeCommand, SignedAccessToken } from './types';
+import type {
+  MediaDecision,
+  MediaSignCommand,
+  MediaRevokeCommand,
+  SignedAccessToken,
+} from './types';
 
 export type MediaAuditPort = {
   record(input: {

@@ -88,8 +88,7 @@ async function main() {
       course: courseCtx,
     });
   } catch (err) {
-    forbiddenOk =
-      err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
+    forbiddenOk = err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
   }
   if (!forbiddenOk) throw new Error('E13_EXPECTED_FORBIDDEN');
 

@@ -112,7 +112,8 @@ export const KnowledgeDocuments: CollectionConfig = {
       relationTo: 'media',
       label: 'Arquivo',
       admin: {
-        description: 'Upload PDF/DOCX/imagem. Extração automática não está habilitada nesta entrega.',
+        description:
+          'Upload PDF/DOCX/imagem. Extração automática não está habilitada nesta entrega.',
       },
     },
     {

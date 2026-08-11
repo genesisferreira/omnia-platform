@@ -21,8 +21,7 @@ export const RENDERER_LOADERS: Record<
   image: () => import('./renderers').then((m) => ({ default: m.ImageRenderer })),
   pdf: () => import('./renderers').then((m) => ({ default: m.PdfRenderer })),
   video: () => import('./renderers').then((m) => ({ default: m.VideoRenderer })),
-  external_link: () =>
-    import('./renderers').then((m) => ({ default: m.ExternalLinkRenderer })),
+  external_link: () => import('./renderers').then((m) => ({ default: m.ExternalLinkRenderer })),
   file: () => import('./renderers').then((m) => ({ default: m.FileRenderer })),
   h5p: () => import('./renderers').then((m) => ({ default: m.H5pRenderer })),
   unknown: () => import('./renderers').then((m) => ({ default: m.UnknownRenderer })),

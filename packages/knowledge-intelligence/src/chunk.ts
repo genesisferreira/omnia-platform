@@ -1,9 +1,4 @@
-import {
-  DEFAULT_CHUNK_CONFIG,
-  estimateTokens,
-  type ChunkConfig,
-  type TextChunk,
-} from './types';
+import { DEFAULT_CHUNK_CONFIG, estimateTokens, type ChunkConfig, type TextChunk } from './types';
 
 /**
  * Chunking por janela deslizante com preferência a quebras de parágrafo.
@@ -23,7 +18,11 @@ export function chunkText(text: string, config: ChunkConfig = DEFAULT_CHUNK_CONF
 
     if (end < source.length) {
       const window = source.slice(start, end);
-      const breakAt = Math.max(window.lastIndexOf('\n\n'), window.lastIndexOf('\n'), window.lastIndexOf(' '));
+      const breakAt = Math.max(
+        window.lastIndexOf('\n\n'),
+        window.lastIndexOf('\n'),
+        window.lastIndexOf(' '),
+      );
       if (breakAt > maxChars * 0.4) {
         end = start + breakAt;
       }

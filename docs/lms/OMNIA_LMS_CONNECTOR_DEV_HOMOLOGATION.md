@@ -8,28 +8,28 @@
 
 ## Resultado
 
-| Item | Valor |
-|------|--------|
-| Commit implantado | `5589092` (`fix(lms): complete connector dev homologation` — tip da branch) |
-| Código base | `f38ce07` + `081d0bd` + fixes de build/homolog |
-| Banco | `omnia_staging` |
-| Backup | `/opt/omnia/backups/platform/dev/omnia_staging_20260731T175337Z.dump` (~398 KB) |
-| Rollback meta | `/opt/omnia/backups/platform/dev/rollback-meta-20260731T175337Z.txt` (`PREV_HEAD=85decbc`) |
-| Container Admin | `omnia-platform-admin-dev` → imagem `omnia-platform-dev-admin` (**healthy**) |
-| Moodle | `omnia-lms-moodle-dev` **healthy** / HTTPS 200 / **4.5.12** |
-| Health BFF | HTTP **200** `status=healthy` `mode=read_only` Moodle auth OK |
+| Item              | Valor                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Commit implantado | `5589092` (`fix(lms): complete connector dev homologation` — tip da branch)                |
+| Código base       | `f38ce07` + `081d0bd` + fixes de build/homolog                                             |
+| Banco             | `omnia_staging`                                                                            |
+| Backup            | `/opt/omnia/backups/platform/dev/omnia_staging_20260731T175337Z.dump` (~398 KB)            |
+| Rollback meta     | `/opt/omnia/backups/platform/dev/rollback-meta-20260731T175337Z.txt` (`PREV_HEAD=85decbc`) |
+| Container Admin   | `omnia-platform-admin-dev` → imagem `omnia-platform-dev-admin` (**healthy**)               |
+| Moodle            | `omnia-lms-moodle-dev` **healthy** / HTTPS 200 / **4.5.12**                                |
+| Health BFF        | HTTP **200** `status=healthy` `mode=read_only` Moodle auth OK                              |
 
 ---
 
 ## Moodle Web Service (DEV)
 
-| Campo | Valor |
-|------|--------|
-| Usuário técnico | `omnia_ws_readonly` |
-| Serviço | `omnia_lms_readonly` |
-| Protocolo | REST only |
-| Token | `/opt/omnia/secrets/omnia-lms-moodle-ws-token.txt` + `MOODLE_REST_TOKEN` em `.env.staging` (**não versionado**) |
-| Meta | `/opt/omnia/secrets/omnia-lms-ws-meta.txt` |
+| Campo           | Valor                                                                                                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Usuário técnico | `omnia_ws_readonly`                                                                                             |
+| Serviço         | `omnia_lms_readonly`                                                                                            |
+| Protocolo       | REST only                                                                                                       |
+| Token           | `/opt/omnia/secrets/omnia-lms-moodle-ws-token.txt` + `MOODLE_REST_TOKEN` em `.env.staging` (**não versionado**) |
+| Meta            | `/opt/omnia/secrets/omnia-lms-ws-meta.txt`                                                                      |
 
 Funções habilitadas (9):
 
@@ -83,19 +83,19 @@ Nota operacional: Global `lms-settings.connectorEnabled` precisa estar `true` **
 
 ## APIs homologadas
 
-| Endpoint | Resultado |
-|----------|-----------|
-| `GET /health` | 200 healthy |
-| `GET /me` anon | 401 |
-| `GET /me` auth + vínculo | 200 connected |
-| `GET /me` sem vínculo | 200 `MOODLE_IDENTITY_NOT_LINKED` |
-| `GET /courses` | 200 (1 curso) |
-| `GET /courses/:id` | 200 |
-| `GET /courses/:id/content` | 200 |
-| `GET /courses/:id/progress` | 200 |
-| `GET /grades?courseId=` | 200 |
-| `GET /completion?courseId=` | 200 |
-| curso não matriculado / IDOR | 403 |
+| Endpoint                     | Resultado                        |
+| ---------------------------- | -------------------------------- |
+| `GET /health`                | 200 healthy                      |
+| `GET /me` anon               | 401                              |
+| `GET /me` auth + vínculo     | 200 connected                    |
+| `GET /me` sem vínculo        | 200 `MOODLE_IDENTITY_NOT_LINKED` |
+| `GET /courses`               | 200 (1 curso)                    |
+| `GET /courses/:id`           | 200                              |
+| `GET /courses/:id/content`   | 200                              |
+| `GET /courses/:id/progress`  | 200                              |
+| `GET /grades?courseId=`      | 200                              |
+| `GET /completion?courseId=`  | 200                              |
+| curso não matriculado / IDOR | 403                              |
 
 Vínculo manual: Omnia user `1` ↔ Moodle `4` (`omnia_aluno_dev`), `status=active`, `syncStatus=synced`.
 
@@ -124,12 +124,12 @@ Vínculo manual: Omnia user `1` ↔ Moodle `4` (`omnia_aluno_dev`), `status=acti
 
 ## Testes automatizados (local, pós-fix)
 
-| Suite | Resultado |
-|-------|-----------|
-| `@omnia/lms-connector` | **29 pass** |
-| BFF helpers | **3 pass** |
-| typecheck connector | OK |
-| typecheck shared | OK |
+| Suite                  | Resultado      |
+| ---------------------- | -------------- |
+| `@omnia/lms-connector` | **29 pass**    |
+| BFF helpers            | **3 pass**     |
+| typecheck connector    | OK             |
+| typecheck shared       | OK             |
 | Build Admin Docker DEV | OK (`5589092`) |
 
 Lint Admin completo / typecheck Admin local: não executados ponta a ponta nesta máquina (build Docker Admin validou compilação Next).
@@ -138,10 +138,10 @@ Lint Admin completo / typecheck Admin local: não executados ponta a ponta nesta
 
 ## Bugs encontrados e correções
 
-1. **Build:** `PayloadRequest` vs `Request` no rate limit → tipagem PayloadRequest.  
-2. **Build:** `req.url` possibly undefined → `new URL(req.url \|\| 'http://local', ...)`.  
-3. **Runtime:** health `disabled` com env true porque Global `connectorEnabled` default false → habilitado em `lms_settings`.  
-4. **Moodle:** progress/completion permissão → caps + enrol do WS user no curso DEV.  
+1. **Build:** `PayloadRequest` vs `Request` no rate limit → tipagem PayloadRequest.
+2. **Build:** `req.url` possibly undefined → `new URL(req.url \|\| 'http://local', ...)`.
+3. **Runtime:** health `disabled` com env true porque Global `connectorEnabled` default false → habilitado em `lms_settings`.
+4. **Moodle:** progress/completion permissão → caps + enrol do WS user no curso DEV.
 5. **Moodle:** `nocriteriaset` → critérios de completion criados no curso fictício.
 
 Commits de fix na branch: `cfa1189`, `5589092`.

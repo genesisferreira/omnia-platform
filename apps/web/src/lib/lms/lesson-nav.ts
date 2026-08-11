@@ -31,15 +31,7 @@ export type FlatLesson = {
 };
 
 export type LessonContentKind =
-  | 'text'
-  | 'html'
-  | 'external_link'
-  | 'video'
-  | 'pdf'
-  | 'h5p'
-  | 'file'
-  | 'quiz'
-  | 'assignment';
+  'text' | 'html' | 'external_link' | 'video' | 'pdf' | 'h5p' | 'file' | 'quiz' | 'assignment';
 
 export type LessonContentBlock = {
   kind: LessonContentKind;
@@ -50,10 +42,7 @@ export type LessonContentBlock = {
 };
 
 /** Atividades visíveis em ordem de seções (navegação linear). */
-export function flattenVisibleLessons(
-  courseId: number,
-  sections: LessonSection[],
-): FlatLesson[] {
+export function flattenVisibleLessons(courseId: number, sections: LessonSection[]): FlatLesson[] {
   const out: FlatLesson[] = [];
   for (const section of sections) {
     if (section.visible === false) continue;
@@ -100,13 +89,7 @@ export function courseHref(courseId: number): string {
 
 /** Estado pedagógico da aula a partir do progress Moodle + conclusão local. */
 export type LessonUiStatus =
-  | 'loading'
-  | 'offline'
-  | 'error'
-  | 'forbidden'
-  | 'blocked'
-  | 'completed'
-  | 'in_progress';
+  'loading' | 'offline' | 'error' | 'forbidden' | 'blocked' | 'completed' | 'in_progress';
 
 export function resolveLessonUiStatus(input: {
   loading?: boolean;
@@ -122,10 +105,7 @@ export function resolveLessonUiStatus(input: {
   if (input.forbidden) return 'forbidden';
   if (input.blocked) return 'blocked';
   if (input.offline) return 'offline';
-  const done =
-    input.locallyCompleted ||
-    input.moodleState === 1 ||
-    input.moodleState === 2;
+  const done = input.locallyCompleted || input.moodleState === 1 || input.moodleState === 2;
   return done ? 'completed' : 'in_progress';
 }
 

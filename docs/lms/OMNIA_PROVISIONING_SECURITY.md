@@ -2,16 +2,16 @@
 
 ## Controles
 
-| Controle | Implementação |
-|----------|---------------|
-| S2S only | `x-omnia-internal-key` obrigatório; cookie Payload **recusado** |
-| RBAC | `x-omnia-lms-role` ∈ `admin\|manager` |
-| Idempotency | Header `Idempotency-Key` (8–128) + dedupe na fila |
-| Correlation | `x-correlation-id` / `x-request-id` propagado |
-| Rate limit | `lms:provision` — 30 req/min por actor |
-| Audit | Append-only `lms-audit-events` (sem update/delete de eventos) |
-| Write lock | `EXECUTE_DISABLED_UNTIL_ACTIVATION` |
-| Surface | **Zero** rotas de provision em `apps/web` `/api/lms/*` |
+| Controle    | Implementação                                                   |
+| ----------- | --------------------------------------------------------------- |
+| S2S only    | `x-omnia-internal-key` obrigatório; cookie Payload **recusado** |
+| RBAC        | `x-omnia-lms-role` ∈ `admin\|manager`                           |
+| Idempotency | Header `Idempotency-Key` (8–128) + dedupe na fila               |
+| Correlation | `x-correlation-id` / `x-request-id` propagado                   |
+| Rate limit  | `lms:provision` — 30 req/min por actor                          |
+| Audit       | Append-only `lms-audit-events` (sem update/delete de eventos)   |
+| Write lock  | `EXECUTE_DISABLED_UNTIL_ACTIVATION`                             |
+| Surface     | **Zero** rotas de provision em `apps/web` `/api/lms/*`          |
 
 ## O que não fazer
 

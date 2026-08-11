@@ -27,11 +27,11 @@ Contexto: assessment ativo via Learning/Assessment Engine ou metadata de ativida
 
 ## Permitido (quando avaliação detectada)
 
-- Explicar conceito e pré-requisitos  
-- Indicar aula / módulo / material (autorizado)  
-- Perguntas socráticas  
-- Exemplo **diferente** do item avaliativo  
-- Exercício semelhante de **treino** (não avaliativo)  
+- Explicar conceito e pré-requisitos
+- Indicar aula / módulo / material (autorizado)
+- Perguntas socráticas
+- Exemplo **diferente** do item avaliativo
+- Exercício semelhante de **treino** (não avaliativo)
 - Orientar raciocínio **sem concluir** a resposta da questão
 
 ## Resposta padrão

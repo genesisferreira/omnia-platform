@@ -28,9 +28,7 @@ describe('knowledge-intelligence e2e', { concurrency: false }, () => {
 
     const { getPayload } = await import('payload');
     const { default: config } = await import('../../payload.config');
-    const { processLearningResource } = await import(
-      '../services/knowledge-intelligence/pipeline'
-    );
+    const { processLearningResource } = await import('../services/knowledge-intelligence/pipeline');
 
     const payload = await getPayload({ config });
 
@@ -102,10 +100,7 @@ describe('knowledge-intelligence e2e', { concurrency: false }, () => {
     const queue = await payload.find({
       collection: 'embedding-queue',
       where: {
-        and: [
-          { learningResource: { equals: resource.id } },
-          { status: { equals: 'pending' } },
-        ],
+        and: [{ learningResource: { equals: resource.id } }, { status: { equals: 'pending' } }],
       },
       limit: 50,
       overrideAccess: true,
@@ -126,9 +121,7 @@ describe('knowledge-intelligence e2e', { concurrency: false }, () => {
   it('TXT extract path works end-to-end', async () => {
     const { getPayload } = await import('payload');
     const { default: config } = await import('../../payload.config');
-    const { processLearningResource } = await import(
-      '../services/knowledge-intelligence/pipeline'
-    );
+    const { processLearningResource } = await import('../services/knowledge-intelligence/pipeline');
 
     const payload = await getPayload({ config });
     const body = Buffer.from(

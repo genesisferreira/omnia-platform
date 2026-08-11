@@ -1,10 +1,7 @@
 import type { RuntimeRequest } from '@omnia/neurofrigo-runtime';
 
 import { buildSalesContext } from '../context/sales-context-builder';
-import {
-  buildProposalMarkdown,
-  wantsProposal,
-} from '../proposal/proposal-builder';
+import { buildProposalMarkdown, wantsProposal } from '../proposal/proposal-builder';
 import { buildCommercialRecommendations } from '../recommendations';
 import type {
   CommercialAnswer,
@@ -28,7 +25,9 @@ export class CommercialService {
   constructor(private readonly deps: CommercialServiceDeps) {}
 
   async ask(request: CommercialAskRequest): Promise<CommercialAnswer> {
-    const profile = await this.deps.profiles.loadActive(request.profileKey ?? 'omnia-frigo-holding');
+    const profile = await this.deps.profiles.loadActive(
+      request.profileKey ?? 'omnia-frigo-holding',
+    );
     if (!profile || profile.status !== 'active') {
       throw new Error('COMMERCIAL_PROFILE_MISSING');
     }

@@ -97,10 +97,7 @@ async function isEnrolled(
     const res = await payload.find({
       collection: 'student-profiles',
       where: {
-        and: [
-          { userKey: { equals: String(userId) } },
-          { course: { equals: courseId } },
-        ],
+        and: [{ userKey: { equals: String(userId) } }, { course: { equals: courseId } }],
       },
       limit: 1,
       overrideAccess: true,
@@ -194,11 +191,7 @@ export async function runNeurofrigoAsk(
     matchedPolicyIds: [] as string[],
   }));
 
-  const enrolled = await isEnrolled(
-    payload,
-    request.identity.userId,
-    request.course.courseId,
-  );
+  const enrolled = await isEnrolled(payload, request.identity.userId, request.course.courseId);
 
   let plan: OrchestratorPlan | null = null;
   if (shouldOrchestrate) {
@@ -213,7 +206,10 @@ export async function runNeurofrigoAsk(
   }
 
   if (plan?.blocked) {
-    const answer = blockedAnswer(plan.blockReason || 'Bloqueado pela política.', plan.blockCode || 'POLICY');
+    const answer = blockedAnswer(
+      plan.blockReason || 'Bloqueado pela política.',
+      plan.blockCode || 'POLICY',
+    );
     const sessionId = await persistSession(payload, {
       existing,
       request,
@@ -247,15 +243,16 @@ export async function runNeurofrigoAsk(
     spentMonthUsd: spend.spentMonthUsd,
     config: {
       dailyLimitUsd: Number((dash as { budgetDailyUsd?: number } | null)?.budgetDailyUsd ?? 25),
-      monthlyLimitUsd: Number((dash as { budgetMonthlyUsd?: number } | null)?.budgetMonthlyUsd ?? 400),
-      at100: ((dash as { budgetAt100?: string } | null)?.budgetAt100 as 'allow' | 'warn_only' | 'block') || 'warn_only',
+      monthlyLimitUsd: Number(
+        (dash as { budgetMonthlyUsd?: number } | null)?.budgetMonthlyUsd ?? 400,
+      ),
+      at100:
+        ((dash as { budgetAt100?: string } | null)?.budgetAt100 as
+          'allow' | 'warn_only' | 'block') || 'warn_only',
     },
   });
   if (budget.blocked) {
-    const answer = blockedAnswer(
-      budget.message || 'Orçamento esgotado.',
-      'BUDGET_EXCEEDED',
-    );
+    const answer = blockedAnswer(budget.message || 'Orçamento esgotado.', 'BUDGET_EXCEEDED');
     const sessionId = await persistSession(payload, {
       existing,
       request,
@@ -314,9 +311,7 @@ export async function runNeurofrigoAsk(
       lessonId: request.course.lessonId,
       lessonTitle: request.course.lessonTitle,
       ownerCompanyId: request.course.ownerCompanyId,
-      requestProposal: /\b(proposta|gerar\s+proposta|montar\s+oferta)\b/i.test(
-        request.question,
-      ),
+      requestProposal: /\b(proposta|gerar\s+proposta|montar\s+oferta)\b/i.test(request.question),
     });
   }
 
@@ -337,10 +332,12 @@ export async function runNeurofrigoAsk(
       lessonId: request.course.lessonId,
       lessonTitle: request.course.lessonTitle,
       ownerCompanyId: request.course.ownerCompanyId,
-      requestTroubleshooting:
-        /\b(troubleshoot|diagn[oó]stic|falha|alarme|defeito)\b/i.test(request.question),
-      requestComparison:
-        /\b(compar(e|ar|a[cç][aã]o)|versus|\bv[sx]\.?\b)\b/i.test(request.question),
+      requestTroubleshooting: /\b(troubleshoot|diagn[oó]stic|falha|alarme|defeito)\b/i.test(
+        request.question,
+      ),
+      requestComparison: /\b(compar(e|ar|a[cç][aã]o)|versus|\bv[sx]\.?\b)\b/i.test(
+        request.question,
+      ),
     });
   }
 
@@ -444,8 +441,7 @@ export async function runNeurofrigoAsk(
     },
   });
 
-  const specialistLabel =
-    plan?.agent.displayName || resolved?.assistant.name || assistantKey;
+  const specialistLabel = plan?.agent.displayName || resolved?.assistant.name || assistantKey;
 
   const sessionId = await persistSession(payload, {
     existing,
@@ -535,8 +531,7 @@ async function persistSession(
       ? Number(args.request.course.lessonId)
       : null;
   const companyNumeric =
-    args.request.course.ownerCompanyId &&
-    /^\d+$/.test(String(args.request.course.ownerCompanyId))
+    args.request.course.ownerCompanyId && /^\d+$/.test(String(args.request.course.ownerCompanyId))
       ? Number(args.request.course.ownerCompanyId)
       : null;
 

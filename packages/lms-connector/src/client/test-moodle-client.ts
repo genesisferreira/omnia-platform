@@ -64,10 +64,9 @@ describe('MoodleClient', () => {
     const client = new MoodleClient({
       config: baseConfig(),
       fetchImpl: async () =>
-        new Response(
-          JSON.stringify({ exception: 'moodle_exception', errorcode: 'invalidtoken' }),
-          { status: 200 },
-        ),
+        new Response(JSON.stringify({ exception: 'moodle_exception', errorcode: 'invalidtoken' }), {
+          status: 200,
+        }),
       maxRetries: 0,
     });
     await assert.rejects(

@@ -12,9 +12,7 @@ export function TrustIndicators({ partner }: TrustIndicatorsProps) {
 
   if (partner.verified) {
     items.push(
-      partner.partnerType === 'professional'
-        ? 'Profissional verificado'
-        : 'Empresa verificada',
+      partner.partnerType === 'professional' ? 'Profissional verificado' : 'Empresa verificada',
     );
   }
   if (partner.featured) {

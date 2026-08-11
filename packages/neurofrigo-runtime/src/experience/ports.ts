@@ -18,11 +18,7 @@ export type IntentClassifierPort = {
 };
 
 export type ResponseFormatterPort = {
-  format(input: {
-    text: string;
-    intent: QuestionIntent | null;
-    status: string;
-  }): string;
+  format(input: { text: string; intent: QuestionIntent | null; status: string }): string;
 };
 
 export type GroundingScorerPort = {

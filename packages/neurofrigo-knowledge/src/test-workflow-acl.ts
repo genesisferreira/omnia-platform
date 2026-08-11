@@ -23,10 +23,7 @@ describe('knowledge workflow', () => {
   });
 
   it('requires human review for INTERNAL_RESTRICTED', () => {
-    assert.equal(
-      requiresHumanReview({ securityClassification: 'INTERNAL_RESTRICTED' }),
-      true,
-    );
+    assert.equal(requiresHumanReview({ securityClassification: 'INTERNAL_RESTRICTED' }), true);
   });
 
   it('blocks publish path without prior approval states when review required', () => {

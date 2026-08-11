@@ -30,7 +30,10 @@
       "title": "API errors + login failures",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "targets": [
-        { "expr": "sum by (status_class) (rate(lms_api_errors[5m]))", "legendFormat": "{{status_class}}" },
+        {
+          "expr": "sum by (status_class) (rate(lms_api_errors[5m]))",
+          "legendFormat": "{{status_class}}"
+        },
         { "expr": "sum(rate(lms_login_failure[5m]))", "legendFormat": "login_failure" },
         { "expr": "sum(rate(http_errors_total{status=\"429\"}[5m]))", "legendFormat": "rate_limit" }
       ]

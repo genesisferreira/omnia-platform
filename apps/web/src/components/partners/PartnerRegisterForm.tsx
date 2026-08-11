@@ -187,9 +187,7 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
         return;
       }
 
-      setSuccessMessage(
-        apiMessage || 'Cadastro enviado com sucesso. Nossa equipe fará a análise.',
-      );
+      setSuccessMessage(apiMessage || 'Cadastro enviado com sucesso. Nossa equipe fará a análise.');
       setState('success');
       formEl.reset();
       setCategoryIds([]);
@@ -358,11 +356,7 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
           </label>
           <label className="block text-sm md:col-span-2">
             <span className="mb-1 block font-medium">Endereço</span>
-            <Input
-              name="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+            <Input name="address" value={address} onChange={(e) => setAddress(e.target.value)} />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Número</span>
@@ -396,11 +390,7 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium">País</span>
-            <Input
-              name="country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+            <Input name="country" value={country} onChange={(e) => setCountry(e.target.value)} />
           </label>
         </div>
       </fieldset>

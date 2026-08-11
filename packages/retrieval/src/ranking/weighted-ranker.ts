@@ -55,7 +55,8 @@ export class WeightedRanker implements RankerPort {
       }
 
       if (hit.record.version) {
-        score += this.weights.versionBoost * Math.min(1, Number.parseFloat(hit.record.version) || 0.5);
+        score +=
+          this.weights.versionBoost * Math.min(1, Number.parseFloat(hit.record.version) || 0.5);
         reasons.push(`version=${hit.record.version}`);
       }
 

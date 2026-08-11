@@ -5,31 +5,31 @@
 
 ## Resultado desta execução
 
-| Item | Valor |
-| --- | --- |
-| Branch | `feature/omnia-lms-learning-engine` |
-| Commit implantado | `7ff1980` (`7ff19803a66532171a0e0b9aeea3a0060ba77a21`) |
-| Commit mensagem | `feat(materials): implement LMS material experience` |
-| Container | `omnia-platform-web-dev` |
-| Imagem Web nova | `sha256:50281facbad2e346809f6d3591567dd552e2e593090b127dfc3c6854d4ed2da7` |
-| Health Web | **healthy** |
-| Commit Web anterior (rollback) | `10fddfa` (`10fddfadd6187bde2a184d300dd080bd51355b06`) |
-| Imagem Web anterior | `sha256:28ebfd85bbf83e8f19947872804787c5d82dedd8caed23c5217e6a38a61fdf9a` |
-| Branch anterior VPS | `feature/omnia-lms-experience-mvp` |
-| Serviços alterados | **somente `web`** |
-| Produção | **intacta** |
+| Item                           | Valor                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| Branch                         | `feature/omnia-lms-learning-engine`                                       |
+| Commit implantado              | `7ff1980` (`7ff19803a66532171a0e0b9aeea3a0060ba77a21`)                    |
+| Commit mensagem                | `feat(materials): implement LMS material experience`                      |
+| Container                      | `omnia-platform-web-dev`                                                  |
+| Imagem Web nova                | `sha256:50281facbad2e346809f6d3591567dd552e2e593090b127dfc3c6854d4ed2da7` |
+| Health Web                     | **healthy**                                                               |
+| Commit Web anterior (rollback) | `10fddfa` (`10fddfadd6187bde2a184d300dd080bd51355b06`)                    |
+| Imagem Web anterior            | `sha256:28ebfd85bbf83e8f19947872804787c5d82dedd8caed23c5217e6a38a61fdf9a` |
+| Branch anterior VPS            | `feature/omnia-lms-experience-mvp`                                        |
+| Serviços alterados             | **somente `web`**                                                         |
+| Produção                       | **intacta**                                                               |
 
 ## Pré-commit (local)
 
-| Suite | Resultado |
-| --- | --- |
-| `@omnia/learning-engine` test | pass (7) |
-| `test:lms-material` | pass (6) |
-| `test:lms-lesson` | pass (8) |
-| `test:lms-smoke` | pass (33) |
-| `typecheck` web | pass |
-| `lint` web | pass (warning pré-existente `ChangePasswordForm`) |
-| `build` web | pass |
+| Suite                         | Resultado                                         |
+| ----------------------------- | ------------------------------------------------- |
+| `@omnia/learning-engine` test | pass (7)                                          |
+| `test:lms-material`           | pass (6)                                          |
+| `test:lms-lesson`             | pass (8)                                          |
+| `test:lms-smoke`              | pass (33)                                         |
+| `typecheck` web               | pass                                              |
+| `lint` web                    | pass (warning pré-existente `ChangePasswordForm`) |
+| `build` web                   | pass                                              |
 
 Build note — First Load JS aula: **11.1 kB** / shared **127 kB** (`/lms/cursos/[courseId]/atividades/[activityId]`).
 
@@ -48,12 +48,12 @@ Turbo prune incluiu `@omnia/learning-engine`. Admin/Moodle/Redis/DB/Traefik **n�
 
 ## Rotas validadas (HTTP)
 
-| URL | Código |
-| --- | --- |
-| `https://dev.omniafrigo.com.br/` | **200** |
-| `https://dev.omniafrigo.com.br/lms` | **307** (login, deslogado) |
-| `https://dev.omniafrigo.com.br/lms/cursos` | **307** |
-| `/lms/cursos/1` / atividade | **307** |
+| URL                                                        | Código                                       |
+| ---------------------------------------------------------- | -------------------------------------------- |
+| `https://dev.omniafrigo.com.br/`                           | **200**                                      |
+| `https://dev.omniafrigo.com.br/lms`                        | **307** (login, deslogado)                   |
+| `https://dev.omniafrigo.com.br/lms/cursos`                 | **307**                                      |
+| `/lms/cursos/1` / atividade                                | **307**                                      |
 | `https://admin.dev.omniafrigo.com.br/api/omnia/lms/health` | **200** `healthy` · Moodle 4.5.12 · readOnly |
 
 Home HTML: sem match `moodle.` / `wstoken`.

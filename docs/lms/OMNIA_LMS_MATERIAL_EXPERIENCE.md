@@ -18,13 +18,13 @@ Aluno → Lesson Experience
 
 ## Componentes
 
-| Peça | Responsabilidade |
-| --- | --- |
-| `MaterialProvider` | Resolve tipo, renderer, permissões, metadata, preview, fallback + security ports |
-| `MaterialViewer` | Shell de render + metadata + estados + lifecycle engine |
-| `MaterialExperience` | Host: lista de materiais da aula + nav |
-| `MaterialNav` | Prev/next material · voltar aula/módulo/curso |
-| Renderers | Text, Html, Image, Pdf, Video, ExternalLink, File, H5p, Unknown |
+| Peça                 | Responsabilidade                                                                 |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `MaterialProvider`   | Resolve tipo, renderer, permissões, metadata, preview, fallback + security ports |
+| `MaterialViewer`     | Shell de render + metadata + estados + lifecycle engine                          |
+| `MaterialExperience` | Host: lista de materiais da aula + nav                                           |
+| `MaterialNav`        | Prev/next material · voltar aula/módulo/curso                                    |
+| Renderers            | Text, Html, Image, Pdf, Video, ExternalLink, File, H5p, Unknown                  |
 
 ## Eventos
 

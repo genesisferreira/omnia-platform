@@ -5,11 +5,7 @@ import { runNeurofrigoAsk } from '../neurofrigo/ask';
 import { getSipAssistantContext, recalculateSipProfile } from '../sip/profile';
 import { runAdaptiveDecide } from '../adaptive/decide';
 import { loadCourseCatalog } from './catalog';
-import {
-  recordLearningUsage,
-  syncLearningProfile,
-  syncStudentProfile,
-} from './profiles';
+import { recordLearningUsage, syncLearningProfile, syncStudentProfile } from './profiles';
 import { refreshTutorDashboard } from './dashboard';
 
 export async function createTutorService(payload: Payload): Promise<TutorService> {
@@ -68,10 +64,7 @@ export async function createTutorService(payload: Payload): Promise<TutorService
         const feedback = await payload.find({
           collection: 'ai-feedback',
           where: {
-            and: [
-              { rating: { equals: 'down' } },
-              { aiSession: { in: ids } },
-            ],
+            and: [{ rating: { equals: 'down' } }, { aiSession: { in: ids } }],
           },
           limit: 1,
           overrideAccess: true,
@@ -170,10 +163,7 @@ export async function runTutorAsk(
   const lp = await payload.find({
     collection: 'learning-profiles',
     where: {
-      and: [
-        { userKey: { equals: userKey } },
-        { course: { equals: String(body.courseId) } },
-      ],
+      and: [{ userKey: { equals: userKey } }, { course: { equals: String(body.courseId) } }],
     },
     limit: 1,
     overrideAccess: true,

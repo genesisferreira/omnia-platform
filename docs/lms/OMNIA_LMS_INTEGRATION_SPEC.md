@@ -13,24 +13,24 @@ Documentos relacionados:
 
 ### Status ME01
 
-| Contrato | Status |
-|----------|--------|
-| Health + site info | Implementado |
-| Read: me/courses/content/progress/grades/completion | Implementado |
-| Identity link storage | Implementado (manual DEV) |
-| Session create/heartbeat/logout/revoke | Implementado |
-| Policy engine (sessão global/perfil) | Implementado |
-| Provisionamento / write Moodle | **Não** nesta entrega |
-| Media signed URL | Preparado (não real CDN) |
+| Contrato                                            | Status                    |
+| --------------------------------------------------- | ------------------------- |
+| Health + site info                                  | Implementado              |
+| Read: me/courses/content/progress/grades/completion | Implementado              |
+| Identity link storage                               | Implementado (manual DEV) |
+| Session create/heartbeat/logout/revoke              | Implementado              |
+| Policy engine (sessão global/perfil)                | Implementado              |
+| Provisionamento / write Moodle                      | **Não** nesta entrega     |
+| Media signed URL                                    | Preparado (não real CDN)  |
 
 ---
 
 ## 1. Princípios
 
-1. Browser do aluno fala só com **Omnia BFF** (`lms.*`).  
-2. Moodle é SoR acadêmico; sessões de produto são Omnia-first.  
-3. Toda mídia passa por **autorização Omnia** (signed/TTL).  
-4. Revogação de sessão Omnia implica invalidação Moodle + media tokens.  
+1. Browser do aluno fala só com **Omnia BFF** (`lms.*`).
+2. Moodle é SoR acadêmico; sessões de produto são Omnia-first.
+3. Toda mídia passa por **autorização Omnia** (signed/TTL).
+4. Revogação de sessão Omnia implica invalidação Moodle + media tokens.
 5. Sem custom core Moodle; WS oficiais / APIs suportadas.
 
 ---
@@ -153,12 +153,12 @@ Após eventos de view relevantes, BFF chama Connector Moodle `completion` / prog
 
 ## 4. Contratos Connector Moodle (complemento sessão)
 
-| Contrato lógico | Direção | Notas |
-| --- | --- | --- |
-| `moodle.session.bind` | Omnia→Moodle | Associa sessionId ↔ user Moodle |
-| `moodle.session.revoke` | Omnia→Moodle | Invalida sessões server-side do user/device binding |
-| `moodle.session.logout` | Omnia→Moodle | Logout sincronizado |
-| (já mapeados) user/course/enrol/completion/grades | — | Ver API Capabilities |
+| Contrato lógico                                   | Direção      | Notas                                               |
+| ------------------------------------------------- | ------------ | --------------------------------------------------- |
+| `moodle.session.bind`                             | Omnia→Moodle | Associa sessionId ↔ user Moodle                     |
+| `moodle.session.revoke`                           | Omnia→Moodle | Invalida sessões server-side do user/device binding |
+| `moodle.session.logout`                           | Omnia→Moodle | Logout sincronizado                                 |
+| (já mapeados) user/course/enrol/completion/grades | —            | Ver API Capabilities                                |
 
 Se WS nativo não matar cookie de browser Moodle (porque não há cookie no client), o bind é **autorização Connector**: qualquer chamada Moodle em nome do aluno exige `sessionId` Omnia active.
 

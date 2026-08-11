@@ -48,7 +48,11 @@ export function resolveUiStatus(descriptor: AssessmentDescriptor): AssessmentUiS
   if (descriptor.completion.completed) {
     return 'completed';
   }
-  if (descriptor.completion.state === 0 && descriptor.attempts.used && descriptor.attempts.used > 0) {
+  if (
+    descriptor.completion.state === 0 &&
+    descriptor.attempts.used &&
+    descriptor.attempts.used > 0
+  ) {
     return 'in_progress';
   }
   if (descriptor.completion.state === 0) {
@@ -79,8 +83,7 @@ export function buildAssessmentDescriptor(input: BuildAssessmentInput): Assessme
   const type = detectAssessmentType(input.modName);
   const completed = input.progressState === 1 || input.progressState === 2;
   const gradePublished = Boolean(
-    input.grade &&
-      (input.grade.gradeFormatted != null || input.grade.percentage != null),
+    input.grade && (input.grade.gradeFormatted != null || input.grade.percentage != null),
   );
   const id = `assess:${input.courseId}:${input.activityId}`;
 

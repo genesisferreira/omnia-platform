@@ -30,7 +30,11 @@ export type CreatedLlmProvider = {
   fallbackReason: string | null;
 };
 
-function resolveApiKey(name: string, env: LlmFactoryEnv, overrides?: LlmProviderOverrides): string | null {
+function resolveApiKey(
+  name: string,
+  env: LlmFactoryEnv,
+  overrides?: LlmProviderOverrides,
+): string | null {
   return (
     overrides?.apiKey ||
     env.NEUROFRIGO_LLM_API_KEY ||
@@ -52,14 +56,8 @@ function buildPrimary(
     }
     return new DeepSeekChatProvider({
       apiKey,
-      model:
-        overrides?.model ||
-        env.NEUROFRIGO_LLM_MODEL ||
-        'deepseek-chat',
-      baseUrl:
-        overrides?.baseUrl ||
-        env.NEUROFRIGO_LLM_BASE_URL ||
-        'https://api.deepseek.com/v1',
+      model: overrides?.model || env.NEUROFRIGO_LLM_MODEL || 'deepseek-chat',
+      baseUrl: overrides?.baseUrl || env.NEUROFRIGO_LLM_BASE_URL || 'https://api.deepseek.com/v1',
       timeoutMs: overrides?.timeoutMs,
       maxRetries: overrides?.maxRetries,
       correlationId: overrides?.correlationId,
@@ -75,10 +73,7 @@ function buildPrimary(
     }
     return new OpenAiCompatibleChatProvider({
       apiKey,
-      baseUrl:
-        overrides?.baseUrl ||
-        env.NEUROFRIGO_LLM_BASE_URL ||
-        'https://api.openai.com/v1',
+      baseUrl: overrides?.baseUrl || env.NEUROFRIGO_LLM_BASE_URL || 'https://api.openai.com/v1',
       model: overrides?.model || env.NEUROFRIGO_LLM_MODEL || 'gpt-4o-mini',
       name: 'openai-compatible',
     });

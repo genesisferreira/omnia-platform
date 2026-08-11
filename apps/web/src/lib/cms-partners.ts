@@ -136,7 +136,8 @@ export async function fetchPublicPartnerBySlug(
     });
     if (res.status === 404) return null;
     if (!res.ok) return null;
-    const data = (await res.json()) as { ok: true; partner: PublicPartnerDetailDto } | { ok: false };
+    const data = (await res.json()) as
+      { ok: true; partner: PublicPartnerDetailDto } | { ok: false };
     if (!data || data.ok !== true) return null;
     return absolutizeDetail(data.partner);
   } catch {

@@ -1,12 +1,6 @@
 /** Domínio Retrieval — tipos públicos (sem dependências externas). */
 
-export const EMBEDDING_STATUSES = [
-  'pending',
-  'processing',
-  'ready',
-  'failed',
-  'stale',
-] as const;
+export const EMBEDDING_STATUSES = ['pending', 'processing', 'ready', 'failed', 'stale'] as const;
 export type EmbeddingStatus = (typeof EMBEDDING_STATUSES)[number];
 
 export const DEFAULT_EMBEDDING_DIMENSIONS = 384;

@@ -14,8 +14,7 @@ export const MOODLE_READ_FUNCTIONS = {
   getGradeItems: 'gradereport_user_get_grade_items',
 } as const;
 
-export type MoodleReadFunction =
-  (typeof MOODLE_READ_FUNCTIONS)[keyof typeof MOODLE_READ_FUNCTIONS];
+export type MoodleReadFunction = (typeof MOODLE_READ_FUNCTIONS)[keyof typeof MOODLE_READ_FUNCTIONS];
 
 export const MOODLE_READ_FUNCTION_SET = new Set<string>(Object.values(MOODLE_READ_FUNCTIONS));
 

@@ -35,10 +35,7 @@ startxref
   'utf8',
 );
 
-const MINI_TXT = Buffer.from(
-  'Omnia LMS Core — material de download para homologação.\n',
-  'utf8',
-);
+const MINI_TXT = Buffer.from('Omnia LMS Core — material de download para homologação.\n', 'utf8');
 
 async function ensureSeedFiles() {
   await mkdir(ASSETS_DIR, { recursive: true });
@@ -93,8 +90,7 @@ async function main() {
     data: {
       title: 'Fundamentos de Refrigeração Industrial',
       slug: COURSE_SLUG,
-      shortDescription:
-        'Curso introdutório do LMS Core Omnia: ciclos, segurança e boas práticas.',
+      shortDescription: 'Curso introdutório do LMS Core Omnia: ciclos, segurança e boas práticas.',
       category: 'Refrigeração',
       level: 'beginner',
       language: 'pt-BR',

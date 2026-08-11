@@ -1,7 +1,4 @@
-import {
-  buildResetPasswordURL,
-  type ResolvedSmtpConfig,
-} from './smtp-config';
+import { buildResetPasswordURL, type ResolvedSmtpConfig } from './smtp-config';
 
 type ForgotPasswordEmailArgs = {
   token?: string;

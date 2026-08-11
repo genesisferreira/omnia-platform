@@ -45,10 +45,7 @@ export default async function LmsProgressPage() {
   return (
     <div className="space-y-6">
       <Breadcrumb
-        items={[
-          { label: 'LMS', href: '/lms' },
-          { label: 'Progresso' },
-        ]}
+        items={[{ label: 'LMS', href: '/lms' }, { label: 'Progresso' }]}
         linkComponent={Link}
       />
       <h1 className="font-heading text-3xl font-bold">Progresso</h1>
@@ -57,7 +54,10 @@ export default async function LmsProgressPage() {
       ) : (
         <ul className="space-y-4">
           {rows.map((row) => (
-            <li key={row.id} className="rounded-lg border border-border bg-card p-4 shadow-lms-card">
+            <li
+              key={row.id}
+              className="rounded-lg border border-border bg-card p-4 shadow-lms-card"
+            >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <Link
                   href={`/lms/cursos/${row.id}`}

@@ -11,7 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: 'courseId is required' }, { status: 400 });
   }
   const result = await fetchTutorProfile(courseId);
-  return NextResponse.json(result.ok ? result.data : { ok: false, error: result.error, data: result.data }, {
-    status: result.ok ? 200 : result.status,
-  });
+  return NextResponse.json(
+    result.ok ? result.data : { ok: false, error: result.error, data: result.data },
+    {
+      status: result.ok ? 200 : result.status,
+    },
+  );
 }

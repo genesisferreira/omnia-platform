@@ -134,18 +134,9 @@ export type AdaptiveDecisionRecord = {
 
 /** Ports — adapters admin; package não acessa Payload. */
 export type SipContextPort = {
-  getContext: (input: {
-    userKey: string;
-    courseId: string;
-  }) => Promise<SipAssistantContext | null>;
-  getInsights: (input: {
-    userKey: string;
-    courseId: string;
-  }) => Promise<StudentInsights | null>;
-  getProgress: (input: {
-    userKey: string;
-    courseId: string;
-  }) => Promise<{
+  getContext: (input: { userKey: string; courseId: string }) => Promise<SipAssistantContext | null>;
+  getInsights: (input: { userKey: string; courseId: string }) => Promise<StudentInsights | null>;
+  getProgress: (input: { userKey: string; courseId: string }) => Promise<{
     progressPercent: number;
     completedLessonIds: string[];
     completedModuleIds: string[];

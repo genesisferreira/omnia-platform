@@ -59,10 +59,7 @@ function makeAction(input: {
   };
 }
 
-function nextIncompleteLesson(
-  catalog: AdaptiveCatalog,
-  completed: Set<string>,
-) {
+function nextIncompleteLesson(catalog: AdaptiveCatalog, completed: Set<string>) {
   const sorted = [...catalog.lessons].sort(
     (a, b) => a.moduleOrder - b.moduleOrder || a.order - b.order,
   );
@@ -116,7 +113,12 @@ export function decideNextActions(input: {
         now,
         lesson: catalog.lessons[catalog.lessons.length - 1] || null,
         factors: [
-          { key: 'progressPercent', value: snapshot.progressPercent, weight: 1, note: '100% aulas' },
+          {
+            key: 'progressPercent',
+            value: snapshot.progressPercent,
+            weight: 1,
+            note: '100% aulas',
+          },
           { key: 'completedLessons', value: completed.size, weight: 1, note: 'todas concluídas' },
         ],
       }),
@@ -240,9 +242,7 @@ export function decideNextActions(input: {
           snapshot,
           policy,
           now,
-          factors: [
-            { key: 'reviewRisk', value: reviewRisk, weight: 1, note: 'acima do limiar' },
-          ],
+          factors: [{ key: 'reviewRisk', value: reviewRisk, weight: 1, note: 'acima do limiar' }],
         }),
       );
     }
@@ -292,28 +292,19 @@ export function decideNextActions(input: {
           policy,
           now,
           lesson: nextLesson,
-          factors: [
-            { key: 'nextLesson', value: nextLesson.title, weight: 1, note: 'fila' },
-          ],
+          factors: [{ key: 'nextLesson', value: nextLesson.title, weight: 1, note: 'fila' }],
         }),
       );
     }
 
     const moduleComplete =
-      catalog.modules.some((m) =>
-        m.lessonIds.length > 0 && m.lessonIds.every((id) => completed.has(id)),
+      catalog.modules.some(
+        (m) => m.lessonIds.length > 0 && m.lessonIds.every((id) => completed.has(id)),
       ) && completedMods.size < catalog.modules.length;
 
     if (moduleComplete || (nextLesson && completedMods.size > 0)) {
-      const nextModLesson = firstLessonOfNextIncompleteModule(
-        catalog,
-        completedMods,
-        completed,
-      );
-      if (
-        nextModLesson &&
-        (!nextLesson || nextModLesson.moduleId !== nextLesson.moduleId)
-      ) {
+      const nextModLesson = firstLessonOfNextIncompleteModule(catalog, completedMods, completed);
+      if (nextModLesson && (!nextLesson || nextModLesson.moduleId !== nextLesson.moduleId)) {
         actions.push(
           makeAction({
             actionType: 'NEXT_MODULE',

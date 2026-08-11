@@ -15,12 +15,12 @@
 
 ## Domínios
 
-| Hostname | Papel | Nesta sprint |
-| --- | --- | --- |
-| `moodle.dev.omniafrigo.com.br` | Engine DEV | Validar HTTPS |
-| `moodle.omniafrigo.com.br` | Engine PROD | DNS reservado; stack PROD ainda não up |
-| `lms.dev.omniafrigo.com.br` | UI Omnia LMS (futuro) | DNS reservado; sem backend Moodle |
-| `lms.omniafrigo.com.br` | UI Omnia LMS (futuro) | DNS reservado; sem backend Moodle |
+| Hostname                       | Papel                 | Nesta sprint                           |
+| ------------------------------ | --------------------- | -------------------------------------- |
+| `moodle.dev.omniafrigo.com.br` | Engine DEV            | Validar HTTPS                          |
+| `moodle.omniafrigo.com.br`     | Engine PROD           | DNS reservado; stack PROD ainda não up |
+| `lms.dev.omniafrigo.com.br`    | UI Omnia LMS (futuro) | DNS reservado; sem backend Moodle      |
+| `lms.omniafrigo.com.br`        | UI Omnia LMS (futuro) | DNS reservado; sem backend Moodle      |
 
 ## Próximo
 

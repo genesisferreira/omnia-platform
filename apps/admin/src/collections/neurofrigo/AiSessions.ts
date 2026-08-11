@@ -13,14 +13,7 @@ export const AiSessions: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'question',
-    defaultColumns: [
-      'question',
-      'status',
-      'intent',
-      'groundingScore',
-      'tookMs',
-      'updatedAt',
-    ],
+    defaultColumns: ['question', 'status', 'intent', 'groundingScore', 'tookMs', 'updatedAt'],
     group: 'Neurofrigo AI',
     description:
       'Sessão de conversa temporária (turns + grounding). Sem memória permanente entre sessões.',

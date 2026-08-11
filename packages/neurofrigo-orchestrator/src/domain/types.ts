@@ -33,17 +33,10 @@ export const OFFICIAL_SPECIALIST_KEYS = [
 export type OfficialSpecialistKey = (typeof OFFICIAL_SPECIALIST_KEYS)[number];
 
 export type ProfileKind =
-  | 'visitor'
-  | 'student'
-  | 'teacher'
-  | 'company'
-  | 'partner'
-  | 'admin'
-  | 'super_admin';
+  'visitor' | 'student' | 'teacher' | 'company' | 'partner' | 'admin' | 'super_admin';
 
 export type GuardDecision =
-  | { allow: true }
-  | { allow: false; code: string; message: string; event: string };
+  { allow: true } | { allow: false; code: string; message: string; event: string };
 
 export type RoutedAgent = {
   assistantKey: string;

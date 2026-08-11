@@ -6,12 +6,12 @@
 
 ## Diferenças vs DEV
 
-| Item | PROD |
-| --- | --- |
-| Compose | `docker/lms/compose/production.yml` |
-| Env | `docker/lms/env/.env.production` (secrets **distintos** do DEV) |
-| `MOODLE_AUTO_INSTALL` | `0` (instalar explicitamente ou restaurar backup) |
-| Recursos | limites maiores (ver compose) |
+| Item                  | PROD                                                            |
+| --------------------- | --------------------------------------------------------------- |
+| Compose               | `docker/lms/compose/production.yml`                             |
+| Env                   | `docker/lms/env/.env.production` (secrets **distintos** do DEV) |
+| `MOODLE_AUTO_INSTALL` | `0` (instalar explicitamente ou restaurar backup)               |
+| Recursos              | limites maiores (ver compose)                                   |
 
 ## Procedimento futuro
 

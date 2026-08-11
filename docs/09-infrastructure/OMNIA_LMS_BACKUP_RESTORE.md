@@ -2,9 +2,9 @@
 
 ## Destino
 
-| Env | Path |
-| --- | --- |
-| DEV | `/opt/omnia/backups/lms/dev/<stamp>/` |
+| Env  | Path                                         |
+| ---- | -------------------------------------------- |
+| DEV  | `/opt/omnia/backups/lms/dev/<stamp>/`        |
 | PROD | `/opt/omnia/backups/lms/production/<stamp>/` |
 
 Conteúdo: `mariadb.sql.gz`, `moodledata.tgz`, `manifest.json`.

@@ -1,19 +1,13 @@
-import type {
-  CollectionAfterChangeHook,
-  CollectionBeforeChangeHook,
-} from 'payload';
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload';
 
-import {
-  ensureLearningResourceFromLessonAsset,
-  processLearningResource,
-} from './pipeline';
+import { ensureLearningResourceFromLessonAsset, processLearningResource } from './pipeline';
 
 function isPipelineContext(context: unknown): boolean {
   return Boolean(
     context &&
-      typeof context === 'object' &&
-      'kiPipelineActive' in context &&
-      (context as { kiPipelineActive?: boolean }).kiPipelineActive,
+    typeof context === 'object' &&
+    'kiPipelineActive' in context &&
+    (context as { kiPipelineActive?: boolean }).kiPipelineActive,
   );
 }
 

@@ -6,12 +6,12 @@
 
 ## Ancestry
 
-| Ref | Relation to feature tip |
-|-----|-------------------------|
-| `origin/develop` (`dc069e9`) | **ancestor** (feature is 173 commits ahead) |
-| `origin/main` (`454d21e`) | **ancestor** (feature further ahead) |
-| `origin/release/2.3.0` (`e45c119`) | **ancestor** (feature ~126 commits ahead) |
-| Landing `release/landing-v1.0` | **isolated worktree** — do not merge into AI RC |
+| Ref                                | Relation to feature tip                         |
+| ---------------------------------- | ----------------------------------------------- |
+| `origin/develop` (`dc069e9`)       | **ancestor** (feature is 173 commits ahead)     |
+| `origin/main` (`454d21e`)          | **ancestor** (feature further ahead)            |
+| `origin/release/2.3.0` (`e45c119`) | **ancestor** (feature ~126 commits ahead)       |
+| Landing `release/landing-v1.0`     | **isolated worktree** — do not merge into AI RC |
 
 ## Recommendation
 

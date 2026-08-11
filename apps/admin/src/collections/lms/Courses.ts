@@ -11,11 +11,7 @@ import {
 import { createSeoFields } from '../../fields/seo';
 import { COURSE_LEVELS, optionsFrom } from './constants';
 
-const normalizeAndGuardStatus: CollectionBeforeChangeHook = async ({
-  data,
-  originalDoc,
-  req,
-}) => {
+const normalizeAndGuardStatus: CollectionBeforeChangeHook = async ({ data, originalDoc, req }) => {
   if (!data) return data;
   if (typeof data.slug === 'string') {
     data.slug = data.slug

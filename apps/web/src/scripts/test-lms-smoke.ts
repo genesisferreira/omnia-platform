@@ -122,9 +122,7 @@ describe('LMS smoke routes', () => {
 
 describe('LMS UI components', () => {
   it('Progress renders accessible meter', () => {
-    const html = renderToStaticMarkup(
-      createElement(Progress, { value: 40, label: 'Progresso' }),
-    );
+    const html = renderToStaticMarkup(createElement(Progress, { value: 40, label: 'Progresso' }));
     assert.match(html, /Progresso/);
     assert.match(html, /40%/);
   });

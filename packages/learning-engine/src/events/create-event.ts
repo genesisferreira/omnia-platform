@@ -24,9 +24,7 @@ export function createEventId(now = Date.now()): string {
   return `evt_${now.toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function createLearningEvent(
-  input: EmitLearningEventInput,
-): LearningEventEnvelope {
+export function createLearningEvent(input: EmitLearningEventInput): LearningEventEnvelope {
   return {
     eventId: input.eventId ?? createEventId(),
     type: input.type,

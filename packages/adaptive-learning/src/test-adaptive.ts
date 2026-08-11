@@ -96,7 +96,9 @@ describe('adaptive-learning', () => {
       catalog,
       policy: DEFAULT_ADAPTIVE_POLICY,
     });
-    assert.ok(actions.some((a) => a.actionType === 'CONTINUE_LESSON' || a.actionType === 'ASK_TUTOR'));
+    assert.ok(
+      actions.some((a) => a.actionType === 'CONTINUE_LESSON' || a.actionType === 'ASK_TUTOR'),
+    );
   });
 
   it('B: 25% progresso sem risco alto → CONTINUE_LESSON', () => {
@@ -128,7 +130,9 @@ describe('adaptive-learning', () => {
       catalog,
       policy: DEFAULT_ADAPTIVE_POLICY,
     });
-    assert.ok(actions.some((a) => a.actionType === 'REVIEW_LESSON' || a.actionType === 'REVIEW_TOPIC'));
+    assert.ok(
+      actions.some((a) => a.actionType === 'REVIEW_LESSON' || a.actionType === 'REVIEW_TOPIC'),
+    );
     assert.ok(actions[0]!.factors.some((f) => f.key === 'reviewRisk'));
   });
 
@@ -171,7 +175,9 @@ describe('adaptive-learning', () => {
           return sipBase;
         },
         async getInsights() {
-          return evidenceCount < 3 ? insightsHighRisk : { ...insightsHighRisk, reviewRisk: 0.1, skillGap: 0.1 };
+          return evidenceCount < 3
+            ? insightsHighRisk
+            : { ...insightsHighRisk, reviewRisk: 0.1, skillGap: 0.1 };
         },
         async getProgress() {
           return {

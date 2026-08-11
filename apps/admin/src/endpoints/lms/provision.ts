@@ -14,9 +14,7 @@ import {
   getProvisionRuntime,
 } from '../../services/lms/provisioning';
 
-async function applyProvisionRateLimit(
-  subject: string,
-): Promise<Response | null> {
+async function applyProvisionRateLimit(subject: string): Promise<Response | null> {
   const decision = await checkRateLimit({
     scope: 'lms:provision',
     subjects: [{ value: subject }],
@@ -92,11 +90,7 @@ export const lmsProvisionUsersEndpoint: Endpoint = {
         const idempotencyKey = readIdempotencyKey(req);
         const body = await readJsonBody(req);
         const action = String(body.action || 'create') as
-          | 'create'
-          | 'update'
-          | 'disable'
-          | 'enable'
-          | 'sync';
+          'create' | 'update' | 'disable' | 'enable' | 'sync';
 
         const result = await handleProvisionUser(req, {
           action,
@@ -105,8 +99,7 @@ export const lmsProvisionUsersEndpoint: Endpoint = {
           email: body.email != null ? String(body.email) : undefined,
           firstName: body.firstName != null ? String(body.firstName) : undefined,
           lastName: body.lastName != null ? String(body.lastName) : undefined,
-          moodleUserId:
-            body.moodleUserId != null ? Number(body.moodleUserId) : undefined,
+          moodleUserId: body.moodleUserId != null ? Number(body.moodleUserId) : undefined,
           idempotencyKey,
           correlationId: correlationFrom(req),
           actor: {
@@ -141,55 +134,46 @@ export const lmsProvisionEnrollmentsEndpoint: Endpoint = {
   path: '/omnia/lms/internal/provision/enrollments',
   method: 'post',
   handler: async (req) =>
-    withLmsObservability(
-      req,
-      '/omnia/lms/internal/provision/enrollments',
-      async () => {
-        try {
-          const auth = requireInternalProvisionAuth(req);
-          const limited = await applyProvisionRateLimit(auth.omniaUserId);
-          if (limited) return limited;
+    withLmsObservability(req, '/omnia/lms/internal/provision/enrollments', async () => {
+      try {
+        const auth = requireInternalProvisionAuth(req);
+        const limited = await applyProvisionRateLimit(auth.omniaUserId);
+        if (limited) return limited;
 
-          const idempotencyKey = readIdempotencyKey(req);
-          const body = await readJsonBody(req);
-          const action = String(body.action || 'enroll') as
-            | 'enroll'
-            | 'unenroll'
-            | 'suspend'
-            | 'reactivate'
-            | 'sync';
+        const idempotencyKey = readIdempotencyKey(req);
+        const body = await readJsonBody(req);
+        const action = String(body.action || 'enroll') as
+          'enroll' | 'unenroll' | 'suspend' | 'reactivate' | 'sync';
 
-          const result = await handleProvisionEnrollment(req, {
-            action,
-            omniaUserId: String(body.omniaUserId || ''),
-            moodleUserId:
-              body.moodleUserId != null ? Number(body.moodleUserId) : undefined,
-            moodleCourseId: Number(body.moodleCourseId),
-            roleId: body.roleId != null ? Number(body.roleId) : undefined,
-            idempotencyKey,
-            correlationId: correlationFrom(req),
-            actor: {
-              omniaUserId: auth.omniaUserId,
-              role: auth.role,
-              origin: 'omnia.internal',
+        const result = await handleProvisionEnrollment(req, {
+          action,
+          omniaUserId: String(body.omniaUserId || ''),
+          moodleUserId: body.moodleUserId != null ? Number(body.moodleUserId) : undefined,
+          moodleCourseId: Number(body.moodleCourseId),
+          roleId: body.roleId != null ? Number(body.roleId) : undefined,
+          idempotencyKey,
+          correlationId: correlationFrom(req),
+          actor: {
+            omniaUserId: auth.omniaUserId,
+            role: auth.role,
+            origin: 'omnia.internal',
+          },
+        });
+
+        return jsonOk({ ok: result.ok, result });
+      } catch (err) {
+        if (err instanceof Error && err.message === 'IDEMPOTENCY_KEY_REQUIRED') {
+          return Response.json(
+            {
+              ok: false,
+              error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: err.message },
             },
-          });
-
-          return jsonOk({ ok: result.ok, result });
-        } catch (err) {
-          if (err instanceof Error && err.message === 'IDEMPOTENCY_KEY_REQUIRED') {
-            return Response.json(
-              {
-                ok: false,
-                error: { code: 'IDEMPOTENCY_KEY_REQUIRED', message: err.message },
-              },
-              { status: 400, headers: { 'Cache-Control': 'no-store' } },
-            );
-          }
-          return jsonError(err);
+            { status: 400, headers: { 'Cache-Control': 'no-store' } },
+          );
         }
-      },
-    ),
+        return jsonError(err);
+      }
+    }),
 };
 
 export const lmsProvisionJobEndpoint: Endpoint = {
@@ -224,42 +208,34 @@ export const lmsProvisionCapabilitiesEndpoint: Endpoint = {
   path: '/omnia/lms/internal/provision/capabilities',
   method: 'get',
   handler: async (req) =>
-    withLmsObservability(
-      req,
-      '/omnia/lms/internal/provision/capabilities',
-      async () => {
-        try {
-          requireInternalProvisionAuth(req);
-          const caps = await listProvisionCapabilities(req);
-          return jsonOk({ ok: true, ...caps });
-        } catch (err) {
-          return jsonError(err);
-        }
-      },
-    ),
+    withLmsObservability(req, '/omnia/lms/internal/provision/capabilities', async () => {
+      try {
+        requireInternalProvisionAuth(req);
+        const caps = await listProvisionCapabilities(req);
+        return jsonOk({ ok: true, ...caps });
+      } catch (err) {
+        return jsonError(err);
+      }
+    }),
 };
 
 export const lmsProvisionWorkerTickEndpoint: Endpoint = {
   path: '/omnia/lms/internal/provision/worker/tick',
   method: 'post',
   handler: async (req) =>
-    withLmsObservability(
-      req,
-      '/omnia/lms/internal/provision/worker/tick',
-      async () => {
-        try {
-          const auth = requireInternalProvisionAuth(req);
-          const limited = await applyProvisionRateLimit(auth.omniaUserId);
-          if (limited) return limited;
-          const body = await readJsonBody(req);
-          const maxJobs = Math.min(50, Math.max(1, Number(body.maxJobs) || 5));
-          const tick = await tickProvisionWorker(req, maxJobs);
-          return jsonOk({ ok: true, ...tick });
-        } catch (err) {
-          return jsonError(err);
-        }
-      },
-    ),
+    withLmsObservability(req, '/omnia/lms/internal/provision/worker/tick', async () => {
+      try {
+        const auth = requireInternalProvisionAuth(req);
+        const limited = await applyProvisionRateLimit(auth.omniaUserId);
+        if (limited) return limited;
+        const body = await readJsonBody(req);
+        const maxJobs = Math.min(50, Math.max(1, Number(body.maxJobs) || 5));
+        const tick = await tickProvisionWorker(req, maxJobs);
+        return jsonOk({ ok: true, ...tick });
+      } catch (err) {
+        return jsonError(err);
+      }
+    }),
 };
 
 export const lmsProvisionEndpoints: Endpoint[] = [

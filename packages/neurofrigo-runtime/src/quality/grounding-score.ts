@@ -27,12 +27,9 @@ export function computeGroundingScore(input: {
   const sourceCountFactor = Math.min(1, chunks.length / 4);
   const coverage = Math.min(1, contextChars / 2400);
   const score = Number(
-    (
-      avgSimilarity * 0.45 +
-      confidence * 0.25 +
-      sourceCountFactor * 0.2 +
-      coverage * 0.1
-    ).toFixed(3),
+    (avgSimilarity * 0.45 + confidence * 0.25 + sourceCountFactor * 0.2 + coverage * 0.1).toFixed(
+      3,
+    ),
   );
 
   return {

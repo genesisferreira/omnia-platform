@@ -89,7 +89,8 @@ export const NeurofrigoKnowledgeDashboard: GlobalConfig = {
       name: 'documentsByClassification',
       type: 'textarea',
       label: 'Por classificação (texto)',
-      defaultValue: 'PUBLIC:0 | CLIENT_PARTNER:0 | STUDENT:0 | TEACHER_MANAGER:0 | INTERNAL_RESTRICTED:0',
+      defaultValue:
+        'PUBLIC:0 | CLIENT_PARTNER:0 | STUDENT:0 | TEACHER_MANAGER:0 | INTERNAL_RESTRICTED:0',
       admin: { readOnly: true },
     },
     {

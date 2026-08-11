@@ -28,7 +28,14 @@ const RULES: Array<{ intent: OrchestratorIntent; patterns: RegExp[]; weight: num
   },
   {
     intent: 'electrical',
-    patterns: [/\bel[eé]tric/i, /\bclp\b/i, /\binversor/i, /\bpainel\b/i, /\bcomando/i, /\bautoma/i],
+    patterns: [
+      /\bel[eé]tric/i,
+      /\bclp\b/i,
+      /\binversor/i,
+      /\bpainel\b/i,
+      /\bcomando/i,
+      /\bautoma/i,
+    ],
     weight: 0.9,
   },
   {
@@ -43,12 +50,23 @@ const RULES: Array<{ intent: OrchestratorIntent; patterns: RegExp[]; weight: num
   },
   {
     intent: 'content_production',
-    patterns: [/\broteiro\b/i, /\bplano\s+de\s+aula\b/i, /\bmaterial\s+did[aá]tico\b/i, /\bprodu[cç][aã]o\s+de\s+conte[uú]do\b/i],
+    patterns: [
+      /\broteiro\b/i,
+      /\bplano\s+de\s+aula\b/i,
+      /\bmaterial\s+did[aá]tico\b/i,
+      /\bprodu[cç][aã]o\s+de\s+conte[uú]do\b/i,
+    ],
     weight: 0.88,
   },
   {
     intent: 'tutoring',
-    patterns: [/\btutor/i, /\brevis/i, /\bestudar\b/i, /\bplano\s+de\s+estudo\b/i, /\bn[aã]o\s+entendi\b/i],
+    patterns: [
+      /\btutor/i,
+      /\brevis/i,
+      /\bestudar\b/i,
+      /\bplano\s+de\s+estudo\b/i,
+      /\bn[aã]o\s+entendi\b/i,
+    ],
     weight: 0.8,
   },
   {
@@ -78,7 +96,12 @@ const RULES: Array<{ intent: OrchestratorIntent; patterns: RegExp[]; weight: num
   },
   {
     intent: 'institutional',
-    patterns: [/\bomnia\b/i, /\bempresa\b/i, /\binstitucional\b/i, /\bsobre\s+(a\s+)?plataforma\b/i],
+    patterns: [
+      /\bomnia\b/i,
+      /\bempresa\b/i,
+      /\binstitucional\b/i,
+      /\bsobre\s+(a\s+)?plataforma\b/i,
+    ],
     weight: 0.65,
   },
   {

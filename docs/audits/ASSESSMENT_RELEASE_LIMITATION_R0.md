@@ -10,11 +10,11 @@
 
 ## Impact on published flows
 
-| Flow | Impact |
-|------|--------|
+| Flow                                                | Impact                                             |
+| --------------------------------------------------- | -------------------------------------------------- |
 | Login → Cursos → Aula → AI → Tutor → SIP → Adaptive | **Not blocked** — assessment write is not required |
-| Certificates | Out of scope / not implemented |
-| Moodle grade write via Omnia | Not in RC |
+| Certificates                                        | Out of scope / not implemented                     |
+| Moodle grade write via Omnia                        | Not in RC                                          |
 
 ## Protection
 

@@ -16,11 +16,7 @@ import {
   mergeLearningSignals,
 } from '../personalization/level';
 import { LEVEL_LABELS } from '../domain/types';
-import {
-  buildRecommendations,
-  buildStudyPlan,
-  detectGaps,
-} from '../recommendations';
+import { buildRecommendations, buildStudyPlan, detectGaps } from '../recommendations';
 
 export type TutorServiceDeps = {
   runtime: TutorAskPort;
@@ -68,13 +64,9 @@ export class TutorService {
     const wantsPlan =
       request.requestStudyPlan === true ||
       Boolean(request.objective?.trim()) ||
-      /plano de estudo|quero aprender|montar um plano|roteiro de estudo/i.test(
-        request.question,
-      );
+      /plano de estudo|quero aprender|montar um plano|roteiro de estudo/i.test(request.question);
 
-    const objective =
-      request.objective?.trim() ||
-      (wantsPlan ? request.question.trim() : null);
+    const objective = request.objective?.trim() || (wantsPlan ? request.question.trim() : null);
 
     const personalizedHint = buildPersonalizedHint(learning.level);
     const profileLabel = buildProfileLabel(learning.level, student);
@@ -124,16 +116,10 @@ export class TutorService {
       : [];
 
     const studyPlan =
-      wantsPlan && objective && catalog
-        ? buildStudyPlan({ objective, catalog, student })
-        : null;
+      wantsPlan && objective && catalog ? buildStudyPlan({ objective, catalog, student }) : null;
 
     const gaps = catalog ? detectGaps({ learning, catalog }) : [];
-    const encouragement = buildEncouragement(
-      learning.level,
-      student,
-      gaps.length,
-    );
+    const encouragement = buildEncouragement(learning.level, student, gaps.length);
 
     return {
       answer,

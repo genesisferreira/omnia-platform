@@ -1,30 +1,29 @@
 import type { Payload } from 'payload';
 
 export async function refreshTutorDashboard(payload: Payload): Promise<void> {
-  const [students, learning, plans, sessions, feedbackUp, feedbackDown] =
-    await Promise.all([
-      payload.find({ collection: 'student-profiles', limit: 200, overrideAccess: true }),
-      payload.find({ collection: 'learning-profiles', limit: 200, overrideAccess: true }),
-      payload.find({ collection: 'tutor-study-plans', limit: 1, overrideAccess: true }),
-      payload.find({
-        collection: 'ai-sessions',
-        limit: 300,
-        sort: '-updatedAt',
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: 'ai-feedback',
-        where: { rating: { equals: 'up' } },
-        limit: 1,
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: 'ai-feedback',
-        where: { rating: { equals: 'down' } },
-        limit: 1,
-        overrideAccess: true,
-      }),
-    ]);
+  const [students, learning, plans, sessions, feedbackUp, feedbackDown] = await Promise.all([
+    payload.find({ collection: 'student-profiles', limit: 200, overrideAccess: true }),
+    payload.find({ collection: 'learning-profiles', limit: 200, overrideAccess: true }),
+    payload.find({ collection: 'tutor-study-plans', limit: 1, overrideAccess: true }),
+    payload.find({
+      collection: 'ai-sessions',
+      limit: 300,
+      sort: '-updatedAt',
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'ai-feedback',
+      where: { rating: { equals: 'up' } },
+      limit: 1,
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'ai-feedback',
+      where: { rating: { equals: 'down' } },
+      limit: 1,
+      overrideAccess: true,
+    }),
+  ]);
 
   const avgProgressPercent = students.docs.length
     ? Number(
@@ -37,7 +36,9 @@ export async function refreshTutorDashboard(payload: Payload): Promise<void> {
 
   const questionFreq = new Map<string, number>();
   for (const s of sessions.docs) {
-    const q = String(s.question || '').trim().slice(0, 100);
+    const q = String(s.question || '')
+      .trim()
+      .slice(0, 100);
     if (!q) continue;
     questionFreq.set(q, (questionFreq.get(q) || 0) + 1);
   }
@@ -67,10 +68,7 @@ export async function refreshTutorDashboard(payload: Payload): Promise<void> {
   const totalFb = up + down;
   const avgFeedbackScore = totalFb ? Number(((up - down) / totalFb).toFixed(3)) : 0;
 
-  const recommendationsCount = learning.docs.reduce(
-    (s, d) => s + Number(d.aiUsageCount || 0),
-    0,
-  );
+  const recommendationsCount = learning.docs.reduce((s, d) => s + Number(d.aiUsageCount || 0), 0);
 
   await payload.updateGlobal({
     slug: 'neurofrigo-tutor-dashboard',

@@ -4,15 +4,7 @@
  */
 
 export type MaterialType =
-  | 'text'
-  | 'html'
-  | 'image'
-  | 'pdf'
-  | 'video'
-  | 'h5p'
-  | 'external_link'
-  | 'file'
-  | 'unknown';
+  'text' | 'html' | 'image' | 'pdf' | 'video' | 'h5p' | 'external_link' | 'file' | 'unknown';
 
 export type MaterialUiState =
   | 'loading'

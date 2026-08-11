@@ -17,7 +17,10 @@ export type OpenAiCompatibleConfig = {
  */
 export class OpenAiCompatibleEmbeddingProvider implements EmbeddingProviderPort {
   private readonly cfg: Required<
-    Pick<OpenAiCompatibleConfig, 'apiKey' | 'baseUrl' | 'model' | 'dimensions' | 'name' | 'maxBatchSize'>
+    Pick<
+      OpenAiCompatibleConfig,
+      'apiKey' | 'baseUrl' | 'model' | 'dimensions' | 'name' | 'maxBatchSize'
+    >
   > & { fetchImpl: typeof fetch };
 
   constructor(config: OpenAiCompatibleConfig) {

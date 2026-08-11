@@ -9,13 +9,7 @@ export type CourseLevel = (typeof COURSE_LEVELS)[number];
 export const COURSE_VISIBILITIES = ['public', 'authenticated', 'company'] as const;
 export type CourseVisibility = (typeof COURSE_VISIBILITIES)[number];
 
-export const LESSON_TYPES = [
-  'video',
-  'pdf',
-  'text',
-  'download',
-  'external_link',
-] as const;
+export const LESSON_TYPES = ['video', 'pdf', 'text', 'download', 'external_link'] as const;
 export type LessonType = (typeof LESSON_TYPES)[number];
 
 export const LESSON_ASSET_TYPES = [

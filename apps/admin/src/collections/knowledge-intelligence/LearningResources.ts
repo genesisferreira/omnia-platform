@@ -1,9 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import {
-  KI_PROCESSING_STATUSES,
-  KI_RESOURCE_TYPES,
-} from '@omnia/knowledge-intelligence';
+import { KI_PROCESSING_STATUSES, KI_RESOURCE_TYPES } from '@omnia/knowledge-intelligence';
 
 import { kiPublisherAccess, kiStaffAccess } from '../../access/knowledge-intelligence';
 import {
@@ -52,7 +49,9 @@ export const LearningResources: CollectionConfig = {
       relationTo: 'media',
       required: true,
       label: 'Media',
-      admin: { description: 'Arquivo fonte. Processadores leem via Learning Resource, não Media crua.' },
+      admin: {
+        description: 'Arquivo fonte. Processadores leem via Learning Resource, não Media crua.',
+      },
     },
     {
       name: 'lessonAsset',

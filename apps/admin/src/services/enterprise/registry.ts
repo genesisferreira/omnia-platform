@@ -47,9 +47,7 @@ export async function loadAiModels(payload: Payload): Promise<AiModelRecord[]> {
     estimatedCostPer1kTokens: Number(d.estimatedCostPer1kTokens || 0),
     maxContextTokens: Number(d.maxContextTokens || 8000),
     defaultTemperature: Number(d.defaultTemperature ?? 0.2),
-    capabilities: Array.isArray(d.capabilities)
-      ? d.capabilities.map(String)
-      : [],
+    capabilities: Array.isArray(d.capabilities) ? d.capabilities.map(String) : [],
     status: (d.status as 'active' | 'disabled') || 'active',
     priority: Number(d.priority || 0),
   }));
@@ -102,8 +100,7 @@ export async function loadAssistants(payload: Payload): Promise<AssistantRecord[
         requireCitations: cfg.requireCitations !== false,
         defaultLanguage: String(cfg.defaultLanguage || 'pt-BR'),
         fallbackBehavior:
-          (cfg.fallbackBehavior as AssistantRecord['config']['fallbackBehavior']) ||
-          'not_found',
+          (cfg.fallbackBehavior as AssistantRecord['config']['fallbackBehavior']) || 'not_found',
       },
     };
   });
@@ -176,9 +173,7 @@ export async function loadPolicies(payload: Payload): Promise<AiPolicyRecord[]> 
     requireGrounding: d.requireGrounding !== false,
     requireExplainability: d.requireExplainability !== false,
     maxTokensPerDay:
-      d.maxTokensPerDay != null && Number(d.maxTokensPerDay) > 0
-        ? Number(d.maxTokensPerDay)
-        : null,
+      d.maxTokensPerDay != null && Number(d.maxTokensPerDay) > 0 ? Number(d.maxTokensPerDay) : null,
     priority: Number(d.priority || 0),
     enabled: d.enabled !== false,
   }));

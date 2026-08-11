@@ -148,7 +148,9 @@ export const mapPublicPartnerListItem = (
     coverageRadius: asNumber(doc.coverageRadius),
     featured: doc.featured === true,
     verified: doc.verified === true,
-    publishedAt: asString(doc.publishedAt) ?? (doc.publishedAt instanceof Date ? doc.publishedAt.toISOString() : null),
+    publishedAt:
+      asString(doc.publishedAt) ??
+      (doc.publishedAt instanceof Date ? doc.publishedAt.toISOString() : null),
     logo: mapPublicPartnerMedia(doc.logo),
     categories: mapTaxonomyList(doc.categories),
     specialties: mapTaxonomyList(doc.specialties),
@@ -169,11 +171,9 @@ export const mapPublicPartnerDetail = (
   const showFullAddress = partnerType === 'company';
 
   const addressParts = showFullAddress
-    ? [
-        asString(doc.address),
-        asString(doc.addressNumber),
-        asString(doc.neighborhood),
-      ].filter(Boolean)
+    ? [asString(doc.address), asString(doc.addressNumber), asString(doc.neighborhood)].filter(
+        Boolean,
+      )
     : [];
 
   const social = asRecord(doc.social) ?? {};

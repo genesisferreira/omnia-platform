@@ -5,12 +5,7 @@ import {
   createLearningEngine,
   type LearningEngine,
 } from '@omnia/learning-engine';
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 const LearningEngineContext = createContext<LearningEngine | null>(null);
 

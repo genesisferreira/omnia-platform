@@ -10,9 +10,8 @@ async function main() {
   const { default: config } = await import('../../payload.config');
   const { planPromptRollback } = await import('@omnia/enterprise-ai');
   const { runNeurofrigoAsk } = await import('../services/neurofrigo/ask');
-  const { listAllowedAssistants, resolveAssistantForAsk } = await import(
-    '../services/enterprise/resolve'
-  );
+  const { listAllowedAssistants, resolveAssistantForAsk } =
+    await import('../services/enterprise/resolve');
   const { loadPrompts } = await import('../services/enterprise/registry');
   const { refreshEnterpriseAiDashboard } = await import('../services/enterprise/dashboard');
 
@@ -80,8 +79,7 @@ async function main() {
       course: courseCtx,
     });
   } catch (err) {
-    forbiddenOk =
-      err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
+    forbiddenOk = err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN');
   }
   if (!forbiddenOk) throw new Error('E11_EXPECTED_FORBIDDEN_COMMERCIAL');
 

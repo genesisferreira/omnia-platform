@@ -49,11 +49,7 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
           'Observação técnica: confirme os parâmetros e procedimentos descritos no material do curso.',
         ].join('\n');
       } else if (intent.includes('comparative')) {
-        text = [
-          `Comparativo com base no material:`,
-          '',
-          ...bullets,
-        ].join('\n');
+        text = [`Comparativo com base no material:`, '', ...bullets].join('\n');
       } else {
         text = [
           `Pontos principais do material sobre “${question.slice(0, 100)}”:`,

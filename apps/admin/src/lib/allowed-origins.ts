@@ -28,15 +28,9 @@ export function getAllowedCorsOrigins(
   }
 
   const nodeEnv = env.NODE_ENV || 'development';
-  const local =
-    nodeEnv === 'production'
-      ? []
-      : ['http://localhost:3000', 'http://localhost:3001'];
+  const local = nodeEnv === 'production' ? [] : ['http://localhost:3000', 'http://localhost:3001'];
 
-  const fallback =
-    fromEnv.length === 0
-      ? ['http://localhost:3000', 'http://localhost:3001']
-      : [];
+  const fallback = fromEnv.length === 0 ? ['http://localhost:3000', 'http://localhost:3001'] : [];
 
   return [...new Set([...fromEnv, ...extras, ...local, ...fallback])];
 }

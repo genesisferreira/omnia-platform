@@ -6,17 +6,17 @@ Monta **apenas** o contexto mínimo necessário para a intenção + perfil autor
 
 ### Slots possíveis
 
-| Slot | Quando |
-|------|--------|
-| identity | Sempre |
-| profile / tenant | Sempre |
-| empresa / parceiro | Intenção comercial / partner |
-| matrícula / curso / aula | Acadêmico autorizado |
-| materiais permitidos | Após Media + matrícula |
-| progresso / notas permitidas | Tutor / adaptive |
-| eventos recentes | Learning Events próprios |
-| histórico conversa | Janela curta da sessão |
-| políticas / intenção / tools | Sempre (redigido) |
+| Slot                         | Quando                       |
+| ---------------------------- | ---------------------------- |
+| identity                     | Sempre                       |
+| profile / tenant             | Sempre                       |
+| empresa / parceiro           | Intenção comercial / partner |
+| matrícula / curso / aula     | Acadêmico autorizado         |
+| materiais permitidos         | Após Media + matrícula       |
+| progresso / notas permitidas | Tutor / adaptive             |
+| eventos recentes             | Learning Events próprios     |
+| histórico conversa           | Janela curta da sessão       |
+| políticas / intenção / tools | Sempre (redigido)            |
 
 ### Propriedades do contexto
 
@@ -24,12 +24,12 @@ Mínimo · temporário · autorizado · auditável · redigido · separado por t
 
 ### Nunca enviar ao modelo
 
-- Banco completo / dump  
-- Documentos não relacionados  
-- Dados de outros usuários  
-- Secrets, tokens, env, cookies  
-- System prompts de outros agentes  
-- Conteúdo Nível 5  
+- Banco completo / dump
+- Documentos não relacionados
+- Dados de outros usuários
+- Secrets, tokens, env, cookies
+- System prompts de outros agentes
+- Conteúdo Nível 5
 
 ### Redação
 

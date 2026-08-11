@@ -1,10 +1,6 @@
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 
-import {
-  resolveSmtpConfig,
-  type ResolvedSmtpConfig,
-  type ResolveSmtpOptions,
-} from './smtp-config';
+import { resolveSmtpConfig, type ResolvedSmtpConfig, type ResolveSmtpOptions } from './smtp-config';
 
 export type BuiltEmailAdapter = {
   smtp: ResolvedSmtpConfig;
@@ -15,9 +11,7 @@ export type BuiltEmailAdapter = {
  * Monta o adapter Nodemailer a partir do env validado.
  * Chamar apenas em runtime (nunca no caminho de generate:importmap sem SMTP).
  */
-export function buildNodemailerEmailAdapter(
-  options: ResolveSmtpOptions = {},
-): BuiltEmailAdapter {
+export function buildNodemailerEmailAdapter(options: ResolveSmtpOptions = {}): BuiltEmailAdapter {
   const smtp = resolveSmtpConfig(options);
   const adapter = nodemailerAdapter({
     defaultFromAddress: smtp.from.address,

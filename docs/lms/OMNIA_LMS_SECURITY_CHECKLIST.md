@@ -64,12 +64,12 @@
 
 ### Macroentrega 01 (read-only + session policy) — implementação
 
-| Item | Status |
-|------|--------|
-| A. Limite concurrent + revoke + familyId + heartbeat + painel + audit | Implementado (código) |
-| A. Sync revoke → Moodle session | Pendente (ME futura; S2S acadêmico sem expor sessão Moodle) |
-| B. Signed media / CDN | Não nesta entrega (flags preparadas) |
-| C. Conta serviço + REST + token server-only | Setup DEV documentado |
-| D. Auditoria before/after políticas | Implementado (`lms-audit-events`) |
+| Item                                                                  | Status                                                      |
+| --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| A. Limite concurrent + revoke + familyId + heartbeat + painel + audit | Implementado (código)                                       |
+| A. Sync revoke → Moodle session                                       | Pendente (ME futura; S2S acadêmico sem expor sessão Moodle) |
+| B. Signed media / CDN                                                 | Não nesta entrega (flags preparadas)                        |
+| C. Conta serviço + REST + token server-only                           | Setup DEV documentado                                       |
+| D. Auditoria before/after políticas                                   | Implementado (`lms-audit-events`)                           |
 
 Homologação DEV: [`OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md`](OMNIA_LMS_CONNECTOR_DEV_HOMOLOGATION.md).

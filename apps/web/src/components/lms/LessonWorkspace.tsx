@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Button, Progress } from '@omnia/ui';
 
-import { AssessmentExperience, isAssessmentMod } from '@/components/lms/assessment/AssessmentExperience';
+import {
+  AssessmentExperience,
+  isAssessmentMod,
+} from '@/components/lms/assessment/AssessmentExperience';
 import { LessonNav } from '@/components/lms/LessonNav';
 import { LessonSidebar } from '@/components/lms/LessonSidebar';
 import { LessonStatusBadge } from '@/components/lms/LessonStatusBadge';
@@ -56,8 +59,7 @@ export function LessonWorkspace(props: LessonWorkspaceProps) {
   const [studiedSeconds, setStudiedSeconds] = useState(0);
   const startedAt = useRef<number>(Date.now());
 
-  const moodleDone =
-    props.moodleState === 1 || props.moodleState === 2 || localCompleted;
+  const moodleDone = props.moodleState === 1 || props.moodleState === 2 || localCompleted;
 
   const status = resolveLessonUiStatus({
     offline,
@@ -95,13 +97,7 @@ export function LessonWorkspace(props: LessonWorkspaceProps) {
       engine.closeLesson(props.courseId, props.activity.moodleActivityId);
       openedRef.current = false;
     };
-  }, [
-    engine,
-    props.omniaUserId,
-    props.courseId,
-    props.activity.moodleActivityId,
-    props.sectionId,
-  ]);
+  }, [engine, props.omniaUserId, props.courseId, props.activity.moodleActivityId, props.sectionId]);
 
   useEffect(() => {
     if (props.next) {
@@ -121,13 +117,7 @@ export function LessonWorkspace(props: LessonWorkspaceProps) {
       });
     }
     setLocalCompleted(true);
-  }, [
-    engine,
-    moodleDone,
-    props.courseId,
-    props.activity.moodleActivityId,
-    props.next,
-  ]);
+  }, [engine, moodleDone, props.courseId, props.activity.moodleActivityId, props.next]);
 
   const estimated = estimateMinutes(props.activity.modName);
   const studiedMin = Math.floor(studiedSeconds / 60);
@@ -148,9 +138,7 @@ export function LessonWorkspace(props: LessonWorkspaceProps) {
           sections={props.sections}
           stateById={{
             ...props.stateById,
-            ...(localCompleted
-              ? { [props.activity.moodleActivityId]: 1 }
-              : {}),
+            ...(localCompleted ? { [props.activity.moodleActivityId]: 1 } : {}),
           }}
           className="order-2 lg:order-1"
         />

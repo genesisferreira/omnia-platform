@@ -37,7 +37,9 @@ function StateBanner(props: { resolved: ResolvedMaterial }) {
   };
   return (
     <Alert
-      variant={s === 'offline' ? 'warning' : s === 'error' || s === 'forbidden' ? 'destructive' : 'default'}
+      variant={
+        s === 'offline' ? 'warning' : s === 'error' || s === 'forbidden' ? 'destructive' : 'default'
+      }
       title={titles[s] || s}
     >
       {props.resolved.fallbackMessage || props.resolved.metadata.statusLabel}
@@ -129,10 +131,7 @@ function MaterialViewerInner(props: MaterialViewerProps) {
     };
   }, [engine, props.descriptor, props.trackLifecycle, authGate.status]);
 
-  const Renderer = useMemo(
-    () => getLazyRenderer(resolved.rendererKey),
-    [resolved.rendererKey],
-  );
+  const Renderer = useMemo(() => getLazyRenderer(resolved.rendererKey), [resolved.rendererKey]);
 
   const body =
     resolved.type === 'html' && resolved.source.body
@@ -156,7 +155,10 @@ function MaterialViewerInner(props: MaterialViewerProps) {
   }
 
   return (
-    <Card className="shadow-lms-card animate-lms-fade-in" aria-label={`Material: ${resolved.metadata.name}`}>
+    <Card
+      className="shadow-lms-card animate-lms-fade-in"
+      aria-label={`Material: ${resolved.metadata.name}`}
+    >
       <CardHeader className="space-y-3">
         <CardTitle className="text-base">{resolved.metadata.name}</CardTitle>
         <MaterialMetadataPanel metadata={resolved.metadata} />

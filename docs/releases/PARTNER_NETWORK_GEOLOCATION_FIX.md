@@ -36,10 +36,10 @@ Backend do cadastro público **revalida CEP** e geocodifica server-side; ignora 
 
 ## 4. Providers
 
-| Função | Provider | Env |
-|--------|----------|-----|
-| CEP | ViaCEP (+ BrasilAPI) | `POSTAL_CODE_PROVIDER=auto` |
-| Geocode | Nominatim OSM | `GEOCODING_PROVIDER=nominatim` |
+| Função  | Provider             | Env                            |
+| ------- | -------------------- | ------------------------------ |
+| CEP     | ViaCEP (+ BrasilAPI) | `POSTAL_CODE_PROVIDER=auto`    |
+| Geocode | Nominatim OSM        | `GEOCODING_PROVIDER=nominatim` |
 
 Cascata Nominatim: endereço completo → sem número → CEP+cidade → centro da cidade. Rejeita `0,0`.
 
@@ -119,16 +119,16 @@ pnpm --filter @omnia/admin test:postal-geocode
 
 ## 13. Deploy DEV (2026-07-24)
 
-| Item | Valor |
-|------|-------|
-| Commit anterior (rollback) | `3408937` |
-| Commit atual | `35cbe93` |
-| Backup | `/opt/omnia/platform/backups/omnia_staging_pre_geo_20260724T183849Z.sql.gz` (~49K) |
-| Banco | `omnia_staging` (container `omnia-postgres`) |
-| Migration | `20260724_180000_partner_geocoding_meta` (colunas presentes) |
-| Env | `GEOCODING_PROVIDER=nominatim`, `POSTAL_CODE_PROVIDER=auto` |
-| Containers | `omnia-platform-admin-dev`, `omnia-platform-web-dev` (healthy) |
-| Produção | **não alterada** |
+| Item                       | Valor                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| Commit anterior (rollback) | `3408937`                                                                          |
+| Commit atual               | `35cbe93`                                                                          |
+| Backup                     | `/opt/omnia/platform/backups/omnia_staging_pre_geo_20260724T183849Z.sql.gz` (~49K) |
+| Banco                      | `omnia_staging` (container `omnia-postgres`)                                       |
+| Migration                  | `20260724_180000_partner_geocoding_meta` (colunas presentes)                       |
+| Env                        | `GEOCODING_PROVIDER=nominatim`, `POSTAL_CODE_PROVIDER=auto`                        |
+| Containers                 | `omnia-platform-admin-dev`, `omnia-platform-web-dev` (healthy)                     |
+| Produção                   | **não alterada**                                                                   |
 
 ### Backfill
 
@@ -138,16 +138,16 @@ Parceiro BH de homologação: `homolog-bh-frio` (aprovado, coords BH).
 
 ### Evidência BH × SP
 
-| Cenário | Resultado |
-|---------|----------|
-| GPS BH (`-19.932,-43.938`, raio 50) | 1º `homolog-bh-frio` (~2,1 km); SP **fora do raio** |
-| CEP `30110012` | 1º BH |
-| `nearCity=Belo Horizonte&nearState=MG` | 1º BH |
-| GPS SP (`-23.55,-46.63`, raio 100) | 1º `homolog-frio` (Campinas) |
-| Sem origem | featured/nome; sem inventar SP como origem |
-| `includeOutsideRadius=1` a partir de BH | BH 2,1 km → SP ~462 km (ordem por distância) |
-| CEP API `30110012` | ViaCEP → Av. Contorno / Floresta / BH / MG |
-| Páginas `/parceiros`, cadastro, perfis | 200 |
+| Cenário                                 | Resultado                                           |
+| --------------------------------------- | --------------------------------------------------- |
+| GPS BH (`-19.932,-43.938`, raio 50)     | 1º `homolog-bh-frio` (~2,1 km); SP **fora do raio** |
+| CEP `30110012`                          | 1º BH                                               |
+| `nearCity=Belo Horizonte&nearState=MG`  | 1º BH                                               |
+| GPS SP (`-23.55,-46.63`, raio 100)      | 1º `homolog-frio` (Campinas)                        |
+| Sem origem                              | featured/nome; sem inventar SP como origem          |
+| `includeOutsideRadius=1` a partir de BH | BH 2,1 km → SP ~462 km (ordem por distância)        |
+| CEP API `30110012`                      | ViaCEP → Av. Contorno / Floresta / BH / MG          |
+| Páginas `/parceiros`, cadastro, perfis  | 200                                                 |
 
 ## 14. Pendências conhecidas
 

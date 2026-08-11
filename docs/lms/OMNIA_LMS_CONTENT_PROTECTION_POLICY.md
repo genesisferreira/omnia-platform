@@ -14,13 +14,13 @@ Impedir download “facilitado” de vídeos e documentos na experiência padrã
 
 ## 2. Política padrão
 
-| Tipo | Comportamento padrão |
-| --- | --- |
-| Vídeos | **Somente streaming** (HLS/DASH ou progressive autenticado) |
-| Documentos (PDF etc.) | **Somente visualizador interno** Omnia |
-| Download de vídeo | **Desabilitado** |
-| Download de documento | **Desabilitado** |
-| URL pública permanente | **Proibida** |
+| Tipo                   | Comportamento padrão                                        |
+| ---------------------- | ----------------------------------------------------------- |
+| Vídeos                 | **Somente streaming** (HLS/DASH ou progressive autenticado) |
+| Documentos (PDF etc.)  | **Somente visualizador interno** Omnia                      |
+| Download de vídeo      | **Desabilitado**                                            |
+| Download de documento  | **Desabilitado**                                            |
+| URL pública permanente | **Proibida**                                                |
 
 **Limitação explícita e honesta:** captura de tela, gravação de display, fotografia da tela ou ferramentas de interceptação avançadas **não podem ser impedidas de forma absoluta**. A política reduz vazamento casual e compartilhamento de links; não é DRM militar.
 
@@ -50,20 +50,20 @@ Moodle **não** expõe `/pluginfile.php` permanentemente ao browser do aluno na 
 
 ## 4. Controles obrigatórios (backend)
 
-| Controle | Descrição |
-| --- | --- |
-| URLs assinadas | Query HMAC + expiry; método/path amarrados |
-| Tokens temporários | `mediaTokenTtl` curto (ex. 60–300s); renovação só com sessão active |
-| Restrição de domínio / Referer | CDN allowlist `lms.*` (complementar, não única defesa) |
-| Validação de matrícula | Usuário deve ter enrolment ativo no curso da activity |
-| Validação de sessão | `sessionId` active; se revogada → 401 MEDIA_FORBIDDEN |
-| Expiração | Signed URL e token expiram; player renova via BFF |
-| Hotlink block | Sem URL estável compartilhável |
-| Auditoria | view start/progress/end; download_attempt (mesmo bloqueado) |
-| Marca d’água opcional | Texto dinâmico (userId/email/timestamp) overlay no viewer/player |
-| Revogação mid-playback | Próximo segment/renew falha; player encerra com mensagem de sessão |
-| Técnicos PF / sensível | Cursos marcados `sensitive=true` forçam view_only + watermark on |
-| Logs | Sem query secrets; redacção de signatures |
+| Controle                       | Descrição                                                           |
+| ------------------------------ | ------------------------------------------------------------------- |
+| URLs assinadas                 | Query HMAC + expiry; método/path amarrados                          |
+| Tokens temporários             | `mediaTokenTtl` curto (ex. 60–300s); renovação só com sessão active |
+| Restrição de domínio / Referer | CDN allowlist `lms.*` (complementar, não única defesa)              |
+| Validação de matrícula         | Usuário deve ter enrolment ativo no curso da activity               |
+| Validação de sessão            | `sessionId` active; se revogada → 401 MEDIA_FORBIDDEN               |
+| Expiração                      | Signed URL e token expiram; player renova via BFF                   |
+| Hotlink block                  | Sem URL estável compartilhável                                      |
+| Auditoria                      | view start/progress/end; download_attempt (mesmo bloqueado)         |
+| Marca d’água opcional          | Texto dinâmico (userId/email/timestamp) overlay no viewer/player    |
+| Revogação mid-playback         | Próximo segment/renew falha; player encerra com mensagem de sessão  |
+| Técnicos PF / sensível         | Cursos marcados `sensitive=true` forçam view_only + watermark on    |
+| Logs                           | Sem query secrets; redacção de signatures                           |
 
 Headers sugeridos na resposta de documento:
 
@@ -114,39 +114,39 @@ Exceção: se perfil/regulatório `forceViewOnly` (ex. conteúdo sensível de t�
 
 ### 7.1 Vídeo
 
-1. Aluno abre aula.  
-2. BFF autoriza → token + signed playlist.  
-3. Player consome segmentos.  
-4. Progresso pedagógico → completion Moodle (sem expor media URL).  
+1. Aluno abre aula.
+2. BFF autoriza → token + signed playlist.
+3. Player consome segmentos.
+4. Progresso pedagógico → completion Moodle (sem expor media URL).
 5. Se sessão revogada → renew falha → mensagem de segurança.
 
 ### 7.2 Documento
 
-1. Aluno abre PDF.  
-2. BFF stream para viewer (PDF.js ou similar) com token.  
-3. UI sem botão download; atalhos desabilitados na medida do possível.  
+1. Aluno abre PDF.
+2. BFF stream para viewer (PDF.js ou similar) com token.
+3. UI sem botão download; atalhos desabilitados na medida do possível.
 4. Tentativa `/download` → 403 + audit `download_attempt`.
 
 ---
 
 ## 8. Responsabilidades
 
-| Capacidade | Dono |
-| --- | --- |
-| Política, viewer, player, BFF authz | 🟦 Omnia |
-| Object storage / CDN signed | 🟠 Ext |
-| Âncora activity + completion | 🟢 Moodle |
-| — | 🟣 não decide proteção |
+| Capacidade                          | Dono                   |
+| ----------------------------------- | ---------------------- |
+| Política, viewer, player, BFF authz | 🟦 Omnia               |
+| Object storage / CDN signed         | 🟠 Ext                 |
+| Âncora activity + completion        | 🟢 Moodle              |
+| —                                   | 🟣 não decide proteção |
 
 ---
 
 ## 9. Critérios de aceite (documentais)
 
-1. Vídeos sem URL permanente.  
-2. Documentos só via viewer autenticado.  
-3. Download padrão off; override auditado.  
-4. Precedência material > curso > global.  
-5. Sessão revogada invalida mídia.  
-6. Matrícula obrigatória.  
-7. Limitação de screen capture documentada explicitamente.  
+1. Vídeos sem URL permanente.
+2. Documentos só via viewer autenticado.
+3. Download padrão off; override auditado.
+4. Precedência material > curso > global.
+5. Sessão revogada invalida mídia.
+6. Matrícula obrigatória.
+7. Limitação de screen capture documentada explicitamente.
 8. Logs sem secrets.

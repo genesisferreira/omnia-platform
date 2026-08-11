@@ -1,10 +1,7 @@
 import type { RuntimeRequest } from '@omnia/neurofrigo-runtime';
 
 import { buildTechnicalContext } from '../context/technical-context-builder';
-import {
-  buildComparisonMarkdown,
-  wantsComparison,
-} from '../comparison/technical-comparison';
+import { buildComparisonMarkdown, wantsComparison } from '../comparison/technical-comparison';
 import {
   buildTroubleshootingMarkdown,
   wantsTroubleshooting,
@@ -44,10 +41,7 @@ export class EngineeringService {
       technicalHint: request.technicalHint,
     });
 
-    const tsWanted = wantsTroubleshooting(
-      request.question,
-      request.requestTroubleshooting,
-    );
+    const tsWanted = wantsTroubleshooting(request.question, request.requestTroubleshooting);
     const compareWanted = wantsComparison(request.question, request.requestComparison);
 
     const modeHints: string[] = [];

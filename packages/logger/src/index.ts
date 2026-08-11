@@ -73,10 +73,12 @@ export function createLogger(options: LoggerOptions): StructuredLogger {
     'development';
 
   const make = (base: LogFields): StructuredLogger => ({
-    debug: (event, fields = {}) => write('debug', options.service, environment, event, fields, base),
+    debug: (event, fields = {}) =>
+      write('debug', options.service, environment, event, fields, base),
     info: (event, fields = {}) => write('info', options.service, environment, event, fields, base),
     warn: (event, fields = {}) => write('warn', options.service, environment, event, fields, base),
-    error: (event, fields = {}) => write('error', options.service, environment, event, fields, base),
+    error: (event, fields = {}) =>
+      write('error', options.service, environment, event, fields, base),
     child: (fields) => make({ ...base, ...fields }),
   });
 

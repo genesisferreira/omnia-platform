@@ -24,12 +24,12 @@ Override: `KNOWLEDGE_HUB_LOAD_DIR=/path`
 
 ## Critérios GO
 
-1. Documentos suportados importados e publicados para AI  
-2. RAR registrado como pendente  
-3. Categorias / empresas / agentes vinculados  
-4. Chunks > 0 e embeddings ready > 0  
-5. Retrieval encontra conteúdo oficial (ex.: CO₂ / Neuro Frigo)  
-6. Admin/web healthy; landing/prod intactos  
+1. Documentos suportados importados e publicados para AI
+2. RAR registrado como pendente
+3. Categorias / empresas / agentes vinculados
+4. Chunks > 0 e embeddings ready > 0
+5. Retrieval encontra conteúdo oficial (ex.: CO₂ / Neuro Frigo)
+6. Admin/web healthy; landing/prod intactos
 
 ## Fora de escopo
 

@@ -1,16 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  COURSE_STATUSES,
-  LESSON_ASSET_TYPES,
-  LESSON_TYPES,
-} from '../collections/lms/constants';
-import {
-  isLmsContentStaff,
-  isLmsInstructor,
-  isLmsPublisher,
-} from '../access/lms-content';
+import { COURSE_STATUSES, LESSON_ASSET_TYPES, LESSON_TYPES } from '../collections/lms/constants';
+import { isLmsContentStaff, isLmsInstructor, isLmsPublisher } from '../access/lms-content';
 
 describe('lms core foundation', () => {
   it('exposes workflow statuses', () => {

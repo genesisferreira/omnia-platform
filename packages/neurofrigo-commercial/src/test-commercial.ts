@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { buildSalesContext } from './context/sales-context-builder';
-import {
-  buildProposalMarkdown,
-  wantsProposal,
-} from './proposal/proposal-builder';
+import { buildProposalMarkdown, wantsProposal } from './proposal/proposal-builder';
 import { buildCommercialRecommendations } from './recommendations';
 import type { CommercialProfile } from './domain/types';
 import type { RuntimeAnswer } from '@omnia/neurofrigo-runtime';

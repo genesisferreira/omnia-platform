@@ -89,8 +89,7 @@ export async function extractDocx(
     meta: baseMeta(buffer, {
       encoding: 'utf-8',
       mimeType:
-        opts?.mimeType ??
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        opts?.mimeType ?? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       filename: opts?.filename ?? null,
       language: null,
       pages: Math.max(1, Math.ceil(text.length / 3000)),
