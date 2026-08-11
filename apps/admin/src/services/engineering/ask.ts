@@ -2,6 +2,7 @@ import type { Payload } from 'payload';
 import { EngineeringService } from '@omnia/neurofrigo-engineering';
 import type { AskResult } from '../neurofrigo/ask';
 import { runNeurofrigoAsk } from '../neurofrigo/ask';
+import { getSipAssistantContext } from '../sip/profile';
 import { loadEngineeringProfile } from './profiles';
 import { refreshEngineeringAiDashboard } from './dashboard';
 
@@ -67,6 +68,20 @@ export async function runEngineeringAsk(
     recommendations?: Awaited<ReturnType<EngineeringService['ask']>>['recommendations'];
   }
 > {
+  let sipHint: string | null = null;
+  if (request.userId && request.userId !== 'anonymous' && request.courseId) {
+    try {
+      const ctx = await getSipAssistantContext(payload, {
+        userKey: request.userId,
+        courseId: String(request.courseId),
+        ensureFresh: false,
+      });
+      sipHint = ctx?.summaryText ?? null;
+    } catch {
+      /* ignore */
+    }
+  }
+
   const service = await createEngineeringService(payload);
   const result = await service.ask({
     question: request.question,
@@ -85,6 +100,7 @@ export async function runEngineeringAsk(
     ownerCompanyId: request.ownerCompanyId,
     requestTroubleshooting: request.requestTroubleshooting,
     requestComparison: request.requestComparison,
+    studentContext: sipHint,
   });
 
   try {

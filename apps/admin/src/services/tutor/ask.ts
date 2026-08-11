@@ -2,6 +2,7 @@ import type { Payload } from 'payload';
 import { TutorService } from '@omnia/neurofrigo-tutor';
 
 import { runNeurofrigoAsk } from '../neurofrigo/ask';
+import { getSipAssistantContext, recalculateSipProfile } from '../sip/profile';
 import { loadCourseCatalog } from './catalog';
 import {
   recordLearningUsage,
@@ -101,7 +102,23 @@ export async function runTutorAsk(
     objective?: string | null;
   },
 ) {
+  const userKey = body.userId || 'anonymous';
+  let sipBlock = '';
+  if (userKey !== 'anonymous') {
+    try {
+      const ctx = await getSipAssistantContext(payload, {
+        userKey,
+        courseId: String(body.courseId),
+        ensureFresh: true,
+      });
+      if (ctx?.summaryText) sipBlock = ctx.summaryText;
+    } catch {
+      /* SIP opcional no primeiro contato */
+    }
+  }
+
   const tutor = await createTutorService(payload);
+  const baseObjectives = body.lessonObjectives || '';
   const result = await tutor.ask({
     question: body.question,
     userId: body.userId,
@@ -115,7 +132,7 @@ export async function runTutorAsk(
     moduleTitle: body.moduleTitle,
     lessonId: body.lessonId,
     lessonTitle: body.lessonTitle,
-    lessonObjectives: body.lessonObjectives,
+    lessonObjectives: [baseObjectives, sipBlock].filter(Boolean).join('\n\n'),
     ownerCompanyId: body.ownerCompanyId,
     requestStudyPlan: body.requestStudyPlan,
     objective: body.objective,
@@ -126,7 +143,7 @@ export async function runTutorAsk(
       collection: 'tutor-study-plans',
       data: {
         objective: result.studyPlan.objective,
-        userKey: body.userId || 'anonymous',
+        userKey,
         user:
           body.userId && body.userId !== 'anonymous' && /^\d+$/.test(body.userId)
             ? Number(body.userId)
@@ -139,12 +156,11 @@ export async function runTutorAsk(
     });
   }
 
-  // Persistir nível atualizado no LearningProfile
   const lp = await payload.find({
     collection: 'learning-profiles',
     where: {
       and: [
-        { userKey: { equals: body.userId || 'anonymous' } },
+        { userKey: { equals: userKey } },
         { course: { equals: String(body.courseId) } },
       ],
     },
@@ -165,6 +181,13 @@ export async function runTutorAsk(
       },
       overrideAccess: true,
     });
+  }
+
+  if (userKey !== 'anonymous') {
+    await recalculateSipProfile(payload, {
+      userKey,
+      courseId: String(body.courseId),
+    }).catch(() => undefined);
   }
 
   await refreshTutorDashboard(payload).catch(() => undefined);

@@ -197,6 +197,9 @@ importers:
       '@omnia/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@omnia/student-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/student-intelligence
       '@omnia/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1026,6 +1029,24 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 8.57.1
+      rimraf:
+        specifier: 'catalog:'
+        version: 6.1.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.22.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/student-intelligence:
+    devDependencies:
+      '@omnia/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.0
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3

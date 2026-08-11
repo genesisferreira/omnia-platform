@@ -29,6 +29,10 @@ export default async function MeuPerfilPage() {
             <Link href="/meu-perfil/organizacao" className="text-omnia-deep-blue hover:underline">
               Organização
             </Link>
+            {' · '}
+            <Link href="/meu-perfil-inteligente" className="text-omnia-deep-blue hover:underline">
+              Perfil Inteligente
+            </Link>
           </p>
         </header>
 

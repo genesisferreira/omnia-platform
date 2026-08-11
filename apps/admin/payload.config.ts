@@ -50,6 +50,7 @@ import { AiSessions, AiFeedback, StudentProfiles, LearningProfiles, TutorStudyPl
 import { AiModels, AiAssistants, AiPrompts, AiPolicies } from './src/collections/enterprise';
 import { CommercialProfiles } from './src/collections/commercial';
 import { EngineeringProfiles } from './src/collections/engineering';
+import { SipProfiles, SipEvidence, SipAuditEvents } from './src/collections/sip';
 import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
@@ -92,6 +93,7 @@ import { NeurofrigoTutorDashboard } from './src/globals/NeurofrigoTutorDashboard
 import { EnterpriseAiDashboard } from './src/globals/EnterpriseAiDashboard';
 import { CommercialAiDashboard } from './src/globals/CommercialAiDashboard';
 import { EngineeringAiDashboard } from './src/globals/EngineeringAiDashboard';
+import { SipDashboard } from './src/globals/SipDashboard';
 import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
 import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
 import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
@@ -99,6 +101,7 @@ import { migrations } from './src/migrations';
 import { retrievalEndpoints } from './src/endpoints/retrieval';
 import { neurofrigoEndpoints } from './src/endpoints/neurofrigo-ai';
 import { tutorEndpoints } from './src/endpoints/neurofrigo-tutor';
+import { sipEndpoints } from './src/endpoints/student-intelligence';
 import { enterpriseEndpoints } from './src/endpoints/enterprise-ai';
 
 const filename = fileURLToPath(import.meta.url);
@@ -168,6 +171,9 @@ export default buildConfig({
     AiPolicies,
     CommercialProfiles,
     EngineeringProfiles,
+    SipProfiles,
+    SipEvidence,
+    SipAuditEvents,
     KnowledgeDocuments,
     KnowledgeCategories,
     KnowledgeSources,
@@ -189,6 +195,7 @@ export default buildConfig({
     EnterpriseAiDashboard,
     CommercialAiDashboard,
     EngineeringAiDashboard,
+    SipDashboard,
   ],
   endpoints: [
     resolveSiteEndpoint,
@@ -214,6 +221,7 @@ export default buildConfig({
     ...retrievalEndpoints,
     ...neurofrigoEndpoints,
     ...tutorEndpoints,
+    ...sipEndpoints,
     ...enterpriseEndpoints,
   ],
   editor: lexicalEditor(),

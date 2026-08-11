@@ -68,6 +68,8 @@ export type EngineeringAskRequest = {
   requestComparison?: boolean;
   technicalHint?: TechnicalHint | null;
   profileKey?: string | null;
+  /** Contexto SIP (somente leitura) — assistentes não alteram o perfil. */
+  studentContext?: string | null;
 };
 
 export type EngineeringAnswer = {

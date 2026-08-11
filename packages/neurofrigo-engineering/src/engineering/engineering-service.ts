@@ -88,6 +88,7 @@ export class EngineeringService {
         lessonObjectives: [
           '## TECHNICAL_CONTEXT',
           technicalContext.summaryText,
+          request.studentContext || '',
           ...modeHints,
         ]
           .filter(Boolean)

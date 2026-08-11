@@ -157,6 +157,49 @@ export async function fetchTutorProfile(courseId: string | number): Promise<AiCh
   return { ok: true, status: response.status, data };
 }
 
+export async function fetchSipProfile(courseId: string | number): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/sip/profile?courseId=${encodeURIComponent(String(courseId))}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'SIP_PROFILE_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
+export async function fetchSipMotivation(body: {
+  courseId: string | number;
+  goals: string[];
+  notes?: string | null;
+}): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) {
+    return { ok: false, status: 503, data: null, error: built.error };
+  }
+
+  const url = `${built.adminBase}/api/omnia/sip/motivation`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: built.headers,
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'SIP_MOTIVATION_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
 export async function fetchAiFeedback(body: {
   sessionId: string | number;
   rating: 'up' | 'down';
