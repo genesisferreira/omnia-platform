@@ -21,6 +21,11 @@ function numericUserId(userId: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function asCourseRel(courseId: string): number | string {
+  if (/^\d+$/.test(String(courseId))) return Number(courseId);
+  return courseId;
+}
+
 async function loadSignals(
   payload: Payload,
   input: { userKey: string; courseId: string },
@@ -227,7 +232,7 @@ export async function recalculateSipProfile(
       collection: 'sip-evidence',
       data: {
         userKey: input.userKey,
-        course: input.courseId,
+        course: asCourseRel(input.courseId),
         sourceType: ev.sourceType,
         sourceId: ev.sourceId,
         competencyKey: ev.competencyKey,
@@ -245,7 +250,7 @@ export async function recalculateSipProfile(
     collection: 'sip-audit-events',
     data: {
       userKey: audit.userKey,
-      course: input.courseId,
+      course: asCourseRel(input.courseId),
       origin: audit.origin,
       event: audit.event,
       evidenceIds: audit.evidenceIds,
@@ -260,7 +265,7 @@ export async function recalculateSipProfile(
   const data = {
     userKey: twin.userKey,
     user: userNumeric,
-    course: input.courseId,
+    course: asCourseRel(input.courseId),
     language: twin.language,
     technicalLevel: twin.identification.technicalLevel,
     progressPercent: twin.identification.progressPercent,
