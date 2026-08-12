@@ -27,11 +27,11 @@ const DEFAULT_SUGGESTIONS = [
 ];
 
 const PUBLIC_SUGGESTIONS = [
-  'Conhecer cursos',
-  'Conhecer serviços',
-  'Falar sobre refrigeração',
+  'O que é a Omnia Frigo?',
+  'Quais serviços a Renovação oferece?',
+  'Quais cursos vocês oferecem?',
   'Conhecer o Neurofrigo',
-  'Encontrar a empresa certa do ecossistema',
+  'Qual empresa procurar para engenharia?',
 ];
 
 export function AiChatWorkspace({

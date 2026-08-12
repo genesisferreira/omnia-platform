@@ -126,7 +126,7 @@ describe('retrieval domain', () => {
     assert.equal(filtered[0]?.record.chunkId, 'tenant-a-doc');
   });
 
-  it('acl filter blocks foreign ownerCompany for portal users', async () => {
+  it('acl filter blocks foreign ownerCompany for non-shared visibility', async () => {
     const acl = new DefaultAclFilter();
     const filtered = await acl.filter(
       [
@@ -138,6 +138,7 @@ describe('retrieval domain', () => {
             text: 'a',
             embedding: [1],
             ownerCompanyId: 'company-a',
+            visibility: 'internal',
           }),
         },
         {
@@ -148,6 +149,7 @@ describe('retrieval domain', () => {
             text: 'b',
             embedding: [1],
             ownerCompanyId: 'company-b',
+            visibility: 'internal',
           }),
         },
       ],
@@ -233,6 +235,54 @@ describe('retrieval domain', () => {
     );
     assert.equal(filtered.length, 1);
     assert.equal(filtered[0]?.record.chunkId, 'pub');
+  });
+
+  it('engineering assistant can read neurofrigo-technology tagged chunks', async () => {
+    const { DefaultAclFilter } = await import('./acl/default-acl-filter');
+    const filter = new DefaultAclFilter();
+    const filtered = await filter.filter(
+      [
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '1',
+            chunkId: 'tech',
+            text: 'CO2',
+            embedding: [1],
+            visibility: 'enrolled',
+            allowAiUse: true,
+            publicationStatus: 'published',
+            tags: ['agent:neurofrigo-technology'],
+          }),
+        },
+      ],
+      { channel: 'portal_chat', agentKey: 'engineering' },
+    );
+    assert.equal(filtered.length, 1);
+  });
+
+  it('shared enrolled catalog is readable across company membership', async () => {
+    const { DefaultAclFilter } = await import('./acl/default-acl-filter');
+    const filter = new DefaultAclFilter();
+    const filtered = await filter.filter(
+      [
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '1',
+            chunkId: 'shared',
+            text: 'curso',
+            embedding: [1],
+            visibility: 'enrolled',
+            allowAiUse: true,
+            publicationStatus: 'published',
+            ownerCompanyId: '3',
+          }),
+        },
+      ],
+      { channel: 'portal_chat', companyIds: ['10'], agentKey: 'tutor' },
+    );
+    assert.equal(filtered.length, 1);
   });
 
   it('soft scope keeps shared catalog rows when tenant/company/course are set', async () => {

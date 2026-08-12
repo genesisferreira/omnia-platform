@@ -79,6 +79,7 @@
     "homolog:r01-http-acl": "tsx src/scripts/homolog-r01-http-acl.ts",
     "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
     "seed:epic16-e2e-users": "tsx src/scripts/seed-epic16-e2e-users.ts",
+    "seed:epic16-public-knowledge": "tsx src/scripts/seed-epic16-public-knowledge.ts",
     "homolog:epic16-e2e-users": "tsx src/scripts/homolog-epic16-e2e-users.ts",
     "test:deepseek-agents": "tsx --test ../../packages/neurofrigo-orchestrator/src/**/test-*.ts && tsx --test src/scripts/test-deepseek-agents.ts",
     "backfill:partner-geocoding": "tsx src/scripts/backfill-partner-geocoding.ts"
