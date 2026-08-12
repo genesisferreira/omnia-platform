@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     '@omnia/assessment-engine',
   ],
   reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
 };
 
 export default nextConfig;

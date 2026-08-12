@@ -128,5 +128,12 @@ jobs:
       - name: Fresh Payload migrations + Pages schema
         run: pnpm --filter @omnia/admin test:pages-migration-db
 
+      - name: Generate Payload importmap
+        env:
+          DOCKER_BUILD: 'true'
+        run: pnpm --filter @omnia/admin generate:importmap
+
       - name: Build
-        run: pnpm build
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm build
