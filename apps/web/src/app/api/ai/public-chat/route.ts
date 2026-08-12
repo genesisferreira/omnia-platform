@@ -67,6 +67,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'question is required' }, { status: 400 });
   }
 
+  const requestedAssistant =
+    body.assistantId != null ? String(body.assistantId).trim().toLowerCase() : 'concierge';
+  if (requestedAssistant !== 'concierge' && requestedAssistant !== 'auto') {
+    return NextResponse.json(
+      { ok: false, error: 'ASSISTANT_FORBIDDEN:public_concierge_only' },
+      { status: 403 },
+    );
+  }
+
   const ip = clientIpFromHeaders(request.headers);
   const rate = await checkRateLimit({
     scope: 'ai-public-chat',
@@ -87,7 +96,7 @@ export async function POST(request: Request) {
     question,
     anonymousSessionId: anon.id,
     sessionId: (body.sessionId as string | number | null) ?? null,
-    assistantId: 'concierge',
+    assistantId: requestedAssistant,
     language: body.language != null ? String(body.language) : 'pt-BR',
   });
 
