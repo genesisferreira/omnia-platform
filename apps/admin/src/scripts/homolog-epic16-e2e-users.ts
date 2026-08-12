@@ -296,6 +296,7 @@ async function main() {
       roles,
     }),
   );
+  process.exit(0);
 }
 
 main().catch((err) => {

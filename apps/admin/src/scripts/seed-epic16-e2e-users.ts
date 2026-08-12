@@ -434,6 +434,7 @@ async function main() {
   // Never include passwords in stdout JSON.
   console.log('EPIC16_E2E_USERS_SEED_OK');
   console.log(JSON.stringify(results));
+  process.exit(0);
 }
 
 main().catch((err) => {
