@@ -1,7 +1,7 @@
 import type { Payload } from 'payload';
 import { chunkChecksum, type VectorRecord } from '@omnia/retrieval';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
 
 import {
   getEmbeddingProvider,
@@ -101,7 +101,7 @@ async function upsertEmbeddingRecord(
   });
 
   const data = {
-    chunk: toPayloadRelationId(args.chunkId),
+    chunk: requirePayloadRelationId(args.chunkId),
     learningResource: toPayloadRelationId(args.resourceId) ?? null,
     knowledgeDocument: toPayloadRelationId(args.documentId) ?? null,
     provider: args.provider,

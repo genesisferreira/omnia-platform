@@ -13,7 +13,7 @@ import {
   type KiSupportedExtractType,
 } from '@omnia/knowledge-intelligence';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
 
 type Rel = string | number | { id: string | number } | null | undefined;
 
@@ -263,13 +263,14 @@ export async function processLearningResource(args: {
     preExtracted,
     hubOverrides,
   } = args;
+  const resourceRelId = requirePayloadRelationId(learningResourceId);
   const correlationId = randomUUID();
   const startedAt = new Date().toISOString();
 
   const run = await payload.create({
     collection: 'ki-processing-runs',
     data: {
-      learningResource: toPayloadRelationId(learningResourceId),
+      learningResource: resourceRelId,
       status: 'running',
       stages: {
         extract: 'pending',
@@ -587,7 +588,7 @@ export async function processLearningResource(args: {
       const chunkDoc = await payload.create({
         collection: 'knowledge-chunks',
         data: {
-          learningResource: toPayloadRelationId(learningResourceId),
+          learningResource: resourceRelId,
           knowledgeDocument: toPayloadRelationId(knowledgeDocumentId),
           chunkIndex: chunk.chunkIndex,
           chunkText: chunk.chunkText,
@@ -613,9 +614,9 @@ export async function processLearningResource(args: {
       await payload.create({
         collection: 'embedding-queue',
         data: {
-          learningResource: toPayloadRelationId(learningResourceId),
+          learningResource: resourceRelId,
           knowledgeDocument: toPayloadRelationId(knowledgeDocumentId),
-          chunk: toPayloadRelationId(chunkDoc.id),
+          chunk: requirePayloadRelationId(chunkDoc.id),
           status: 'pending',
           attempts: 0,
           provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',
@@ -814,7 +815,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
   const data = {
     title: String(asset.title || media?.filename || `Asset ${lessonAssetId}`),
     media: mediaId,
-    lessonAsset: toPayloadRelationId(lessonAssetId),
+    lessonAsset: requirePayloadRelationId(lessonAssetId),
     lesson: lessonId ?? undefined,
     module: moduleId ?? undefined,
     course: courseId ?? undefined,

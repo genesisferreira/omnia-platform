@@ -14,7 +14,7 @@ import {
   type OrchestratorPlan,
 } from '@omnia/neurofrigo-orchestrator';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
 import { refreshEnterpriseAiDashboard } from '../enterprise/dashboard';
 import { listAllowedAssistants, resolveAssistantForAsk } from '../enterprise/resolve';
 import { runSemanticSearch } from '../retrieval/search';
@@ -630,7 +630,7 @@ export async function submitAiFeedback(
   const created = await payload.create({
     collection: 'ai-feedback',
     data: {
-      aiSession: toPayloadRelationId(args.sessionId),
+      aiSession: requirePayloadRelationId(args.sessionId),
       rating: args.rating,
       comment: args.comment ?? null,
       user: toPayloadRelationId(args.userId),
