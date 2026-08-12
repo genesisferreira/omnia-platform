@@ -1,5 +1,6 @@
 import type { Payload } from 'payload';
 
+import { toPayloadRelationId, requirePayloadRelationId } from '../../lib/payload-relation-id';
 import { getVectorStore } from './runtime';
 import { refreshRetrievalDashboard } from './dashboard';
 
@@ -8,11 +9,13 @@ async function enqueueResource(
   resourceId: string | number,
   knowledgeDocumentId?: string | number | null,
 ) {
+  const learningResource = requirePayloadRelationId(resourceId);
+  const knowledgeDocument = toPayloadRelationId(knowledgeDocumentId) ?? null;
   const existing = await payload.find({
     collection: 'embedding-queue',
     where: {
       and: [
-        { learningResource: { equals: resourceId } },
+        { learningResource: { equals: learningResource } },
         { status: { in: ['pending', 'processing'] } },
       ],
     },
@@ -27,7 +30,15 @@ async function enqueueResource(
       id: existing.docs[0].id,
       data: {
         status: 'pending',
-        knowledgeDocument: knowledgeDocumentId ?? existing.docs[0].knowledgeDocument,
+        knowledgeDocument:
+          knowledgeDocument ??
+          toPayloadRelationId(
+            typeof existing.docs[0].knowledgeDocument === 'object' &&
+              existing.docs[0].knowledgeDocument &&
+              'id' in existing.docs[0].knowledgeDocument
+              ? (existing.docs[0].knowledgeDocument as { id: number }).id
+              : (existing.docs[0].knowledgeDocument as string | number | null | undefined),
+          ),
         lastError: null,
       },
       overrideAccess: true,
@@ -39,8 +50,8 @@ async function enqueueResource(
   const created = await payload.create({
     collection: 'embedding-queue',
     data: {
-      learningResource: resourceId,
-      knowledgeDocument: knowledgeDocumentId ?? undefined,
+      learningResource,
+      knowledgeDocument: knowledgeDocument ?? undefined,
       status: 'pending',
       attempts: 0,
       provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',

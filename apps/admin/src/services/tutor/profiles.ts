@@ -1,7 +1,11 @@
 import type { Payload } from 'payload';
 import type { LearningProfile, StudentProfile, LearningLevel } from '@omnia/neurofrigo-tutor';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import {
+  asPayloadJson,
+  requirePayloadRelationId,
+  toPayloadRelationId,
+} from '../../lib/payload-relation-id';
 import { loadCourseCatalog } from './catalog';
 
 function asStringArray(value: unknown): string[] {
@@ -106,11 +110,11 @@ export async function syncStudentProfile(
     userKey: input.userId,
     user: numericUserId(input.userId) ?? undefined,
     tenant: toPayloadRelationId(input.tenantId),
-    course: toPayloadRelationId(catalog.courseId),
-    enrolledCourseIds: [catalog.courseId],
+    course: requirePayloadRelationId(catalog.courseId),
+    enrolledCourseIds: asPayloadJson([catalog.courseId]),
     progressPercent,
-    completedModuleIds,
-    completedLessonIds,
+    completedModuleIds: asPayloadJson(completedModuleIds),
+    completedLessonIds: asPayloadJson(completedLessonIds),
     lastActivityAt: lastActivityAt || new Date().toISOString(),
     studyTimeMinutes: Math.max(1, Math.round(studyMs / 60_000)),
     language: input.language || 'pt-BR',
@@ -194,7 +198,7 @@ export async function syncLearningProfile(
   const data = {
     userKey: input.userId,
     user: numericUserId(input.userId) ?? undefined,
-    course: toPayloadRelationId(courseId),
+    course: requirePayloadRelationId(courseId),
     level: profile.level,
     masteredTopics: profile.masteredTopics,
     pendingTopics: profile.pendingTopics,

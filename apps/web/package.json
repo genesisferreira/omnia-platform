@@ -14,6 +14,7 @@
     "test:seo": "tsx src/scripts/test-seo.ts",
     "test:seo-blog": "tsx src/scripts/test-seo-blog.ts",
     "test:seo-companies": "tsx src/scripts/test-seo-companies.ts",
+    "test:ai-auth-ordering": "tsx --test src/scripts/test-ai-auth-ordering.ts",
     "test:partners-nav": "tsx --test src/scripts/test-partners-nav.ts",
     "test:lms-continue": "tsx --test src/scripts/test-lms-continue.ts",
     "test:lms-lesson": "tsx --test src/scripts/test-lms-lesson.ts src/scripts/test-lms-lesson-engine.ts",

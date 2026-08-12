@@ -10,6 +10,8 @@
     "start": "next start --port 3001",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "typecheck:cli": "tsc --noEmit -p tsconfig.cli.json",
+    "generate:types": "payload generate:types",
     "clean": "rimraf .next .turbo dist",
     "generate:importmap": "payload generate:importmap",
     "migrate": "payload migrate",

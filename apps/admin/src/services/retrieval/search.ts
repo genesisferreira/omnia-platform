@@ -1,6 +1,7 @@
 import type { Payload } from 'payload';
 import { Retriever, type RetrievalQuery, type RetrievalResult } from '@omnia/retrieval';
 
+import { asPayloadJson } from '../../lib/payload-relation-id';
 import { getEmbeddingProvider, getVectorStore } from './runtime';
 import { refreshRetrievalDashboard } from './dashboard';
 
@@ -37,20 +38,20 @@ export async function runSemanticSearch(
       ? Number(session.ownerCompanyId)
       : null;
 
-  const data: Record<string, unknown> = {
+  const data = {
     query: session.query,
     tookMs: session.tookMs,
     provider: session.provider,
     model: session.model,
     resultCount: session.resultCount,
     recoveredTokens: session.recoveredTokens,
-    filters: session.filters,
+    filters: asPayloadJson(session.filters),
     chunkIds: session.chunkIds.map((chunkId) => ({ chunkId })),
     scores: session.scores.map((score) => ({ score })),
+    ...(userNumeric != null ? { user: userNumeric } : {}),
+    ...(tenantNumeric != null ? { tenant: tenantNumeric } : {}),
+    ...(companyNumeric != null ? { ownerCompany: companyNumeric } : {}),
   };
-  if (userNumeric != null) data.user = userNumeric;
-  if (tenantNumeric != null) data.tenant = tenantNumeric;
-  if (companyNumeric != null) data.ownerCompany = companyNumeric;
 
   await payload.create({
     collection: 'search-sessions',

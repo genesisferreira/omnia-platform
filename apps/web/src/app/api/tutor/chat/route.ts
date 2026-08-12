@@ -1,30 +1,39 @@
 import { NextResponse } from 'next/server';
 
 import { fetchTutorChat } from '@/lib/ai/connector';
+import { gateAuthenticatedAiRequest, requirePortalSession } from '@/lib/auth/ai-auth-gate';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const session = await requirePortalSession();
+  if (!session.ok) return session.response;
+
   let body: Record<string, unknown>;
+  let jsonValid = true;
   try {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
-    return NextResponse.json({ ok: false, error: 'INVALID_JSON' }, { status: 400 });
+    jsonValid = false;
+    body = {};
   }
 
-  const question = String(body.question || '').trim();
-  const courseId = body.courseId;
-  if (!question) {
-    return NextResponse.json({ ok: false, error: 'question is required' }, { status: 400 });
-  }
-  if (courseId == null || courseId === '') {
-    return NextResponse.json({ ok: false, error: 'courseId is required' }, { status: 400 });
+  const gate = gateAuthenticatedAiRequest({
+    hasSession: true,
+    jsonValid,
+    requireQuestion: true,
+    question: jsonValid ? String(body.question || '') : null,
+    requireCourseId: true,
+    courseId: jsonValid ? (body.courseId as string | number | null) : null,
+  });
+  if (!gate.ok) {
+    return NextResponse.json({ ok: false, error: gate.error }, { status: gate.status });
   }
 
   const result = await fetchTutorChat({
-    question,
+    question: String(body.question || '').trim(),
     sessionId: (body.sessionId as string | number | null) ?? null,
-    courseId: courseId as string | number,
+    courseId: body.courseId as string | number,
     courseTitle: (body.courseTitle as string | null) ?? null,
     moduleId: (body.moduleId as string | number | null) ?? null,
     moduleTitle: (body.moduleTitle as string | null) ?? null,

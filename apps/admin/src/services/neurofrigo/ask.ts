@@ -14,7 +14,11 @@ import {
   type OrchestratorPlan,
 } from '@omnia/neurofrigo-orchestrator';
 
-import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
+import {
+  asPayloadJson,
+  requirePayloadRelationId,
+  toPayloadRelationId,
+} from '../../lib/payload-relation-id';
 import { refreshEnterpriseAiDashboard } from '../enterprise/dashboard';
 import { listAllowedAssistants, resolveAssistantForAsk } from '../enterprise/resolve';
 import { runSemanticSearch } from '../retrieval/search';
@@ -135,12 +139,12 @@ async function loadBudgetSpend(payload: Payload): Promise<{
     }),
   ]);
 
-  const sum = (docs: Array<Record<string, unknown>>) =>
+  const sum = (docs: Array<{ estimatedCostUsd?: number | null }>) =>
     docs.reduce((s, d) => s + Number(d.estimatedCostUsd || 0), 0);
 
   return {
-    spentTodayUsd: sum(today.docs as Array<Record<string, unknown>>),
-    spentMonthUsd: sum(month.docs as Array<Record<string, unknown>>),
+    spentTodayUsd: sum(today.docs),
+    spentMonthUsd: sum(month.docs),
   };
 }
 
@@ -536,7 +540,7 @@ async function persistSession(
       ? Number(args.request.course.ownerCompanyId)
       : null;
 
-  const data: Record<string, unknown> = {
+  const data = {
     question: args.request.question,
     answerText: args.answer.text,
     formattedAnswer: args.answer.formattedText,
@@ -554,11 +558,11 @@ async function persistSession(
     confidence: args.answer.confidence,
     groundingScore: args.answer.grounding?.score ?? 0,
     errorCode: args.answer.errorCode ?? null,
-    sources: args.answer.sources,
-    explainability: args.answer.explainability,
-    grounding: args.answer.grounding,
-    turns,
-    filters: {
+    sources: asPayloadJson(args.answer.sources),
+    explainability: asPayloadJson(args.answer.explainability),
+    grounding: asPayloadJson(args.answer.grounding),
+    turns: asPayloadJson(turns),
+    filters: asPayloadJson({
       course: args.request.course,
       identity: {
         userId: args.request.identity.userId ?? null,
@@ -584,14 +588,14 @@ async function persistSession(
             action: args.budget.action,
           }
         : null,
-    },
+    }),
+    ...(userNumeric != null ? { user: userNumeric } : {}),
+    ...(tenantNumeric != null ? { tenant: tenantNumeric } : {}),
+    ...(courseNumeric != null ? { course: courseNumeric } : {}),
+    ...(moduleNumeric != null ? { module: moduleNumeric } : {}),
+    ...(lessonNumeric != null ? { lesson: lessonNumeric } : {}),
+    ...(companyNumeric != null ? { ownerCompany: companyNumeric } : {}),
   };
-  if (userNumeric != null) data.user = userNumeric;
-  if (tenantNumeric != null) data.tenant = tenantNumeric;
-  if (courseNumeric != null) data.course = courseNumeric;
-  if (moduleNumeric != null) data.module = moduleNumeric;
-  if (lessonNumeric != null) data.lesson = lessonNumeric;
-  if (companyNumeric != null) data.ownerCompany = companyNumeric;
 
   let sessionId: string | number;
   if (args.existing) {

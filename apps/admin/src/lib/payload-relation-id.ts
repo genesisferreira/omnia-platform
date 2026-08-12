@@ -1,6 +1,9 @@
 /**
- * After `next build` generates types, Payload postgres relationships are
+ * After `payload generate:types` (and Next build), Payload postgres relationships are
  * `number | Doc`, not `string | number`. Coerce before create/update.
+ *
+ * Quality must run `payload generate:types` before `tsc` so this class of errors is
+ * caught before the Build job (see CI + R0.3 audit).
  */
 export function toPayloadRelationId(id: string | number | null | undefined): number | undefined {
   if (id == null || id === '') return undefined;
@@ -14,6 +17,18 @@ export function requirePayloadRelationId(id: string | number | null | undefined)
     throw new Error(`INVALID_RELATION_ID:${String(id)}`);
   }
   return n;
+}
+
+/**
+ * Safe relation id from Payload find/create results:
+ * number | { id } | null/undefined → number | undefined
+ */
+export function relationId(
+  value: string | number | { id?: string | number | null } | null | undefined,
+): number | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'object') return toPayloadRelationId(value.id ?? undefined);
+  return toPayloadRelationId(value);
 }
 
 /** Next typecheck rejects Payload docs `as Record<string, unknown>` without unknown. */

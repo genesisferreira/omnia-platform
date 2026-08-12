@@ -1,24 +1,35 @@
 import { NextResponse } from 'next/server';
 
 import { fetchAiChat } from '@/lib/ai/connector';
+import { gateAuthenticatedAiRequest, requirePortalSession } from '@/lib/auth/ai-auth-gate';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const session = await requirePortalSession();
+  if (!session.ok) return session.response;
+
   let body: Record<string, unknown>;
+  let jsonValid = true;
   try {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
-    return NextResponse.json({ ok: false, error: 'INVALID_JSON' }, { status: 400 });
+    jsonValid = false;
+    body = {};
   }
 
-  const question = String(body.question || '').trim();
-  if (!question) {
-    return NextResponse.json({ ok: false, error: 'question is required' }, { status: 400 });
+  const gate = gateAuthenticatedAiRequest({
+    hasSession: true,
+    jsonValid,
+    requireQuestion: true,
+    question: jsonValid ? String(body.question || '') : null,
+  });
+  if (!gate.ok) {
+    return NextResponse.json({ ok: false, error: gate.error }, { status: gate.status });
   }
 
   const result = await fetchAiChat({
-    question,
+    question: String(body.question || '').trim(),
     sessionId: (body.sessionId as string | number | null) ?? null,
     assistantId: (body.assistantId as string | null) ?? 'auto',
     courseId: (body.courseId as string | number | null) ?? null,

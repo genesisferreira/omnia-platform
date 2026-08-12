@@ -1,7 +1,7 @@
 import type { Payload } from 'payload';
 import { TutorService } from '@omnia/neurofrigo-tutor';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { asPayloadJson, requirePayloadRelationId } from '../../lib/payload-relation-id';
 import { runAdaptiveDecide } from '../adaptive/decide';
 import { runNeurofrigoAsk } from '../neurofrigo/ask';
 import { getSipAssistantContext, recalculateSipProfile } from '../sip/profile';
@@ -153,8 +153,8 @@ export async function runTutorAsk(
           body.userId && body.userId !== 'anonymous' && /^\d+$/.test(body.userId)
             ? Number(body.userId)
             : undefined,
-        course: toPayloadRelationId(result.studyPlan.courseId),
-        steps: result.studyPlan.steps,
+        course: requirePayloadRelationId(result.studyPlan.courseId),
+        steps: asPayloadJson(result.studyPlan.steps),
         estimatedLessons: result.studyPlan.estimatedLessons,
       },
       overrideAccess: true,

@@ -37,11 +37,19 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Parity with Next build: generated Payload types make relationship/select/json
+      # mismatches fail here instead of only in `next build` typecheck (R0.3).
+      - name: Generate Payload types
+        run: pnpm --filter @omnia/admin generate:types
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Format check
         run: pnpm format:check
+
+      - name: AI auth ordering (Portal BFF)
+        run: pnpm --filter @omnia/web test:ai-auth-ordering
 
       - name: Public companies contract tests
         run: pnpm --filter @omnia/admin test:public-companies
@@ -128,12 +136,25 @@ jobs:
       - name: Fresh Payload migrations + Pages schema
         run: pnpm --filter @omnia/admin test:pages-migration-db
 
+      - name: Generate Payload types
+        run: pnpm --filter @omnia/admin generate:types
+
       - name: Generate Payload importmap
         env:
           DOCKER_BUILD: 'true'
         run: pnpm --filter @omnia/admin generate:importmap
 
-      - name: Build
+      - name: Build Admin (isolated)
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm --filter @omnia/admin build
+
+      - name: Build Web (isolated)
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm --filter @omnia/web build
+
+      - name: Build monorepo
         env:
           DOCKER_BUILD: 'true'
         run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm build
