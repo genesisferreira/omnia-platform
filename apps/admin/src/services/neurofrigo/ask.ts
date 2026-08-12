@@ -140,8 +140,8 @@ async function loadBudgetSpend(payload: Payload): Promise<{
     }),
   ]);
 
-  const sum = (docs: unknown[]) =>
-    docs.reduce((s, d) => {
+  const sum = (docs: unknown[]): number =>
+    docs.reduce<number>((s, d) => {
       const row = asUnknownRecord(d);
       return s + Number(row.estimatedCostUsd || 0);
     }, 0);
