@@ -15,6 +15,7 @@ env:
   SMTP_PORT: '1025'
   SMTP_FROM: ci@omnia.local
   OMNIA_INTERNAL_API_SECRET: ci-internal-api-secret-minimum-32-characters
+  OMNIA_SMTP_ALLOW_BUILD: '1'
 
 jobs:
   quality:

@@ -117,6 +117,20 @@ describe('SMTP parsing', () => {
     assert.equal(config.transport.auth, undefined);
   });
 
+  it('CI=true permite SMTP localhost em NODE_ENV=production (workers do next build)', () => {
+    const config = resolveSmtpConfig({
+      nodeEnv: 'production',
+      env: {
+        CI: 'true',
+        SMTP_HOST: 'localhost',
+        SMTP_PORT: '1025',
+        SMTP_FROM: 'ci@omnia.local',
+        NEXT_PUBLIC_ADMIN_URL: 'http://localhost:3001',
+      },
+    });
+    assert.equal(config.transport.host, 'localhost');
+  });
+
   it('importmap/build sem SMTP_HOST adia a config', () => {
     assert.equal(
       isSmtpConfigDeferred({ DOCKER_BUILD: 'true', NODE_ENV: 'production' }, [

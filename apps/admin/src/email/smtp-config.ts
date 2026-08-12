@@ -174,6 +174,9 @@ export function isBuildToolingPhase(
   if (env.OMNIA_SMTP_ALLOW_BUILD === '1') {
     return true;
   }
+  if (env.CI === 'true') {
+    return true;
+  }
   if (env.DOCKER_BUILD === 'true') {
     return true;
   }
