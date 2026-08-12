@@ -242,11 +242,14 @@ export default buildConfig({
   cors: getAllowedCorsOrigins(),
   onInit: (payload) => {
     wrapJwtStrategyRejectBlocked(payload);
-    // onInit só corre em runtime — reforça falha clara se SMTP estiver ausente.
-    const smtp = runtimeEmail?.smtp ?? buildNodemailerEmailAdapter().smtp;
+    // migrate / importmap / docker build: SMTP pode estar adiado — não forçar adapter.
+    if (!runtimeEmail) {
+      payload.logger.info({ msg: 'SMTP adiado (tooling/build)' });
+      return;
+    }
     payload.logger.info({
       msg: 'SMTP configurado',
-      smtp: smtpConfigForLog(smtp),
+      smtp: smtpConfigForLog(runtimeEmail.smtp),
     });
   },
 });

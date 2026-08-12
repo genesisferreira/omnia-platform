@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, staging, 'feature/**']
+    branches: [main, develop, staging, 'feature/**', 'release/**']
   pull_request:
     branches: [main, develop]
 
@@ -11,6 +11,10 @@ env:
   PAYLOAD_SECRET: ci-test-secret-minimum-32-characters-long
   NEXT_PUBLIC_APP_URL: http://localhost:3000
   NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
+  SMTP_HOST: localhost
+  SMTP_PORT: '1025'
+  SMTP_FROM: ci@omnia.local
+  OMNIA_INTERNAL_API_SECRET: ci-internal-api-secret-minimum-32-characters
 
 jobs:
   quality:
@@ -74,6 +78,21 @@ jobs:
       - name: Portal blog SEO contracts
         run: pnpm --filter @omnia/web test:seo-blog
 
+      - name: SMTP config contracts
+        run: pnpm --filter @omnia/admin test:smtp-auth
+
+      - name: Neurofrigo auth/ACL contracts
+        run: pnpm --filter @omnia/admin test:neurofrigo-auth-acl
+
+      - name: Retrieval ACL contracts
+        run: pnpm --filter @omnia/retrieval test
+
+      - name: Adaptive Learning unit tests
+        run: pnpm --filter @omnia/adaptive-learning test
+
+      - name: Student Intelligence unit tests
+        run: pnpm --filter @omnia/student-intelligence test
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -105,7 +124,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Pages migration DB validation
+      - name: Fresh Payload migrations + Pages schema
         run: pnpm --filter @omnia/admin test:pages-migration-db
 
       - name: Build

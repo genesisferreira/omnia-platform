@@ -181,10 +181,23 @@ export function isBuildToolingPhase(
     return true;
   }
   const lifecycle = env.npm_lifecycle_event || '';
-  if (lifecycle === 'build' || lifecycle === 'generate:importmap') {
+  if (
+    lifecycle === 'build' ||
+    lifecycle === 'generate:importmap' ||
+    lifecycle === 'migrate' ||
+    lifecycle === 'migrate:status'
+  ) {
     return true;
   }
-  return argv.some((arg) => String(arg).includes('generate:importmap'));
+  return argv.some((arg) => {
+    const value = String(arg);
+    return (
+      value.includes('generate:importmap') ||
+      value === 'migrate' ||
+      value === 'migrate:status' ||
+      value.endsWith('/migrate')
+    );
+  });
 }
 
 /** @deprecated Use isBuildToolingPhase — mantido para testes existentes. */

@@ -139,6 +139,20 @@ describe('SMTP parsing', () => {
     );
   });
 
+  it('payload migrate sem SMTP_HOST adia a config (CLI tooling)', () => {
+    assert.equal(
+      isSmtpConfigDeferred({ NODE_ENV: 'development' }, ['node', 'payload', 'migrate']),
+      true,
+    );
+    assert.equal(
+      isSmtpConfigDeferred({ npm_lifecycle_event: 'migrate', NODE_ENV: 'development' }, [
+        'node',
+        'payload',
+      ]),
+      true,
+    );
+  });
+
   it('runtime sem SMTP_HOST não adia (falha na resolução)', () => {
     assert.equal(isSmtpConfigDeferred({ NODE_ENV: 'production' }, ['node', 'server.js']), false);
     assert.throws(

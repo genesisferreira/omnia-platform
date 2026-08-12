@@ -33,28 +33,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const adminRoot = path.resolve(__dirname, '../..');
 const repoRoot = path.resolve(adminRoot, '../..');
 
-const INSTITUTIONAL_MIGRATION_NAME = '20260716_172340_pages_institutional';
-const PAGES_BASE_MIGRATION_NAME = '20260716_124305_pages';
-/** Migration posterior não relacionada — registry check only. */
-const IDENTITY_CRM_MIGRATION_NAME = '20260720_120000_identity_crm_foundation';
+import { migrations } from '../migrations';
+
+const EXPECTED_MIGRATION_NAMES = migrations.map((item) => item.name);
 
 const runAdminMigrate = (): void => {
   const command = process.platform === 'win32' ? 'corepack' : 'pnpm';
   const commandArgs =
     process.platform === 'win32'
-      ? ['pnpm', '--filter', '@omnia/admin', 'exec', 'payload', 'migrate']
-      : ['--filter', '@omnia/admin', 'exec', 'payload', 'migrate'];
+      ? ['pnpm', '--filter', '@omnia/admin', 'migrate']
+      : ['--filter', '@omnia/admin', 'migrate'];
   const result = spawnSync(command, commandArgs, {
     cwd: repoRoot,
     env: process.env,
-    stdio: 'pipe',
+    stdio: 'inherit',
     shell: process.platform === 'win32',
-    encoding: 'utf8',
   });
   if (result.status !== 0) {
-    throw new Error(
-      `command failed: pnpm --filter @omnia/admin exec payload migrate\n${result.stdout ?? ''}\n${result.stderr ?? ''}`,
-    );
+    throw new Error(`command failed: pnpm --filter @omnia/admin migrate (exit ${result.status})`);
   }
 };
 
@@ -64,11 +60,6 @@ const listMigrationNames = async (): Promise<string[]> => {
     ORDER BY created_at ASC, id ASC
   `);
   return result.rows.map((row) => String(row.name));
-};
-
-const assertMigrationPresent = async (name: string): Promise<void> => {
-  const names = await listMigrationNames();
-  assert.equal(names.includes(name), true, `migration ausente: ${name}`);
 };
 
 const client = new Client({ connectionString: databaseUrl });
@@ -83,6 +74,8 @@ const test = async (name: string, fn: () => Promise<void>): Promise<void> => {
 
 try {
   console.log('==> Aplicando migrations (fresh)...');
+  runAdminMigrate();
+  console.log('==> Reaplicando migrations (upgrade idempotente)...');
   runAdminMigrate();
 
   await test('tabela pages existe com colunas essenciais', async () => {
@@ -162,17 +155,46 @@ try {
     assert.equal(fks.rows.length, 1);
   });
 
-  await test('migrations Pages + institutional + CRM foundation presentes', async () => {
-    await assertMigrationPresent(PAGES_BASE_MIGRATION_NAME);
-    await assertMigrationPresent(INSTITUTIONAL_MIGRATION_NAME);
-    await assertMigrationPresent(IDENTITY_CRM_MIGRATION_NAME);
+  await test('registry Payload contém todas as migrations do código', async () => {
+    const names = await listMigrationNames();
+    assert.equal(EXPECTED_MIGRATION_NAMES.length >= 31, true, 'expected at least 31 migrations');
+    for (const name of EXPECTED_MIGRATION_NAMES) {
+      assert.equal(names.includes(name), true, `migration ausente: ${name}`);
+    }
+    assert.equal(names.length, EXPECTED_MIGRATION_NAMES.length);
+  });
+
+  await test('tabelas SIP/Adaptive/Knowledge existem após fresh migrate', async () => {
+    const tables = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public'
+        AND tablename IN (
+          'sip_profiles',
+          'adaptive_decisions',
+          'knowledge_documents',
+          'knowledge_chunks',
+          'embedding_records',
+          'pages'
+        )
+    `);
+    const names = new Set(tables.rows.map((r) => String(r.tablename)));
+    for (const table of [
+      'sip_profiles',
+      'adaptive_decisions',
+      'knowledge_documents',
+      'knowledge_chunks',
+      'embedding_records',
+      'pages',
+    ]) {
+      assert.equal(names.has(table), true, `missing table ${table}`);
+    }
   });
 
   /**
    * Mid-stack `down` of institutional pages was valid when Pages was near tip.
    * With Neurofrigo E03–E15 migrations applied after it, destructive rollback is
    * no longer a safe CI invariant and can fail for unrelated schema coupling.
-   * Schema + migration registry checks above remain the release gate.
+   * Schema + full migration registry checks above remain the release gate.
    */
   console.log('ℹ skipped institutional mid-stack rollback cycle (unsafe with post-CRM migrations)');
 
