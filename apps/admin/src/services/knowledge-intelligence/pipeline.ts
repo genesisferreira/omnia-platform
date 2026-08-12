@@ -12,6 +12,12 @@ import {
   sha256Hex,
   type KiSupportedExtractType,
 } from '@omnia/knowledge-intelligence';
+import {
+  KNOWLEDGE_AREAS,
+  SECURITY_CLASSIFICATIONS,
+  TECHNICAL_RISK_LEVELS,
+  type SourceType,
+} from '@omnia/neurofrigo-knowledge';
 
 import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
 
@@ -37,9 +43,16 @@ function sanitizeStoredText(text: string, maxChars = 60_000): string {
   return `${cleaned.slice(0, maxChars)}\n\n[truncated_for_admin_storage]`;
 }
 
-function sourceTypeFor(
-  resourceType: string,
-): 'pdf' | 'markdown' | 'txt' | 'docx' | 'technical_manual' | 'lesson_ref' {
+function pickUnion<T extends string>(
+  value: string | undefined,
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  if (value && (allowed as readonly string[]).includes(value)) return value as T;
+  return fallback;
+}
+
+function sourceTypeFor(resourceType: string): SourceType {
   if (resourceType === 'pdf') return 'pdf';
   if (resourceType === 'markdown') return 'markdown';
   if (resourceType === 'txt') return 'txt';
@@ -468,7 +481,7 @@ export async function processLearningResource(args: {
         toPayloadRelationId(hubOverrides?.ownerCompany) ??
         relId(resource.ownerCompany as Rel) ??
         undefined,
-      knowledgeArea: hubOverrides?.knowledgeArea || 'cursos',
+      knowledgeArea: pickUnion(hubOverrides?.knowledgeArea, KNOWLEDGE_AREAS, 'cursos'),
       category: toPayloadRelationId(hubOverrides?.category),
       subcategories: (hubOverrides?.subcategories || [])
         .map((id) => toPayloadRelationId(id))
@@ -482,13 +495,20 @@ export async function processLearningResource(args: {
       publicationStatus: publishForAi
         ? ('unpublished' as const)
         : hubOverrides?.publicationStatus || ('unpublished' as const),
-      securityClassification:
-        hubOverrides?.securityClassification || ('INTERNAL_RESTRICTED' as const),
+      securityClassification: pickUnion(
+        hubOverrides?.securityClassification,
+        SECURITY_CLASSIFICATIONS,
+        'INTERNAL_RESTRICTED',
+      ),
       allowAiUse: hubOverrides?.allowAiUse ?? false,
       allowWebPublication: hubOverrides?.allowWebPublication ?? false,
       allowDownload: false,
       requiresEnrollment: false,
-      technicalRiskLevel: hubOverrides?.technicalRiskLevel || ('high' as const),
+      technicalRiskLevel: pickUnion(
+        hubOverrides?.technicalRiskLevel,
+        TECHNICAL_RISK_LEVELS,
+        'high',
+      ),
       humanReviewRequired: hubOverrides?.humanReviewRequired ?? true,
       versionNumber: (resource.version as string) || '1.0.0',
       checksum: fileHash,
