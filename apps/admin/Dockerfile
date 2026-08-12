@@ -39,7 +39,10 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV PAYLOAD_SECRET=$PAYLOAD_SECRET
 ENV NODE_ENV=production
 ENV DOCKER_BUILD=true
+ENV OMNIA_SMTP_ALLOW_BUILD=1
 
+# Parity with CI: generated Payload types must exist before Next typecheck (R0.4).
+RUN pnpm --filter @omnia/admin generate:types
 RUN pnpm --filter @omnia/admin generate:importmap
 RUN pnpm turbo build --filter=@omnia/admin
 

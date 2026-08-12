@@ -16,6 +16,7 @@ import {
 
 import {
   asPayloadJson,
+  asUnknownRecord,
   requirePayloadRelationId,
   toPayloadRelationId,
 } from '../../lib/payload-relation-id';
@@ -139,12 +140,15 @@ async function loadBudgetSpend(payload: Payload): Promise<{
     }),
   ]);
 
-  const sum = (docs: Array<{ estimatedCostUsd?: number | null }>) =>
-    docs.reduce((s, d) => s + Number(d.estimatedCostUsd || 0), 0);
+  const sum = (docs: unknown[]) =>
+    docs.reduce((s, d) => {
+      const row = asUnknownRecord(d);
+      return s + Number(row.estimatedCostUsd || 0);
+    }, 0);
 
   return {
-    spentTodayUsd: sum(today.docs),
-    spentMonthUsd: sum(month.docs),
+    spentTodayUsd: sum(today.docs as unknown[]),
+    spentMonthUsd: sum(month.docs as unknown[]),
   };
 }
 
