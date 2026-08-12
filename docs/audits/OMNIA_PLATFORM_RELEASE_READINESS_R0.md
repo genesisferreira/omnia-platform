@@ -15,6 +15,8 @@ R0 entregou **hardening de autenticação/ACL**, **OTel estável**, **login redi
 
 **CI Build** ainda falha no step `Pages migration DB validation` (job Build) — Quality verde; produto **builda no Docker staging**. Por critério estrito da R0 (**Build GREEN obrigatório**): **RELEASE CANDIDATE NO-GO**.
 
+**R0.1:** ver [`OMNIA_PLATFORM_RELEASE_READINESS_R0_1.md`](./OMNIA_PLATFORM_RELEASE_READINESS_R0_1.md). O histórico de NO-GO desta R0 permanece; a R0.1 desbloqueou fresh migrate no CI e Quality, mas o `pnpm build` do job Build ainda falha no runner.
+
 ---
 
 ## 2. Commits R0
