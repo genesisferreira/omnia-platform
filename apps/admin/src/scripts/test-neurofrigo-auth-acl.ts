@@ -49,3 +49,76 @@ test('anonymous identity is not a valid auth context shape', () => {
   const anonymous = { role: 'anonymous' as const };
   assert.equal('userId' in anonymous && Boolean((anonymous as { userId?: string }).userId), false);
 });
+
+function bindRequestScope(input: {
+  isStaff: boolean;
+  sessionTenantId: string | null;
+  sessionCompanyIds: string[];
+  requestedTenantId?: string | null;
+  requestedCompanyIds?: unknown;
+  requestedChannel?: string | null;
+}): {
+  tenantId: string | null;
+  companyIds: string[];
+  channel: 'portal_chat' | 'admin' | 'system';
+} {
+  if (!input.isStaff) {
+    return {
+      tenantId: input.sessionTenantId,
+      companyIds: input.sessionCompanyIds,
+      channel: 'portal_chat',
+    };
+  }
+  const requestedCompanies = Array.isArray(input.requestedCompanyIds)
+    ? input.requestedCompanyIds.map(String)
+    : input.sessionCompanyIds;
+  const channel =
+    input.requestedChannel === 'portal_chat' ||
+    input.requestedChannel === 'admin' ||
+    input.requestedChannel === 'system'
+      ? input.requestedChannel
+      : 'admin';
+  return {
+    tenantId: input.requestedTenantId?.trim() || input.sessionTenantId,
+    companyIds: requestedCompanies,
+    channel,
+  };
+}
+
+test('student cannot spoof tenantId of tenant B', () => {
+  const result = bindRequestScope({
+    isStaff: false,
+    sessionTenantId: 'tenant-a',
+    sessionCompanyIds: ['co-a'],
+    requestedTenantId: 'tenant-b',
+    requestedCompanyIds: ['co-b'],
+    requestedChannel: 'admin',
+  });
+  assert.equal(result.tenantId, 'tenant-a');
+  assert.deepEqual(result.companyIds, ['co-a']);
+  assert.equal(result.channel, 'portal_chat');
+});
+
+test('student cannot elevate retrieval channel to system', () => {
+  const result = bindRequestScope({
+    isStaff: false,
+    sessionTenantId: 'tenant-a',
+    sessionCompanyIds: [],
+    requestedChannel: 'system',
+  });
+  assert.equal(result.channel, 'portal_chat');
+});
+
+test('staff may target another tenant', () => {
+  const result = bindRequestScope({
+    isStaff: true,
+    sessionTenantId: 'tenant-a',
+    sessionCompanyIds: ['co-a'],
+    requestedTenantId: 'tenant-b',
+    requestedCompanyIds: ['co-b'],
+    requestedChannel: 'admin',
+  });
+  assert.equal(result.tenantId, 'tenant-b');
+  assert.deepEqual(result.companyIds, ['co-b']);
+  assert.equal(result.channel, 'admin');
+});

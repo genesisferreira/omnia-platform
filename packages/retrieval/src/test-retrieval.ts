@@ -95,6 +95,68 @@ describe('retrieval domain', () => {
     assert.equal(results[0]?.citation.page, 2);
   });
 
+  it('acl filter blocks cross-tenant hits for portal users', async () => {
+    const acl = new DefaultAclFilter();
+    const filtered = await acl.filter(
+      [
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '1',
+            chunkId: 'tenant-a-doc',
+            text: 'a',
+            embedding: [1],
+            tenantId: 'tenant-a',
+          }),
+        },
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '2',
+            chunkId: 'tenant-b-doc',
+            text: 'b',
+            embedding: [1],
+            tenantId: 'tenant-b',
+          }),
+        },
+      ],
+      { channel: 'portal_chat', tenantId: 'tenant-a' },
+    );
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0]?.record.chunkId, 'tenant-a-doc');
+  });
+
+  it('acl filter blocks foreign ownerCompany for portal users', async () => {
+    const acl = new DefaultAclFilter();
+    const filtered = await acl.filter(
+      [
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '1',
+            chunkId: 'co-a',
+            text: 'a',
+            embedding: [1],
+            ownerCompanyId: 'company-a',
+          }),
+        },
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '2',
+            chunkId: 'co-b',
+            text: 'b',
+            embedding: [1],
+            ownerCompanyId: 'company-b',
+          }),
+        },
+      ],
+      { channel: 'portal_chat', companyIds: ['company-a'] },
+    );
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0]?.record.chunkId, 'co-a');
+  });
+
   it('acl filter blocks allowAiUse=false and unpublished', async () => {
     const acl = new DefaultAclFilter();
     const filtered = await acl.filter(
