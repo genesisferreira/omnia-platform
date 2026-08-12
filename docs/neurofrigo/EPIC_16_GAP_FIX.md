@@ -31,3 +31,18 @@
 - Course: https://dev.omniafrigo.com.br/cursos/fundamentos-refrigeracao-industrial
 - Lesson: https://dev.omniafrigo.com.br/cursos/fundamentos-refrigeracao-industrial/aula/apostila-pdf
 - Admin: https://admin.dev.omniafrigo.com.br
+
+## Staging smoke (2026-08-12)
+
+- HEAD `6904668`
+- `GET /` → 200 + AI Dock (Concierge) visível
+- `POST /api/ai/public-chat` → 200 Concierge
+- `assistantId=engineering` → **403** `ASSISTANT_FORBIDDEN`
+- Purpose OOS → guardrail (policy/guard)
+- Admin + Web healthy; Landing/Moodle/Prod intactos
+
+## Veredito
+
+**EPIC16_GAP_FIX_READY_FOR_HUMAN_RETEST**
+
+Não iniciar LMS Product Completion. Aguardar reteste humano.
