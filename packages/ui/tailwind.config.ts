@@ -11,9 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Montserrat', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
+        body: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -26,6 +26,7 @@ const config: Config = {
           'deep-blue': '#0E2D4D',
           copper: '#C7783D',
           graphite: '#11161B',
+          'graphite-light': '#8E969E',
           white: '#FFFFFF',
         },
         primary: {
@@ -52,11 +53,31 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        lms: {
+          sidebar: 'hsl(var(--lms-sidebar))',
+          'sidebar-foreground': 'hsl(var(--lms-sidebar-foreground))',
+          surface: 'hsl(var(--lms-surface))',
+          progress: 'hsl(var(--lms-progress))',
+          success: 'hsl(var(--lms-success))',
+          warning: 'hsl(var(--lms-warning))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        'lms-card': '0 1px 2px hsl(210 17% 9% / 0.06), 0 4px 12px hsl(210 17% 9% / 0.04)',
+      },
+      keyframes: {
+        'lms-fade-in': {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'lms-fade-in': 'lms-fade-in 200ms ease-out',
       },
     },
   },

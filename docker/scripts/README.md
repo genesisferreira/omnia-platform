@@ -16,4 +16,4 @@ docker compose -f docker/compose/staging.yml --env-file .env.staging \
   --profile bootstrap run --rm admin-bootstrap
 ```
 
-Modos: `migrate` | `seed` | `bootstrap` (padrão).
+Modos: `migrate` | `seed` | `bootstrap` (padrão) | `holding-home` (somente Home omnia-hub).

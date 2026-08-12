@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload';
 
+import { adminsOnly } from '../access/rbac';
+
 export const GlobalSettings: GlobalConfig = {
   slug: 'global-settings',
   label: 'Configurações Globais',
@@ -8,6 +10,7 @@ export const GlobalSettings: GlobalConfig = {
   },
   access: {
     read: () => true,
+    update: adminsOnly,
   },
   fields: [
     {

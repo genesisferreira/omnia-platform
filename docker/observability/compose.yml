@@ -1,0 +1,74 @@
+# Omnia LMS — Observabilidade (DEV / staging only)
+# NÃO usar em produção sem revisão de segurança.
+#
+# Portas publicadas apenas em loopback (127.0.0.1) — não expor à internet.
+# Scrape Admin interno: http://omnia-platform-admin-dev:3000/api/metrics
+# Token: arquivo /opt/omnia/secrets/metrics_scrape_token.txt (montado no Prometheus)
+#
+# Uso (raiz do repo na VPS):
+#   docker compose -f docker/observability/compose.yml --env-file .env.staging up -d
+
+name: omnia-observability-dev
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: omnia-otel-collector-dev
+    restart: unless-stopped
+    command: ['--config=/etc/otelcol/config.yaml']
+    volumes:
+      - ./otel/collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - '127.0.0.1:4318:4318'
+    networks:
+      - omnia_internal
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: omnia-prometheus-dev
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ${METRICS_TOKEN_FILE:-/opt/omnia/secrets/metrics_scrape_token.txt}:/etc/prometheus/metrics_token:ro
+      - omnia_prometheus_dev:/prometheus
+    ports:
+      - '127.0.0.1:9090:9090'
+    networks:
+      - omnia_internal
+    depends_on:
+      - otel-collector
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: omnia-grafana-dev
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-changeme}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://127.0.0.1:3005}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - omnia_grafana_dev:/var/lib/grafana
+    ports:
+      - '127.0.0.1:3005:3000'
+    networks:
+      - omnia_internal
+    depends_on:
+      - prometheus
+
+networks:
+  omnia_internal:
+    external: true
+
+volumes:
+  omnia_prometheus_dev:
+  omnia_grafana_dev:

@@ -1,0 +1,26 @@
+{
+  "name": "@omnia/neurofrigo-tutor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Neurofrigo Tutor IA — personalização educacional sobre o Runtime (sem Retrieval/Prompt duplicados)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/test-*.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@omnia/neurofrigo-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

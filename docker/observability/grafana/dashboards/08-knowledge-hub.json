@@ -1,0 +1,63 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Knowledge documents (placeholder)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "knowledge_documents_total",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Reviews pending (placeholder)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "knowledge_reviews_pending",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Processing failures (placeholder)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "knowledge_processing_failures_total",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "ACL denials (placeholder)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "knowledge_acl_denials_total",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["omnia", "neurofrigo", "knowledge-hub"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "08 — Knowledge Hub",
+  "uid": "omnia-knowledge-hub-08",
+  "version": 1
+}

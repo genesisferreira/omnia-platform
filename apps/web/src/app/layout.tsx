@@ -1,14 +1,36 @@
+import { Inter, Montserrat } from 'next/font/google';
 import type { Metadata } from 'next';
 
 import '@omnia/ui/globals.css';
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
+import { PathAwareChrome } from '@/components/layout/PathAwareChrome';
+import { SkipLink } from '@/components/layout/SkipLink';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+  getPublicSiteOrigin,
+  SEO_FALLBACK_DESCRIPTION,
+  SEO_FALLBACK_TITLE,
+} from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-montserrat',
+});
+
 export const metadata: Metadata = {
-  title: 'Omnia Platform',
-  description: 'Ecossistema digital da Omnia Frigo Holding',
+  metadataBase: new URL(getPublicSiteOrigin()),
+  title: SEO_FALLBACK_TITLE,
+  description: SEO_FALLBACK_DESCRIPTION,
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -24,11 +46,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-company-slug={resolution.ok ? (resolution.context.company?.slug ?? '') : undefined}
       data-tenant-slug={resolution.ok ? resolution.context.tenant.slug : undefined}
       data-site-error-code={resolution.ok ? undefined : resolution.error.code}
+      className={`${inter.variable} ${montserrat.variable} scroll-smooth scroll-pt-20`}
     >
       <body className="font-sans antialiased">
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <JsonLd data={[buildOrganizationJsonLd({ hostname }), buildWebSiteJsonLd({ hostname })]} />
+        <SkipLink />
+        <PathAwareChrome>{children}</PathAwareChrome>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import type { Access, CollectionConfig, TextFieldSingleValidation } from 'payload';
 
+import { adminsOnly, staffOnly } from '../access/rbac';
 import { createEditorialFields, createOwnershipFields } from '../fields';
 import { isValidOfficialUrl } from '../lib/branding/validators';
 import {
@@ -11,7 +12,8 @@ import {
   SITE_TYPES,
 } from '../types/site';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+const authenticated: Access = staffOnly;
+const infrastructureWrite: Access = adminsOnly;
 
 const SITE_STATUS_LABELS: Record<(typeof SITE_STATUSES)[number], string> = {
   draft: 'Rascunho',
@@ -101,9 +103,9 @@ export const Sites: CollectionConfig = {
   },
   access: {
     read: authenticated,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: infrastructureWrite,
+    update: infrastructureWrite,
+    delete: infrastructureWrite,
   },
   fields: [
     {

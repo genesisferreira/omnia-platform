@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
+import { staffOnly } from '../access/rbac';
+
 /**
  * Media Library — upload local no Sprint 2.
  * Integração MinIO documentada em src/storage/README.md
@@ -11,7 +13,21 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: 'media',
-    mimeTypes: ['image/*'],
+    mimeTypes: [
+      'image/*',
+      'video/*',
+      'application/pdf',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'text/markdown',
+    ],
     imageSizes: [
       {
         name: 'thumbnail',
@@ -29,12 +45,17 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
   },
   access: {
+    // Leitura pública necessária para URLs de mídia no Portal.
     read: () => true,
+    create: staffOnly,
+    update: staffOnly,
+    delete: staffOnly,
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
+      required: true,
       label: 'Texto alternativo',
     },
     {

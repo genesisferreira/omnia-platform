@@ -5,19 +5,31 @@
   "description": "Tipos, constantes e utilitários compartilhados",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./rate-limit": "./src/rate-limit/index.ts",
+    "./lms": "./src/lms/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "dev": "node ../../scripts/workspace-placeholder.mjs dev",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "test:public-page-contracts": "tsx src/cms/public-page/test-public-page-contracts.ts",
+    "test:public-post-contracts": "tsx src/cms/public-post/test-public-post-contracts.ts",
+    "test:public-company-contracts": "tsx src/cms/public-company/test-public-company-contracts.ts",
+    "test:rate-limit": "tsx src/rate-limit/test-rate-limit.ts",
+    "test:partners": "tsx src/partners/test-partners.ts && tsx src/partners/test-partners-geo.ts",
     "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "ioredis": "catalog:"
   },
   "devDependencies": {
     "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
     "eslint": "catalog:",
     "rimraf": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

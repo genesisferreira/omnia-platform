@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, staging, 'feature/**']
+    branches: [main, develop, staging, 'feature/**', 'release/**']
   pull_request:
     branches: [main, develop]
 
@@ -11,6 +11,11 @@ env:
   PAYLOAD_SECRET: ci-test-secret-minimum-32-characters-long
   NEXT_PUBLIC_APP_URL: http://localhost:3000
   NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
+  SMTP_HOST: localhost
+  SMTP_PORT: '1025'
+  SMTP_FROM: ci@omnia.local
+  OMNIA_INTERNAL_API_SECRET: ci-internal-api-secret-minimum-32-characters
+  OMNIA_SMTP_ALLOW_BUILD: '1'
 
 jobs:
   quality:
@@ -32,11 +37,70 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Parity with Next build: generated Payload types make relationship/select/json
+      # mismatches fail here instead of only in `next build` typecheck (R0.3).
+      - name: Generate Payload types
+        run: pnpm --filter @omnia/admin generate:types
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Format check
         run: pnpm format:check
+
+      - name: AI auth ordering (Portal BFF)
+        run: pnpm --filter @omnia/web test:ai-auth-ordering
+
+      - name: Public companies contract tests
+        run: pnpm --filter @omnia/admin test:public-companies
+
+      - name: Holding companies seed invariants
+        run: pnpm --filter @omnia/admin test:holding-companies-seed
+
+      - name: Holding home exclusive seed
+        run: pnpm --filter @omnia/admin test:seed-holding-home
+
+      - name: Holding institutional pages seed
+        run: pnpm --filter @omnia/admin test:seed-holding-institutional-pages
+
+      - name: Holding blog seed
+        run: pnpm --filter @omnia/admin test:seed-holding-blog
+
+      - name: Holding home institutional upgrade
+        run: pnpm --filter @omnia/admin test:upgrade-holding-home
+
+      - name: Public page contracts
+        run: pnpm --filter @omnia/shared test:public-page-contracts
+
+      - name: Public post contracts
+        run: pnpm --filter @omnia/shared test:public-post-contracts
+
+      - name: Public page endpoint and Pages rules
+        run: pnpm --filter @omnia/admin test:public-page
+
+      - name: Public posts endpoint rules
+        run: pnpm --filter @omnia/admin test:public-posts
+
+      - name: Portal SEO contracts
+        run: pnpm --filter @omnia/web test:seo
+
+      - name: Portal blog SEO contracts
+        run: pnpm --filter @omnia/web test:seo-blog
+
+      - name: SMTP config contracts
+        run: pnpm --filter @omnia/admin test:smtp-auth
+
+      - name: Neurofrigo auth/ACL contracts
+        run: pnpm --filter @omnia/admin test:neurofrigo-auth-acl
+
+      - name: Retrieval ACL contracts
+        run: pnpm --filter @omnia/retrieval test
+
+      - name: Adaptive Learning unit tests
+        run: pnpm --filter @omnia/adaptive-learning test
+
+      - name: Student Intelligence unit tests
+        run: pnpm --filter @omnia/student-intelligence test
 
   build:
     name: Build
@@ -69,5 +133,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Fresh Payload migrations + Pages schema
+        run: pnpm --filter @omnia/admin test:pages-migration-db
+
+      - name: Generate Payload types
+        run: pnpm --filter @omnia/admin generate:types
+
+      - name: Generate Payload importmap
+        env:
+          DOCKER_BUILD: 'true'
+        run: pnpm --filter @omnia/admin generate:importmap
+
+      - name: Build Admin (isolated)
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm --filter @omnia/admin build
+
+      - name: Build Web (isolated)
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm --filter @omnia/web build
+
+      - name: Build monorepo
+        env:
+          DOCKER_BUILD: 'true'
+        run: unset SMTP_HOST SMTP_PORT SMTP_FROM SMTP_USER SMTP_PASS && pnpm build

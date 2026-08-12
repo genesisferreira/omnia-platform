@@ -1,0 +1,6 @@
+.git
+**/node_modules
+**/backups/**
+env/.env.dev
+env/.env.production
+**/*.md

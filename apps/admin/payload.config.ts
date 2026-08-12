@@ -5,19 +5,119 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
 
+import { wrapJwtStrategyRejectBlocked } from './src/auth/account-status';
+import { buildNodemailerEmailAdapter } from './src/email/build-email-adapter';
+import { isSmtpConfigDeferred, loadRootEnvFile, smtpConfigForLog } from './src/email/smtp-config';
+import { Activities } from './src/collections/Activities';
+import { Authors } from './src/collections/Authors';
+import { Categories } from './src/collections/Categories';
 import { Companies } from './src/collections/Companies';
+import { Contacts } from './src/collections/Contacts';
+import { CrmCompanies } from './src/collections/CrmCompanies';
 import { Domains } from './src/collections/Domains';
+import { Leads } from './src/collections/Leads';
 import { Media } from './src/collections/Media';
+import { Organizations } from './src/collections/Organizations';
+import { Pages } from './src/collections/Pages';
+import { PartnerCategories } from './src/collections/PartnerCategories';
+import { Partners } from './src/collections/Partners';
+import { PartnerSpecialties } from './src/collections/PartnerSpecialties';
+import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
+import { Tags } from './src/collections/Tags';
 import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
+import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
+import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
+import { CourseModules, Courses, LessonAssets, Lessons } from './src/collections/lms';
+import {
+  EmbeddingQueue,
+  KiProcessingRuns,
+  KnowledgeChunks,
+  LearningResources,
+} from './src/collections/knowledge-intelligence';
+import { EmbeddingRecords, SearchSessions } from './src/collections/retrieval';
+import {
+  AiSessions,
+  AiFeedback,
+  StudentProfiles,
+  LearningProfiles,
+  TutorStudyPlans,
+} from './src/collections/neurofrigo';
+import { AiModels, AiAssistants, AiPrompts, AiPolicies } from './src/collections/enterprise';
+import { CommercialProfiles } from './src/collections/commercial';
+import { EngineeringProfiles } from './src/collections/engineering';
+import { SipProfiles, SipEvidence, SipAuditEvents } from './src/collections/sip';
+import { AdaptiveDecisions, AdaptivePolicies } from './src/collections/adaptive';
+import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgentAccess';
+import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
+import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
+import { KnowledgeDocuments } from './src/collections/knowledge/KnowledgeDocuments';
+import { KnowledgeProcessingJobs } from './src/collections/knowledge/KnowledgeProcessingJobs';
+import { KnowledgeReviews } from './src/collections/knowledge/KnowledgeReviews';
+import { KnowledgeSources } from './src/collections/knowledge/KnowledgeSources';
+import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
+import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
+import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
+import { partnerRegisterEndpoint } from './src/endpoints/partner-register';
+import {
+  publicCourseEndpoint,
+  publicCoursesEndpoint,
+  publicLessonEndpoint,
+} from './src/endpoints/public-courses';
+import { publicPageEndpoint } from './src/endpoints/public-page';
+import {
+  publicPartnerCategoriesEndpoint,
+  publicPartnerEndpoint,
+  publicPartnersEndpoint,
+  publicPartnerSpecialtiesEndpoint,
+} from './src/endpoints/public-partners';
+import { publicPostalCodeEndpoint } from './src/endpoints/public-postal-code';
+import {
+  publicPostCategoriesEndpoint,
+  publicPostEndpoint,
+  publicPostsEndpoint,
+  publicPostTagsEndpoint,
+} from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
+import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
+import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
+import { LmsSettings } from './src/globals/LmsSettings';
+import { KiIntelligenceDashboard } from './src/globals/KiIntelligenceDashboard';
+import { RetrievalDashboard } from './src/globals/RetrievalDashboard';
+import { NeurofrigoAiDashboard } from './src/globals/NeurofrigoAiDashboard';
+import { NeurofrigoTutorDashboard } from './src/globals/NeurofrigoTutorDashboard';
+import { EnterpriseAiDashboard } from './src/globals/EnterpriseAiDashboard';
+import { CommercialAiDashboard } from './src/globals/CommercialAiDashboard';
+import { EngineeringAiDashboard } from './src/globals/EngineeringAiDashboard';
+import { SipDashboard } from './src/globals/SipDashboard';
+import { AdaptiveLearningDashboard } from './src/globals/AdaptiveLearningDashboard';
+import { NeurofrigoKnowledgeDashboard } from './src/globals/NeurofrigoKnowledgeDashboard';
+import { NeurofrigoKnowledgeSettings } from './src/globals/NeurofrigoKnowledgeSettings';
+import { getAllowedCorsOrigins } from './src/lib/allowed-origins';
+import { migrations } from './src/migrations';
+import { retrievalEndpoints } from './src/endpoints/retrieval';
+import { neurofrigoEndpoints } from './src/endpoints/neurofrigo-ai';
+import { tutorEndpoints } from './src/endpoints/neurofrigo-tutor';
+import { sipEndpoints } from './src/endpoints/student-intelligence';
+import { adaptiveEndpoints } from './src/endpoints/adaptive-learning';
+import { enterpriseEndpoints } from './src/endpoints/enterprise-ai';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+loadRootEnvFile();
+
+/**
+ * generate:importmap / docker build: sem SMTP_HOST → adia adapter.
+ * Runtime (compose com SMTP_*): resolve e exige config válida.
+ */
+const smtpDeferred = isSmtpConfigDeferred();
+const runtimeEmail = smtpDeferred ? null : buildNodemailerEmailAdapter();
+
 export default buildConfig({
+  serverURL: (process.env.NEXT_PUBLIC_ADMIN_URL || '').replace(/\/$/, '') || undefined,
   admin: {
     user: Users.slug,
     importMap: {
@@ -27,9 +127,107 @@ export default buildConfig({
       titleSuffix: '— Omnia Admin',
     },
   },
-  collections: [Users, Tenants, Companies, Sites, Domains, Media],
-  globals: [GlobalSettings],
-  endpoints: [resolveSiteEndpoint],
+  ...(runtimeEmail ? { email: runtimeEmail.adapter } : {}),
+  collections: [
+    Users,
+    Tenants,
+    Organizations,
+    Companies,
+    CrmCompanies,
+    Contacts,
+    Leads,
+    Activities,
+    Sites,
+    Domains,
+    Media,
+    Pages,
+    Authors,
+    Categories,
+    Tags,
+    Posts,
+    PartnerCategories,
+    PartnerSpecialties,
+    Partners,
+    LmsIdentityLinks,
+    LmsAuditEvents,
+    Courses,
+    CourseModules,
+    Lessons,
+    LessonAssets,
+    LearningResources,
+    KnowledgeChunks,
+    EmbeddingQueue,
+    KiProcessingRuns,
+    EmbeddingRecords,
+    SearchSessions,
+    AiSessions,
+    AiFeedback,
+    StudentProfiles,
+    LearningProfiles,
+    TutorStudyPlans,
+    AiModels,
+    AiAssistants,
+    AiPrompts,
+    AiPolicies,
+    CommercialProfiles,
+    EngineeringProfiles,
+    SipProfiles,
+    SipEvidence,
+    SipAuditEvents,
+    AdaptiveDecisions,
+    AdaptivePolicies,
+    KnowledgeDocuments,
+    KnowledgeCategories,
+    KnowledgeSources,
+    KnowledgeReviews,
+    KnowledgeProcessingJobs,
+    KnowledgeAuditEvents,
+    KnowledgeAgentAccess,
+  ],
+  globals: [
+    GlobalSettings,
+    PartnerNetworkDashboard,
+    LmsSettings,
+    NeurofrigoKnowledgeSettings,
+    NeurofrigoKnowledgeDashboard,
+    KiIntelligenceDashboard,
+    RetrievalDashboard,
+    NeurofrigoAiDashboard,
+    NeurofrigoTutorDashboard,
+    EnterpriseAiDashboard,
+    CommercialAiDashboard,
+    EngineeringAiDashboard,
+    SipDashboard,
+    AdaptiveLearningDashboard,
+  ],
+  endpoints: [
+    resolveSiteEndpoint,
+    publicCompaniesEndpoint,
+    publicCompanyEndpoint,
+    publicOrganizationsEndpoint,
+    leadCaptureEndpoint,
+    publicPageEndpoint,
+    publicPostsEndpoint,
+    publicPostEndpoint,
+    publicPostCategoriesEndpoint,
+    publicPostTagsEndpoint,
+    publicPartnersEndpoint,
+    publicPartnerEndpoint,
+    publicPartnerCategoriesEndpoint,
+    publicPartnerSpecialtiesEndpoint,
+    publicPostalCodeEndpoint,
+    partnerRegisterEndpoint,
+    publicCoursesEndpoint,
+    publicCourseEndpoint,
+    publicLessonEndpoint,
+    ...lmsEndpoints,
+    ...retrievalEndpoints,
+    ...neurofrigoEndpoints,
+    ...tutorEndpoints,
+    ...sipEndpoints,
+    ...adaptiveEndpoints,
+    ...enterpriseEndpoints,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',
   typescript: {
@@ -39,6 +237,19 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    prodMigrations: migrations,
   }),
-  cors: [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'],
+  cors: getAllowedCorsOrigins(),
+  onInit: (payload) => {
+    wrapJwtStrategyRejectBlocked(payload);
+    // migrate / importmap / docker build: SMTP pode estar adiado — não forçar adapter.
+    if (!runtimeEmail) {
+      payload.logger.info({ msg: 'SMTP adiado (tooling/build)' });
+      return;
+    }
+    payload.logger.info({
+      msg: 'SMTP configurado',
+      smtp: smtpConfigForLog(runtimeEmail.smtp),
+    });
+  },
 });

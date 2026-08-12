@@ -1,6 +1,34 @@
 import * as migration_20260709_181730 from './20260709_181730';
 import * as migration_20260713_142511_sites from './20260713_142511_sites';
 import * as migration_20260713_174436_domains from './20260713_174436_domains';
+import * as migration_20260716_124305_pages from './20260716_124305_pages';
+import * as migration_20260716_172340_pages_institutional from './20260716_172340_pages_institutional';
+import * as migration_20260717_160602_blog_collections from './20260717_160602_blog_collections';
+import * as migration_20260717_180310_companies_strategic_pages from './20260717_180310_companies_strategic_pages';
+import * as migration_20260717_194500_users_rbac from './20260717_194500_users_rbac';
+import * as migration_20260720_120000_identity_crm_foundation from './20260720_120000_identity_crm_foundation';
+import * as migration_20260720_180000_lead_capture_activity from './20260720_180000_lead_capture_activity';
+import * as migration_20260720_190000_crm_companies_texts from './20260720_190000_crm_companies_texts';
+import * as migration_20260720_191000_locked_documents_crm_rels from './20260720_191000_locked_documents_crm_rels';
+import * as migration_20260724_120000_partner_network from './20260724_120000_partner_network';
+import * as migration_20260724_180000_partner_geocoding_meta from './20260724_180000_partner_geocoding_meta';
+import * as migration_20260731_160000_lms_connector_foundation from './20260731_160000_lms_connector_foundation';
+import * as migration_20260803_180000_neurofrigo_knowledge_hub from './20260803_180000_neurofrigo_knowledge_hub';
+import * as migration_20260804_160000_lms_settings_provision_flags from './20260804_160000_lms_settings_provision_flags';
+import * as migration_20260805_140000_lms_core from './20260805_140000_lms_core';
+import * as migration_20260805_180000_knowledge_intelligence from './20260805_180000_knowledge_intelligence';
+import * as migration_20260805_200000_retrieval_engine from './20260805_200000_retrieval_engine';
+import * as migration_20260805_201000_retrieval_locked_rels from './20260805_201000_retrieval_locked_rels';
+import * as migration_20260806_120000_neurofrigo_ai_mvp from './20260806_120000_neurofrigo_ai_mvp';
+import * as migration_20260806_180000_ai_experience from './20260806_180000_ai_experience';
+import * as migration_20260807_120000_tutor_ia from './20260807_120000_tutor_ia';
+import * as migration_20260807_180000_enterprise_ai from './20260807_180000_enterprise_ai';
+import * as migration_20260807_220000_deepseek_agents from './20260807_220000_deepseek_agents';
+import * as migration_20260810_140000_enterprise_ai_epic11 from './20260810_140000_enterprise_ai_epic11';
+import * as migration_20260810_160000_commercial_ia from './20260810_160000_commercial_ia';
+import * as migration_20260810_180000_engineering_ia from './20260810_180000_engineering_ia';
+import * as migration_20260810_200000_student_intelligence from './20260810_200000_student_intelligence';
+import * as migration_20260811_120000_adaptive_learning from './20260811_120000_adaptive_learning';
 
 export const migrations = [
   {
@@ -16,6 +44,146 @@ export const migrations = [
   {
     up: migration_20260713_174436_domains.up,
     down: migration_20260713_174436_domains.down,
-    name: '20260713_174436_domains'
+    name: '20260713_174436_domains',
+  },
+  {
+    up: migration_20260716_124305_pages.up,
+    down: migration_20260716_124305_pages.down,
+    name: '20260716_124305_pages',
+  },
+  {
+    up: migration_20260716_172340_pages_institutional.up,
+    down: migration_20260716_172340_pages_institutional.down,
+    name: '20260716_172340_pages_institutional',
+  },
+  {
+    up: migration_20260717_160602_blog_collections.up,
+    down: migration_20260717_160602_blog_collections.down,
+    name: '20260717_160602_blog_collections',
+  },
+  {
+    up: migration_20260717_180310_companies_strategic_pages.up,
+    down: migration_20260717_180310_companies_strategic_pages.down,
+    name: '20260717_180310_companies_strategic_pages',
+  },
+  {
+    up: migration_20260717_194500_users_rbac.up,
+    down: migration_20260717_194500_users_rbac.down,
+    name: '20260717_194500_users_rbac',
+  },
+  {
+    up: migration_20260720_120000_identity_crm_foundation.up,
+    down: migration_20260720_120000_identity_crm_foundation.down,
+    name: '20260720_120000_identity_crm_foundation',
+  },
+  {
+    up: migration_20260720_180000_lead_capture_activity.up,
+    down: migration_20260720_180000_lead_capture_activity.down,
+    name: '20260720_180000_lead_capture_activity',
+  },
+  {
+    up: migration_20260720_190000_crm_companies_texts.up,
+    down: migration_20260720_190000_crm_companies_texts.down,
+    name: '20260720_190000_crm_companies_texts',
+  },
+  {
+    up: migration_20260720_191000_locked_documents_crm_rels.up,
+    down: migration_20260720_191000_locked_documents_crm_rels.down,
+    name: '20260720_191000_locked_documents_crm_rels',
+  },
+  {
+    up: migration_20260724_120000_partner_network.up,
+    down: migration_20260724_120000_partner_network.down,
+    name: '20260724_120000_partner_network',
+  },
+  {
+    up: migration_20260724_180000_partner_geocoding_meta.up,
+    down: migration_20260724_180000_partner_geocoding_meta.down,
+    name: '20260724_180000_partner_geocoding_meta',
+  },
+  {
+    up: migration_20260731_160000_lms_connector_foundation.up,
+    down: migration_20260731_160000_lms_connector_foundation.down,
+    name: '20260731_160000_lms_connector_foundation',
+  },
+  {
+    up: migration_20260803_180000_neurofrigo_knowledge_hub.up,
+    down: migration_20260803_180000_neurofrigo_knowledge_hub.down,
+    name: '20260803_180000_neurofrigo_knowledge_hub',
+  },
+  {
+    up: migration_20260804_160000_lms_settings_provision_flags.up,
+    down: migration_20260804_160000_lms_settings_provision_flags.down,
+    name: '20260804_160000_lms_settings_provision_flags',
+  },
+  {
+    up: migration_20260805_140000_lms_core.up,
+    down: migration_20260805_140000_lms_core.down,
+    name: '20260805_140000_lms_core',
+  },
+  {
+    up: migration_20260805_180000_knowledge_intelligence.up,
+    down: migration_20260805_180000_knowledge_intelligence.down,
+    name: '20260805_180000_knowledge_intelligence',
+  },
+  {
+    up: migration_20260805_200000_retrieval_engine.up,
+    down: migration_20260805_200000_retrieval_engine.down,
+    name: '20260805_200000_retrieval_engine',
+  },
+  {
+    up: migration_20260805_201000_retrieval_locked_rels.up,
+    down: migration_20260805_201000_retrieval_locked_rels.down,
+    name: '20260805_201000_retrieval_locked_rels',
+  },
+  {
+    up: migration_20260806_120000_neurofrigo_ai_mvp.up,
+    down: migration_20260806_120000_neurofrigo_ai_mvp.down,
+    name: '20260806_120000_neurofrigo_ai_mvp',
+  },
+  {
+    up: migration_20260806_180000_ai_experience.up,
+    down: migration_20260806_180000_ai_experience.down,
+    name: '20260806_180000_ai_experience',
+  },
+  {
+    up: migration_20260807_120000_tutor_ia.up,
+    down: migration_20260807_120000_tutor_ia.down,
+    name: '20260807_120000_tutor_ia',
+  },
+  {
+    up: migration_20260807_180000_enterprise_ai.up,
+    down: migration_20260807_180000_enterprise_ai.down,
+    name: '20260807_180000_enterprise_ai',
+  },
+  {
+    up: migration_20260807_220000_deepseek_agents.up,
+    down: migration_20260807_220000_deepseek_agents.down,
+    name: '20260807_220000_deepseek_agents',
+  },
+  {
+    up: migration_20260810_140000_enterprise_ai_epic11.up,
+    down: migration_20260810_140000_enterprise_ai_epic11.down,
+    name: '20260810_140000_enterprise_ai_epic11',
+  },
+  {
+    up: migration_20260810_160000_commercial_ia.up,
+    down: migration_20260810_160000_commercial_ia.down,
+    name: '20260810_160000_commercial_ia',
+  },
+  {
+    up: migration_20260810_180000_engineering_ia.up,
+    down: migration_20260810_180000_engineering_ia.down,
+    name: '20260810_180000_engineering_ia',
+  },
+  {
+    up: migration_20260810_200000_student_intelligence.up,
+    down: migration_20260810_200000_student_intelligence.down,
+    name: '20260810_200000_student_intelligence',
+  },
+  {
+    up: migration_20260811_120000_adaptive_learning.up,
+    down: migration_20260811_120000_adaptive_learning.down,
+    name: '20260811_120000_adaptive_learning',
   },
 ];
