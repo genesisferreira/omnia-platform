@@ -1,6 +1,6 @@
 #!/bin/sh
 # Omnia Platform — bootstrap one-off (migrations + seed)
-# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | commercial-ia | commercial-ia-epic12 | engineering-ia | engineering-ia-epic13 | student-intelligence | student-intelligence-epic14 | adaptive-learning | adaptive-learning-epic15 | deepseek-agents
+# Uso: migrate | seed | bootstrap | holding-home | upgrade-holding-home | holding-institutional-pages | holding-blog | holding-strategic-companies | knowledge-hub | knowledge-hub-load | lms-core | knowledge-intelligence | retrieval | neurofrigo-ai | ai-experience | tutor-ia | enterprise-ai | enterprise-ai-epic11 | commercial-ia | commercial-ia-epic12 | engineering-ia | engineering-ia-epic13 | student-intelligence | student-intelligence-epic14 | adaptive-learning | adaptive-learning-epic15 | deepseek-agents | epic16-e2e-users
 set -eu
 
 MODE="${1:-bootstrap}"
@@ -143,6 +143,12 @@ run_deepseek_agents() {
   echo "==> Seed deepseek-agents concluído."
 }
 
+run_epic16_e2e_users() {
+  echo "==> Seed EPIC 16 E2E users (staging only; requires OMNIA_ALLOW_E2E_SEED=1 + password envs)..."
+  pnpm --filter @omnia/admin seed:epic16-e2e-users
+  echo "==> Seed epic16-e2e-users concluído."
+}
+
 run_holding_home() {
   echo "==> Seed exclusivo da Home (omnia-hub)..."
   pnpm --filter @omnia/admin seed:holding-home
@@ -256,8 +262,11 @@ case "$MODE" in
   deepseek-agents)
     run_deepseek_agents
     ;;
+  epic16-e2e-users)
+    run_epic16_e2e_users
+    ;;
   *)
-    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|commercial-ia|commercial-ia-epic12|engineering-ia|engineering-ia-epic13|student-intelligence|student-intelligence-epic14|adaptive-learning|adaptive-learning-epic15|deepseek-agents]"
+    echo "Uso: admin-bootstrap.sh [migrate|seed|bootstrap|holding-home|upgrade-holding-home|holding-institutional-pages|holding-blog|holding-strategic-companies|knowledge-hub|knowledge-hub-load|lms-core|knowledge-intelligence|retrieval|neurofrigo-ai|ai-experience|tutor-ia|enterprise-ai|enterprise-ai-epic11|commercial-ia|commercial-ia-epic12|engineering-ia|engineering-ia-epic13|student-intelligence|student-intelligence-epic14|adaptive-learning|adaptive-learning-epic15|deepseek-agents|epic16-e2e-users]"
     exit 1
     ;;
 esac
