@@ -203,3 +203,5 @@ Harness: `pnpm --filter @omnia/admin homolog:r01-http-acl` (TLS leaf do Node loc
 ### 🔴 OMNIA PLATFORM AI V3 RELEASE CANDIDATE NO-GO — VER PENDÊNCIAS
 
 Pendência P0: GitHub Actions **Build** / `pnpm build` Admin. Fresh migrate e Quality já não bloqueiam.
+
+**R0.2:** ver [`OMNIA_PLATFORM_RELEASE_READINESS_R0_2.md`](./OMNIA_PLATFORM_RELEASE_READINESS_R0_2.md). O histórico de NO-GO desta R0.1 permanece.
