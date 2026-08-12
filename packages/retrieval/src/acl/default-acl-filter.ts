@@ -29,6 +29,12 @@ export class DefaultAclFilter implements AclFilterPort {
         return false;
       }
 
+      // Public Concierge channel: only explicitly public (or unset legacy) published AI content.
+      if (subject.channel === 'portal_public') {
+        if (r.visibility === 'internal' || r.visibility === 'private') return false;
+        if (r.visibility && r.visibility !== 'public') return false;
+      }
+
       if (subject.tenantId && r.tenantId && r.tenantId !== subject.tenantId) {
         return false;
       }
@@ -38,7 +44,10 @@ export class DefaultAclFilter implements AclFilterPort {
         if (!allowed.includes(String(r.ownerCompanyId))) return false;
       }
 
-      if (subject.agentKey && subject.channel === 'portal_chat') {
+      if (
+        subject.agentKey &&
+        (subject.channel === 'portal_chat' || subject.channel === 'portal_public')
+      ) {
         const agentTags = (r.tags || []).filter((t) => t.startsWith('agent:'));
         if (agentTags.length > 0) {
           const needed = `agent:${subject.agentKey}`;

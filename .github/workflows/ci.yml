@@ -54,6 +54,9 @@ jobs:
       - name: EPIC 16 AI context resolution
         run: pnpm --filter @omnia/web test:epic16-ai-context
 
+      - name: EPIC 16 portal redirect
+        run: pnpm --filter @omnia/admin test:epic16-portal-redirect
+
       - name: Public companies contract tests
         run: pnpm --filter @omnia/admin test:public-companies
 

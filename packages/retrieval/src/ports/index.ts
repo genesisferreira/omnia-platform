@@ -33,7 +33,7 @@ export type AclSubject = {
   tenantId?: string | null;
   companyIds?: Array<string | number>;
   agentKey?: string | null;
-  channel?: 'portal_chat' | 'admin' | 'system' | 'command';
+  channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command';
 };
 
 export interface AclFilterPort {

@@ -3,12 +3,15 @@ import type { Endpoint, PayloadRequest } from 'payload';
 import { runNeurofrigoAsk, submitAiFeedback } from '../services/neurofrigo/ask';
 import {
   bindRequestScope,
+  hasValidInternalKey,
   isAuthResponse,
   requireNeurofrigoAuth,
   requireNeurofrigoServiceOrStaff,
   resolveSessionScope,
+  unauthorized,
 } from '../services/neurofrigo/auth-context';
 import { refreshNeurofrigoAiDashboard } from '../services/neurofrigo/dashboard';
+import { ensureAnonymousConciergePolicy } from '../services/enterprise/ensure-anonymous-policy';
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, {
@@ -310,8 +313,125 @@ export const neurofrigoSessionGetEndpoint: Endpoint = {
   },
 };
 
+/** Public Concierge chat — internal key + anonymous session only (no user elevation). */
+export const neurofrigoPublicChatEndpoint: Endpoint = {
+  path: '/omnia/ai/public-chat',
+  method: 'post',
+  handler: async (req) => {
+    if (!hasValidInternalKey(req)) return unauthorized();
+
+    const body = await readJson(req);
+    const question = String(body.question || body.text || '').trim();
+    if (!question) return json({ ok: false, error: 'question is required' }, 400);
+
+    const anonymousSessionId = String(body.anonymousSessionId || '').trim();
+    if (!anonymousSessionId || anonymousSessionId.length < 16 || anonymousSessionId.length > 80) {
+      return json({ ok: false, error: 'anonymousSessionId required' }, 400);
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(anonymousSessionId)) {
+      return json({ ok: false, error: 'invalid anonymousSessionId' }, 400);
+    }
+
+    const requestedAssistant =
+      body.assistantId != null ? String(body.assistantId).trim().toLowerCase() : 'concierge';
+    if (requestedAssistant !== 'concierge' && requestedAssistant !== 'auto') {
+      return json({ ok: false, error: 'ASSISTANT_FORBIDDEN:public_concierge_only' }, 403);
+    }
+
+    const anonUserId = `anon:${anonymousSessionId}`;
+
+    // Continuations must belong to this anonymous id (never authenticated user sessions).
+    if (body.sessionId != null && body.sessionId !== '') {
+      try {
+        const existing = await req.payload.findByID({
+          collection: 'ai-sessions',
+          id: body.sessionId as string | number,
+          depth: 0,
+          overrideAccess: true,
+        });
+        const filters =
+          existing.filters && typeof existing.filters === 'object'
+            ? (existing.filters as Record<string, unknown>)
+            : {};
+        const identity =
+          filters.identity && typeof filters.identity === 'object'
+            ? (filters.identity as Record<string, unknown>)
+            : {};
+        const owner = String(identity.userId || '');
+        if (existing.user != null || owner !== anonUserId) {
+          return json({ ok: false, error: 'FORBIDDEN' }, 403);
+        }
+      } catch {
+        return json({ ok: false, error: 'NOT_FOUND' }, 404);
+      }
+    }
+
+    await ensureAnonymousConciergePolicy(req.payload);
+
+    let result;
+    try {
+      result = await runNeurofrigoAsk(req.payload, {
+        question,
+        sessionId: (body.sessionId as string | number | null) ?? null,
+        assistantId: 'concierge',
+        orchestrate: true,
+        channel: 'portal_public',
+        identity: {
+          userId: anonUserId,
+          role: 'anonymous',
+          tenantId: null,
+          companyIds: [],
+          language: body.language != null ? String(body.language) : 'pt-BR',
+          profileLabel: 'Visitante · Concierge',
+        },
+        course: {
+          courseId: null,
+          courseTitle: null,
+          moduleId: null,
+          moduleTitle: null,
+          lessonId: null,
+          lessonTitle: null,
+          lessonObjectives: null,
+          ownerCompanyId: null,
+        },
+        topK: body.topK != null ? Number(body.topK) : undefined,
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith('ASSISTANT_FORBIDDEN')) {
+        return json({ ok: false, error: err.message }, 403);
+      }
+      if (err instanceof Error && err.message.includes('DEEPSEEK_API_KEY_MISSING')) {
+        return json({ ok: false, error: 'PROVIDER_UNAVAILABLE:DeepSeek key missing' }, 503);
+      }
+      throw err;
+    }
+
+    return json({
+      ok: true,
+      data: {
+        sessionId: result.sessionId,
+        assistant: result.assistantKey,
+        specialistLabel: result.specialistLabel ?? null,
+        model: result.answer.model,
+        provider: result.answer.provider,
+        text: result.answer.text,
+        formattedText: result.answer.formattedText,
+        sources: result.answer.sources,
+        groundingScore: result.answer.grounding?.score ?? null,
+        explainability: result.answer.explainability,
+        status: result.answer.status,
+        errorCode: result.answer.errorCode,
+        latency: result.answer.tookMs,
+        policyDecision: result.policyDecision ?? null,
+        channel: 'portal_public',
+      },
+    });
+  },
+};
+
 export const neurofrigoEndpoints = [
   neurofrigoChatEndpoint,
+  neurofrigoPublicChatEndpoint,
   neurofrigoFeedbackEndpoint,
   neurofrigoDashboardRefreshEndpoint,
   neurofrigoSessionsListEndpoint,

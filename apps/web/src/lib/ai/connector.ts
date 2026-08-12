@@ -82,6 +82,44 @@ function mapBuildError(built: { error: string; status: number }): AiChatResult {
   return { ok: false, status: built.status, data: null, error: built.error };
 }
 
+export async function fetchAiPublicChat(body: {
+  question: string;
+  anonymousSessionId: string;
+  sessionId?: string | number | null;
+  assistantId?: string | null;
+  language?: string | null;
+}): Promise<AiChatResult> {
+  let secret: string;
+  try {
+    secret = getInternalApiConfig().secret;
+  } catch {
+    return { ok: false, status: 503, data: null, error: 'INTERNAL_MISCONFIGURED' };
+  }
+
+  const adminBase = getAdminBaseUrl();
+  const response = await fetch(`${adminBase}/api/omnia/ai/public-chat`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-omnia-internal-key': secret,
+    },
+    body: JSON.stringify({
+      question: body.question,
+      anonymousSessionId: body.anonymousSessionId,
+      sessionId: body.sessionId ?? null,
+      assistantId: body.assistantId ?? 'concierge',
+      language: body.language ?? 'pt-BR',
+    }),
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'AI_PUBLIC_RUNTIME_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
 export async function fetchAiChat(body: AiChatPayload): Promise<AiChatResult> {
   const built = await buildInternalHeaders();
   if ('error' in built) return mapBuildError(built);

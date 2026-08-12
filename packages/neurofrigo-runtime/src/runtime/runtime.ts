@@ -70,7 +70,7 @@ export class NeurofrigoRuntime {
             topK: request.topK ?? this.limits.maxContextChunks,
           },
           {
-            channel: 'portal_chat',
+            channel: request.channel || 'portal_chat',
             role: context.role,
             userId: context.userId,
             tenantId: context.tenantId,

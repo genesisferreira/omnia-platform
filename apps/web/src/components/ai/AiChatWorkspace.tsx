@@ -7,6 +7,8 @@ import type { AiChatData, AiTurn, AskAiContext, AssistantOption } from '@/compon
 export type AiChatWorkspaceProps = {
   context: AskAiContext;
   variant?: 'embedded' | 'command' | 'dock';
+  /** public = Concierge anonymous (no login). */
+  mode?: 'authenticated' | 'public';
   sessionId?: string | number | null;
   turns?: AiTurn[];
   assistantId?: string;
@@ -24,18 +26,29 @@ const DEFAULT_SUGGESTIONS = [
   'Resuma o que é mais importante agora.',
 ];
 
+const PUBLIC_SUGGESTIONS = [
+  'Conhecer cursos',
+  'Conhecer serviços',
+  'Falar sobre refrigeração',
+  'Conhecer o Neurofrigo',
+  'Encontrar a empresa certa do ecossistema',
+];
+
 export function AiChatWorkspace({
   context,
   variant = 'embedded',
+  mode = 'authenticated',
   sessionId: controlledSessionId,
   turns: controlledTurns,
   assistantId: controlledAssistantId,
   onSessionIdChange,
   onTurnsChange,
   onAssistantIdChange,
-  suggestions = DEFAULT_SUGGESTIONS,
+  suggestions,
   className,
 }: AiChatWorkspaceProps) {
+  const isPublic = mode === 'public';
+  const resolvedSuggestions = suggestions ?? (isPublic ? PUBLIC_SUGGESTIONS : DEFAULT_SUGGESTIONS);
   const baseId = useId();
   const [internalSessionId, setInternalSessionId] = useState<string | number | null>(null);
   const [internalTurns, setInternalTurns] = useState<AiTurn[]>([]);
@@ -71,6 +84,19 @@ export function AiChatWorkspace({
   }
 
   useEffect(() => {
+    if (isPublic) {
+      setAssistants([
+        {
+          id: 'concierge',
+          key: 'concierge',
+          name: 'Concierge',
+          description: 'Atendimento institucional Omnia Frigo',
+          category: 'concierge',
+        },
+      ]);
+      setAssistantId('concierge');
+      return;
+    }
     const qs = new URLSearchParams();
     if (context.courseId != null && context.courseId !== '') {
       qs.set('courseId', String(context.courseId));
@@ -93,7 +119,7 @@ export function AiChatWorkspace({
       })
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load on context change only
-  }, [context.courseId, context.ownerCompanyId]);
+  }, [context.courseId, context.ownerCompanyId, isPublic]);
 
   function newSession() {
     setSessionId(null);
@@ -118,23 +144,33 @@ export function AiChatWorkspace({
     setError(null);
     startTransition(async () => {
       try {
-        const res = await fetch('/api/ai/chat', {
+        const endpoint = isPublic ? '/api/ai/public-chat' : '/api/ai/chat';
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            question: q,
-            sessionId,
-            assistantId,
-            courseId: context.courseId ?? null,
-            courseTitle: context.courseTitle ?? null,
-            moduleId: context.moduleId ?? null,
-            moduleTitle: context.moduleTitle ?? null,
-            lessonId: context.lessonId ?? null,
-            lessonTitle: context.lessonTitle ?? null,
-            lessonObjectives: context.lessonObjectives ?? null,
-            ownerCompanyId: context.ownerCompanyId ?? null,
-            language: context.language || 'pt-BR',
-          }),
+          body: JSON.stringify(
+            isPublic
+              ? {
+                  question: q,
+                  sessionId,
+                  assistantId: 'concierge',
+                  language: context.language || 'pt-BR',
+                }
+              : {
+                  question: q,
+                  sessionId,
+                  assistantId,
+                  courseId: context.courseId ?? null,
+                  courseTitle: context.courseTitle ?? null,
+                  moduleId: context.moduleId ?? null,
+                  moduleTitle: context.moduleTitle ?? null,
+                  lessonId: context.lessonId ?? null,
+                  lessonTitle: context.lessonTitle ?? null,
+                  lessonObjectives: context.lessonObjectives ?? null,
+                  ownerCompanyId: context.ownerCompanyId ?? null,
+                  language: context.language || 'pt-BR',
+                },
+          ),
         });
         const json = (await res.json()) as { ok?: boolean; data?: AiChatData; error?: string };
         if (!res.ok || !json.ok || !json.data) {
@@ -200,28 +236,41 @@ export function AiChatWorkspace({
         }`}
       >
         <div className="space-y-2 min-w-0 flex-1">
-          <label className="block text-sm font-medium" htmlFor={`${baseId}-assistant`}>
-            Conversar com
-          </label>
-          <select
-            id={`${baseId}-assistant`}
-            value={assistantId}
-            onChange={(e) => changeAssistant(e.target.value)}
-            className={`w-full max-w-md rounded-md border px-3 py-2 text-sm ${
-              variant === 'embedded'
-                ? 'border-border bg-background'
-                : 'border-zinc-700 bg-zinc-900 text-zinc-100'
-            }`}
-            style={selected?.color ? { borderColor: selected.color } : undefined}
-            aria-label="Selecionar assistente"
-          >
-            <option value="auto">Automático (recomendado)</option>
-            {assistants.map((a) => (
-              <option key={a.key} value={a.key}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+          {isPublic ? (
+            <div>
+              <p className="text-sm font-medium">Concierge Omnia</p>
+              <p
+                className={`text-xs ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-500'}`}
+              >
+                Atendimento institucional — cursos, serviços e refrigeração.
+              </p>
+            </div>
+          ) : (
+            <>
+              <label className="block text-sm font-medium" htmlFor={`${baseId}-assistant`}>
+                Conversar com
+              </label>
+              <select
+                id={`${baseId}-assistant`}
+                value={assistantId}
+                onChange={(e) => changeAssistant(e.target.value)}
+                className={`w-full max-w-md rounded-md border px-3 py-2 text-sm ${
+                  variant === 'embedded'
+                    ? 'border-border bg-background'
+                    : 'border-zinc-700 bg-zinc-900 text-zinc-100'
+                }`}
+                style={selected?.color ? { borderColor: selected.color } : undefined}
+                aria-label="Selecionar assistente"
+              >
+                <option value="auto">Automático (recomendado)</option>
+                {assistants.map((a) => (
+                  <option key={a.key} value={a.key}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
           <p
             className={`text-sm ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-400'}`}
           >
@@ -255,10 +304,12 @@ export function AiChatWorkspace({
         {turns.length === 0 ? (
           <div className="space-y-4 py-6">
             <h3 className={`text-lg font-semibold ${variant === 'embedded' ? '' : 'text-zinc-50'}`}>
-              Como posso ajudar?
+              {isPublic
+                ? 'Olá, sou o assistente da Omnia Frigo. Como posso ajudar?'
+                : 'Como posso ajudar?'}
             </h3>
             <div className="flex flex-wrap gap-2">
-              {suggestions.map((s) => (
+              {resolvedSuggestions.map((s) => (
                 <button
                   key={s}
                   type="button"

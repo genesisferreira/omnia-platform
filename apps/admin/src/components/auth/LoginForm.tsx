@@ -14,6 +14,12 @@ import {
   Input,
 } from '@omnia/ui';
 
+import {
+  ADMIN_PANEL_ROLES,
+  isPortalDestination,
+  PORTAL_ROLES,
+  safePortalNextPath,
+} from '@/lib/portal-redirect';
 import { safeRedirectPath } from '@/lib/safe-redirect';
 
 function mapLoginError(status: number, payloadMessage?: string): string {
@@ -31,6 +37,27 @@ function mapLoginError(status: number, payloadMessage?: string): string {
 
 function portalBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_APP_URL || 'https://omniafrigo.com.br').replace(/\/$/, '');
+}
+
+/** Top-level form POST so Portal can Set-Cookie on its own domain. */
+function establishPortalSession(token: string, nextPath: string) {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `${portalBaseUrl()}/api/auth/establish`;
+  form.style.display = 'none';
+
+  const tokenInput = document.createElement('input');
+  tokenInput.name = 'token';
+  tokenInput.value = token;
+  form.appendChild(tokenInput);
+
+  const nextInput = document.createElement('input');
+  nextInput.name = 'next';
+  nextInput.value = nextPath;
+  form.appendChild(nextInput);
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export function LoginForm() {
@@ -55,6 +82,7 @@ export function LoginForm() {
       });
 
       const payload = (await response.json().catch(() => null)) as {
+        token?: string;
         user?: { role?: string; accountStatus?: string };
         errors?: Array<{ message?: string }>;
         message?: string;
@@ -62,7 +90,6 @@ export function LoginForm() {
 
       if (!response.ok) {
         const technical = payload?.errors?.[0]?.message || payload?.message;
-        // Mensagem neutra ao usuário; status técnico permanece no Network/logs.
         setError(mapLoginError(response.status, technical));
         setPending(false);
         return;
@@ -78,20 +105,34 @@ export function LoginForm() {
         return;
       }
 
-      const role = payload?.user?.role;
-      if (role === 'client') {
-        window.location.assign(`${portalBaseUrl()}/minha-conta`);
+      const role = String(payload?.user?.role || '');
+      const token = typeof payload?.token === 'string' ? payload.token : '';
+      const rawNext = searchParams.get('next');
+      const portalNext = safePortalNextPath(rawNext, '/ia');
+
+      // Portal roles always land on the Web Portal (never Admin /area placeholders).
+      if (PORTAL_ROLES.has(role)) {
+        if (!token) {
+          setError('Sessão inválida. Tente novamente.');
+          setPending(false);
+          return;
+        }
+        establishPortalSession(token, portalNext);
         return;
       }
 
-      if (role === 'partner' || role === 'instructor' || role === 'student') {
-        router.replace(`/area/${role}`);
-        router.refresh();
-        return;
-      }
-
-      if (role === 'super_admin' || role === 'admin' || role === 'editor') {
-        router.replace(safeRedirectPath(searchParams.get('next')));
+      if (ADMIN_PANEL_ROLES.has(role)) {
+        // Staff who started login from Portal (`next=/ia`, cursos, etc.) → Portal.
+        if (rawNext && isPortalDestination(rawNext)) {
+          if (!token) {
+            setError('Sessão inválida. Tente novamente.');
+            setPending(false);
+            return;
+          }
+          establishPortalSession(token, portalNext);
+          return;
+        }
+        router.replace(safeRedirectPath(rawNext));
         router.refresh();
         return;
       }

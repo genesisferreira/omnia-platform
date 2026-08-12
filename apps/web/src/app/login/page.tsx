@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath = Array.isArray(rawNext) ? rawNext[0] : rawNext;
   redirect(
     getAdminLoginUrl(
-      typeof nextPath === 'string' && nextPath.startsWith('/') ? nextPath : '/minha-conta',
+      typeof nextPath === 'string' && nextPath.startsWith('/') ? nextPath : '/ia',
     ),
   );
 }

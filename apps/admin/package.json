@@ -75,6 +75,7 @@
     "homolog:e15-adaptive-learning": "tsx src/scripts/homolog-e15-adaptive-learning.ts",
     "test:adaptive-learning": "tsx --test ../../packages/adaptive-learning/src/**/test-*.ts && tsx --test src/scripts/test-adaptive-learning.ts",
     "test:neurofrigo-auth-acl": "tsx --test src/scripts/test-neurofrigo-auth-acl.ts",
+    "test:epic16-portal-redirect": "tsx --test src/scripts/test-epic16-portal-redirect.ts",
     "homolog:r01-http-acl": "tsx src/scripts/homolog-r01-http-acl.ts",
     "seed:deepseek-agents": "tsx src/scripts/seed-deepseek-agents.ts",
     "seed:epic16-e2e-users": "tsx src/scripts/seed-epic16-e2e-users.ts",

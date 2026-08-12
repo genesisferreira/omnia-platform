@@ -65,7 +65,7 @@ export function AccountNav({ className }: AccountNavProps) {
 
   return (
     <Button asChild size="sm" variant="outline" className={className}>
-      <a href={getAdminLoginUrl()}>Entrar na plataforma</a>
+      <a href={getAdminLoginUrl('/ia')}>Entrar na plataforma</a>
     </Button>
   );
 }

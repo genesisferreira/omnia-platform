@@ -38,6 +38,8 @@ export type RuntimeRequest = {
   /** Histórico da sessão atual apenas. */
   conversationHistory?: ConversationTurn[];
   sessionId?: string | number | null;
+  /** Retrieval ACL channel (public Concierge uses portal_public). */
+  channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command';
 };
 
 export type BuiltContext = {

@@ -38,6 +38,14 @@ const IN_SCOPE_HINTS = [
   /\bsuporte/i,
   /\bcomercial/i,
   /\bproposta/i,
+  /\brenova[cç]/i,
+  /\bfred\b/i,
+  /\bcte\b/i,
+  /\befici[eê]ncia/i,
+  /\bservi[cç]o/i,
+  /\becossistema/i,
+  /\bempresa/i,
+  /\bcontato/i,
 ];
 
 export function normalizeProfile(role?: string | null): ProfileKind {

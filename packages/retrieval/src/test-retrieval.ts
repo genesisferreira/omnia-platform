@@ -199,6 +199,42 @@ describe('retrieval domain', () => {
     assert.equal(filtered[0]?.record.chunkId, 'a');
   });
 
+  it('portal_public ACL keeps only public visibility', async () => {
+    const { DefaultAclFilter } = await import('./acl/default-acl-filter');
+    const filter = new DefaultAclFilter();
+    const filtered = await filter.filter(
+      [
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '1',
+            chunkId: 'pub',
+            text: 'omnia',
+            embedding: [1],
+            visibility: 'public',
+            allowAiUse: true,
+            publicationStatus: 'published',
+          }),
+        },
+        {
+          similarity: 1,
+          record: sampleRecord({
+            id: '2',
+            chunkId: 'int',
+            text: 'secret',
+            embedding: [1],
+            visibility: 'internal',
+            allowAiUse: true,
+            publicationStatus: 'published',
+          }),
+        },
+      ],
+      { channel: 'portal_public' },
+    );
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0]?.record.chunkId, 'pub');
+  });
+
   it('end-to-end retriever returns structured JSON without LLM', async () => {
     const provider = new DeterministicEmbeddingProvider({ dimensions: 64 });
     const store = new InMemoryVectorStore();
