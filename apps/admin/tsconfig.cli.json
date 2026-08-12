@@ -1,5 +1,10 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/scripts/**/*.ts", "src/seed/**/*.ts", "src/payload-types.ts", "payload.config.ts"],
+  "include": [
+    "src/scripts/**/*.ts",
+    "src/seed/**/*.ts",
+    "src/payload-types.ts",
+    "payload.config.ts"
+  ],
   "exclude": ["node_modules"]
 }
