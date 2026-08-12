@@ -21,11 +21,21 @@ function slugify(input: string): string {
     .slice(0, 80);
 }
 
+/** Payload types `knowledge-categories.parent` as numeric id (not string). */
+function toNumericRelationId(id: string | number | null | undefined): number | undefined {
+  if (typeof id === 'number' && Number.isFinite(id)) return id;
+  if (typeof id === 'string' && id.trim() !== '') {
+    const n = Number(id);
+    if (Number.isFinite(n)) return n;
+  }
+  return undefined;
+}
+
 async function ensureCategory(
   payload: Awaited<ReturnType<typeof import('payload').getPayload>>,
   name: string,
   parentId?: string | number | null,
-): Promise<string | number> {
+): Promise<number> {
   const slug = slugify(name) + (parentId != null ? `-p${parentId}` : '');
   const existing = await payload.find({
     collection: 'knowledge-categories',
@@ -33,19 +43,23 @@ async function ensureCategory(
     limit: 1,
     overrideAccess: true,
   });
-  if (existing.docs[0]) return existing.docs[0].id;
+  const existingId = toNumericRelationId(existing.docs[0]?.id);
+  if (existingId != null) return existingId;
+  const parent = toNumericRelationId(parentId);
   const created = await payload.create({
     collection: 'knowledge-categories',
     data: {
       name,
       slug,
       active: true,
-      parent: parentId ?? undefined,
-      sortOrder: parentId ? 100 : 50,
+      parent,
+      sortOrder: parent != null ? 100 : 50,
     },
     overrideAccess: true,
   });
-  return created.id;
+  const createdId = toNumericRelationId(created.id);
+  if (createdId == null) throw new Error(`E10_CATEGORY_ID:${slug}`);
+  return createdId;
 }
 
 async function ensureCompany(
@@ -382,7 +396,7 @@ async function main() {
 
     const categoryId = await ensureCategory(payload, classification.categoryName);
     categoriesCreated.add(classification.categoryName);
-    let subcategoryId: string | number | null = null;
+    let subcategoryId: number | null = null;
     if (classification.subcategoryName) {
       subcategoryId = await ensureCategory(payload, classification.subcategoryName, categoryId);
       categoriesCreated.add(classification.subcategoryName);
