@@ -179,8 +179,141 @@ export const neurofrigoDashboardRefreshEndpoint: Endpoint = {
   },
 };
 
+/** List AI sessions owned by the authenticated subject (EPIC 16 history). */
+export const neurofrigoSessionsListEndpoint: Endpoint = {
+  path: '/omnia/ai/sessions',
+  method: 'get',
+  handler: async (req) => {
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
+
+    const url = new URL(req.url || 'http://local');
+    const limit = Math.min(Number(url.searchParams.get('limit') || 30), 50);
+    const userNumeric = /^\d+$/.test(auth.userId) ? Number(auth.userId) : null;
+    if (userNumeric == null) {
+      return json({ ok: true, data: { sessions: [] } });
+    }
+
+    const session = await resolveSessionScope(req, auth);
+    const and: Array<{ user?: { equals: number }; tenant?: { equals: number } }> = [
+      { user: { equals: userNumeric } },
+    ];
+    if (session.tenantId && /^\d+$/.test(String(session.tenantId))) {
+      and.push({ tenant: { equals: Number(session.tenantId) } });
+    }
+
+    const found = await req.payload.find({
+      collection: 'ai-sessions',
+      where: { and },
+      sort: '-updatedAt',
+      limit,
+      overrideAccess: true,
+    });
+
+    return json({
+      ok: true,
+      data: {
+        sessions: found.docs.map((doc) => {
+          const row = doc as {
+            id: string | number;
+            question?: string;
+            answerText?: string | null;
+            status?: string | null;
+            intent?: string | null;
+            updatedAt?: string;
+            createdAt?: string;
+            course?: string | number | { id?: string | number } | null;
+          };
+          const course =
+            row.course == null
+              ? null
+              : typeof row.course === 'object'
+                ? (row.course.id ?? null)
+                : row.course;
+          return {
+            id: row.id,
+            question: row.question || '',
+            answerText: row.answerText ?? null,
+            status: row.status ?? null,
+            intent: row.intent ?? null,
+            updatedAt: row.updatedAt ?? null,
+            createdAt: row.createdAt ?? null,
+            courseId: course,
+          };
+        }),
+      },
+    });
+  },
+};
+
+/** Open one AI session if owned by the authenticated subject. */
+export const neurofrigoSessionGetEndpoint: Endpoint = {
+  path: '/omnia/ai/sessions/:id',
+  method: 'get',
+  handler: async (req) => {
+    const auth = requireNeurofrigoAuth(req);
+    if (isAuthResponse(auth)) return auth;
+
+    const idParam = req.routeParams?.id;
+    const sessionId = Array.isArray(idParam) ? idParam[0] : idParam;
+    if (sessionId == null || sessionId === '') {
+      return json({ ok: false, error: 'session id required' }, 400);
+    }
+
+    let doc;
+    try {
+      doc = await req.payload.findByID({
+        collection: 'ai-sessions',
+        id: sessionId,
+        overrideAccess: true,
+      });
+    } catch {
+      return json({ ok: false, error: 'NOT_FOUND' }, 404);
+    }
+
+    const owner =
+      doc.user == null
+        ? null
+        : typeof doc.user === 'object'
+          ? String((doc.user as { id?: string | number }).id ?? '')
+          : String(doc.user);
+    if (!owner || owner !== String(auth.userId)) {
+      return json({ ok: false, error: 'FORBIDDEN' }, 403);
+    }
+
+    const session = await resolveSessionScope(req, auth);
+    const sessionTenant =
+      doc.tenant == null
+        ? null
+        : typeof doc.tenant === 'object'
+          ? String((doc.tenant as { id?: string | number }).id ?? '')
+          : String(doc.tenant);
+    if (session.tenantId && sessionTenant && String(session.tenantId) !== sessionTenant) {
+      return json({ ok: false, error: 'FORBIDDEN' }, 403);
+    }
+
+    return json({
+      ok: true,
+      data: {
+        id: doc.id,
+        question: doc.question,
+        answerText: doc.answerText,
+        status: doc.status,
+        intent: doc.intent,
+        turns: doc.turns ?? null,
+        sources: doc.sources ?? null,
+        explainability: doc.explainability ?? null,
+        updatedAt: doc.updatedAt,
+        createdAt: doc.createdAt,
+      },
+    });
+  },
+};
+
 export const neurofrigoEndpoints = [
   neurofrigoChatEndpoint,
   neurofrigoFeedbackEndpoint,
   neurofrigoDashboardRefreshEndpoint,
+  neurofrigoSessionsListEndpoint,
+  neurofrigoSessionGetEndpoint,
 ];

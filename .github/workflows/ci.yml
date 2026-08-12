@@ -51,6 +51,9 @@ jobs:
       - name: AI auth ordering (Portal BFF)
         run: pnpm --filter @omnia/web test:ai-auth-ordering
 
+      - name: EPIC 16 AI context resolution
+        run: pnpm --filter @omnia/web test:epic16-ai-context
+
       - name: Public companies contract tests
         run: pnpm --filter @omnia/admin test:public-companies
 

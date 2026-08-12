@@ -244,3 +244,37 @@ export async function fetchAiFeedback(body: {
   }
   return { ok: true, status: response.status, data };
 }
+
+export async function fetchAiSessions(limit = 30): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) return mapBuildError(built);
+
+  const url = `${built.adminBase}/api/omnia/ai/sessions?limit=${encodeURIComponent(String(limit))}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'AI_SESSIONS_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}
+
+export async function fetchAiSession(sessionId: string | number): Promise<AiChatResult> {
+  const built = await buildInternalHeaders();
+  if ('error' in built) return mapBuildError(built);
+
+  const url = `${built.adminBase}/api/omnia/ai/sessions/${encodeURIComponent(String(sessionId))}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: built.headers,
+    cache: 'no-store',
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    return { ok: false, status: response.status, data, error: 'AI_SESSION_ERROR' };
+  }
+  return { ok: true, status: response.status, data };
+}

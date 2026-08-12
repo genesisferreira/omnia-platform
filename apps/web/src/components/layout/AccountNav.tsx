@@ -52,9 +52,14 @@ export function AccountNav({ className }: AccountNavProps) {
 
   if (authenticated) {
     return (
-      <Button asChild size="sm" variant="outline" className={className}>
-        <Link href="/minha-conta">Minha conta</Link>
-      </Button>
+      <div className={`flex items-center gap-2 ${className || ''}`}>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/ia">Omnia AI</Link>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/minha-conta">Minha conta</Link>
+        </Button>
+      </div>
     );
   }
 

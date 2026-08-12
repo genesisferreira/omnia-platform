@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 import '@omnia/ui/globals.css';
 
-import { PathAwareChrome } from '@/components/layout/PathAwareChrome';
+import { PortalAiShell } from '@/components/layout/PathAwareChrome';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { JsonLd } from '@/components/seo/JsonLd';
 import {
@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="font-sans antialiased">
         <JsonLd data={[buildOrganizationJsonLd({ hostname }), buildWebSiteJsonLd({ hostname })]} />
         <SkipLink />
-        <PathAwareChrome>{children}</PathAwareChrome>
+        <PortalAiShell>{children}</PortalAiShell>
       </body>
     </html>
   );
