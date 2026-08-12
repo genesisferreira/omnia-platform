@@ -1,5 +1,6 @@
 import type { RuntimeAnswer, RuntimeRequest, GuardrailLimits } from '../domain/types';
 import { DEFAULT_GUARDRAIL_LIMITS } from '../domain/types';
+import { buildCapabilityAnswer, isCapabilityQuestion } from '../domain/capability-response';
 import { ContextBuilder } from '../context/context-builder';
 import { PromptBuilder } from '../prompt/prompt-builder';
 import { formatResponse } from '../formatter/response-formatter';
@@ -53,6 +54,49 @@ export class NeurofrigoRuntime {
     const context = this.contextBuilder.build(request);
     const meta = this.llm.metadata();
     const intentHint = classifyIntent(request.question);
+    const assistantKey = request.assistantKey ?? null;
+
+    if (isCapabilityQuestion(request.question)) {
+      const text = buildCapabilityAnswer({
+        assistantKey,
+        assistantName: request.assistantMeta?.name,
+        description: request.assistantMeta?.description,
+        capabilities: request.assistantMeta?.capabilities,
+        channel: request.channel,
+      });
+      const formatted = formatResponse({
+        text,
+        intent: intentHint,
+        status: 'ok',
+      });
+      return {
+        text,
+        formattedText: formatted,
+        sources: [],
+        confidence: 1,
+        tookMs: Date.now() - started,
+        model: meta.model,
+        provider: meta.name,
+        promptTokens: 0,
+        completionTokens: Math.ceil(text.length / 4),
+        totalTokens: Math.ceil(text.length / 4),
+        estimatedCostUsd: 0,
+        status: 'ok',
+        errorCode: null,
+        intent: intentHint,
+        grounding: null,
+        explainability: {
+          sourceCount: 0,
+          avgScore: 0,
+          confidence: 1,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: intentHint,
+          justification: 'Resposta de capacidades a partir do Assistant Registry (sem retrieval).',
+        },
+      };
+    }
 
     try {
       const retrievalStarted = Date.now();
@@ -75,6 +119,7 @@ export class NeurofrigoRuntime {
             userId: context.userId,
             tenantId: context.tenantId,
             companyIds: context.companyIds,
+            agentKey: assistantKey,
           },
         ),
         this.limits.timeoutMs,
@@ -85,6 +130,11 @@ export class NeurofrigoRuntime {
         this.buildRetrievalQuery(request),
         retrieval.results,
         this.limits,
+        {
+          assistantKey,
+          channel: request.channel,
+          courseId: context.courseId,
+        },
       );
 
       if (!guarded.ok) {

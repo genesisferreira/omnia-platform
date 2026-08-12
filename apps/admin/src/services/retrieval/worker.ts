@@ -19,6 +19,24 @@ function relId(value: unknown): string | null {
   return String(value);
 }
 
+/** Map Knowledge Hub securityClassification → retrieval visibility (ACL channel). */
+function mapSecurityClassificationToVisibility(classification: string | null | undefined): string {
+  switch ((classification || '').toUpperCase()) {
+    case 'PUBLIC':
+      return 'public';
+    case 'STUDENT':
+      return 'enrolled';
+    case 'TEACHER_MANAGER':
+    case 'CLIENT_PARTNER':
+    case 'INTERNAL':
+      return 'internal';
+    case 'INTERNAL_RESTRICTED':
+      return 'internal_restricted';
+    default:
+      return 'enrolled';
+  }
+}
+
 type QueueDoc = {
   id: string | number;
   status?: string;
@@ -184,6 +202,7 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
       allowAiUse = doc.allowAiUse !== false;
       publicationStatus = doc.publicationStatus || publicationStatus;
       status = doc.status || status;
+      visibility = mapSecurityClassificationToVisibility(doc.securityClassification);
       if (doc.securityClassification === 'INTERNAL_RESTRICTED') {
         allowAiUse = false;
         visibility = 'internal_restricted';

@@ -33,7 +33,7 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
     let text: string;
     if (!sources.length) {
       text =
-        'Não encontrei essa informação no conteúdo autorizado deste curso. Posso responder apenas com base no material publicado.';
+        'Não encontrei essa informação na base autorizada disponível. Posso responder apenas com material publicado para o seu perfil.';
     } else {
       const bullets = sources.slice(0, 4).map((s, i) => {
         const excerpt = s.text.slice(0, 260).trim().replace(/\s+/g, ' ');

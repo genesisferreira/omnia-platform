@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  isPortalDestination,
-  PORTAL_ROLES,
-  safePortalNextPath,
-} from '../lib/portal-redirect';
+import { isPortalDestination, PORTAL_ROLES, safePortalNextPath } from '../lib/portal-redirect';
 
 describe('EPIC16 gap fix portal redirect', () => {
   it('maps safe next paths and blocks open redirects', () => {

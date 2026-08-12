@@ -40,6 +40,14 @@ export type RuntimeRequest = {
   sessionId?: string | number | null;
   /** Retrieval ACL channel (public Concierge uses portal_public). */
   channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command';
+  /** Assistant key for contextual fallbacks / capability answers. */
+  assistantKey?: string | null;
+  /** Optional registry metadata for meta questions (no RAG). */
+  assistantMeta?: {
+    name?: string | null;
+    description?: string | null;
+    capabilities?: string[] | null;
+  } | null;
 };
 
 export type BuiltContext = {
@@ -169,5 +177,5 @@ export const DEFAULT_GUARDRAIL_LIMITS: GuardrailLimits = {
 
 export type HealthStatus = { ok: boolean; detail: string };
 
-export const NOT_FOUND_MESSAGE =
-  'Não encontrei essa informação no conteúdo autorizado deste curso. Posso responder apenas com base no material publicado.';
+export { NOT_FOUND_MESSAGE, resolveNotFoundMessage } from './not-found-message';
+export { buildCapabilityAnswer, isCapabilityQuestion } from './capability-response';

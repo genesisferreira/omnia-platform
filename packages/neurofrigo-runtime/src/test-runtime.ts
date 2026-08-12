@@ -223,4 +223,49 @@ describe('neurofrigo-runtime experience v2', () => {
     assert.equal(nf.status, 'not_found');
     assert.equal(nf.text, NOT_FOUND_MESSAGE);
   });
+
+  it('capability questions skip retrieval', async () => {
+    let searched = false;
+    const retrieval: RetrievalPort = {
+      async search() {
+        searched = true;
+        return {
+          query: '',
+          tookMs: 0,
+          provider: 'test',
+          model: 'test',
+          dimensions: 1,
+          filters: {},
+          results: [],
+          recoveredTokens: 0,
+          candidateCount: 0,
+          afterAclCount: 0,
+        };
+      },
+    };
+    const runtime = new NeurofrigoRuntime({
+      retrieval,
+      llm: new GroundedExtractiveProvider(),
+    });
+    const answer = await runtime.ask({
+      question: 'Como você pode me ajudar?',
+      assistantKey: 'concierge',
+      channel: 'portal_public',
+      identity: { role: 'anonymous', language: 'pt-BR' },
+      course: {},
+    });
+    assert.equal(searched, false);
+    assert.equal(answer.status, 'ok');
+    assert.match(answer.text, /Concierge|ajudar|cursos/i);
+  });
+
+  it('not-found message is contextual for public channel', async () => {
+    const { resolveNotFoundMessage } = await import('./domain/not-found-message');
+    assert.match(
+      resolveNotFoundMessage({ channel: 'portal_public', assistantKey: 'concierge' }),
+      /base pública/i,
+    );
+    assert.match(resolveNotFoundMessage({ assistantKey: 'engineering' }), /base técnica/i);
+    assert.match(resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }), /deste curso/i);
+  });
 });

@@ -235,6 +235,40 @@ describe('retrieval domain', () => {
     assert.equal(filtered[0]?.record.chunkId, 'pub');
   });
 
+  it('soft scope keeps shared catalog rows when tenant/company/course are set', async () => {
+    const provider = new DeterministicEmbeddingProvider({ dimensions: 64 });
+    const store = new InMemoryVectorStore();
+    const emb = await provider.generate('controle CO2 transcrítico refrigeração');
+    await store.insert(
+      sampleRecord({
+        id: 'shared-1',
+        chunkId: 'shared-chunk',
+        text: 'Controle CO2 transcrítico em sistemas de refrigeração industrial.',
+        embedding: emb,
+        tenantId: null,
+        ownerCompanyId: null,
+        courseId: null,
+        visibility: 'enrolled',
+        allowAiUse: true,
+        publicationStatus: 'published',
+      }),
+    );
+    const retriever = new Retriever({ embeddingProvider: provider, vectorStore: store });
+    const result = await retriever.retrieve(
+      {
+        text: 'controle CO2 transcrítico',
+        tenantId: '4',
+        ownerCompanyId: '10',
+        courseId: '1',
+        topK: 3,
+      },
+      { channel: 'portal_chat', tenantId: '4' },
+    );
+    assert.ok(result.candidateCount >= 1);
+    assert.ok(result.afterAclCount >= 1);
+    assert.ok(result.results.length >= 1);
+  });
+
   it('end-to-end retriever returns structured JSON without LLM', async () => {
     const provider = new DeterministicEmbeddingProvider({ dimensions: 64 });
     const store = new InMemoryVectorStore();

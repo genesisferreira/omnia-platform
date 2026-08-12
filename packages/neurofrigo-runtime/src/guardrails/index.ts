@@ -1,7 +1,7 @@
 import type { CitationResult } from '@omnia/retrieval';
 
 import type { GuardrailLimits } from '../domain/types';
-import { DEFAULT_GUARDRAIL_LIMITS, NOT_FOUND_MESSAGE } from '../domain/types';
+import { DEFAULT_GUARDRAIL_LIMITS, resolveNotFoundMessage } from '../domain/types';
 
 export type GuardrailDecision =
   | { ok: true; chunks: CitationResult[] }
@@ -10,6 +10,12 @@ export type GuardrailDecision =
       code: 'EMPTY_QUESTION' | 'NO_SOURCES' | 'LOW_CONFIDENCE' | 'OFF_TOPIC';
       message: string;
     };
+
+export type GuardrailContext = {
+  assistantKey?: string | null;
+  channel?: string | null;
+  courseId?: string | null;
+};
 
 /** Tokens genéricos que não provam relevância ao conteúdo técnico. */
 const GENERIC_TOKENS = new Set([
@@ -82,11 +88,14 @@ export function applyRetrievalGuardrails(
   question: string,
   chunks: CitationResult[],
   limits: GuardrailLimits = DEFAULT_GUARDRAIL_LIMITS,
+  context: GuardrailContext = {},
 ): GuardrailDecision {
   const q = question.trim();
   if (!q) {
     return { ok: false, code: 'EMPTY_QUESTION', message: 'Pergunta vazia.' };
   }
+
+  const notFound = resolveNotFoundMessage(context);
 
   const filtered = chunks
     .filter((c) => (c.similarity ?? c.score) >= limits.minSimilarity)
@@ -96,7 +105,7 @@ export function applyRetrievalGuardrails(
     return {
       ok: false,
       code: 'NO_SOURCES',
-      message: NOT_FOUND_MESSAGE,
+      message: notFound,
     };
   }
 
@@ -105,7 +114,7 @@ export function applyRetrievalGuardrails(
     return {
       ok: false,
       code: 'LOW_CONFIDENCE',
-      message: NOT_FOUND_MESSAGE,
+      message: notFound,
     };
   }
 
@@ -113,7 +122,7 @@ export function applyRetrievalGuardrails(
     return {
       ok: false,
       code: 'OFF_TOPIC',
-      message: NOT_FOUND_MESSAGE,
+      message: notFound,
     };
   }
 

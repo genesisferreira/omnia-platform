@@ -19,6 +19,7 @@ export interface RetrievalPort {
       tenantId?: string | null;
       companyIds?: Array<string | number>;
       channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command';
+      agentKey?: string | null;
     },
   ): Promise<RetrievalResult>;
 }

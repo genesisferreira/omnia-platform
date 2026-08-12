@@ -71,6 +71,21 @@ function asTurns(value: unknown): ConversationTurn[] {
     .filter(Boolean) as ConversationTurn[];
 }
 
+function specialistLabelFromKey(key: string): string {
+  switch (key) {
+    case 'concierge':
+      return 'Concierge Omnia';
+    case 'tutor':
+      return 'Tutor';
+    case 'commercial':
+      return 'Assistente Comercial';
+    case 'engineering':
+      return 'Assistente de Engenharia';
+    default:
+      return key;
+  }
+}
+
 function blockedAnswer(message: string, code: string): RuntimeAnswer {
   return {
     text: message,
@@ -402,6 +417,18 @@ export async function runNeurofrigoAsk(
   const language = resolved?.language || request.identity.language || 'pt-BR';
   let answer = await runtime.ask({
     ...request,
+    assistantKey,
+    assistantMeta: resolved
+      ? {
+          name: resolved.assistant.name,
+          description: resolved.assistant.description,
+          capabilities: resolved.assistant.capabilities,
+        }
+      : {
+          name: specialistLabelFromKey(assistantKey),
+          description: null,
+          capabilities: null,
+        },
     identity: {
       ...request.identity,
       language,

@@ -278,20 +278,30 @@ export class PgVectorStore implements VectorStorePort {
     const params: unknown[] = [];
     let i = startIndex;
 
-    const add = (col: string, value: unknown) => {
+    const addExact = (col: string, value: unknown) => {
       parts.push(`${col} = $${i++}`);
       params.push(value);
     };
 
-    if (filters.tenantId) add('tenant_id', filters.tenantId);
-    if (filters.ownerCompanyId) add('owner_company_id', filters.ownerCompanyId);
-    if (filters.courseId) add('course_id', filters.courseId);
-    if (filters.lessonId) add('lesson_id', filters.lessonId);
-    if (filters.moduleId) add('module_id', filters.moduleId);
-    if (filters.language) add('language', filters.language);
-    if (filters.publicationStatus) add('publication_status', filters.publicationStatus);
-    if (filters.visibility) add('visibility', filters.visibility);
-    if (filters.status) add('status', filters.status);
+    /**
+     * Soft scope: shared catalog rows (NULL metadata) remain searchable.
+     * Aligns with InMemoryVectorStore — hard equality was zeroing all hits when
+     * vectors have tenant_id/owner_company_id/course_id NULL.
+     */
+    const addSoft = (col: string, value: unknown) => {
+      parts.push(`(${col} IS NULL OR ${col} = $${i++})`);
+      params.push(value);
+    };
+
+    if (filters.tenantId) addSoft('tenant_id', filters.tenantId);
+    if (filters.ownerCompanyId) addSoft('owner_company_id', filters.ownerCompanyId);
+    if (filters.courseId) addSoft('course_id', filters.courseId);
+    if (filters.lessonId) addSoft('lesson_id', filters.lessonId);
+    if (filters.moduleId) addSoft('module_id', filters.moduleId);
+    if (filters.language) addSoft('language', filters.language);
+    if (filters.publicationStatus) addExact('publication_status', filters.publicationStatus);
+    if (filters.visibility) addExact('visibility', filters.visibility);
+    if (filters.status) addExact('status', filters.status);
     if (filters.allowAiUse === true) {
       parts.push(`(allow_ai_use IS DISTINCT FROM false)`);
     }
