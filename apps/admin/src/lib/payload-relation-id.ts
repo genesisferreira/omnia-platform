@@ -15,3 +15,11 @@ export function requirePayloadRelationId(id: string | number | null | undefined)
   }
   return n;
 }
+
+/** Next typecheck rejects Payload docs `as Record<string, unknown>` without unknown. */
+export function asUnknownRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+}

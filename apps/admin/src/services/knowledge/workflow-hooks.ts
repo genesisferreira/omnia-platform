@@ -129,7 +129,7 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
 
     if (!pipelineBypass && (toRaw === 'approved' || toRaw === 'published')) {
       const merged = {
-        ...(originalDoc as Record<string, unknown> | undefined),
+        ...(originalDoc as unknown as Record<string, unknown> | undefined),
         ...data,
       };
       const reviewNeeded = requiresHumanReview({
@@ -174,7 +174,9 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
         action: `knowledge.status.${fromRaw}_to_${toRaw}`,
         entityType: 'knowledge-documents',
         entityId: originalDoc?.id ?? null,
-        previousState: pickAuditSnapshot(originalDoc as Record<string, unknown> | undefined),
+        previousState: pickAuditSnapshot(
+          originalDoc as unknown as Record<string, unknown> | undefined,
+        ),
         nextState: pickAuditSnapshot({ ...(originalDoc as object), ...data } as Record<
           string,
           unknown
@@ -215,7 +217,7 @@ export const knowledgeDocumentBeforeChange: CollectionBeforeChangeHook = async (
           action: 'knowledge.acl_or_classification.updated',
           entityType: 'knowledge-documents',
           entityId: originalDoc.id,
-          previousState: pickAuditSnapshot(originalDoc as Record<string, unknown>),
+          previousState: pickAuditSnapshot(originalDoc as unknown as Record<string, unknown>),
           nextState: pickAuditSnapshot({ ...(originalDoc as object), ...data } as Record<
             string,
             unknown
@@ -248,7 +250,7 @@ export const knowledgeDocumentAfterChange: CollectionAfterChangeHook = async ({
     return doc;
   }
 
-  const docRecord = doc as Record<string, unknown>;
+  const docRecord = doc as unknown as Record<string, unknown>;
   await writeKnowledgeAudit(
     req.payload,
     {
@@ -276,7 +278,7 @@ export const knowledgeDocumentAfterDelete: CollectionAfterDeleteHook = async ({ 
     return;
   }
 
-  const docRecord = doc as Record<string, unknown>;
+  const docRecord = doc as unknown as Record<string, unknown>;
   await writeKnowledgeAudit(
     req.payload,
     {

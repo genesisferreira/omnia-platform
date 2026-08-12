@@ -10,7 +10,7 @@ import {
   type SipEvidenceInput,
 } from '@omnia/student-intelligence';
 
-import { requirePayloadRelationId } from '../../lib/payload-relation-id';
+import { asUnknownRecord, requirePayloadRelationId } from '../../lib/payload-relation-id';
 import { syncLearningProfile, syncStudentProfile } from '../tutor/profiles';
 import { loadCourseCatalog } from '../tutor/catalog';
 import { refreshSipDashboard } from './dashboard';
@@ -330,7 +330,7 @@ export async function getSipAssistantContext(
   }
 
   if (!found.docs[0]) return null;
-  return toAssistantContext(mapDocToTwin(found.docs[0] as Record<string, unknown>));
+  return toAssistantContext(mapDocToTwin(asUnknownRecord(found.docs[0])));
 }
 
 export async function getSipPortalView(

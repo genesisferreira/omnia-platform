@@ -1,6 +1,8 @@
 import type { Payload } from 'payload';
 import type { EngineeringProfile } from '@omnia/neurofrigo-engineering';
 
+import { asUnknownRecord } from '../../lib/payload-relation-id';
+
 function relId(value: unknown): string | null {
   if (value == null) return null;
   if (typeof value === 'object' && value && 'id' in value) {
@@ -38,9 +40,9 @@ export async function loadEngineeringProfile(
       overrideAccess: true,
     });
     if (!fallback.docs[0]) return null;
-    return mapProfile(fallback.docs[0] as Record<string, unknown>);
+    return mapProfile(asUnknownRecord(fallback.docs[0]));
   }
-  return mapProfile(d as Record<string, unknown>);
+  return mapProfile(asUnknownRecord(d));
 }
 
 function mapProfile(d: Record<string, unknown>): EngineeringProfile {

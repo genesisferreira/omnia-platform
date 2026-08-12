@@ -305,7 +305,7 @@ export async function processLearningResource(args: {
       depth: 0,
       overrideAccess: true,
       req,
-    })) as Record<string, unknown>;
+    })) as unknown as Record<string, unknown>;
 
     const mediaId = relId(resource.media as Rel);
     if (mediaId == null) throw new Error('LEARNING_RESOURCE_MEDIA_MISSING');
@@ -729,7 +729,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
     depth: 2,
     overrideAccess: true,
     req,
-  })) as Record<string, unknown>;
+  })) as unknown as Record<string, unknown>;
 
   const mediaId = relId(asset.media as Rel);
   if (mediaId == null) return { learningResourceId: null, processed: false };
@@ -775,7 +775,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
       depth: 2,
       overrideAccess: true,
       req,
-    })) as Record<string, unknown>;
+    })) as unknown as Record<string, unknown>;
     moduleId = relId(lesson.module as Rel);
     if (moduleId != null) {
       const mod = (await payload.findByID({
@@ -784,7 +784,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
         depth: 2,
         overrideAccess: true,
         req,
-      })) as Record<string, unknown>;
+      })) as unknown as Record<string, unknown>;
       courseId = relId(mod.course as Rel);
       if (courseId != null) {
         const course = (await payload.findByID({
@@ -793,7 +793,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
           depth: 0,
           overrideAccess: true,
           req,
-        })) as Record<string, unknown>;
+        })) as unknown as Record<string, unknown>;
         ownerCompanyId = relId(course.ownerCompany as Rel);
         instructorId = relId(course.instructor as Rel);
         category = typeof course.category === 'string' ? course.category : null;
