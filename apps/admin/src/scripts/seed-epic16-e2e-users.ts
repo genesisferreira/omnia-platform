@@ -101,10 +101,11 @@ const USERS: SeedUserSpec[] = [
 ];
 
 function assertStagingOnly(): void {
-  const nodeEnv = String(process.env.NODE_ENV || '').toLowerCase();
   const omniaEnv = String(process.env.OMNIA_ENV || process.env.APP_ENV || '').toLowerCase();
+  const target = String(process.env.OMNIA_TARGET || '').toLowerCase();
   const flag = String(process.env.OMNIA_ALLOW_E2E_SEED || '').toLowerCase();
-  if (nodeEnv === 'production' || omniaEnv === 'production') {
+  // NODE_ENV=production is expected in staging Docker (Next/Payload prodMigrations).
+  if (omniaEnv === 'production' || target === 'production') {
     throw new Error('ABORT: epic16-e2e-users refused on production environment');
   }
   if (flag !== '1' && flag !== 'true' && flag !== 'yes') {
