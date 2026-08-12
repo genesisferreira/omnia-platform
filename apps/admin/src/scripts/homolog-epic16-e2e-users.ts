@@ -209,8 +209,12 @@ async function main() {
     ok?: boolean;
     data?: { role?: string; userId?: string };
   } | null;
-  if (!ctxA.ok || !ctxAJson?.ok || ctxAJson.data?.role !== 'student') {
+  if (!ctxA.ok || !ctxAJson?.ok) {
     throw new Error(`AI_CONTEXT_FAIL_A:${ctxA.status}`);
+  }
+  const ctxRole = String(ctxAJson.data?.role || '');
+  if (ctxRole !== 'student') {
+    throw new Error(`AI_CONTEXT_ROLE_FAIL_A:${ctxRole}`);
   }
   console.log('AI_CONTEXT_OK');
 

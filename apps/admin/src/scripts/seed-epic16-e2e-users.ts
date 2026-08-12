@@ -220,6 +220,15 @@ async function main() {
       throw new Error(`${spec.passwordEnv} fails password policy: ${policy.error}`);
     }
 
+    // Local API without req.user triggers Users.beforeChange → force role=client.
+    // Act as super_admin so roles/accountStatus stick under overrideAccess.
+    const actor = {
+      id: 0,
+      collection: 'users' as const,
+      email: 'e2e.seed.actor@example.invalid',
+      role: 'super_admin' as const,
+    };
+
     const found = await payload.find({
       collection: 'users',
       where: { email: { equals: spec.email } },
@@ -243,6 +252,7 @@ async function main() {
         collection: 'users',
         id: found.docs[0].id,
         data,
+        user: actor,
         overrideAccess: true,
       });
       return { id: found.docs[0].id, created: false };
@@ -251,6 +261,7 @@ async function main() {
     const doc = await payload.create({
       collection: 'users',
       data,
+      user: actor,
       overrideAccess: true,
     });
     return { id: doc.id, created: true };
