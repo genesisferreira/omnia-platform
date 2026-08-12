@@ -1,9 +1,11 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
 import {
+  bindRequestScope,
   isAuthResponse,
   requireNeurofrigoAuth,
   requireNeurofrigoServiceOrStaff,
+  resolveSessionScope,
   resolveSubjectUserKey,
 } from '../services/neurofrigo/auth-context';
 import { runTutorAsk } from '../services/tutor/ask';
@@ -44,12 +46,20 @@ export const tutorChatEndpoint: Endpoint = {
     const subject = resolveSubjectUserKey(auth, body.userId != null ? String(body.userId) : null);
     if (isAuthResponse(subject)) return subject;
 
+    const session = await resolveSessionScope(req, auth);
+    const scope = bindRequestScope({
+      isStaff: auth.isStaff,
+      sessionTenantId: session.tenantId,
+      sessionCompanyIds: session.companyIds,
+      requestedTenantId: body.tenantId != null ? String(body.tenantId) : null,
+    });
+
     const result = await runTutorAsk(req.payload, {
       question,
       sessionId: (body.sessionId as string | number | null) ?? null,
       userId: subject.userKey,
       role: auth.role,
-      tenantId: body.tenantId != null ? String(body.tenantId) : null,
+      tenantId: scope.tenantId,
       language: body.language != null ? String(body.language) : 'pt-BR',
       courseId,
       courseTitle: body.courseTitle != null ? String(body.courseTitle) : null,
@@ -58,7 +68,11 @@ export const tutorChatEndpoint: Endpoint = {
       lessonId: body.lessonId != null ? String(body.lessonId) : null,
       lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
       lessonObjectives: body.lessonObjectives != null ? String(body.lessonObjectives) : null,
-      ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
+      ownerCompanyId: auth.isStaff
+        ? body.ownerCompanyId != null
+          ? String(body.ownerCompanyId)
+          : null
+        : (scope.companyIds[0] ?? null),
       requestStudyPlan: Boolean(body.requestStudyPlan),
       objective: body.objective != null ? String(body.objective) : null,
     });

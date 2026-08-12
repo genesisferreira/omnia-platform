@@ -1,10 +1,12 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
 import {
+  bindRequestScope,
   forbidden,
   isAuthResponse,
   requireNeurofrigoAuth,
   requireNeurofrigoServiceOrStaff,
+  resolveSessionScope,
   resolveSubjectUserKey,
 } from '../services/neurofrigo/auth-context';
 import { recordAdaptiveOutcome, runAdaptiveDecide } from '../services/adaptive/decide';
@@ -96,10 +98,18 @@ export const adaptiveDecideEndpoint: Endpoint = {
     const subject = resolveSubjectUserKey(auth, body.userKey != null ? String(body.userKey) : null);
     if (isAuthResponse(subject)) return subject;
 
+    const session = await resolveSessionScope(req, auth);
+    const scope = bindRequestScope({
+      isStaff: auth.isStaff,
+      sessionTenantId: session.tenantId,
+      sessionCompanyIds: session.companyIds,
+      requestedTenantId: body.tenantId != null ? String(body.tenantId) : null,
+    });
+
     const result = await runAdaptiveDecide(req.payload, {
       userKey: subject.userKey,
       courseId,
-      tenantId: body.tenantId != null ? String(body.tenantId) : null,
+      tenantId: scope.tenantId,
       assessmentAvailable: Boolean(body.assessmentAvailable),
     });
     const technical = Boolean(body.technical) && auth.isStaff;

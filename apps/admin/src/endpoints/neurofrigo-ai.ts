@@ -2,9 +2,11 @@ import type { Endpoint, PayloadRequest } from 'payload';
 
 import { runNeurofrigoAsk, submitAiFeedback } from '../services/neurofrigo/ask';
 import {
+  bindRequestScope,
   isAuthResponse,
   requireNeurofrigoAuth,
   requireNeurofrigoServiceOrStaff,
+  resolveSessionScope,
 } from '../services/neurofrigo/auth-context';
 import { refreshNeurofrigoAiDashboard } from '../services/neurofrigo/dashboard';
 
@@ -36,6 +38,15 @@ export const neurofrigoChatEndpoint: Endpoint = {
     const question = String(body.question || body.text || '').trim();
     if (!question) return json({ ok: false, error: 'question is required' }, 400);
 
+    const session = await resolveSessionScope(req, auth);
+    const scope = bindRequestScope({
+      isStaff: auth.isStaff,
+      sessionTenantId: session.tenantId,
+      sessionCompanyIds: session.companyIds,
+      requestedTenantId: body.tenantId != null ? String(body.tenantId) : null,
+      requestedCompanyIds: body.companyIds,
+    });
+
     let result;
     try {
       result = await runNeurofrigoAsk(req.payload, {
@@ -46,8 +57,8 @@ export const neurofrigoChatEndpoint: Endpoint = {
         identity: {
           userId: auth.userId,
           role: auth.role,
-          tenantId: body.tenantId != null ? String(body.tenantId) : null,
-          companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
+          tenantId: scope.tenantId,
+          companyIds: scope.companyIds,
           language: body.language != null ? String(body.language) : 'pt-BR',
           profileLabel: body.profileLabel != null ? String(body.profileLabel) : null,
         },
@@ -59,7 +70,11 @@ export const neurofrigoChatEndpoint: Endpoint = {
           lessonId: body.lessonId != null ? String(body.lessonId) : null,
           lessonTitle: body.lessonTitle != null ? String(body.lessonTitle) : null,
           lessonObjectives: body.lessonObjectives != null ? String(body.lessonObjectives) : null,
-          ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
+          ownerCompanyId: auth.isStaff
+            ? body.ownerCompanyId != null
+              ? String(body.ownerCompanyId)
+              : null
+            : (scope.companyIds[0] ?? null),
         },
         topK: body.topK != null ? Number(body.topK) : undefined,
       });

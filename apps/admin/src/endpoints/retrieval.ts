@@ -1,9 +1,11 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
 import {
+  bindRequestScope,
   isAuthResponse,
   requireNeurofrigoAuth,
   requireNeurofrigoServiceOrStaff,
+  resolveSessionScope,
 } from '../services/neurofrigo/auth-context';
 import { refreshRetrievalDashboard } from '../services/retrieval/dashboard';
 import { reindex } from '../services/retrieval/reindex';
@@ -37,13 +39,27 @@ export const retrievalSearchEndpoint: Endpoint = {
     const text = String(body.text || body.query || '').trim();
     if (!text) return json({ ok: false, error: 'text is required' }, 400);
 
+    const session = await resolveSessionScope(req, auth);
+    const scope = bindRequestScope({
+      isStaff: auth.isStaff,
+      sessionTenantId: session.tenantId,
+      sessionCompanyIds: session.companyIds,
+      requestedTenantId: body.tenantId != null ? String(body.tenantId) : null,
+      requestedCompanyIds: body.companyIds,
+      requestedChannel: body.channel != null ? String(body.channel) : null,
+    });
+
     const result = await runSemanticSearch(
       req.payload,
       {
         text,
-        tenantId: body.tenantId != null ? String(body.tenantId) : null,
+        tenantId: scope.tenantId,
         userId: auth.userId,
-        ownerCompanyId: body.ownerCompanyId != null ? String(body.ownerCompanyId) : null,
+        ownerCompanyId: auth.isStaff
+          ? body.ownerCompanyId != null
+            ? String(body.ownerCompanyId)
+            : null
+          : (scope.companyIds[0] ?? null),
         courseId: body.courseId != null ? String(body.courseId) : null,
         lessonId: body.lessonId != null ? String(body.lessonId) : null,
         moduleId: body.moduleId != null ? String(body.moduleId) : null,
@@ -52,11 +68,11 @@ export const retrievalSearchEndpoint: Endpoint = {
         topK: body.topK != null ? Number(body.topK) : 8,
       },
       {
-        channel: (body.channel as 'portal_chat' | 'admin' | 'system') || 'system',
+        channel: scope.channel,
         role: auth.role,
         userId: auth.userId,
-        tenantId: body.tenantId != null ? String(body.tenantId) : null,
-        companyIds: Array.isArray(body.companyIds) ? body.companyIds : undefined,
+        tenantId: scope.tenantId,
+        companyIds: scope.companyIds,
       },
     );
 
