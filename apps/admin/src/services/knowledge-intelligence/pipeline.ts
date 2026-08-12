@@ -39,13 +39,7 @@ function sanitizeStoredText(text: string, maxChars = 60_000): string {
 
 function sourceTypeFor(
   resourceType: string,
-):
-  | 'pdf'
-  | 'markdown'
-  | 'txt'
-  | 'docx'
-  | 'technical_manual'
-  | 'lesson_ref' {
+): 'pdf' | 'markdown' | 'txt' | 'docx' | 'technical_manual' | 'lesson_ref' {
   if (resourceType === 'pdf') return 'pdf';
   if (resourceType === 'markdown') return 'markdown';
   if (resourceType === 'txt') return 'txt';
