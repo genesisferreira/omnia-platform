@@ -12,12 +12,17 @@ export type KnowledgeAuditInput = {
   environment?: string | null;
 };
 
+type AuditJson = string | number | boolean | null | AuditJson[] | { [k: string]: AuditJson };
+
 /**
  * Sanitiza estado para auditoria — nunca persiste content/richText/tokens/secrets.
  */
-export function sanitizeKnowledgeAuditState(value: unknown): unknown {
+export function sanitizeKnowledgeAuditState(value: unknown): AuditJson {
   if (value == null) return null;
-  if (typeof value !== 'object') return value;
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value !== 'object') return String(value);
   if (Array.isArray(value)) {
     return value.map((item) => sanitizeKnowledgeAuditState(item));
   }
@@ -32,7 +37,7 @@ export function sanitizeKnowledgeAuditState(value: unknown): unknown {
     'checksum',
   ]);
 
-  const out: Record<string, unknown> = {};
+  const out: { [k: string]: AuditJson } = {};
   for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
     if (blocked.has(key)) {
       out[key] = '[redacted]';
