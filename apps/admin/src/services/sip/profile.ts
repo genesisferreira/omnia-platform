@@ -10,6 +10,7 @@ import {
   type SipEvidenceInput,
 } from '@omnia/student-intelligence';
 
+import { requirePayloadRelationId } from '../../lib/payload-relation-id';
 import { syncLearningProfile, syncStudentProfile } from '../tutor/profiles';
 import { loadCourseCatalog } from '../tutor/catalog';
 import { refreshSipDashboard } from './dashboard';
@@ -21,9 +22,8 @@ function numericUserId(userId: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function asCourseRel(courseId: string): number | string {
-  if (/^\d+$/.test(String(courseId))) return Number(courseId);
-  return courseId;
+function asCourseRel(courseId: string): number {
+  return requirePayloadRelationId(courseId);
 }
 
 async function loadSignals(

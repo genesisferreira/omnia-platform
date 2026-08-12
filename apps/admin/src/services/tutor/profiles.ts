@@ -1,6 +1,7 @@
 import type { Payload } from 'payload';
 import type { LearningProfile, StudentProfile, LearningLevel } from '@omnia/neurofrigo-tutor';
 
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
 import { loadCourseCatalog } from './catalog';
 
 function asStringArray(value: unknown): string[] {
@@ -104,8 +105,8 @@ export async function syncStudentProfile(
   const data = {
     userKey: input.userId,
     user: numericUserId(input.userId) ?? undefined,
-    tenant: input.tenantId ? Number(input.tenantId) || input.tenantId : undefined,
-    course: Number(catalog.courseId) || catalog.courseId,
+    tenant: toPayloadRelationId(input.tenantId),
+    course: toPayloadRelationId(catalog.courseId),
     enrolledCourseIds: [catalog.courseId],
     progressPercent,
     completedModuleIds,
@@ -193,7 +194,7 @@ export async function syncLearningProfile(
   const data = {
     userKey: input.userId,
     user: numericUserId(input.userId) ?? undefined,
-    course: Number(courseId) || courseId,
+    course: toPayloadRelationId(courseId),
     level: profile.level,
     masteredTopics: profile.masteredTopics,
     pendingTopics: profile.pendingTopics,

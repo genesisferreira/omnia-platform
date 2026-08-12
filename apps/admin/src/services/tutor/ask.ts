@@ -1,9 +1,10 @@
 import type { Payload } from 'payload';
 import { TutorService } from '@omnia/neurofrigo-tutor';
 
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { runAdaptiveDecide } from '../adaptive/decide';
 import { runNeurofrigoAsk } from '../neurofrigo/ask';
 import { getSipAssistantContext, recalculateSipProfile } from '../sip/profile';
-import { runAdaptiveDecide } from '../adaptive/decide';
 import { loadCourseCatalog } from './catalog';
 import { recordLearningUsage, syncLearningProfile, syncStudentProfile } from './profiles';
 import { refreshTutorDashboard } from './dashboard';
@@ -152,7 +153,7 @@ export async function runTutorAsk(
           body.userId && body.userId !== 'anonymous' && /^\d+$/.test(body.userId)
             ? Number(body.userId)
             : undefined,
-        course: Number(result.studyPlan.courseId) || result.studyPlan.courseId,
+        course: toPayloadRelationId(result.studyPlan.courseId),
         steps: result.studyPlan.steps,
         estimatedLessons: result.studyPlan.estimatedLessons,
       },

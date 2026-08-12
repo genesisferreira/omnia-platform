@@ -8,13 +8,13 @@ import {
 } from '@omnia/adaptive-learning';
 import type { StudentInsights } from '@omnia/student-intelligence';
 
+import { requirePayloadRelationId } from '../../lib/payload-relation-id';
 import { getSipAssistantContext } from '../sip/profile';
 import { loadCourseCatalog } from '../tutor/catalog';
 import { refreshAdaptiveDashboard } from './dashboard';
 
-function asCourseRel(courseId: string): number | string {
-  if (/^\d+$/.test(String(courseId))) return Number(courseId);
-  return courseId;
+function asCourseRel(courseId: string): number {
+  return requirePayloadRelationId(courseId);
 }
 
 function numericUserId(userId: string): number | null {

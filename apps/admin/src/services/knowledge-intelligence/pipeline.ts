@@ -13,13 +13,16 @@ import {
   type KiSupportedExtractType,
 } from '@omnia/knowledge-intelligence';
 
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
+
 type Rel = string | number | { id: string | number } | null | undefined;
 
-function relId(value: Rel): string | number | null {
+function relId(value: Rel): number | null {
   if (value == null) return null;
-  if (typeof value === 'string' || typeof value === 'number') return value;
-  if (typeof value === 'object' && 'id' in value) return value.id;
-  return null;
+  if (typeof value === 'object' && 'id' in value) {
+    return toPayloadRelationId(value.id) ?? null;
+  }
+  return toPayloadRelationId(value) ?? null;
 }
 
 function sanitizeError(err: unknown): string {
@@ -266,7 +269,7 @@ export async function processLearningResource(args: {
   const run = await payload.create({
     collection: 'ki-processing-runs',
     data: {
-      learningResource: learningResourceId,
+      learningResource: toPayloadRelationId(learningResourceId),
       status: 'running',
       stages: {
         extract: 'pending',
@@ -458,10 +461,15 @@ export async function processLearningResource(args: {
       sourceType: sourceTypeFor(resourceType),
       file: mediaId,
       language: (resource.language as string) || 'pt-BR',
-      ownerCompany: hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel) ?? undefined,
+      ownerCompany:
+        toPayloadRelationId(hubOverrides?.ownerCompany) ??
+        relId(resource.ownerCompany as Rel) ??
+        undefined,
       knowledgeArea: hubOverrides?.knowledgeArea || 'cursos',
-      category: hubOverrides?.category,
-      subcategories: hubOverrides?.subcategories,
+      category: toPayloadRelationId(hubOverrides?.category),
+      subcategories: (hubOverrides?.subcategories || [])
+        .map((id) => toPayloadRelationId(id))
+        .filter((id): id is number => id != null),
       allowedAgents: hubOverrides?.allowedAgents,
       tags: mergedTags.map((tag) => ({ tag })),
       authorName: (resource.author as string) || undefined,
@@ -509,7 +517,7 @@ export async function processLearningResource(args: {
           req,
           context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
         });
-        knowledgeDocumentId = created.id;
+        knowledgeDocumentId = toPayloadRelationId(created.id) ?? null;
       } catch {
         const created = await payload.create({
           collection: 'knowledge-documents',
@@ -522,7 +530,7 @@ export async function processLearningResource(args: {
           req,
           context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
         });
-        knowledgeDocumentId = created.id;
+        knowledgeDocumentId = toPayloadRelationId(created.id) ?? null;
       }
     }
 
@@ -557,7 +565,10 @@ export async function processLearningResource(args: {
     await payload.update({
       collection: 'learning-resources',
       id: learningResourceId,
-      data: { processingStatus: 'queued', knowledgeDocument: knowledgeDocumentId },
+      data: {
+        processingStatus: 'queued',
+        knowledgeDocument: toPayloadRelationId(knowledgeDocumentId),
+      },
       overrideAccess: true,
       req,
       context: { kiPipelineActive: true },
@@ -566,7 +577,8 @@ export async function processLearningResource(args: {
     const courseId = relId(resource.course as Rel);
     const moduleId = relId(resource.module as Rel);
     const lessonId = relId(resource.lesson as Rel);
-    const ownerCompanyId = hubOverrides?.ownerCompany ?? relId(resource.ownerCompany as Rel);
+    const ownerCompanyId =
+      toPayloadRelationId(hubOverrides?.ownerCompany) ?? relId(resource.ownerCompany as Rel);
     const instructorId = relId(resource.instructor as Rel);
     const agentTags = (hubOverrides?.allowedAgents || []).map((a) => `agent:${a}`);
     const chunkTags = [...new Set([...mergedTags, ...agentTags])];
@@ -575,8 +587,8 @@ export async function processLearningResource(args: {
       const chunkDoc = await payload.create({
         collection: 'knowledge-chunks',
         data: {
-          learningResource: learningResourceId,
-          knowledgeDocument: knowledgeDocumentId,
+          learningResource: toPayloadRelationId(learningResourceId),
+          knowledgeDocument: toPayloadRelationId(knowledgeDocumentId),
           chunkIndex: chunk.chunkIndex,
           chunkText: chunk.chunkText,
           tokenEstimate: chunk.tokenEstimate,
@@ -601,9 +613,9 @@ export async function processLearningResource(args: {
       await payload.create({
         collection: 'embedding-queue',
         data: {
-          learningResource: learningResourceId,
-          knowledgeDocument: knowledgeDocumentId,
-          chunk: chunkDoc.id,
+          learningResource: toPayloadRelationId(learningResourceId),
+          knowledgeDocument: toPayloadRelationId(knowledgeDocumentId),
+          chunk: toPayloadRelationId(chunkDoc.id),
           status: 'pending',
           attempts: 0,
           provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',
@@ -749,10 +761,10 @@ export async function ensureLearningResourceFromLessonAsset(args: {
 
   const lessonRel = asset.lesson as Rel;
   const lessonId = relId(lessonRel);
-  let moduleId: string | number | null = null;
-  let courseId: string | number | null = null;
-  let ownerCompanyId: string | number | null = null;
-  let instructorId: string | number | null = null;
+  let moduleId: number | null = null;
+  let courseId: number | null = null;
+  let ownerCompanyId: number | null = null;
+  let instructorId: number | null = null;
   let category: string | null = null;
   let language = 'pt-BR';
 
@@ -802,7 +814,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
   const data = {
     title: String(asset.title || media?.filename || `Asset ${lessonAssetId}`),
     media: mediaId,
-    lessonAsset: lessonAssetId,
+    lessonAsset: toPayloadRelationId(lessonAssetId),
     lesson: lessonId ?? undefined,
     module: moduleId ?? undefined,
     course: courseId ?? undefined,

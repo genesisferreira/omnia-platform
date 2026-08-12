@@ -14,10 +14,11 @@ import {
   type OrchestratorPlan,
 } from '@omnia/neurofrigo-orchestrator';
 
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { refreshEnterpriseAiDashboard } from '../enterprise/dashboard';
+import { listAllowedAssistants, resolveAssistantForAsk } from '../enterprise/resolve';
 import { runSemanticSearch } from '../retrieval/search';
 import { refreshNeurofrigoAiDashboard } from './dashboard';
-import { listAllowedAssistants, resolveAssistantForAsk } from '../enterprise/resolve';
-import { refreshEnterpriseAiDashboard } from '../enterprise/dashboard';
 
 type SessionDoc = {
   id: string | number;
@@ -629,10 +630,10 @@ export async function submitAiFeedback(
   const created = await payload.create({
     collection: 'ai-feedback',
     data: {
-      aiSession: Number(args.sessionId) || args.sessionId,
+      aiSession: toPayloadRelationId(args.sessionId),
       rating: args.rating,
       comment: args.comment ?? null,
-      user: args.userId ? Number(args.userId) || args.userId : undefined,
+      user: toPayloadRelationId(args.userId),
     },
     overrideAccess: true,
   });
