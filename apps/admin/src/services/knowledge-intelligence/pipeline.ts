@@ -37,7 +37,15 @@ function sanitizeStoredText(text: string, maxChars = 60_000): string {
   return `${cleaned.slice(0, maxChars)}\n\n[truncated_for_admin_storage]`;
 }
 
-function sourceTypeFor(resourceType: string): string {
+function sourceTypeFor(
+  resourceType: string,
+):
+  | 'pdf'
+  | 'markdown'
+  | 'txt'
+  | 'docx'
+  | 'technical_manual'
+  | 'lesson_ref' {
   if (resourceType === 'pdf') return 'pdf';
   if (resourceType === 'markdown') return 'markdown';
   if (resourceType === 'txt') return 'txt';
