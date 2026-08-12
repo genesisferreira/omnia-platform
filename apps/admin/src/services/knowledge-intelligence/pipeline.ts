@@ -13,9 +13,11 @@ import {
   type KiSupportedExtractType,
 } from '@omnia/knowledge-intelligence';
 import {
+  AGENT_KEYS,
   KNOWLEDGE_AREAS,
   SECURITY_CLASSIFICATIONS,
   TECHNICAL_RISK_LEVELS,
+  type AgentKey,
   type SourceType,
 } from '@omnia/neurofrigo-knowledge';
 
@@ -50,6 +52,13 @@ function pickUnion<T extends string>(
 ): T {
   if (value && (allowed as readonly string[]).includes(value)) return value as T;
   return fallback;
+}
+
+function pickAgentKeys(values: string[] | undefined): AgentKey[] {
+  if (!values?.length) return [];
+  return values.filter((value): value is AgentKey =>
+    (AGENT_KEYS as readonly string[]).includes(value),
+  );
 }
 
 function sourceTypeFor(resourceType: string): SourceType {
@@ -486,7 +495,7 @@ export async function processLearningResource(args: {
       subcategories: (hubOverrides?.subcategories || [])
         .map((id) => toPayloadRelationId(id))
         .filter((id): id is number => id != null),
-      allowedAgents: hubOverrides?.allowedAgents,
+      allowedAgents: pickAgentKeys(hubOverrides?.allowedAgents),
       tags: mergedTags.map((tag) => ({ tag })),
       authorName: (resource.author as string) || undefined,
       // Sempre cria em draft; publicação oficial sobe via transições válidas.
