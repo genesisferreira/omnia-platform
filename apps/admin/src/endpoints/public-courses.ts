@@ -39,6 +39,9 @@ const internalError = () =>
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
+/** Payload `find()` typed as CollectionSlug unions PayloadMigration; go through unknown. */
+const asRecord = (value: unknown): Record<string, unknown> => (isRecord(value) ? value : {});
+
 function mediaDto(value: unknown) {
   if (!isRecord(value)) return null;
   const url = typeof value.url === 'string' ? value.url : null;
@@ -116,7 +119,7 @@ export const publicCoursesEndpoint: Endpoint = {
       });
 
       const items = result.docs.map((doc) => {
-        const d = doc as Record<string, unknown>;
+        const d = asRecord(doc);
         return {
           id: String(d.id),
           title: d.title,
@@ -189,14 +192,14 @@ export const publicCourseEndpoint: Endpoint = {
             });
 
       const lessonsByModule = new Map<string, Record<string, unknown>[]>();
-      for (const lesson of lessons.docs as Record<string, unknown>[]) {
+      for (const lesson of lessons.docs.map(asRecord)) {
         const mid = String(relationId(lesson.module));
         const list = lessonsByModule.get(mid) ?? [];
         list.push(lesson);
         lessonsByModule.set(mid, list);
       }
 
-      const c = course as Record<string, unknown>;
+      const c = asRecord(course);
       return json(200, {
         ok: true,
         course: {
@@ -216,7 +219,7 @@ export const publicCourseEndpoint: Endpoint = {
           seo: isRecord(c.seo) ? c.seo : null,
         },
         modules: modules.docs.map((mod) => {
-          const m = mod as Record<string, unknown>;
+          const m = asRecord(mod);
           const id = String(m.id);
           return {
             id,
@@ -283,7 +286,7 @@ export const publicLessonEndpoint: Endpoint = {
         depth: 1,
         overrideAccess: true,
       });
-      const lesson = lessons.docs[0] as Record<string, unknown> | undefined;
+      const lesson = lessons.docs[0] ? asRecord(lessons.docs[0]) : undefined;
       if (!lesson) return notFound('Aula não encontrada.');
 
       const assets = await req.payload.find({
@@ -303,14 +306,14 @@ export const publicLessonEndpoint: Endpoint = {
         ok: true,
         course: {
           id: String(course.id),
-          title: (course as Record<string, unknown>).title,
-          slug: (course as Record<string, unknown>).slug,
+          title: asRecord(course).title,
+          slug: asRecord(course).slug,
         },
         module: moduleDoc
           ? {
               id: String(moduleDoc.id),
-              title: (moduleDoc as Record<string, unknown>).title,
-              slug: (moduleDoc as Record<string, unknown>).slug,
+              title: asRecord(moduleDoc).title,
+              slug: asRecord(moduleDoc).slug,
             }
           : null,
         lesson: {
@@ -325,7 +328,7 @@ export const publicLessonEndpoint: Endpoint = {
           externalUrl: lesson.externalUrl ?? null,
         },
         assets: assets.docs.map((a) => {
-          const row = a as Record<string, unknown>;
+          const row = asRecord(a);
           return {
             id: String(row.id),
             title: row.title,
