@@ -2,6 +2,8 @@ import type { Payload, PayloadRequest } from 'payload';
 
 import type { LmsIdentityLink, LmsNotLinked } from '@omnia/shared/lms';
 
+import { asPayloadJson } from '../../lib/payload-relation-id';
+
 export async function findIdentityLink(
   payload: Payload,
   omniaUserId: string,
@@ -54,10 +56,10 @@ export async function writeLmsAudit(
         action: input.action,
         actorId: input.actorId,
         targetUserId: input.targetUserId ?? null,
-        previousValue: input.previousValue ?? null,
-        newValue: input.newValue ?? null,
+        previousValue: asPayloadJson(input.previousValue),
+        newValue: asPayloadJson(input.newValue),
         reason: input.reason ?? null,
-        metadata: input.metadata ?? null,
+        metadata: asPayloadJson(input.metadata),
       },
       overrideAccess: true,
       req,

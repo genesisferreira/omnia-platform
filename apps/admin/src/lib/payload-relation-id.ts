@@ -23,3 +23,16 @@ export function asUnknownRecord(value: unknown): Record<string, unknown> {
   }
   return {};
 }
+
+/** Payload json fields reject `unknown` and empty `{}` without an index signature. */
+export function asPayloadJson(
+  value: unknown,
+): string | number | boolean | unknown[] | { [k: string]: unknown } | null {
+  if (value == null) return null;
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  if (Array.isArray(value)) return value as unknown[];
+  if (typeof value === 'object') return value as { [k: string]: unknown };
+  return String(value);
+}
