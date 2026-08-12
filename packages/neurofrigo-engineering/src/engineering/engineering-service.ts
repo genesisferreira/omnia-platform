@@ -87,7 +87,7 @@ export class EngineeringService {
         ]
           .filter(Boolean)
           .join('\n\n'),
-        ownerCompanyId: request.ownerCompanyId ?? profile.companyId,
+        ownerCompanyId: request.ownerCompanyId ?? null,
       },
     };
 
