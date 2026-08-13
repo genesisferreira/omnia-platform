@@ -39,10 +39,15 @@ export type AiSource = {
   };
 };
 
+export type AiSuggestedAction = {
+  label: string;
+  question: string;
+};
+
 export type AiExplainability = {
   sourceCount: number;
   avgScore: number;
-  confidence: number;
+  confidence: number | null;
   documents: Array<{
     chunkId: string;
     knowledgeDocumentId: string | null;
@@ -63,7 +68,8 @@ export type AiChatData = {
   specialistLabel?: string | null;
   text: string;
   sources: AiSource[];
-  confidence: number;
+  /** Finite 0..1 or null — never NaN. */
+  confidence: number | null;
   tookMs: number;
   model: string;
   provider: string;
@@ -73,6 +79,7 @@ export type AiChatData = {
   intent?: string | null;
   grounding?: { score: number } | null;
   explainability?: AiExplainability | null;
+  suggestedActions?: AiSuggestedAction[];
   sourceCount?: number;
   proposalMarkdown?: string | null;
   troubleshootingMarkdown?: string | null;

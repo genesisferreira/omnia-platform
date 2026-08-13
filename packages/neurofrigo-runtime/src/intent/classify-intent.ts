@@ -74,21 +74,21 @@ export const INTENT_LABELS: Record<QuestionIntent, string> = {
 export function intentSystemAddon(intent: QuestionIntent): string {
   switch (intent) {
     case 'definition':
-      return 'Foque em uma definição clara e objetiva, com 1–2 frases e um exemplo do material.';
+      return 'Entregue uma definição clara em linguagem natural, com 1–2 frases e contexto útil.';
     case 'procedural':
-      return 'Organize a resposta em passos numerados, na ordem do procedimento do material.';
+      return 'Organize em passos claros e numerados, sem jargão interno.';
     case 'comparative':
-      return 'Compare lado a lado (semelhanças e diferenças) usando lista ou tabela textual.';
+      return 'Compare de forma estruturada (semelhanças e diferenças) em linguagem acessível.';
     case 'troubleshooting':
-      return 'Estruture: sintoma → possíveis causas (do material) → verificações. Inclua nota de segurança se houver.';
+      return 'Estruture: sintoma → possíveis causas → verificações. Peça dados críticos se faltarem. Inclua nota de segurança se houver.';
     case 'summary':
-      return 'Entregue um resumo curto com bullets dos pontos principais do material.';
+      return 'Resuma de forma conversacional os pontos essenciais, sem listar IDs ou markers.';
     case 'review':
-      return 'Faça uma revisão objetiva em checklist dos pontos-chave da aula/curso.';
+      return 'Faça uma revisão objetiva em checklist dos pontos-chave autorizados.';
     case 'conceptual':
-      return 'Explique o conceito com base no material, usando título e bullets curtos.';
+      return 'Explique o conceito de forma didática e natural, ancorada nas fontes.';
     case 'explanation':
     default:
-      return 'Explique de forma didática com título, bullets e observação técnica quando fizer sentido.';
+      return 'Explique de forma natural e didática; termine com um próximo passo útil quando fizer sentido.';
   }
 }

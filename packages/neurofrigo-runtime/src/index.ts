@@ -11,3 +11,8 @@ export * from './adapters/llm/openai-compatible';
 export * from './adapters/llm/deepseek';
 export * from './runtime/runtime';
 export * from './factory';
+export * from './conversation/normalize-confidence';
+export * from './conversation/sanitize-evidence';
+export * from './conversation/synthesize-answer';
+export { buildSuggestedActions } from './conversation/suggested-actions';
+export * from './conversation/source-label';

@@ -8,13 +8,14 @@ function estimateTokens(text: string): number {
   return Math.max(1, Math.ceil(text.length / 4));
 }
 
-const BASE_SYSTEM = `Você é o Assistente Técnico Neurofrigo da plataforma Omnia.
-Responda APENAS com base nos trechos fornecidos (FONTES) e no CONTEXTO da sessão.
-Se a informação não estiver nas fontes, diga claramente que não encontrou no conteúdo autorizado do curso.
-Não invente. Não use conhecimento externo.
-Responda no idioma do contexto.
-Use estrutura clara: título, listas ou passos, e observação técnica quando fizer sentido.
-Ao citar, use [chunk:ID].`;
+const BASE_SYSTEM = `Você é um especialista do ecossistema Omnia Frigo.
+Responda de forma natural, clara e profissional — como um atendente/consultor experiente.
+Use APENAS os fatos das FONTES e do CONTEXTO. Não invente.
+Não mencione RAG, chunks, vetores, pipelines, policy, routing ou IDs internos.
+Não comece com "Pontos principais do material".
+Não inclua marcadores de fixture nem [chunk:ID] na resposta ao usuário.
+Organize a resposta: responda primeiro, depois detalhes, depois próximo passo útil.
+Responda no idioma do contexto.`;
 
 /**
  * PromptBuilder V2 — adapta o prompt pela intenção detectada.
@@ -32,6 +33,7 @@ export class PromptBuilder implements PromptBuilderPort {
     context: BuiltContext;
     chunks: CitationResult[];
     limits: GuardrailLimits;
+    assistantKey?: string | null;
   }): PromptBundle {
     const intent = classifyIntent(input.question);
     const limited = input.chunks.slice(0, input.limits.maxContextChunks);
@@ -40,7 +42,8 @@ export class PromptBuilder implements PromptBuilderPort {
       -Math.max(0, input.limits.maxHistoryTurns),
     );
 
-    const system = `${this.baseSystem}\n\nIntenção detectada: ${intent}.\n${intentSystemAddon(intent)}`;
+    const assistantLine = input.assistantKey ? `Assistente: ${input.assistantKey}` : 'Assistente: omnia';
+    const system = `${this.baseSystem}\n\n${assistantLine}\nIntenção detectada: ${intent}.\n${intentSystemAddon(intent)}`;
 
     const contextBlock = [
       `Curso: ${input.context.courseTitle ?? input.context.courseId ?? 'n/d'}`,
@@ -60,7 +63,7 @@ export class PromptBuilder implements PromptBuilderPort {
         : history
             .map(
               (t, i) =>
-                `Turno ${i + 1}\nP: ${t.question}\nR: ${t.answer.slice(0, 500)}${t.answer.length > 500 ? '…' : ''}`,
+                `Usuário: ${t.question}\nAssistente: ${t.answer.slice(0, 500)}${t.answer.length > 500 ? '…' : ''}`,
             )
             .join('\n\n');
 

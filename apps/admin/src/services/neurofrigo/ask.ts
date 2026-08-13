@@ -104,6 +104,7 @@ function blockedAnswer(message: string, code: string): RuntimeAnswer {
     intent: null,
     grounding: null,
     explainability: null,
+    suggestedActions: [],
   };
 }
 
@@ -415,8 +416,27 @@ export async function runNeurofrigoAsk(
   });
 
   const language = resolved?.language || request.identity.language || 'pt-BR';
+
+  let domainContext = request.domainContext ?? null;
+  if (
+    (assistantKey === 'concierge' || request.channel === 'portal_public') &&
+    !domainContext?.publicCourses
+  ) {
+    try {
+      const { loadPublicCourseCatalog, isCourseOrientedQuestion } =
+        await import('./public-catalog');
+      if (isCourseOrientedQuestion(request.question) || (history?.length ?? 0) > 0) {
+        const publicCourses = await loadPublicCourseCatalog(payload, 12);
+        domainContext = { ...(domainContext || {}), publicCourses };
+      }
+    } catch {
+      /* catalog optional */
+    }
+  }
+
   let answer = await runtime.ask({
     ...request,
+    domainContext,
     assistantKey,
     assistantMeta: resolved
       ? {
@@ -586,7 +606,7 @@ async function persistSession(
     completionTokens: args.answer.completionTokens,
     totalTokens: args.answer.totalTokens,
     estimatedCostUsd: args.answer.estimatedCostUsd,
-    confidence: args.answer.confidence,
+    confidence: args.answer.confidence ?? 0,
     groundingScore: args.answer.grounding?.score ?? 0,
     errorCode: args.answer.errorCode ?? null,
     sources: asPayloadJson(args.answer.sources),

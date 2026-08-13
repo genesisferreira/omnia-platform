@@ -1,4 +1,8 @@
-import type { RuntimeAnswer, RuntimeRequest, GuardrailLimits } from '../domain/types';
+import type {
+  RuntimeAnswer,
+  RuntimeRequest,
+  GuardrailLimits,
+} from '../domain/types';
 import { DEFAULT_GUARDRAIL_LIMITS } from '../domain/types';
 import { buildCapabilityAnswer, isCapabilityQuestion } from '../domain/capability-response';
 import { ContextBuilder } from '../context/context-builder';
@@ -12,6 +16,10 @@ import {
   estimateCostUsd,
   withTimeout,
 } from '../guardrails';
+import { normalizeConfidence } from '../conversation/normalize-confidence';
+import { buildSuggestedActions } from '../conversation/suggested-actions';
+import { synthesizeConversationalAnswer } from '../conversation/synthesize-answer';
+import { looksLikeInternalLeak } from '../conversation/sanitize-evidence';
 import type {
   ContextBuilderPort,
   LLMProviderPort,
@@ -30,7 +38,8 @@ export type NeurofrigoRuntimeDeps = {
 };
 
 /**
- * Orquestrador Experience V2 — ports only; sem Payload/pgvector.
+ * Orquestrador Experience V2 — Conversation Layer sobre Retrieval + LLM.
+ * Não altera ACL: só sintetiza evidência já autorizada.
  */
 export class NeurofrigoRuntime {
   private readonly retrieval: RetrievalPort;
@@ -55,6 +64,7 @@ export class NeurofrigoRuntime {
     const meta = this.llm.metadata();
     const intentHint = classifyIntent(request.question);
     const assistantKey = request.assistantKey ?? null;
+    const publicCourses = request.domainContext?.publicCourses ?? null;
 
     if (isCapabilityQuestion(request.question)) {
       const text = buildCapabilityAnswer({
@@ -68,6 +78,14 @@ export class NeurofrigoRuntime {
         text,
         intent: intentHint,
         status: 'ok',
+      });
+      const suggestedActions = buildSuggestedActions({
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        status: 'ok',
+        intent: intentHint,
+        hasSources: false,
       });
       return {
         text,
@@ -85,6 +103,7 @@ export class NeurofrigoRuntime {
         errorCode: null,
         intent: intentHint,
         grounding: null,
+        suggestedActions,
         explainability: {
           sourceCount: 0,
           avgScore: 0,
@@ -93,7 +112,64 @@ export class NeurofrigoRuntime {
           retrievalTookMs: 0,
           llmTookMs: 0,
           intent: intentHint,
-          justification: 'Resposta de capacidades a partir do Assistant Registry (sem retrieval).',
+          justification:
+            'Esta resposta descreve o que o assistente pode fazer, com base no perfil e nas capacidades publicadas — sem consulta à base documental.',
+        },
+      };
+    }
+
+    // Course discovery with live LMS catalog — prefer catalog over pure RAG dump.
+    if (
+      publicCourses &&
+      publicCourses.length > 0 &&
+      /quais?\s+cursos|que\s+cursos|cursos\s+voc[eê]s|oferecem?\s+cursos|cat[aá]logo/i.test(
+        request.question,
+      )
+    ) {
+      const text = synthesizeConversationalAnswer({
+        question: request.question,
+        evidence: [],
+        intent: intentHint,
+        assistantKey,
+        channel: request.channel,
+        publicCourses,
+        history: request.conversationHistory,
+      });
+      const suggestedActions = buildSuggestedActions({
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        status: 'ok',
+        intent: intentHint,
+        hasSources: false,
+      });
+      return {
+        text,
+        formattedText: formatResponse({ text, intent: intentHint, status: 'ok' }),
+        sources: [],
+        confidence: 0.9,
+        tookMs: Date.now() - started,
+        model: meta.model,
+        provider: meta.name,
+        promptTokens: 0,
+        completionTokens: Math.ceil(text.length / 4),
+        totalTokens: Math.ceil(text.length / 4),
+        estimatedCostUsd: 0,
+        status: 'ok',
+        errorCode: null,
+        intent: intentHint,
+        grounding: null,
+        suggestedActions,
+        explainability: {
+          sourceCount: 0,
+          avgScore: 0,
+          confidence: 0.9,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: intentHint,
+          justification:
+            'Esta resposta foi elaborada a partir do catálogo público de cursos publicados na plataforma Omnia.',
         },
       };
     }
@@ -138,10 +214,48 @@ export class NeurofrigoRuntime {
       );
 
       if (!guarded.ok) {
+        // Follow-up with catalog still available
+        if (
+          publicCourses?.length &&
+          /iniciante|melhor|quem\s+oferece|e\s+quem|quanto\s+tempo/i.test(request.question)
+        ) {
+          const text = synthesizeConversationalAnswer({
+            question: request.question,
+            evidence: [],
+            intent: intentHint,
+            assistantKey,
+            channel: request.channel,
+            publicCourses,
+            history: request.conversationHistory,
+          });
+          if (text && !/não encontrei/i.test(text)) {
+            return this.okSynthetic({
+              text,
+              intent: intentHint,
+              started,
+              meta,
+              assistantKey,
+              channel: request.channel,
+              question: request.question,
+              confidence: 0.85,
+              justification:
+                'Resposta de continuidade com base no catálogo público e no histórico da sessão.',
+            });
+          }
+        }
+
         const formatted = formatResponse({
           text: guarded.message,
           intent: intentHint,
           status: 'not_found',
+        });
+        const suggestedActions = buildSuggestedActions({
+          assistantKey,
+          channel: request.channel,
+          question: request.question,
+          status: 'not_found',
+          intent: intentHint,
+          hasSources: false,
         });
         return {
           text: guarded.message,
@@ -163,6 +277,7 @@ export class NeurofrigoRuntime {
             confidence: 0,
             contextChars: 0,
           }),
+          suggestedActions,
           explainability: {
             sourceCount: 0,
             avgScore: 0,
@@ -172,7 +287,7 @@ export class NeurofrigoRuntime {
             llmTookMs: 0,
             intent: intentHint,
             justification:
-              'Nenhuma fonte autorizada atingiu o limiar de relevância para esta pergunta.',
+              'Não havia conteúdo autorizado suficientemente relevante para esta pergunta.',
           },
           retrieval: {
             candidateCount: retrieval.candidateCount,
@@ -189,6 +304,7 @@ export class NeurofrigoRuntime {
         context,
         chunks: guarded.chunks,
         limits: this.limits,
+        assistantKey,
       });
 
       const llmStarted = Date.now();
@@ -211,23 +327,46 @@ export class NeurofrigoRuntime {
         citation: c.citation,
       }));
 
-      const confidence = computeConfidence(guarded.chunks);
+      let answerText = completion.text;
+      // Safety net: if provider still leaks internals, re-synthesize.
+      if (looksLikeInternalLeak(answerText)) {
+        answerText = synthesizeConversationalAnswer({
+          question: request.question,
+          evidence: sources.map((s) => ({ id: s.chunkId, text: s.text })),
+          intent: prompt.intent,
+          assistantKey,
+          channel: request.channel,
+          publicCourses,
+          history: request.conversationHistory,
+        });
+      }
+
+      const confidence = normalizeConfidence(computeConfidence(guarded.chunks));
       const contextChars = guarded.chunks.reduce((s, c) => s + c.text.length, 0);
       const grounding = computeGroundingScore({
         chunks: guarded.chunks,
-        confidence,
+        confidence: confidence ?? 0,
         contextChars,
       });
       const avgScore = sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length);
 
       const formattedText = formatResponse({
-        text: completion.text,
+        text: answerText,
         intent: prompt.intent,
         status: 'ok',
       });
 
+      const suggestedActions = buildSuggestedActions({
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        status: 'ok',
+        intent: prompt.intent,
+        hasSources: sources.length > 0,
+      });
+
       return {
-        text: completion.text,
+        text: answerText,
         formattedText,
         sources,
         confidence,
@@ -247,6 +386,7 @@ export class NeurofrigoRuntime {
         errorCode: null,
         intent: prompt.intent,
         grounding,
+        suggestedActions,
         explainability: {
           sourceCount: sources.length,
           avgScore: Number(avgScore.toFixed(3)),
@@ -262,7 +402,11 @@ export class NeurofrigoRuntime {
           retrievalTookMs,
           llmTookMs,
           intent: prompt.intent,
-          justification: `Resposta ancorada em ${sources.length} trecho(s) do material autorizado (score médio ${avgScore.toFixed(2)}, grounding ${grounding.score.toFixed(2)}).`,
+          justification: humanExplainability({
+            assistantKey,
+            channel: request.channel,
+            sourceCount: sources.length,
+          }),
         },
         retrieval: {
           candidateCount: retrieval.candidateCount,
@@ -286,7 +430,7 @@ export class NeurofrigoRuntime {
           status: isTimeout ? 'timeout' : 'error',
         }),
         sources: [],
-        confidence: 0,
+        confidence: null,
         tookMs: Date.now() - started,
         model: meta.model,
         provider: meta.name,
@@ -300,16 +444,95 @@ export class NeurofrigoRuntime {
           : `RUNTIME_ERROR:${message.replace(/\s+/g, ' ').slice(0, 160)}`,
         intent: intentHint,
         grounding: null,
+        suggestedActions: [],
         explainability: null,
       };
     }
   }
 
-  /** Inclui leve reforço do último turno para follow-up sem mudar o Retriever. */
+  private okSynthetic(input: {
+    text: string;
+    intent: RuntimeAnswer['intent'];
+    started: number;
+    meta: { model: string; name: string };
+    assistantKey: string | null;
+    channel?: string | null;
+    question: string;
+    confidence: number;
+    justification: string;
+  }): RuntimeAnswer {
+    const suggestedActions = buildSuggestedActions({
+      assistantKey: input.assistantKey,
+      channel: input.channel,
+      question: input.question,
+      status: 'ok',
+      intent: input.intent,
+      hasSources: false,
+    });
+    return {
+      text: input.text,
+      formattedText: formatResponse({
+        text: input.text,
+        intent: input.intent,
+        status: 'ok',
+      }),
+      sources: [],
+      confidence: normalizeConfidence(input.confidence),
+      tookMs: Date.now() - input.started,
+      model: input.meta.model,
+      provider: input.meta.name,
+      promptTokens: 0,
+      completionTokens: Math.ceil(input.text.length / 4),
+      totalTokens: Math.ceil(input.text.length / 4),
+      estimatedCostUsd: 0,
+      status: 'ok',
+      errorCode: null,
+      intent: input.intent,
+      grounding: null,
+      suggestedActions,
+      explainability: {
+        sourceCount: 0,
+        avgScore: 0,
+        confidence: normalizeConfidence(input.confidence),
+        documents: [],
+        retrievalTookMs: 0,
+        llmTookMs: 0,
+        intent: input.intent || 'explanation',
+        justification: input.justification,
+      },
+    };
+  }
+
+  /** Inclui reforço do histórico recente para follow-up sem mudar o Retriever. */
   private buildRetrievalQuery(request: RuntimeRequest): string {
     const history = request.conversationHistory ?? [];
     if (!history.length) return request.question;
-    const last = history[history.length - 1]!;
-    return `${request.question}\n(contexto da sessão: ${last.question})`;
+    const recent = history.slice(-2);
+    const ctx = recent
+      .map((t) => `${t.question}${t.answer ? ` → ${t.answer.slice(0, 160)}` : ''}`)
+      .join(' | ');
+    return `${request.question}\n(contexto da sessão: ${ctx})`;
   }
+}
+
+function humanExplainability(input: {
+  assistantKey?: string | null;
+  channel?: string | null;
+  sourceCount: number;
+}): string {
+  const isPublic =
+    input.channel === 'portal_public' || (input.assistantKey || '').toLowerCase() === 'concierge';
+  if (isPublic) {
+    return `Esta resposta foi elaborada com base em conteúdos institucionais públicos da Omnia Frigo${
+      input.sourceCount ? ` (${input.sourceCount} trecho${input.sourceCount > 1 ? 's' : ''} autorizado${input.sourceCount > 1 ? 's' : ''})` : ''
+    } e nas informações disponíveis para este assistente.`;
+  }
+  if ((input.assistantKey || '').toLowerCase() === 'tutor') {
+    return `Esta resposta foi elaborada com base no material autorizado do curso/aula disponível para o seu perfil${
+      input.sourceCount ? ` (${input.sourceCount} fonte${input.sourceCount > 1 ? 's' : ''})` : ''
+    }.`;
+  }
+  return `Esta resposta foi elaborada com base no conteúdo autorizado disponível para este assistente${
+    input.sourceCount ? ` (${input.sourceCount} fonte${input.sourceCount > 1 ? 's' : ''})` : ''
+  }.`;
 }

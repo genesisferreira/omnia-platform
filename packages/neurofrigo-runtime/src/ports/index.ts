@@ -45,5 +45,6 @@ export interface PromptBuilderPort {
     context: BuiltContext;
     chunks: CitationResult[];
     limits: GuardrailLimits;
+    assistantKey?: string | null;
   }): PromptBundle;
 }

@@ -48,6 +48,21 @@ export type RuntimeRequest = {
     description?: string | null;
     capabilities?: string[] | null;
   } | null;
+  /**
+   * Live domain facts (LMS catalog etc.) — not RAG.
+   * Conversation layer may synthesize from these without inventing.
+   */
+  domainContext?: {
+    publicCourses?: Array<{
+      title: string;
+      slug?: string | null;
+      shortDescription?: string | null;
+      level?: string | null;
+      category?: string | null;
+      estimatedHours?: number | null;
+      providerHint?: string | null;
+    }> | null;
+  } | null;
 };
 
 export type BuiltContext = {
@@ -110,7 +125,7 @@ export type SourceCitation = {
 export type Explainability = {
   sourceCount: number;
   avgScore: number;
-  confidence: number;
+  confidence: number | null;
   documents: Array<{
     chunkId: string;
     knowledgeDocumentId: string | null;
@@ -134,11 +149,17 @@ export type GroundingScore = {
   confidence: number;
 };
 
+export type SuggestedAction = {
+  label: string;
+  question: string;
+};
+
 export type RuntimeAnswer = {
   text: string;
   formattedText: string;
   sources: SourceCitation[];
-  confidence: number;
+  /** Finite 0..1 or null — never NaN. */
+  confidence: number | null;
   tookMs: number;
   model: string;
   provider: string;
@@ -151,6 +172,7 @@ export type RuntimeAnswer = {
   intent: QuestionIntent | null;
   grounding: GroundingScore | null;
   explainability: Explainability | null;
+  suggestedActions?: SuggestedAction[];
   retrieval?: Pick<
     RetrievalResult,
     'candidateCount' | 'afterAclCount' | 'recoveredTokens' | 'tookMs'

@@ -1,15 +1,17 @@
 import type { HealthStatus, LLMCompletion } from '../../domain/types';
 import type { LLMProviderPort } from '../../ports';
+import { synthesizeConversationalAnswer } from '../../conversation/synthesize-answer';
 
 /**
- * Provider default — resposta ancorada exclusivamente nos chunks recuperados.
+ * Provider default — sintetiza resposta conversacional ancorada nas evidências.
+ * Nunca devolve raw chunks / markers / [chunk:id] como corpo principal.
  */
 export class GroundedExtractiveProvider implements LLMProviderPort {
   private readonly model: string;
   private readonly name: string;
 
   constructor(opts?: { model?: string; name?: string }) {
-    this.model = opts?.model ?? 'grounded-extractive-v1';
+    this.model = opts?.model ?? 'grounded-extractive-v2';
     this.name = opts?.name ?? 'grounded';
   }
 
@@ -29,35 +31,16 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
     const sources = this.parseSources(input.user);
     const question = this.parseQuestion(input.user);
     const intent = this.parseIntent(input.system);
+    const assistantKey = this.parseAssistantKey(input.system);
+    const history = this.parseHistory(input.user);
 
-    let text: string;
-    if (!sources.length) {
-      text =
-        'Não encontrei essa informação na base autorizada disponível. Posso responder apenas com material publicado para o seu perfil.';
-    } else {
-      const bullets = sources.slice(0, 4).map((s, i) => {
-        const excerpt = s.text.slice(0, 260).trim().replace(/\s+/g, ' ');
-        return `${i + 1}. ${excerpt}${s.text.length > 260 ? '…' : ''} [chunk:${s.id}]`;
-      });
-
-      if (intent.includes('procedural') || intent.includes('troubleshooting')) {
-        text = [
-          `Com base no material autorizado sobre “${question.slice(0, 100)}”:`,
-          '',
-          ...bullets,
-          '',
-          'Observação técnica: confirme os parâmetros e procedimentos descritos no material do curso.',
-        ].join('\n');
-      } else if (intent.includes('comparative')) {
-        text = [`Comparativo com base no material:`, '', ...bullets].join('\n');
-      } else {
-        text = [
-          `Pontos principais do material sobre “${question.slice(0, 100)}”:`,
-          '',
-          ...bullets.map((b) => b.replace(/^\d+\.\s/, '- ')),
-        ].join('\n');
-      }
-    }
+    let text = synthesizeConversationalAnswer({
+      question,
+      evidence: sources.map((s) => ({ id: s.id, text: s.text })),
+      intent,
+      assistantKey,
+      history,
+    });
 
     if (text.length > input.maxTokens * 4) {
       text = text.slice(0, input.maxTokens * 4);
@@ -82,9 +65,27 @@ export class GroundedExtractiveProvider implements LLMProviderPort {
     return (m?.[1] || '').toLowerCase();
   }
 
+  private parseAssistantKey(system: string): string | null {
+    const m = /Assistente:\s*([a-z0-9_-]+)/i.exec(system);
+    return m?.[1]?.toLowerCase() || null;
+  }
+
   private parseQuestion(user: string): string {
     const m = /PERGUNTA\n([\s\S]*)$/m.exec(user);
     return (m?.[1] || user).trim();
+  }
+
+  private parseHistory(user: string): Array<{ question: string; answer: string }> {
+    const block = /HISTÓRICO DA SESSÃO\n([\s\S]*?)(?:\n\nFONTES|\n\nPERGUNTA)/m.exec(user)?.[1];
+    if (!block || /nenhum/i.test(block)) return [];
+    const out: Array<{ question: string; answer: string }> = [];
+    const turns = block.split(/\n(?=Usuário:)/i);
+    for (const turn of turns) {
+      const q = /Usuário:\s*(.+)/i.exec(turn)?.[1]?.trim();
+      const a = /Assistente:\s*([\s\S]+)/i.exec(turn)?.[1]?.trim();
+      if (q && a) out.push({ question: q, answer: a.slice(0, 500) });
+    }
+    return out;
   }
 
   private parseSources(user: string): Array<{ id: string; text: string }> {

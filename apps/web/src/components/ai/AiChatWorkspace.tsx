@@ -34,6 +34,33 @@ const PUBLIC_SUGGESTIONS = [
   'Qual empresa procurar para engenharia?',
 ];
 
+function formatConfidenceLabel(value: unknown): string | null {
+  if (value == null || value === '') return null;
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return null;
+  return `confiança ${Math.round(Math.max(0, Math.min(1, n)) * 100)}%`;
+}
+
+function friendlySourceTitle(s: {
+  text: string;
+  citation?: { page?: number | null } | null;
+  index: number;
+}): string {
+  const cleaned = String(s.text || '')
+    .replace(/EPIC16_PUBLIC_INSTITUTIONAL_V\d+/gi, '')
+    .replace(/\[chunk:[^\]]+\]/gi, '')
+    .replace(/^#+\s*/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const first = cleaned.split(/(?<=[.!?])\s+/)[0]?.trim() || cleaned;
+  const snippet = first.slice(0, 72).trim() || `Trecho autorizado ${s.index + 1}`;
+  const base = first.length > 72 ? `${snippet}…` : snippet;
+  if (s.citation?.page != null && Number.isFinite(s.citation.page)) {
+    return `${base} (p. ${s.citation.page})`;
+  }
+  return base;
+}
+
 export function AiChatWorkspace({
   context,
   variant = 'embedded',
@@ -393,10 +420,18 @@ export function AiChatWorkspace({
                     variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-500'
                   }`}
                 >
-                  <span>{turn.answer.tookMs} ms</span>
-                  <span>·</span>
-                  <span>confiança {(turn.answer.confidence * 100).toFixed(0)}%</span>
-                  <span>·</span>
+                  {Number.isFinite(turn.answer.tookMs) ? (
+                    <>
+                      <span>{turn.answer.tookMs} ms</span>
+                      <span>·</span>
+                    </>
+                  ) : null}
+                  {formatConfidenceLabel(turn.answer.confidence) ? (
+                    <>
+                      <span>{formatConfidenceLabel(turn.answer.confidence)}</span>
+                      <span>·</span>
+                    </>
+                  ) : null}
                   <span>{turn.answer.sourceCount ?? turn.answer.sources.length} fontes</span>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -442,7 +477,7 @@ export function AiChatWorkspace({
                     {turn.answer.sources.length === 0 ? (
                       <li className="text-xs opacity-70">Nenhuma fonte.</li>
                     ) : (
-                      turn.answer.sources.map((s) => (
+                      turn.answer.sources.map((s, sourceIdx) => (
                         <li
                           key={s.chunkId}
                           className={`rounded-md border px-3 py-2 text-xs ${
@@ -450,13 +485,19 @@ export function AiChatWorkspace({
                           }`}
                         >
                           <div className="font-medium">
-                            chunk:{s.chunkId}
-                            {s.citation?.page != null ? ` · p.${s.citation.page}` : ''}
-                            {' · score '}
-                            {s.score.toFixed(2)}
+                            {friendlySourceTitle({
+                              text: s.text,
+                              citation: s.citation,
+                              index: sourceIdx,
+                            })}
                           </div>
                           <p className="mt-1 opacity-70">
-                            {s.text.slice(0, 220)}
+                            {s.text
+                              .replace(/EPIC16_PUBLIC_INSTITUTIONAL_V\d+/gi, '')
+                              .replace(/\[chunk:[^\]]+\]/gi, '')
+                              .replace(/\s+/g, ' ')
+                              .trim()
+                              .slice(0, 220)}
                             {s.text.length > 220 ? '…' : ''}
                           </p>
                         </li>
@@ -473,12 +514,25 @@ export function AiChatWorkspace({
                     }`}
                   >
                     <p>{turn.answer.explainability.justification}</p>
-                    <p>
-                      Fontes: {turn.answer.explainability.sourceCount} · score médio{' '}
-                      {turn.answer.explainability.avgScore.toFixed(2)} · retrieval{' '}
-                      {turn.answer.explainability.retrievalTookMs} ms · LLM{' '}
-                      {turn.answer.explainability.llmTookMs} ms
-                    </p>
+                  </div>
+                ) : null}
+                {turn.answer.suggestedActions && turn.answer.suggestedActions.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {turn.answer.suggestedActions.map((action) => (
+                      <button
+                        key={action.question}
+                        type="button"
+                        disabled={pending}
+                        onClick={() => submit(action.question)}
+                        className={`rounded-full border px-3 py-1 text-xs transition hover:opacity-90 disabled:opacity-50 ${
+                          variant === 'embedded'
+                            ? 'border-border text-foreground'
+                            : 'border-zinc-700 text-zinc-200 hover:border-cyan-500/60'
+                        }`}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
                   </div>
                 ) : null}
                 {feedbackFor === idx ? (

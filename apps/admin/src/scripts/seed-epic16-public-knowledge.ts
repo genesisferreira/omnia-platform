@@ -10,7 +10,8 @@
  */
 export {};
 
-const MARKER = 'EPIC16_PUBLIC_INSTITUTIONAL_V1';
+const MARKER = 'EPIC16_PUBLIC_INSTITUTIONAL_V2';
+const LEGACY_MARKER = 'EPIC16_PUBLIC_INSTITUTIONAL_V1';
 const RESOURCE_TITLE = `${MARKER} — Omnia Frigo Holding (público)`;
 
 function assertStagingSafe() {
@@ -56,11 +57,25 @@ As empresas que fazem parte da Omnia Frigo Holding incluem:
 
 ## Serviços da Renovação Refrigeração
 
-A Renovação Refrigeração oferece serviços de engenharia e projetos em refrigeração,
-incluindo levantamento técnico, projeto de câmaras e sistemas, instalação,
-comissionamento, manutenção preventiva e corretiva, e suporte a operações de
-refrigeração industrial e comercial. Para um projeto de refrigeração industrial,
-a empresa do ecossistema a procurar é a Renovação Refrigeração.
+A Renovação Refrigeração oferece serviços de engenharia e execução em refrigeração
+comercial e industrial, incluindo:
+
+- levantamento técnico e diagnóstico de campo
+- projeto de câmaras frigoríficas e sistemas de refrigeração
+- instalação e comissionamento
+- manutenção preventiva e corretiva
+- retrofit e modernização de plantas
+- suporte operacional a sistemas de refrigeração
+
+Para um projeto de refrigeração industrial, instalação de câmara frigorífica ou
+manutenção técnica, a empresa do ecossistema a procurar é a Renovação Refrigeração.
+
+## Serviços e soluções Neurofrigo
+
+O Neurofrigo Command IA apoia monitoramento, automação e inteligência artificial
+aplicada ao controle de refrigeração. O Neurofrigo Carga complementa o ecossistema
+com gestão digital de carga refrigerada. Visitantes podem conhecer essas soluções
+como parte das ofertas integradas da Holding.
 
 ## Cursos e treinamentos
 
@@ -126,7 +141,13 @@ async function main() {
 
   const existing = await payload.find({
     collection: 'learning-resources',
-    where: { title: { equals: RESOURCE_TITLE } },
+    where: {
+      or: [
+        { title: { equals: RESOURCE_TITLE } },
+        { title: { equals: `${LEGACY_MARKER} — Omnia Frigo Holding (público)` } },
+        { title: { contains: 'EPIC16_PUBLIC_INSTITUTIONAL' } },
+      ],
+    },
     limit: 1,
     overrideAccess: true,
   });

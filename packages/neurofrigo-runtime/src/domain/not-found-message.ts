@@ -1,5 +1,5 @@
 /**
- * Contextual not-found copy — never use course wording outside academic scope.
+ * Contextual not-found copy — natural, helpful, never exposes internal codes.
  */
 export function resolveNotFoundMessage(input: {
   assistantKey?: string | null;
@@ -11,16 +11,16 @@ export function resolveNotFoundMessage(input: {
   const hasCourse = Boolean(input.courseId);
 
   if (channel === 'portal_public' || assistant === 'concierge') {
-    return 'Não encontrei essa informação na base pública autorizada da Omnia Frigo. Posso ajudar com cursos, serviços, refrigeração e o ecossistema Omnia.';
+    return 'Não encontrei informação pública suficiente para responder isso com segurança. Posso, porém, ajudar você com nossos cursos, serviços, empresas do grupo ou soluções de refrigeração.';
   }
   if (assistant === 'engineering') {
-    return 'Não encontrei essa informação na base técnica autorizada. Reformule com mais contexto do sistema ou do sintoma.';
+    return 'Não encontrei evidência suficiente na base técnica para afirmar isso com segurança. Se você fornecer pressões, temperaturas e a condição operacional, posso continuar a análise.';
   }
   if (assistant === 'commercial') {
-    return 'Não encontrei essa informação na base comercial autorizada. Posso orientar sobre soluções e próximos passos de contato.';
+    return 'Não encontrei informação comercial autorizada suficiente para essa pergunta. Posso ajudar a estruturar a necessidade e orientar soluções do ecossistema Omnia.';
   }
   if (hasCourse || assistant === 'tutor') {
-    return 'Não encontrei essa informação no material autorizado deste curso. Posso responder apenas com base no material publicado.';
+    return 'Não encontrei esse ponto no material autorizado desta aula. Se quiser, posso ajudar com os conceitos relacionados que estão disponíveis.';
   }
   return 'Não encontrei essa informação na base autorizada disponível para o seu perfil. Reformule a pergunta ou escolha outro assistente.';
 }

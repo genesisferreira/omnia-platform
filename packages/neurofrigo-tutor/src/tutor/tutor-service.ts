@@ -102,7 +102,7 @@ export class TutorService {
       courseId,
       question: request.question,
       groundingScore: answer.grounding?.score ?? 0,
-      confidence: answer.confidence,
+      confidence: answer.confidence ?? 0,
       status: answer.status,
     });
 

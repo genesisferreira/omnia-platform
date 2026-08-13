@@ -88,7 +88,7 @@ describe('neurofrigo-runtime experience v2', () => {
       },
     });
     assert.equal(prompt.intent, 'procedural');
-    assert.match(prompt.system, /passos numerados/i);
+    assert.match(prompt.system, /passos claros e numerados/i);
     assert.match(prompt.user, /HISTÓRICO DA SESSÃO/);
     assert.match(prompt.user, /manômetro/);
   });
@@ -99,7 +99,7 @@ describe('neurofrigo-runtime experience v2', () => {
       intent: 'procedural',
       status: 'ok',
     });
-    assert.match(formatted, /## /);
+    assert.match(formatted, /Passo A/);
     assert.match(formatted, /Nota de segurança/);
 
     const g = computeGroundingScore({
@@ -190,11 +190,12 @@ describe('neurofrigo-runtime experience v2', () => {
     });
 
     assert.equal(answer.status, 'ok');
-    assert.ok(answer.formattedText.includes('##'));
     assert.ok(answer.sources.length >= 1);
     assert.ok(answer.explainability);
     assert.ok((answer.grounding?.score ?? 0) > 0);
     assert.ok(answer.intent);
+    assert.ok(!/Pontos principais do material/i.test(answer.text));
+    assert.ok(!/\[chunk:/i.test(answer.text));
 
     const empty: RetrievalPort = {
       async search() {
@@ -263,9 +264,9 @@ describe('neurofrigo-runtime experience v2', () => {
     const { resolveNotFoundMessage } = await import('./domain/not-found-message');
     assert.match(
       resolveNotFoundMessage({ channel: 'portal_public', assistantKey: 'concierge' }),
-      /base pública/i,
+      /informação pública/i,
     );
     assert.match(resolveNotFoundMessage({ assistantKey: 'engineering' }), /base técnica/i);
-    assert.match(resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }), /deste curso/i);
+    assert.match(resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }), /desta aula|autorizado/i);
   });
 });
