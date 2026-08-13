@@ -2,6 +2,14 @@
 
 Pacote oficial do **Blueprint Omnia LMS** + **Auditoria Funcional Moodle 4.5 LTS**.
 
+## Product Completion (escola operacional)
+
+| Documento                                                                              | Descrição                            |
+| -------------------------------------------------------------------------------------- | ------------------------------------ |
+| [LMS_PRODUCT_COMPLETION_AUDIT.md](LMS_PRODUCT_COMPLETION_AUDIT.md)                     | Matriz EXISTE / PARCIAL / FALTA      |
+| [LMS_PRODUCT_COMPLETION_ARCHITECTURE.md](LMS_PRODUCT_COMPLETION_ARCHITECTURE.md)       | Ownership Omnia vs Moodle, ACL, sync |
+| [LMS_PRODUCT_COMPLETION_DELIVERY_REPORT.md](LMS_PRODUCT_COMPLETION_DELIVERY_REPORT.md) | Relatório 43 itens + GO / NO-GO      |
+
 ## Blueprint (fonte de verdade do produto)
 
 | Documento                                                                      | Descrição                                    |

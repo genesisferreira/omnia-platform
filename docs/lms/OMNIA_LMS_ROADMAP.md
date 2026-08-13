@@ -51,6 +51,21 @@
 
 ---
 
+## LMS Product Completion (2026-08) — **implementado, homologação humana**
+
+Macroentrega única (auditar → reutilizar → completar gaps):
+
+- Áreas `/aluno` e `/professor` no Portal (não Admin Payload)
+- Modelo acadêmico nativo: turmas, matrículas, banco, avaliações, tentativas, notas, certificados, calendário, notificações in-app, progresso
+- Assessment Engine nativo (MCQ/TF/short auto; dissertativa manual) **sem dual-write Moodle**
+- Moodle Connector permanece **read-only / write dry-run**
+- EPIC 16 R6 permanece em validação humana contínua
+- Docs: `LMS_PRODUCT_COMPLETION_AUDIT.md`, `LMS_PRODUCT_COMPLETION_ARCHITECTURE.md`, `LMS_PRODUCT_COMPLETION_DELIVERY_REPORT.md`
+
+**Fora desta entrega:** CRM, ERP, WhatsApp, n8n, produção, merge develop.
+
+---
+
 ## Sprint 2.6 — Área do Aluno MVP
 
 - Dashboard, meus cursos, continuar estudando

@@ -37,3 +37,11 @@ export {
   type AssessmentEventSink,
   type CreateAssessmentEngineOptions,
 } from './engine';
+export {
+  gradeAttempt,
+  gradeObjectiveQuestion,
+  studentSafeQuestion,
+  type NativeAnswer,
+  type NativeQuestion,
+  type NativeQuestionType,
+} from './native-grade';

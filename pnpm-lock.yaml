@@ -149,6 +149,9 @@ importers:
       '@omnia/adaptive-learning':
         specifier: workspace:*
         version: link:../../packages/adaptive-learning
+      '@omnia/assessment-engine':
+        specifier: workspace:*
+        version: link:../../packages/assessment-engine
       '@omnia/config':
         specifier: workspace:*
         version: link:../../packages/config

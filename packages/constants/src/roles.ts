@@ -64,7 +64,7 @@ export function isScopedPortalRole(value: unknown): value is ScopedPortalRole {
   return typeof value === 'string' && (SCOPED_PORTAL_ROLES as readonly string[]).includes(value);
 }
 
-/** Caminho stub da área própria (partner / instructor / student / client). */
+/** Caminho stub da área própria no host Admin (partner / instructor / student / client). */
 export function getScopedAreaPath(role: PlatformRole): string | null {
   if (!isScopedPortalRole(role)) {
     return null;

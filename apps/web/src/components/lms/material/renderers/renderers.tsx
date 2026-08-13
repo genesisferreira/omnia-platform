@@ -53,26 +53,40 @@ export function ImageRenderer(props: MaterialRendererProps) {
 }
 
 export function PdfRenderer(props: MaterialRendererProps) {
+  const src = props.previewUrl || props.externalUrl;
+  if (!src) {
+    return (
+      <Placeholder
+        title="PDF"
+        message={props.fallbackMessage || 'Arquivo PDF ainda não disponível.'}
+      />
+    );
+  }
   return (
-    <Placeholder
-      title="PDF (placeholder)"
-      message={
-        props.fallbackMessage ||
-        'Protected PDF viewer + Media Authorization reservados para sprint futura.'
-      }
-    />
+    <div className="space-y-2">
+      <iframe
+        title={props.name}
+        className="h-[28rem] w-full rounded-md border border-border"
+        src={src}
+      />
+      <a className="text-sm underline" href={src} target="_blank" rel="noreferrer">
+        Abrir / baixar PDF
+      </a>
+    </div>
   );
 }
 
 export function VideoRenderer(props: MaterialRendererProps) {
+  const src = props.previewUrl || props.externalUrl;
+  if (!src) {
+    return (
+      <Placeholder title="Vídeo" message={props.fallbackMessage || 'Vídeo ainda não disponível.'} />
+    );
+  }
   return (
-    <Placeholder
-      title="Vídeo (placeholder)"
-      message={
-        props.fallbackMessage ||
-        'Streaming protegido / CDN / signed URLs fora do escopo desta sprint.'
-      }
-    />
+    <video className="w-full rounded-md border border-border" controls src={src}>
+      <a href={src}>Abrir vídeo</a>
+    </video>
   );
 }
 

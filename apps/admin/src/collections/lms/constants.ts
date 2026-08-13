@@ -23,6 +23,44 @@ export const LESSON_ASSET_TYPES = [
 ] as const;
 export type LessonAssetType = (typeof LESSON_ASSET_TYPES)[number];
 
+export const CLASS_STATUSES = ['draft', 'open', 'running', 'closed', 'archived'] as const;
+export type ClassStatus = (typeof CLASS_STATUSES)[number];
+
+export const CLASS_MODALITIES = ['online', 'in_person', 'hybrid'] as const;
+export type ClassModality = (typeof CLASS_MODALITIES)[number];
+
+export const ENROLLMENT_STATUSES = ['invited', 'active', 'completed', 'cancelled'] as const;
+export type EnrollmentStatus = (typeof ENROLLMENT_STATUSES)[number];
+
+export const QUESTION_TYPES = ['multiple_choice', 'true_false', 'short_answer', 'essay'] as const;
+export type QuestionType = (typeof QUESTION_TYPES)[number];
+
+export const QUESTION_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
+
+export const ASSESSMENT_STATUSES = ['draft', 'published', 'closed'] as const;
+export type AssessmentStatus = (typeof ASSESSMENT_STATUSES)[number];
+
+export const ATTEMPT_STATUSES = ['in_progress', 'submitted', 'graded', 'published'] as const;
+export type AttemptStatus = (typeof ATTEMPT_STATUSES)[number];
+
+export const CERTIFICATE_STATUSES = ['valid', 'revoked'] as const;
+
+export const ACADEMIC_EVENT_TYPES = [
+  'lesson',
+  'assessment',
+  'deadline',
+  'class_session',
+  'other',
+] as const;
+
+export const NOTIFICATION_TYPES = [
+  'assessment_available',
+  'deadline',
+  'grade_published',
+  'new_material',
+  'certificate_available',
+] as const;
+
 export function optionsFrom(values: readonly string[]) {
   return values.map((value) => ({ label: value, value }));
 }

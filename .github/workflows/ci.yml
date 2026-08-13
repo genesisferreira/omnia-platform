@@ -108,6 +108,12 @@ jobs:
       - name: Student Intelligence unit tests
         run: pnpm --filter @omnia/student-intelligence test
 
+      - name: LMS Core + product completion ACL
+        run: pnpm --filter @omnia/admin test:lms-core && pnpm --filter @omnia/admin test:lms-product-completion
+
+      - name: Assessment engine native grade
+        run: pnpm --filter @omnia/assessment-engine test
+
   build:
     name: Build
     runs-on: ubuntu-latest

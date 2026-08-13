@@ -28,6 +28,6 @@ export default async function ScopedAreaPage({ params }: AreaPageProps) {
     redirect(`/login?next=${encodeURIComponent('/ia')}`);
   }
 
-  // Authenticated on Admin host but area pages are deprecated → Portal /ia
-  redirect(`${portalBase}/ia`);
+  const dest = rawRole === 'instructor' ? '/professor' : rawRole === 'student' ? '/aluno' : '/ia';
+  redirect(`${portalBase}${dest}`);
 }

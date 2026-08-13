@@ -16,6 +16,8 @@ describe('EPIC16 gap fix portal redirect', () => {
   it('recognizes portal destinations for staff next=', () => {
     assert.equal(isPortalDestination('/ia'), true);
     assert.equal(isPortalDestination('/cursos/x'), true);
+    assert.equal(isPortalDestination('/aluno'), true);
+    assert.equal(isPortalDestination('/professor/turmas'), true);
     assert.equal(isPortalDestination('/'), true);
     assert.equal(isPortalDestination('/admin'), false);
   });

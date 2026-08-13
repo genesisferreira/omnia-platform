@@ -15,6 +15,10 @@ describe('lms core foundation', () => {
     assert.ok(LESSON_ASSET_TYPES.includes('attachment'));
   });
 
+  it('keeps LMS Core independent from Moodle academic write', () => {
+    assert.equal(COURSE_STATUSES.includes('published'), true);
+  });
+
   it('ACL helpers distinguish publisher / instructor / student', () => {
     assert.equal(isLmsPublisher({ role: 'admin' }), true);
     assert.equal(isLmsPublisher({ role: 'editor' }), false);

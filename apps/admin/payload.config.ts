@@ -29,7 +29,22 @@ import { Tenants } from './src/collections/Tenants';
 import { Users } from './src/collections/Users';
 import { LmsIdentityLinks } from './src/collections/LmsIdentityLinks';
 import { LmsAuditEvents } from './src/collections/LmsAuditEvents';
-import { CourseModules, Courses, LessonAssets, Lessons } from './src/collections/lms';
+import {
+  CourseModules,
+  Courses,
+  LessonAssets,
+  Lessons,
+  LmsAcademicEvents,
+  LmsAssessments,
+  LmsAttempts,
+  LmsCertificates,
+  LmsClasses,
+  LmsEnrollments,
+  LmsLessonProgress,
+  LmsNotifications,
+  LmsQuestionBanks,
+  LmsQuestions,
+} from './src/collections/lms';
 import {
   EmbeddingQueue,
   KiProcessingRuns,
@@ -80,6 +95,7 @@ import {
   publicPostTagsEndpoint,
 } from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
+import { academicEndpoints } from './src/endpoints/academic';
 import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
@@ -154,6 +170,16 @@ export default buildConfig({
     CourseModules,
     Lessons,
     LessonAssets,
+    LmsClasses,
+    LmsEnrollments,
+    LmsQuestionBanks,
+    LmsQuestions,
+    LmsAssessments,
+    LmsAttempts,
+    LmsLessonProgress,
+    LmsCertificates,
+    LmsAcademicEvents,
+    LmsNotifications,
     LearningResources,
     KnowledgeChunks,
     EmbeddingQueue,
@@ -221,6 +247,7 @@ export default buildConfig({
     publicCourseEndpoint,
     publicLessonEndpoint,
     ...lmsEndpoints,
+    ...academicEndpoints,
     ...retrievalEndpoints,
     ...neurofrigoEndpoints,
     ...tutorEndpoints,

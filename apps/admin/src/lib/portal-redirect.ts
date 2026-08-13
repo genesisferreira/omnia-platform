@@ -27,6 +27,9 @@ export function isPortalDestination(path: string): boolean {
     p.startsWith('/ia/') ||
     p.startsWith('/cursos') ||
     p.startsWith('/lms') ||
+    p.startsWith('/aluno') ||
+    p.startsWith('/professor') ||
+    p.startsWith('/certificados') ||
     p.startsWith('/minha-conta') ||
     p.startsWith('/meu-perfil') ||
     p.startsWith('/empresas') ||

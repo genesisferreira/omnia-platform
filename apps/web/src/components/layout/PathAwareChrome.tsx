@@ -7,13 +7,23 @@ import { AiExperienceProvider } from '@/components/ai/AiExperienceProvider';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 
+function isAcademicShell(pathname: string): boolean {
+  return (
+    pathname === '/lms' ||
+    pathname.startsWith('/lms/') ||
+    pathname === '/aluno' ||
+    pathname.startsWith('/aluno/') ||
+    pathname === '/professor' ||
+    pathname.startsWith('/professor/')
+  );
+}
+
 /**
- * Esconde chrome institucional nas rotas /lms/* (shell LMS próprio).
- * Mantém AI Dock global nas áreas autenticadas (inclui LMS via provider no root).
+ * Esconde chrome institucional nas rotas /lms, /aluno e /professor (shell próprio).
  */
 export function PathAwareChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
-  const isLms = pathname === '/lms' || pathname.startsWith('/lms/');
+  const isLms = isAcademicShell(pathname);
 
   if (isLms) {
     return <>{children}</>;
@@ -43,7 +53,6 @@ export function PortalAiShell({ children }: { children: React.ReactNode }) {
 
 function LmsAwareDock() {
   const pathname = usePathname() || '';
-  const isLms = pathname === '/lms' || pathname.startsWith('/lms/');
-  if (!isLms) return null;
+  if (!isAcademicShell(pathname)) return null;
   return <AiDock />;
 }

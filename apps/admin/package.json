@@ -48,6 +48,7 @@
     "seed:knowledge-hub-load": "tsx src/scripts/seed-knowledge-hub-load.ts",
     "seed:lms-core": "tsx src/scripts/seed-lms-core.ts",
     "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
+    "test:lms-product-completion": "tsx --test src/scripts/test-lms-product-completion.ts ../../packages/assessment-engine/src/**/test-*.ts",
     "seed:knowledge-intelligence": "tsx src/scripts/seed-knowledge-intelligence.ts",
     "test:knowledge-intelligence": "tsx --test ../../packages/knowledge-intelligence/src/**/test-*.ts && tsx --test src/scripts/test-knowledge-intelligence.ts",
     "seed:retrieval": "tsx src/scripts/seed-retrieval.ts",
@@ -86,6 +87,7 @@
   },
   "dependencies": {
     "@omnia/academic-provisioning": "workspace:*",
+    "@omnia/assessment-engine": "workspace:*",
     "@omnia/media-authorization": "workspace:*",
     "@omnia/config": "workspace:*",
     "@omnia/constants": "workspace:*",

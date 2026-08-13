@@ -52,7 +52,8 @@ export const Courses: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'status', 'level', 'visibility', 'updatedAt'],
     group: 'LMS',
-    description: 'Catálogo de cursos do LMS Core (Payload). Sem provas/certificados nesta entrega.',
+    description:
+      'Catálogo de cursos do LMS Core (Payload). Turmas, avaliações e certificados no grupo LMS Acadêmico.',
   },
   timestamps: true,
   access: {
@@ -191,6 +192,20 @@ export const Courses: CollectionConfig = {
       type: 'checkbox',
       label: 'Destaque',
       defaultValue: false,
+    },
+    {
+      name: 'passingScore',
+      type: 'number',
+      min: 0,
+      max: 100,
+      defaultValue: 70,
+      label: 'Nota mínima para certificado (%)',
+    },
+    {
+      name: 'certificateEnabled',
+      type: 'checkbox',
+      defaultValue: true,
+      label: 'Emitir certificado ao concluir',
     },
     {
       name: 'visibility',
