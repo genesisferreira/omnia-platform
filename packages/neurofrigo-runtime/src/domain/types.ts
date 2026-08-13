@@ -28,6 +28,7 @@ export type ConversationTurn = {
   answer: string;
   chunkIds?: string[];
   intent?: QuestionIntent | null;
+  dialogueIntent?: string | null;
 };
 
 export type RuntimeRequest = {
@@ -63,6 +64,8 @@ export type RuntimeRequest = {
       providerHint?: string | null;
     }> | null;
   } | null;
+  /** Persisted dialogue state from session (R5). */
+  dialogueState?: import('../conversation/dialogue-types').ConversationState | null;
 };
 
 export type BuiltContext = {
@@ -173,6 +176,9 @@ export type RuntimeAnswer = {
   grounding: GroundingScore | null;
   explainability: Explainability | null;
   suggestedActions?: SuggestedAction[];
+  /** Session dialogue state snapshot (R5). */
+  dialogueState?: import('../conversation/dialogue-types').ConversationState | null;
+  dialogueIntent?: string | null;
   retrieval?: Pick<
     RetrievalResult,
     'candidateCount' | 'afterAclCount' | 'recoveredTokens' | 'tookMs'

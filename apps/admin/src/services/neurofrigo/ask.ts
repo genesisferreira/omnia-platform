@@ -28,6 +28,7 @@ import { refreshNeurofrigoAiDashboard } from './dashboard';
 type SessionDoc = {
   id: string | number;
   turns?: ConversationTurn[] | null;
+  filters?: unknown;
 };
 
 export type AskResult = {
@@ -66,9 +67,17 @@ function asTurns(value: unknown): ConversationTurn[] {
         answer: String(row.answer),
         chunkIds: row.chunkIds,
         intent: row.intent ?? null,
+        dialogueIntent: row.dialogueIntent ?? null,
       };
     })
     .filter(Boolean) as ConversationTurn[];
+}
+
+function asDialogueState(filters: unknown): RuntimeRequest['dialogueState'] {
+  const row = asUnknownRecord(filters);
+  const raw = row?.dialogueState;
+  if (!raw || typeof raw !== 'object') return null;
+  return raw as RuntimeRequest['dialogueState'];
 }
 
 function specialistLabelFromKey(key: string): string {
@@ -183,6 +192,7 @@ export async function runNeurofrigoAsk(
 ): Promise<AskResult> {
   let existing: SessionDoc | null = null;
   let history: ConversationTurn[] = request.conversationHistory ?? [];
+  let dialogueState: RuntimeRequest['dialogueState'] = request.dialogueState ?? null;
 
   if (request.sessionId != null && request.sessionId !== '') {
     try {
@@ -193,6 +203,7 @@ export async function runNeurofrigoAsk(
         overrideAccess: true,
       })) as SessionDoc;
       history = asTurns(existing.turns);
+      dialogueState = asDialogueState(existing.filters) ?? dialogueState;
     } catch {
       existing = null;
     }
@@ -457,6 +468,7 @@ export async function runNeurofrigoAsk(
         (resolved ? `${resolved.assistant.name} · ${resolved.assistant.category}` : null),
     },
     conversationHistory: history,
+    dialogueState,
   });
 
   const compliance = applyComplianceGuard(answer.text);
@@ -563,6 +575,7 @@ async function persistSession(
     answer: args.answer.formattedText || args.answer.text,
     chunkIds: args.answer.sources.map((s) => s.chunkId),
     intent: args.answer.intent,
+    dialogueIntent: args.answer.dialogueIntent ?? null,
   };
   const turns = [...args.history, nextTurn].slice(-8);
 
@@ -631,6 +644,8 @@ async function persistSession(
       policyDecision: args.policyDecision ?? null,
       orchestratorIntent: args.plan?.intent ?? null,
       auditEvents: args.plan?.events ?? [],
+      dialogueState: args.answer.dialogueState ?? null,
+      dialogueIntent: args.answer.dialogueIntent ?? null,
       budget: args.budget
         ? {
             dailyPct: args.budget.dailyPct,

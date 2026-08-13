@@ -16,3 +16,8 @@ export * from './conversation/sanitize-evidence';
 export * from './conversation/synthesize-answer';
 export { buildSuggestedActions } from './conversation/suggested-actions';
 export * from './conversation/source-label';
+export * from './conversation/dialogue-types';
+export * from './conversation/conversation-state';
+export * from './conversation/follow-up-resolver';
+export * from './conversation/naturalize-text';
+export * from './conversation/dialogue-compose';

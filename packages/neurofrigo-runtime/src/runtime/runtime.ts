@@ -16,6 +16,11 @@ import { normalizeConfidence } from '../conversation/normalize-confidence';
 import { buildSuggestedActions } from '../conversation/suggested-actions';
 import { synthesizeConversationalAnswer } from '../conversation/synthesize-answer';
 import { looksLikeInternalLeak } from '../conversation/sanitize-evidence';
+import { resolveDialogueTurn } from '../conversation/follow-up-resolver';
+import { composeDialogueAnswer } from '../conversation/dialogue-compose';
+import { applyStatePatch } from '../conversation/conversation-state';
+import { applyRepetitionControl, naturalizeUserText } from '../conversation/naturalize-text';
+import type { ConversationState } from '../conversation/dialogue-types';
 import type {
   ContextBuilderPort,
   LLMProviderPort,
@@ -29,13 +34,12 @@ export type NeurofrigoRuntimeDeps = {
   contextBuilder?: ContextBuilderPort;
   promptBuilder?: PromptBuilderPort;
   limits?: Partial<GuardrailLimits>;
-  /** Custo estimado do Model Registry ($ / 1k tokens). */
   costPer1kTokens?: number | null;
 };
 
 /**
- * Orquestrador Experience V2 — Conversation Layer sobre Retrieval + LLM.
- * Não altera ACL: só sintetiza evidência já autorizada.
+ * Experience runtime — Retrieval + Dialogue State (R5) + conversational synthesis.
+ * Does not change ACL; only interprets authorized evidence + session memory.
  */
 export class NeurofrigoRuntime {
   private readonly retrieval: RetrievalPort;
@@ -61,155 +65,273 @@ export class NeurofrigoRuntime {
     const intentHint = classifyIntent(request.question);
     const assistantKey = request.assistantKey ?? null;
     const publicCourses = request.domainContext?.publicCourses ?? null;
+    const previousAnswers = (request.conversationHistory || []).map((t) => t.answer);
 
-    if (isCapabilityQuestion(request.question)) {
-      const text = buildCapabilityAnswer({
-        assistantKey,
-        assistantName: request.assistantMeta?.name,
-        description: request.assistantMeta?.description,
-        capabilities: request.assistantMeta?.capabilities,
-        channel: request.channel,
-      });
-      const formatted = formatResponse({
-        text,
-        intent: intentHint,
-        status: 'ok',
-      });
-      const suggestedActions = buildSuggestedActions({
-        assistantKey,
-        channel: request.channel,
-        question: request.question,
-        status: 'ok',
-        intent: intentHint,
-        hasSources: false,
-      });
-      return {
-        text,
-        formattedText: formatted,
-        sources: [],
-        confidence: 1,
-        tookMs: Date.now() - started,
-        model: meta.model,
-        provider: meta.name,
-        promptTokens: 0,
-        completionTokens: Math.ceil(text.length / 4),
-        totalTokens: Math.ceil(text.length / 4),
-        estimatedCostUsd: 0,
-        status: 'ok',
-        errorCode: null,
-        intent: intentHint,
-        grounding: null,
-        suggestedActions,
-        explainability: {
-          sourceCount: 0,
-          avgScore: 0,
-          confidence: 1,
-          documents: [],
-          retrievalTookMs: 0,
-          llmTookMs: 0,
-          intent: intentHint,
-          justification:
-            'Esta resposta descreve o que o assistente pode fazer, com base no perfil e nas capacidades publicadas — sem consulta à base documental.',
-        },
-      };
-    }
+    const resolved = resolveDialogueTurn({
+      question: request.question,
+      history: request.conversationHistory,
+      persistedState: request.dialogueState,
+      assistantKey,
+    });
 
-    // Course discovery with live LMS catalog — prefer catalog over pure RAG dump.
+    // Capability meta-questions (no retrieval) — unless dialogue already handled affirmations.
     if (
-      publicCourses &&
-      publicCourses.length > 0 &&
-      /quais?\s+cursos|que\s+cursos|cursos\s+voc[eê]s|oferecem?\s+cursos|cat[aá]logo/i.test(
-        request.question,
-      )
+      resolved.dialogueIntent === 'capabilities' ||
+      (isCapabilityQuestion(request.question) && resolved.dialogueIntent === 'unknown')
     ) {
-      const text = synthesizeConversationalAnswer({
-        question: request.question,
-        evidence: [],
-        intent: intentHint,
-        assistantKey,
-        channel: request.channel,
-        publicCourses,
-        history: request.conversationHistory,
-      });
-      const suggestedActions = buildSuggestedActions({
-        assistantKey,
-        channel: request.channel,
-        question: request.question,
-        status: 'ok',
-        intent: intentHint,
-        hasSources: false,
-      });
-      return {
+      const text = naturalizeUserText(
+        buildCapabilityAnswer({
+          assistantKey,
+          assistantName: request.assistantMeta?.name,
+          description: request.assistantMeta?.description,
+          capabilities: request.assistantMeta?.capabilities,
+          channel: request.channel,
+        }),
+      );
+      return this.finishDialogue({
         text,
-        formattedText: formatResponse({ text, intent: intentHint, status: 'ok' }),
-        sources: [],
-        confidence: 0.9,
-        tookMs: Date.now() - started,
-        model: meta.model,
-        provider: meta.name,
-        promptTokens: 0,
-        completionTokens: Math.ceil(text.length / 4),
-        totalTokens: Math.ceil(text.length / 4),
-        estimatedCostUsd: 0,
-        status: 'ok',
-        errorCode: null,
-        intent: intentHint,
-        grounding: null,
-        suggestedActions,
-        explainability: {
-          sourceCount: 0,
-          avgScore: 0,
-          confidence: 0.9,
-          documents: [],
-          retrievalTookMs: 0,
-          llmTookMs: 0,
-          intent: intentHint,
-          justification:
-            'Esta resposta foi elaborada a partir do catálogo público de cursos publicados na plataforma Omnia.',
-        },
-      };
-    }
-
-    // Company routing with institutional heuristics (Concierge) — no invention beyond public map.
-    if (
-      (request.channel === 'portal_public' || assistantKey === 'concierge') &&
-      /qual\s+empresa|quem\s+(faz|oferece|cuida|trabalha|instala)|procurar\s+para|c[aâ]mara\s+frigor|projeto\s+de\s+refrigera|montar\s+uma\s+c[aâ]mara/i.test(
-        request.question,
-      )
-    ) {
-      const text = synthesizeConversationalAnswer({
-        question: request.question,
-        evidence: [
-          {
-            text: 'Para projeto, instalação, manutenção ou câmara frigorífica, a empresa a procurar é a Renovação Refrigeração. Para cursos: Fred do Frio ou CTE. Para IA e automação: Neurofrigo Command IA.',
-          },
-        ],
-        intent: intentHint,
-        assistantKey,
-        channel: request.channel,
-        publicCourses,
-        history: request.conversationHistory,
-      });
-      return this.okSynthetic({
-        text,
-        intent: intentHint,
         started,
         meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 1,
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: 'capabilities',
+          lastAssistantText: text,
+          pendingOffer: null,
+        }),
+        dialogueIntent: 'capabilities',
+        justification: 'Resposta de capacidades a partir do Assistant Registry (sem retrieval).',
+        previousAnswers,
+      });
+    }
+
+    // Dialogue-composed answers (clarification, catalog, recommendation, services map, etc.)
+    const composed = composeDialogueAnswer({
+      dialogueIntent: resolved.dialogueIntent,
+      state: resolved.state,
+      publicCourses,
+      clarificationText: resolved.clarificationText,
+      evidenceTexts: [],
+    });
+
+    if (
+      resolved.skipRetrieval &&
+      (composed.text || resolved.clarificationText) &&
+      resolved.dialogueIntent !== 'unknown'
+    ) {
+      let text = composed.text || resolved.clarificationText || '';
+      text = applyRepetitionControl({
+        candidate: text,
+        previousAnswers,
+        dialogueIntent: resolved.dialogueIntent,
+      });
+      text = naturalizeUserText(text);
+      const pendingOffer = composed.pendingOffer;
+      const state = applyStatePatch(resolved.state, {
+        currentIntent: resolved.dialogueIntent,
+        currentTopic: composed.topic,
+        pendingOffer,
+        lastAssistantText: text,
+        selectedCourse:
+          resolved.dialogueIntent === 'course_catalog' ||
+          resolved.dialogueIntent === 'course_recommendation'
+            ? publicCourses?.[0]?.title || resolved.state.selectedCourse
+            : resolved.state.selectedCourse,
+      });
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: resolved.decision === 'NEEDS_CLARIFICATION' ? 0.7 : 0.9,
+        sources: [],
+        state,
+        dialogueIntent: resolved.dialogueIntent,
+        justification: dialogueJustification(resolved.dialogueIntent),
+        previousAnswers,
+      });
+    }
+
+    // Force services / institutional compose even when retrieval will run — prefer composed services.
+    if (resolved.dialogueIntent === 'services' && !resolved.clarificationText) {
+      const serviceCompose = composeDialogueAnswer({
+        dialogueIntent: 'services',
+        state: resolved.state,
+        publicCourses,
+      });
+      let text = applyRepetitionControl({
+        candidate: serviceCompose.text,
+        previousAnswers,
+        dialogueIntent: 'services',
+      });
+      text = naturalizeUserText(text);
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 0.86,
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: 'services',
+          pendingOffer: serviceCompose.pendingOffer,
+          lastAssistantText: text,
+          activeEntity: 'service',
+        }),
+        dialogueIntent: 'services',
+        justification:
+          'Orientação de serviços do ecossistema Omnia com base no mapa institucional público.',
+        previousAnswers,
+      });
+    }
+
+    if (resolved.dialogueIntent === 'company_routing') {
+      const companyCompose = composeDialogueAnswer({
+        dialogueIntent: 'company_routing',
+        state: resolved.state,
+      });
+      const text = naturalizeUserText(companyCompose.text);
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
         assistantKey,
         channel: request.channel,
         question: request.question,
         confidence: 0.88,
-        justification:
-          'Orientação institucional pública do ecossistema Omnia sobre qual empresa procurar.',
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: 'company_routing',
+          pendingOffer: companyCompose.pendingOffer,
+          lastAssistantText: text,
+        }),
+        dialogueIntent: 'company_routing',
+        justification: 'Roteamento institucional público entre empresas do ecossistema.',
+        previousAnswers,
       });
     }
+
+    if (resolved.dialogueIntent === 'commercial_discovery') {
+      const commercial = composeDialogueAnswer({
+        dialogueIntent: 'commercial_discovery',
+        state: resolved.state,
+      });
+      const text = naturalizeUserText(commercial.text);
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 0.8,
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: 'commercial_discovery',
+          pendingOffer: commercial.pendingOffer,
+          lastAssistantText: text,
+        }),
+        dialogueIntent: 'commercial_discovery',
+        justification: 'Descoberta comercial multi-turn com qualificação de necessidade.',
+        previousAnswers,
+      });
+    }
+
+    if (
+      resolved.dialogueIntent === 'engineering_troubleshooting' &&
+      (resolved.decision === 'NEEDS_CLARIFICATION' ||
+        resolved.state.engineeringContext?.suctionPsi != null ||
+        resolved.state.engineeringContext?.dischargePsi != null)
+    ) {
+      const eng = composeDialogueAnswer({
+        dialogueIntent: 'engineering_troubleshooting',
+        state: resolved.state,
+        clarificationText: resolved.clarificationText,
+      });
+      const text = naturalizeUserText(eng.text);
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 0.82,
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: 'engineering_troubleshooting',
+          pendingOffer: eng.pendingOffer,
+          lastAssistantText: text,
+        }),
+        dialogueIntent: 'engineering_troubleshooting',
+        justification: 'Diagnóstico de engenharia multi-turn com pedido/uso de dados do usuário.',
+        previousAnswers,
+      });
+    }
+
+    // Teaching rephrase/example/check without requiring retrieval hit
+    if (
+      resolved.dialogueIntent === 'teaching_rephrase' ||
+      resolved.dialogueIntent === 'teaching_example' ||
+      resolved.dialogueIntent === 'teaching_check'
+    ) {
+      const teach = composeDialogueAnswer({
+        dialogueIntent: resolved.dialogueIntent,
+        state: resolved.state,
+      });
+      let text = applyRepetitionControl({
+        candidate: teach.text,
+        previousAnswers,
+        dialogueIntent: resolved.dialogueIntent,
+      });
+      text = naturalizeUserText(text);
+      return this.finishDialogue({
+        text,
+        started,
+        meta,
+        intentHint,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 0.84,
+        sources: [],
+        state: applyStatePatch(resolved.state, {
+          currentIntent: resolved.dialogueIntent,
+          pendingOffer: teach.pendingOffer,
+          lastAssistantText: text,
+        }),
+        dialogueIntent: resolved.dialogueIntent,
+        justification: 'Adaptação pedagógica multi-turn (reexplicar / exemplo / verificação).',
+        previousAnswers,
+      });
+    }
+
+    // Retrieval path with effective question from dialogue resolver
+    const retrievalQuestion = resolved.effectiveQuestion || request.question;
+    const retrievalRequest: RuntimeRequest = {
+      ...request,
+      question: retrievalQuestion,
+    };
 
     try {
       const retrievalStarted = Date.now();
       const retrieval = await withTimeout(
         this.retrieval.search(
           {
-            text: this.buildRetrievalQuery(request),
+            text: this.buildRetrievalQuery(retrievalRequest, resolved.state),
             tenantId: context.tenantId,
             userId: context.userId,
             ownerCompanyId: context.ownerCompanyId,
@@ -233,7 +355,7 @@ export class NeurofrigoRuntime {
       const retrievalTookMs = Date.now() - retrievalStarted;
 
       const guarded = applyRetrievalGuardrails(
-        this.buildRetrievalQuery(request),
+        this.buildRetrievalQuery(retrievalRequest, resolved.state),
         retrieval.results,
         this.limits,
         {
@@ -244,48 +366,40 @@ export class NeurofrigoRuntime {
       );
 
       if (!guarded.ok) {
-        // Follow-up with catalog still available
-        if (
-          publicCourses?.length &&
-          /iniciante|melhor|quem\s+oferece|e\s+quem|quanto\s+tempo/i.test(request.question)
-        ) {
-          const text = synthesizeConversationalAnswer({
-            question: request.question,
-            evidence: [],
-            intent: intentHint,
+        // Institutional overview can still be composed without hits if dialogue says so
+        if (resolved.dialogueIntent === 'institutional_overview') {
+          const inst = composeDialogueAnswer({
+            dialogueIntent: 'institutional_overview',
+            state: resolved.state,
+            evidenceTexts: [],
+          });
+          const text = naturalizeUserText(inst.text);
+          return this.finishDialogue({
+            text,
+            started,
+            meta,
+            intentHint,
             assistantKey,
             channel: request.channel,
-            publicCourses,
-            history: request.conversationHistory,
+            question: request.question,
+            confidence: 0.75,
+            sources: [],
+            state: applyStatePatch(resolved.state, {
+              currentIntent: 'institutional_overview',
+              pendingOffer: inst.pendingOffer,
+              lastAssistantText: text,
+              activeEntity: 'omnia',
+            }),
+            dialogueIntent: 'institutional_overview',
+            justification: 'Visão institucional pública do ecossistema Omnia.',
+            previousAnswers,
           });
-          if (text && !/não encontrei/i.test(text)) {
-            return this.okSynthetic({
-              text,
-              intent: intentHint,
-              started,
-              meta,
-              assistantKey,
-              channel: request.channel,
-              question: request.question,
-              confidence: 0.85,
-              justification:
-                'Resposta de continuidade com base no catálogo público e no histórico da sessão.',
-            });
-          }
         }
 
         const formatted = formatResponse({
           text: guarded.message,
           intent: intentHint,
           status: 'not_found',
-        });
-        const suggestedActions = buildSuggestedActions({
-          assistantKey,
-          channel: request.channel,
-          question: request.question,
-          status: 'not_found',
-          intent: intentHint,
-          hasSources: false,
         });
         return {
           text: guarded.message,
@@ -307,7 +421,16 @@ export class NeurofrigoRuntime {
             confidence: 0,
             contextChars: 0,
           }),
-          suggestedActions,
+          suggestedActions: buildSuggestedActions({
+            assistantKey,
+            channel: request.channel,
+            question: request.question,
+            status: 'not_found',
+            intent: resolved.dialogueIntent,
+            hasSources: false,
+          }),
+          dialogueState: resolved.state,
+          dialogueIntent: resolved.dialogueIntent,
           explainability: {
             sourceCount: 0,
             avgScore: 0,
@@ -329,8 +452,61 @@ export class NeurofrigoRuntime {
         };
       }
 
+      // Prefer dialogue compose for institutional when we have evidence
+      if (resolved.dialogueIntent === 'institutional_overview') {
+        const inst = composeDialogueAnswer({
+          dialogueIntent: 'institutional_overview',
+          state: resolved.state,
+          evidenceTexts: guarded.chunks.map((c) => c.text),
+        });
+        let text = applyRepetitionControl({
+          candidate: inst.text,
+          previousAnswers,
+          dialogueIntent: 'institutional_overview',
+        });
+        text = naturalizeUserText(text);
+        const sources = guarded.chunks.map((c) => ({
+          chunkId: c.chunkId,
+          text: c.text,
+          score: c.score,
+          similarity: c.similarity,
+          citation: c.citation,
+        }));
+        return this.finishDialogue({
+          text,
+          started,
+          meta,
+          intentHint,
+          assistantKey,
+          channel: request.channel,
+          question: request.question,
+          confidence: normalizeConfidence(computeConfidence(guarded.chunks)) ?? 0.8,
+          sources,
+          state: applyStatePatch(resolved.state, {
+            currentIntent: 'institutional_overview',
+            pendingOffer: inst.pendingOffer,
+            lastAssistantText: text,
+            activeEntity: 'omnia',
+          }),
+          dialogueIntent: 'institutional_overview',
+          justification: humanExplainability({
+            assistantKey,
+            channel: request.channel,
+            sourceCount: sources.length,
+          }),
+          previousAnswers,
+          retrievalMeta: {
+            candidateCount: retrieval.candidateCount,
+            afterAclCount: retrieval.afterAclCount,
+            recoveredTokens: retrieval.recoveredTokens,
+            tookMs: retrieval.tookMs,
+            llmTookMs: 0,
+          },
+        });
+      }
+
       const prompt = this.promptBuilder.build({
-        question: request.question,
+        question: retrievalQuestion,
         context,
         chunks: guarded.chunks,
         limits: this.limits,
@@ -358,10 +534,9 @@ export class NeurofrigoRuntime {
       }));
 
       let answerText = completion.text;
-      // Safety net: if provider still leaks internals, re-synthesize.
       if (looksLikeInternalLeak(answerText)) {
         answerText = synthesizeConversationalAnswer({
-          question: request.question,
+          question: retrievalQuestion,
           evidence: sources.map((s) => ({ id: s.chunkId, text: s.text })),
           intent: prompt.intent,
           assistantKey,
@@ -370,6 +545,12 @@ export class NeurofrigoRuntime {
           history: request.conversationHistory,
         });
       }
+      answerText = applyRepetitionControl({
+        candidate: answerText,
+        previousAnswers,
+        dialogueIntent: resolved.dialogueIntent,
+      });
+      answerText = naturalizeUserText(answerText);
 
       const confidence = normalizeConfidence(computeConfidence(guarded.chunks));
       const contextChars = guarded.chunks.reduce((s, c) => s + c.text.length, 0);
@@ -378,26 +559,30 @@ export class NeurofrigoRuntime {
         confidence: confidence ?? 0,
         contextChars,
       });
-      const avgScore = sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length);
 
-      const formattedText = formatResponse({
-        text: answerText,
-        intent: prompt.intent,
-        status: 'ok',
-      });
+      const pendingOffer =
+        resolved.dialogueIntent === 'teaching'
+          ? composeDialogueAnswer({
+              dialogueIntent: 'teaching_example',
+              state: resolved.state,
+            }).pendingOffer
+          : resolved.state.pendingOffer;
 
-      const suggestedActions = buildSuggestedActions({
-        assistantKey,
-        channel: request.channel,
-        question: request.question,
-        status: 'ok',
-        intent: prompt.intent,
-        hasSources: sources.length > 0,
+      const state = applyStatePatch(resolved.state, {
+        lastAssistantText: answerText,
+        pendingOffer,
+        tutorConcept: resolved.dialogueIntent.startsWith('teaching')
+          ? resolved.state.tutorConcept || request.course.lessonTitle || 'conceito da aula'
+          : resolved.state.tutorConcept,
       });
 
       return {
         text: answerText,
-        formattedText,
+        formattedText: formatResponse({
+          text: answerText,
+          intent: prompt.intent,
+          status: 'ok',
+        }),
         sources,
         confidence,
         tookMs: Date.now() - started,
@@ -416,10 +601,22 @@ export class NeurofrigoRuntime {
         errorCode: null,
         intent: prompt.intent,
         grounding,
-        suggestedActions,
+        suggestedActions: buildSuggestedActions({
+          assistantKey,
+          channel: request.channel,
+          question: request.question,
+          status: 'ok',
+          intent: resolved.dialogueIntent,
+          hasSources: sources.length > 0,
+          conversationKind: resolved.dialogueIntent,
+        }),
+        dialogueState: state,
+        dialogueIntent: resolved.dialogueIntent,
         explainability: {
           sourceCount: sources.length,
-          avgScore: Number(avgScore.toFixed(3)),
+          avgScore: Number(
+            (sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length)).toFixed(3),
+          ),
           confidence,
           documents: sources.map((s) => ({
             chunkId: s.chunkId,
@@ -475,38 +672,46 @@ export class NeurofrigoRuntime {
         intent: intentHint,
         grounding: null,
         suggestedActions: [],
+        dialogueState: resolved.state,
+        dialogueIntent: resolved.dialogueIntent,
         explainability: null,
       };
     }
   }
 
-  private okSynthetic(input: {
+  private finishDialogue(input: {
     text: string;
-    intent: RuntimeAnswer['intent'];
     started: number;
     meta: { model: string; name: string };
+    intentHint: RuntimeAnswer['intent'];
     assistantKey: string | null;
     channel?: string | null;
     question: string;
     confidence: number;
+    sources: RuntimeAnswer['sources'];
+    state: ConversationState;
+    dialogueIntent: string;
     justification: string;
+    previousAnswers: string[];
+    retrievalMeta?: RuntimeAnswer['retrieval'];
   }): RuntimeAnswer {
     const suggestedActions = buildSuggestedActions({
       assistantKey: input.assistantKey,
       channel: input.channel,
       question: input.question,
       status: 'ok',
-      intent: input.intent,
-      hasSources: false,
+      intent: input.dialogueIntent,
+      hasSources: input.sources.length > 0,
+      conversationKind: input.dialogueIntent,
     });
     return {
       text: input.text,
       formattedText: formatResponse({
         text: input.text,
-        intent: input.intent,
+        intent: input.intentHint,
         status: 'ok',
       }),
-      sources: [],
+      sources: input.sources,
       confidence: normalizeConfidence(input.confidence),
       tookMs: Date.now() - input.started,
       model: input.meta.model,
@@ -517,31 +722,80 @@ export class NeurofrigoRuntime {
       estimatedCostUsd: 0,
       status: 'ok',
       errorCode: null,
-      intent: input.intent,
-      grounding: null,
+      intent: input.intentHint,
+      grounding:
+        input.sources.length > 0
+          ? computeGroundingScore({
+              chunks: input.sources.map((s) => ({
+                chunkId: s.chunkId,
+                text: s.text,
+                score: s.score,
+                similarity: s.similarity,
+                tokenEstimate: Math.ceil(s.text.length / 4),
+                language: 'pt-BR',
+                tags: [],
+                citation: s.citation,
+              })),
+              confidence: input.confidence,
+              contextChars: input.sources.reduce((n, s) => n + s.text.length, 0),
+            })
+          : null,
       suggestedActions,
+      dialogueState: input.state,
+      dialogueIntent: input.dialogueIntent,
       explainability: {
-        sourceCount: 0,
-        avgScore: 0,
+        sourceCount: input.sources.length,
+        avgScore: input.sources.length
+          ? Number(
+              (input.sources.reduce((s, x) => s + x.score, 0) / input.sources.length).toFixed(3),
+            )
+          : 0,
         confidence: normalizeConfidence(input.confidence),
-        documents: [],
-        retrievalTookMs: 0,
-        llmTookMs: 0,
-        intent: input.intent || 'explanation',
+        documents: input.sources.map((s) => ({
+          chunkId: s.chunkId,
+          knowledgeDocumentId: s.citation.knowledgeDocumentId,
+          learningResourceId: s.citation.learningResourceId,
+          page: s.citation.page,
+          score: s.score,
+          similarity: s.similarity,
+        })),
+        retrievalTookMs: input.retrievalMeta?.tookMs ?? 0,
+        llmTookMs: input.retrievalMeta?.llmTookMs ?? 0,
+        intent: input.intentHint || 'explanation',
         justification: input.justification,
       },
+      retrieval: input.retrievalMeta,
     };
   }
 
-  /** Inclui reforço do histórico recente para follow-up sem mudar o Retriever. */
-  private buildRetrievalQuery(request: RuntimeRequest): string {
+  private buildRetrievalQuery(request: RuntimeRequest, state?: ConversationState | null): string {
     const history = request.conversationHistory ?? [];
-    if (!history.length) return request.question;
+    const topic = state?.currentTopic || state?.currentIntent || '';
+    const entity = state?.activeEntity || '';
+    if (!history.length) {
+      return topic ? `${request.question}\n(tópico: ${topic} ${entity})` : request.question;
+    }
     const recent = history.slice(-2);
     const ctx = recent
-      .map((t) => `${t.question}${t.answer ? ` → ${t.answer.slice(0, 160)}` : ''}`)
+      .map((t) => `${t.question}${t.answer ? ` → ${t.answer.slice(0, 120)}` : ''}`)
       .join(' | ');
-    return `${request.question}\n(contexto da sessão: ${ctx})`;
+    return `${request.question}\n(contexto da sessão: ${ctx}; tópico: ${topic}; entidade: ${entity})`;
+  }
+}
+
+function dialogueJustification(intent: string): string {
+  switch (intent) {
+    case 'course_catalog':
+      return 'Resposta a partir do catálogo público de cursos publicados.';
+    case 'course_recommendation':
+      return 'Recomendação de curso com qualificação do perfil do usuário.';
+    case 'services':
+      return 'Mapa de serviços do ecossistema Omnia.';
+    case 'clarification':
+    case 'affirmation_orphan':
+      return 'Esclarecimento conversacional antes de recuperar conteúdo.';
+    default:
+      return 'Resposta conversacional com continuidade de sessão.';
   }
 }
 
@@ -558,11 +812,6 @@ function humanExplainability(input: {
         ? ` (${input.sourceCount} trecho${input.sourceCount > 1 ? 's' : ''} autorizado${input.sourceCount > 1 ? 's' : ''})`
         : ''
     } e nas informações disponíveis para este assistente.`;
-  }
-  if ((input.assistantKey || '').toLowerCase() === 'tutor') {
-    return `Esta resposta foi elaborada com base no material autorizado do curso/aula disponível para o seu perfil${
-      input.sourceCount ? ` (${input.sourceCount} fonte${input.sourceCount > 1 ? 's' : ''})` : ''
-    }.`;
   }
   return `Esta resposta foi elaborada com base no conteúdo autorizado disponível para este assistente${
     input.sourceCount ? ` (${input.sourceCount} fonte${input.sourceCount > 1 ? 's' : ''})` : ''
