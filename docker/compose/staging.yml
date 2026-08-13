@@ -29,6 +29,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # Bind only. Never use HOSTNAME/PORT to build browser redirects.
       HOSTNAME: 0.0.0.0
       APP_VERSION: ${APP_VERSION}
       GIT_SHA: ${GIT_SHA:-unknown}

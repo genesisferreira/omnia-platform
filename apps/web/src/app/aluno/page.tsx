@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle, Progress } from '@omnia/ui';
 
 import { fetchAcademic } from '@/lib/academic/client';
@@ -22,6 +23,12 @@ type Dash = {
 
 export default async function AlunoDashboardPage() {
   const user = await requirePortalSession('/aluno');
+  const gate = await fetchAcademic<{
+    context?: { academicAllowed?: boolean };
+  }>('ils/context', { user });
+  if (gate.ok && gate.data.context?.academicAllowed === false) {
+    redirect('/aluno/onboarding');
+  }
   const res = await fetchAcademic<Dash>('dashboard', { user });
   const dash = res.ok ? res.data.dashboard : null;
   const enrollments = dash?.enrollments ?? [];

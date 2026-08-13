@@ -57,6 +57,9 @@ jobs:
       - name: EPIC 16 portal redirect
         run: pnpm --filter @omnia/admin test:epic16-portal-redirect
 
+      - name: Public origin / auth redirect contracts
+        run: pnpm --filter @omnia/shared test:public-origin
+
       - name: Public companies contract tests
         run: pnpm --filter @omnia/admin test:public-companies
 

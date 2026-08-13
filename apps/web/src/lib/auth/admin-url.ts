@@ -1,16 +1,23 @@
+import { getConfiguredPublicOrigin } from '@omnia/shared';
+
 export function getAdminBaseUrl(): string {
   const internal = process.env.INTERNAL_ADMIN_URL?.trim();
   if (internal) {
     return internal.replace(/\/+$/, '');
   }
-
-  const publicUrl = process.env.NEXT_PUBLIC_ADMIN_URL?.trim() || 'http://localhost:3001';
-  return publicUrl.replace(/\/+$/, '');
+  return getPublicAdminUrl();
 }
 
 export function getPublicAdminUrl(): string {
-  const publicUrl = process.env.NEXT_PUBLIC_ADMIN_URL?.trim() || 'http://localhost:3001';
-  return publicUrl.replace(/\/+$/, '');
+  const resolved = getConfiguredPublicOrigin({
+    configuredUrl: process.env.NEXT_PUBLIC_ADMIN_URL,
+    nodeEnv: process.env.NODE_ENV,
+    fallbackDev: 'http://localhost:3001',
+  });
+  if (!resolved.ok) {
+    throw new Error('PUBLIC_ADMIN_ORIGIN_UNAVAILABLE');
+  }
+  return resolved.origin;
 }
 
 export function getAdminLoginUrl(nextPath?: string): string {

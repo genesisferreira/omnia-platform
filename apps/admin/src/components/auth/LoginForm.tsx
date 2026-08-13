@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
+import { getConfiguredPublicOrigin, resolveEstablishDestination } from '@omnia/shared';
 import {
   Button,
   Card,
@@ -14,12 +15,7 @@ import {
   Input,
 } from '@omnia/ui';
 
-import {
-  ADMIN_PANEL_ROLES,
-  isPortalDestination,
-  PORTAL_ROLES,
-  safePortalNextPath,
-} from '@/lib/portal-redirect';
+import { ADMIN_PANEL_ROLES, isPortalDestination, PORTAL_ROLES } from '@/lib/portal-redirect';
 import { safeRedirectPath } from '@/lib/safe-redirect';
 
 function mapLoginError(status: number, payloadMessage?: string): string {
@@ -35,15 +31,20 @@ function mapLoginError(status: number, payloadMessage?: string): string {
   return 'Não foi possível autenticar. Verifique suas credenciais.';
 }
 
-function portalBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL || 'https://omniafrigo.com.br').replace(/\/$/, '');
+function portalBaseUrl(): string | null {
+  const resolved = getConfiguredPublicOrigin({
+    configuredUrl: process.env.NEXT_PUBLIC_APP_URL,
+    nodeEnv: process.env.NODE_ENV,
+    fallbackDev: 'http://localhost:3000',
+  });
+  return resolved.ok ? resolved.origin : null;
 }
 
 /** Top-level form POST so Portal can Set-Cookie on its own domain. */
-function establishPortalSession(token: string, nextPath: string) {
+function establishPortalSession(token: string, nextPath: string, portalOrigin: string) {
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = `${portalBaseUrl()}/api/auth/establish`;
+  form.action = `${portalOrigin}/api/auth/establish`;
   form.style.display = 'none';
 
   const tokenInput = document.createElement('input');
@@ -108,7 +109,7 @@ export function LoginForm() {
       const role = String(payload?.user?.role || '');
       const token = typeof payload?.token === 'string' ? payload.token : '';
       const rawNext = searchParams.get('next');
-      const portalNext = safePortalNextPath(rawNext, '/ia');
+      const portalNext = resolveEstablishDestination(role, rawNext);
 
       // Portal roles always land on the Web Portal (never Admin /area placeholders).
       if (PORTAL_ROLES.has(role)) {
@@ -117,7 +118,13 @@ export function LoginForm() {
           setPending(false);
           return;
         }
-        establishPortalSession(token, portalNext);
+        const portal = portalBaseUrl();
+        if (!portal) {
+          setError('Origem pública do portal indisponível. Contate o suporte.');
+          setPending(false);
+          return;
+        }
+        establishPortalSession(token, portalNext, portal);
         return;
       }
 
@@ -129,7 +136,13 @@ export function LoginForm() {
             setPending(false);
             return;
           }
-          establishPortalSession(token, portalNext);
+          const portal = portalBaseUrl();
+          if (!portal) {
+            setError('Origem pública do portal indisponível. Contate o suporte.');
+            setPending(false);
+            return;
+          }
+          establishPortalSession(token, portalNext, portal);
           return;
         }
         router.replace(safeRedirectPath(rawNext));

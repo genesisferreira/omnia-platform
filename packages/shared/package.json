@@ -19,6 +19,7 @@
     "test:public-company-contracts": "tsx src/cms/public-company/test-public-company-contracts.ts",
     "test:rate-limit": "tsx src/rate-limit/test-rate-limit.ts",
     "test:partners": "tsx src/partners/test-partners.ts && tsx src/partners/test-partners-geo.ts",
+    "test:public-origin": "tsx --test src/test-public-origin.ts",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {

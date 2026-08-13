@@ -99,10 +99,13 @@ export function OnboardingWizard(props: { initial: Onboarding }) {
             <CardTitle>Antes de começar, queremos conhecer melhor você.</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm leading-relaxed">
-            <p>Isto não é prova eliminatória e não é diagnóstico psicológico.</p>
             <p>
-              Serve para personalizar o aprendizado: conhecimentos prévios, experiência, objetivos e
-              como você prefere estudar. O perfil evolui durante a formação.
+              Antes de liberar sua área de estudos, vamos conhecer seu nível técnico, sua
+              experiência e seus objetivos.
+            </p>
+            <p>
+              Essa avaliação nos ajuda a adaptar conteúdos, exercícios e acompanhamento à sua
+              realidade profissional. Ela não é uma prova de aprovação ou reprovação.
             </p>
             <ul className="list-disc space-y-1 pl-5">
               <li>O que avaliamos: experiência declarada e competências técnicas observáveis</li>

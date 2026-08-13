@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { browserRedirect } from '@/lib/auth/browser-redirect';
 import { logoutUser } from '@/lib/auth/payload-client';
 import { clearSessionCookie, getSessionToken } from '@/lib/auth/session';
 
@@ -9,14 +10,15 @@ async function handleLogout(request: Request) {
     await logoutUser(token);
   }
 
-  const response = NextResponse.json({ ok: true });
-  clearSessionCookie(response);
-
   const accept = request.headers.get('accept') ?? '';
   if (accept.includes('text/html')) {
-    return NextResponse.redirect(new URL('/', request.url), 303);
+    const response = browserRedirect('/', 303, '/');
+    clearSessionCookie(response);
+    return response;
   }
 
+  const response = NextResponse.json({ ok: true });
+  clearSessionCookie(response);
   return response;
 }
 

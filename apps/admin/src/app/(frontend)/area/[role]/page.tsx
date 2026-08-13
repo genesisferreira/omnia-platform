@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { isScopedPortalRole } from '@omnia/constants';
+import { getConfiguredPublicOrigin, resolveEstablishDestination } from '@omnia/shared';
 
 import { getAuthSession } from '@/lib/auth';
 
@@ -19,15 +20,18 @@ export default async function ScopedAreaPage({ params }: AreaPageProps) {
   }
 
   const { user } = await getAuthSession();
-  const portalBase = (process.env.NEXT_PUBLIC_APP_URL || 'https://omniafrigo.com.br').replace(
-    /\/$/,
-    '',
-  );
-
   if (!user) {
     redirect(`/login?next=${encodeURIComponent('/ia')}`);
   }
 
-  const dest = rawRole === 'instructor' ? '/professor' : rawRole === 'student' ? '/aluno' : '/ia';
-  redirect(`${portalBase}${dest}`);
+  const dest = resolveEstablishDestination(rawRole, null);
+  const portal = getConfiguredPublicOrigin({
+    configuredUrl: process.env.NEXT_PUBLIC_APP_URL,
+    nodeEnv: process.env.NODE_ENV,
+    fallbackDev: 'http://localhost:3000',
+  });
+  if (!portal.ok) {
+    redirect('/unauthorized');
+  }
+  redirect(`${portal.origin}${dest}`);
 }

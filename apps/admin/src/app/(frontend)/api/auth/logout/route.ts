@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { browserRedirect } from '@/lib/browser-redirect';
 
 /**
  * Logout server-side via Payload REST.
  * Invalida o cookie HttpOnly sem expor tokens no cliente.
+ * Internal fetch may use request.url (container bind). Browser Location is relative.
  */
 export async function POST(request: Request) {
   const cookie = request.headers.get('cookie') ?? '';
-  const origin = new URL(request.url).origin;
 
-  await fetch(`${origin}/api/users/logout`, {
+  await fetch(new URL('/api/users/logout', request.url), {
     method: 'POST',
     headers: {
       cookie,
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     },
   }).catch(() => undefined);
 
-  const response = NextResponse.redirect(new URL('/login', origin), 303);
+  const response = browserRedirect('/login', 303, '/login');
   response.cookies.set('payload-token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
