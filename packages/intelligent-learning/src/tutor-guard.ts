@@ -53,6 +53,38 @@ export function applyAssessmentGuard(input: AssessmentGuardInput): AssessmentGua
   };
 }
 
+const SCHOOL_IDENTITY_Q =
+  /\b(em qual escola( eu)? estou|qual (e|é) (a )?minha escola|qual escola|onde (eu )?estudo|em que escola)\b/i;
+
+/** Resposta determinística de identidade escolar — não depende de Retrieval. */
+export function answerSchoolIdentityQuestion(
+  question: string,
+  schoolKey: SchoolKey | null,
+): { text: string; schoolKey: SchoolKey | null; source: 'brand-context' } | null {
+  if (!SCHOOL_IDENTITY_Q.test(question.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) {
+    return null;
+  }
+  if (schoolKey === 'fred-do-frio') {
+    return {
+      text: 'Você está no ambiente Fred do Frio. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo CTE.',
+      schoolKey,
+      source: 'brand-context',
+    };
+  }
+  if (schoolKey === 'cte') {
+    return {
+      text: 'Você está no ambiente CTE. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo Fred do Frio.',
+      schoolKey,
+      source: 'brand-context',
+    };
+  }
+  return {
+    text: 'Não há escola educacional autenticada neste contexto. Não posso atribuir Fred do Frio ou CTE sem evidência.',
+    schoolKey: null,
+    source: 'brand-context',
+  };
+}
+
 export function schoolAiContext(schoolKey: SchoolKey | null): string {
   if (schoolKey === 'cte') {
     return 'SCHOOL_CONTEXT=CTE. Responda no contexto da escola CTE. Não atribua cursos ou catálogo Fred do Frio.';

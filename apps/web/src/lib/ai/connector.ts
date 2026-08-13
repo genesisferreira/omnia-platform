@@ -21,6 +21,8 @@ export type AiChatPayload = {
   topK?: number;
   requestStudyPlan?: boolean;
   objective?: string | null;
+  schoolKey?: string | null;
+  officialAssessmentActive?: boolean;
 };
 
 export type AiChatResult =

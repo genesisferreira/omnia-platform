@@ -3,17 +3,24 @@
 export const SCHOOL_KEYS = ['fred-do-frio', 'cte'] as const;
 export type SchoolKey = (typeof SCHOOL_KEYS)[number];
 
-export const SCHOOL_BRANDS: Record<
-  SchoolKey,
-  {
-    name: string;
-    shortName: string;
-    theme: 'fred' | 'cte';
-    certificateIssuer: string;
-    placeholder: boolean;
-    notes: string;
-  }
-> = {
+export type SchoolBrand = {
+  name: string;
+  shortName: string;
+  theme: 'fred' | 'cte';
+  certificateIssuer: string;
+  placeholder: boolean;
+  notes: string;
+  entryPath: string;
+  logoLabel: string;
+  colors: {
+    sidebar: string;
+    accent: string;
+    banner: string;
+    surface: string;
+  };
+};
+
+export const SCHOOL_BRANDS: Record<SchoolKey, SchoolBrand> = {
   'fred-do-frio': {
     name: 'Fred do Frio',
     shortName: 'Fred',
@@ -21,6 +28,14 @@ export const SCHOOL_BRANDS: Record<
     certificateIssuer: 'Fred do Frio — LMS',
     placeholder: false,
     notes: 'Identidade visual existente (brandTheme=fred).',
+    entryPath: '/escola/fred-do-frio/login',
+    logoLabel: 'Fred',
+    colors: {
+      sidebar: 'bg-emerald-900',
+      accent: 'text-emerald-300',
+      banner: 'bg-emerald-800',
+      surface: 'bg-emerald-50',
+    },
   },
   cte: {
     name: 'CTE',
@@ -30,6 +45,14 @@ export const SCHOOL_BRANDS: Record<
     placeholder: true,
     notes:
       'CTE STAGING BRAND PLACEHOLDER. Sem assets oficiais no repositório. Logo slot, cores, nome, login/dashboard context e issuer configuráveis — identidade definitiva NÃO homologada.',
+    entryPath: '/escola/cte/login',
+    logoLabel: 'CTE',
+    colors: {
+      sidebar: 'bg-slate-900',
+      accent: 'text-sky-300',
+      banner: 'bg-slate-800',
+      surface: 'bg-slate-100',
+    },
   },
 };
 
@@ -86,4 +109,24 @@ export function assertSchoolAccess(input: {
 
 export function schoolLabel(key: SchoolKey | null): string {
   return key ? SCHOOL_BRANDS[key].name : 'Omnia LMS';
+}
+
+export function schoolBrand(key: SchoolKey | string | null | undefined): SchoolBrand | null {
+  return isSchoolKey(key) ? SCHOOL_BRANDS[key] : null;
+}
+
+export function parseSchoolKeyParam(raw: unknown): SchoolKey | null {
+  if (typeof raw !== 'string') return null;
+  return resolveSchoolKey({ schoolKey: raw, slug: raw, portalSlug: raw });
+}
+
+export function filterEntitiesBySchool<T extends { schoolKey?: unknown }>(
+  rows: T[],
+  schoolKey: SchoolKey | null,
+): T[] {
+  return rows.filter((row) => {
+    const key = resolveSchoolKey({ schoolKey: row.schoolKey });
+    if (!key) return false;
+    return !schoolKey || key === schoolKey;
+  });
 }

@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { schoolBrand } from '@omnia/intelligent-learning';
 import { Button, cn } from '@omnia/ui';
+
+import { BrandBanner, BrandMark } from '@/components/academic/BrandContext';
 
 const STUDENT_NAV = [
   { href: '/aluno', label: 'Dashboard', exact: true },
@@ -42,9 +45,19 @@ export function AcademicShell(props: {
   const [open, setOpen] = useState(false);
   const nav = props.role === 'teacher' ? TEACHER_NAV : STUDENT_NAV;
   const home = props.role === 'teacher' ? '/professor' : '/aluno';
+  const brand = schoolBrand(props.schoolKey);
+  const sidebarClass = brand
+    ? brand.theme === 'fred'
+      ? 'bg-emerald-900 text-white'
+      : 'bg-slate-900 text-white'
+    : 'bg-lms-sidebar text-lms-sidebar-foreground';
 
   return (
-    <div className="flex min-h-screen bg-lms-surface text-foreground">
+    <div
+      className="flex min-h-screen overflow-x-hidden bg-lms-surface text-foreground"
+      data-school-key={props.schoolKey || ''}
+      data-brand-placeholder={brand?.placeholder ? 'true' : 'false'}
+    >
       <a
         href="#conteudo-academico"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2"
@@ -61,13 +74,18 @@ export function AcademicShell(props: {
       ) : null}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-lms-sidebar text-lms-sidebar-foreground transition-transform lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col transition-transform lg:static lg:translate-x-0',
+          sidebarClass,
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="border-b border-white/10 px-4 py-4">
-          <Link href={home} className="font-heading text-lg font-bold tracking-tight">
-            {props.schoolName || 'Omnia'} {props.role === 'teacher' ? 'Professor' : 'Aluno'}
+          <Link href={home} className="block">
+            <BrandMark schoolKey={props.schoolKey} />
+            <span className="mt-2 block text-sm text-white/80">
+              {props.schoolName || brand?.name || 'Omnia LMS'} ·{' '}
+              {props.role === 'teacher' ? 'professor' : 'aluno'}
+            </span>
           </Link>
           <p className="mt-1 truncate text-xs text-white/70">{props.userName}</p>
         </div>
@@ -82,10 +100,8 @@ export function AcademicShell(props: {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  'block rounded-md px-3 py-2 text-sm font-medium',
-                  active
-                    ? 'bg-white/10 text-lms-sidebar-foreground'
-                    : 'text-lms-sidebar-foreground/80 hover:bg-white/5',
+                  'block min-h-11 rounded-md px-3 py-2 text-sm font-medium',
+                  active ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/5',
                 )}
               >
                 {item.label}
@@ -104,13 +120,23 @@ export function AcademicShell(props: {
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-background px-4 py-3 lg:hidden">
-          <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <header className="flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-3 lg:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11"
+            onClick={() => setOpen(true)}
+          >
             Menu
           </Button>
-          <span className="text-sm font-medium">{props.userName}</span>
+          <BrandMark schoolKey={props.schoolKey} compact className="min-w-0" />
         </header>
-        <main id="conteudo-academico" className="flex-1 p-4 md:p-8">
+        <main id="conteudo-academico" className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">
+          <BrandBanner
+            schoolKey={props.schoolKey}
+            area={props.role === 'teacher' ? 'professor' : 'aluno'}
+          />
           {props.children}
         </main>
       </div>

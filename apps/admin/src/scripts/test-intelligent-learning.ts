@@ -3,14 +3,18 @@ import { describe, it } from 'node:test';
 
 import {
   academicAccessAllowed,
+  answerSchoolIdentityQuestion,
   applyAssessmentGuard,
   assertSchoolAccess,
   canUseInOfficialAssessment,
+  filterEntitiesBySchool,
   isAllowedWhileGated,
+  normalizePcarArea,
   resolveSchoolKey,
   ruleGenerateExercise,
   SCHOOL_BRANDS,
 } from '@omnia/intelligent-learning';
+import { academicEndpoints } from '../endpoints/academic';
 import { ilsEndpoints } from '../endpoints/ils';
 import { academicAccessAllowed as gate } from '@omnia/intelligent-learning';
 
@@ -24,6 +28,29 @@ describe('ils admin wiring', () => {
     assert.ok(paths.includes('post /omnia/academic/ils/exercises'));
     assert.ok(paths.includes('post /omnia/academic/ils/blueprints'));
     assert.ok(paths.includes('post /omnia/academic/ils/override'));
+    assert.ok(paths.includes('get /omnia/academic/ils/admin/overview'));
+  });
+
+  it('registers teaching close/list assessment endpoints', () => {
+    const paths = academicEndpoints.map((e) => `${e.method} ${e.path}`);
+    assert.ok(paths.includes('get /omnia/academic/teaching/assessments'));
+    assert.ok(paths.includes('post /omnia/academic/teaching/assessments/:id/close'));
+  });
+
+  it('filters admin overview entities by school and maps elétrica', () => {
+    const companies = [
+      { name: 'Fred', schoolKey: 'fred-do-frio' },
+      { name: 'CTE', schoolKey: 'cte' },
+    ];
+    assert.equal(filterEntitiesBySchool(companies, 'fred-do-frio').length, 1);
+    assert.equal(filterEntitiesBySchool(companies, 'cte')[0]?.name, 'CTE');
+    assert.equal(normalizePcarArea('comandos elétricos'), 'comandos');
+    assert.ok(
+      answerSchoolIdentityQuestion('em qual escola estou?', 'fred-do-frio')?.text.includes(
+        'Fred do Frio',
+      ),
+    );
+    assert.equal(SCHOOL_BRANDS.cte.placeholder, true);
   });
 
   it('keeps fred/cte isolation and certificate issuers distinct', () => {

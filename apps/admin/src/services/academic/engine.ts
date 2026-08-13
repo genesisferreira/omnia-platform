@@ -453,6 +453,10 @@ async function refreshEnrollmentProgress(
 async function maybeIssueCertificate(payload: Payload, auth: LmsAuthContext, courseId: number) {
   const course = await getDoc(payload, COURSES, courseId);
   if (!course || course.certificateEnabled === false) return;
+  const enrollments = await findDocs(payload, ENROLLMENTS, {
+    and: [{ student: { equals: userIdNum(auth) } }, { course: { equals: courseId } }],
+  });
+  if (Number(enrollments[0]?.progressPercent || 0) < 100) return;
   const passing = Number(course.passingScore ?? 70);
   const published = await findDocs(payload, ATTEMPTS, {
     and: [
@@ -900,6 +904,47 @@ export async function createAssessment(
   return { id: created.id };
 }
 
+export async function listTeachingAssessments(
+  payload: Payload,
+  auth: LmsAuthContext,
+  courseId?: number | null,
+) {
+  if (!isTeacher(auth)) throw new AcademicError(403, 'FORBIDDEN', 'Área do professor');
+  const where: Where = {};
+  if (courseId) {
+    await assertCanTeachCourse(payload, auth, courseId);
+    where.course = { equals: courseId };
+  } else if (!isAdmin(auth)) {
+    where.instructor = { equals: userIdNum(auth) };
+  }
+  return (await findDocs(payload, ASSESSMENTS, where, 0, 100)).map((row) => ({
+    id: row.id,
+    title: row.title,
+    status: row.status,
+    courseId: relId(row.course),
+    passingScore: row.passingScore ?? null,
+    maxAttempts: row.maxAttempts ?? null,
+  }));
+}
+
+export async function closeAssessment(
+  payload: Payload,
+  auth: LmsAuthContext,
+  assessmentId: number,
+) {
+  const assessment = await getDoc(payload, ASSESSMENTS, assessmentId);
+  if (!assessment) throw new AcademicError(404, 'NOT_FOUND', 'Avaliação não encontrada');
+  await assertCanTeachCourse(payload, auth, relId(assessment.course)!);
+  if (assessment.status === 'closed') return { id: assessmentId, status: 'closed' as const };
+  await payload.update({
+    collection: ASSESSMENTS,
+    id: assessmentId,
+    data: { status: 'closed' },
+    overrideAccess: true,
+  });
+  return { id: assessmentId, status: 'closed' as const };
+}
+
 export async function createClass(
   payload: Payload,
   auth: LmsAuthContext,
@@ -1027,6 +1072,19 @@ export async function gradeManual(
   });
   if (input.publish) {
     const student = relId(attempt.student);
+    const courseId = relId(attempt.course);
+    if (student && courseId) {
+      await maybeIssueCertificate(
+        payload,
+        {
+          omniaUserId: String(student),
+          role: 'student',
+          isAdmin: false,
+          via: 'internal',
+        },
+        courseId,
+      );
+    }
     if (student) {
       await notify(payload, {
         recipient: student,
@@ -1154,6 +1212,9 @@ function serializeCert(row: Rec) {
     status: row.status,
     issuedAt: row.issuedAt,
     issuer: row.issuer,
+    schoolKey:
+      resolveSchoolKey({ schoolKey: row.schoolKey }) ??
+      resolveSchoolKey({ schoolKey: course.schoolKey }),
     courseTitle: course.title ?? null,
     courseSlug: course.slug ?? null,
   };

@@ -92,6 +92,7 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
             language: context.language || 'pt-BR',
             requestStudyPlan: wantPlan,
             objective: wantPlan ? q : undefined,
+            schoolKey: context.schoolKey ?? null,
           }),
         });
         const json = await res.json();

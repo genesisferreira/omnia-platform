@@ -5,10 +5,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@omnia/ui';
 
+import { BrandBanner } from '@/components/academic/BrandContext';
+
 type Onboarding = {
   status?: string;
   currentStep?: string;
   schoolName?: string | null;
+  schoolKey?: string | null;
   consentVersion?: string;
   academicAllowed?: boolean;
   result?: { summary?: string; nextAction?: string } | null;
@@ -85,7 +88,8 @@ export function OnboardingWizard(props: { initial: Onboarding }) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6 overflow-x-hidden">
+      <BrandBanner schoolKey={state.schoolKey} area="onboarding" />
       <p className="text-xs uppercase tracking-wide text-muted-foreground">
         {state.schoolName || 'Omnia LMS'} · onboarding
       </p>
@@ -106,13 +110,21 @@ export function OnboardingWizard(props: { initial: Onboarding }) {
               <li>Privacidade: consentimento educacional versionado ({state.consentVersion})</li>
               <li>Tempo estimado: 10 a 20 minutos</li>
             </ul>
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               {step === 'explanation' ? (
-                <Button disabled={busy} onClick={() => run('ils/onboarding/start')}>
+                <Button
+                  className="min-h-11"
+                  disabled={busy}
+                  onClick={() => run('ils/onboarding/start')}
+                >
                   Começar
                 </Button>
               ) : (
-                <Button disabled={busy} onClick={() => run('ils/onboarding/consent')}>
+                <Button
+                  className="min-h-11"
+                  disabled={busy}
+                  onClick={() => run('ils/onboarding/consent')}
+                >
                   Concordo e continuar
                 </Button>
               )}
@@ -127,24 +139,47 @@ export function OnboardingWizard(props: { initial: Onboarding }) {
             <CardTitle>Sua experiência</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button
-              disabled={busy}
-              onClick={() =>
-                run('ils/onboarding/pcar', {
-                  experienceYears: 3,
-                  areas: ['comercial'],
-                  technicalFamiliarity: 'operacional',
-                  explanationPreference: 'pratico',
-                  mathComfort: 'media',
-                  readingComfort: 'media',
-                  problemSolvingComfort: 'media',
-                  schematicExperience: true,
-                  studyAvailabilityHoursPerWeek: 6,
-                })
-              }
-            >
-              Salvar perfil prático e continuar
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                className="min-h-11"
+                disabled={busy}
+                onClick={() =>
+                  run('ils/onboarding/pcar', {
+                    experienceYears: 3,
+                    areas: ['comercial'],
+                    technicalFamiliarity: 'operacional',
+                    explanationPreference: 'pratico',
+                    mathComfort: 'media',
+                    readingComfort: 'media',
+                    problemSolvingComfort: 'media',
+                    schematicExperience: true,
+                    studyAvailabilityHoursPerWeek: 6,
+                  })
+                }
+              >
+                Perfil comercial / refrigeração
+              </Button>
+              <Button
+                className="min-h-11"
+                variant="outline"
+                disabled={busy}
+                onClick={() =>
+                  run('ils/onboarding/pcar', {
+                    experienceYears: 3,
+                    areas: ['eletricidade', 'comandos elétricos'],
+                    technicalFamiliarity: 'operacional',
+                    explanationPreference: 'pratico',
+                    mathComfort: 'media',
+                    readingComfort: 'media',
+                    problemSolvingComfort: 'media',
+                    schematicExperience: true,
+                    studyAvailabilityHoursPerWeek: 6,
+                  })
+                }
+              >
+                Perfil elétrica / comandos
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : null}

@@ -10,6 +10,7 @@ export type AskAiContext = {
   language?: string;
   portalArea?: string | null;
   currentRoute?: string | null;
+  schoolKey?: string | null;
 };
 
 export type AssistantOption = {

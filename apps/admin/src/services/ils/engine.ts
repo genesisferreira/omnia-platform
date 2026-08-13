@@ -12,6 +12,7 @@ import {
   blueprintsEquivalent,
   canUseInOfficialAssessment,
   computeImt,
+  filterEntitiesBySchool,
   filterTutorContext,
   humanizeResult,
   isSchoolKey,
@@ -823,20 +824,35 @@ export async function adminOverview(
         )
       : 0,
     interventions: interventions.length,
-    companies: await findDocs(payload, COMPANIES, {}, 0, 20).then((rows) =>
-      rows
-        .map((c) => ({
-          id: c.id,
-          name: c.name,
-          schoolKey: resolveSchoolKey({
-            schoolKey: c.schoolKey,
-            brandTheme: c.brandTheme,
-            slug: c.slug,
-            portalSlug: c.portalSlug,
-          }),
-        }))
-        .filter((c) => c.schoolKey),
+    companies: filterEntitiesBySchool(
+      (await findDocs(payload, COMPANIES, {}, 0, 100)).map((c) => ({
+        id: c.id,
+        name: c.name,
+        schoolKey: resolveSchoolKey({
+          schoolKey: c.schoolKey,
+          brandTheme: c.brandTheme,
+          slug: c.slug,
+          portalSlug: c.portalSlug,
+        }),
+      })),
+      schoolKey ?? null,
     ),
+    courses: (await findDocs(payload, COURSES, where, 0, 50)).map((c) => ({
+      id: c.id,
+      title: c.title,
+      slug: c.slug,
+      schoolKey: resolveSchoolKey({ schoolKey: c.schoolKey }),
+    })),
+    classes: (await findDocs(payload, CLASSES, where, 0, 50)).map((c) => ({
+      id: c.id,
+      name: c.name,
+      schoolKey: resolveSchoolKey({ schoolKey: c.schoolKey }),
+    })),
+    students: {
+      total: new Set(
+        enrollments.map((e) => relId(e.student)).filter((id): id is number => id != null),
+      ).size,
+    },
   };
 }
 

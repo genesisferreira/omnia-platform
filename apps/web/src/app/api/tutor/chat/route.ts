@@ -44,6 +44,8 @@ export async function POST(request: Request) {
     language: (body.language as string | null) ?? 'pt-BR',
     requestStudyPlan: Boolean(body.requestStudyPlan),
     objective: (body.objective as string | null) ?? null,
+    schoolKey: typeof body.schoolKey === 'string' ? body.schoolKey : null,
+    officialAssessmentActive: body.officialAssessmentActive === true,
   });
 
   if (!result.ok) {

@@ -8,7 +8,14 @@ import {
   schoolKeyFromCourseEvidence,
   schoolKeyFromUniqueEnrollmentSchools,
 } from './backfill';
-import { SCHOOL_KEYS, assertSchoolAccess, resolveSchoolKey, schoolsIsolated } from './schools';
+import {
+  SCHOOL_BRANDS,
+  SCHOOL_KEYS,
+  assertSchoolAccess,
+  filterEntitiesBySchool,
+  resolveSchoolKey,
+  schoolsIsolated,
+} from './schools';
 import {
   academicAccessAllowed,
   applyOnboardingTransition,
@@ -16,7 +23,7 @@ import {
   nextOnboardingStep,
   requireOverrideReason,
 } from './onboarding';
-import { CAREER_GOALS, sanitizeCareerGoals, sanitizePcar } from './pcar';
+import { CAREER_GOALS, normalizePcarArea, sanitizeCareerGoals, sanitizePcar } from './pcar';
 import {
   TECHNICAL_DOMAINS,
   blueprintsEquivalent,
@@ -41,7 +48,12 @@ import {
   validateGeneratedExercise,
   type GeneratedExercise,
 } from './exercises';
-import { applyAssessmentGuard, filterTutorContext, schoolAiContext } from './tutor-guard';
+import {
+  answerSchoolIdentityQuestion,
+  applyAssessmentGuard,
+  filterTutorContext,
+  schoolAiContext,
+} from './tutor-guard';
 
 const fredBank = (domain: BankQuestion['domain']): BankQuestion[] =>
   ([1, 2, 3] as const).map((d) => ({
@@ -142,6 +154,18 @@ describe('intelligent learning — PCAR + goals', () => {
     });
     assert.equal(pcar.experienceYears, 12);
     assert.deepEqual(pcar.areas, ['comercial']);
+    assert.equal(normalizePcarArea('eletricidade'), 'eletricidade');
+    assert.equal(normalizePcarArea('elétrica'), 'eletricidade');
+    assert.equal(normalizePcarArea('eletrica'), 'eletricidade');
+    assert.equal(normalizePcarArea('comandos elétricos'), 'comandos');
+    assert.equal(normalizePcarArea('comandos eletricos'), 'comandos');
+    assert.deepEqual(
+      sanitizePcar({
+        experienceYears: 2,
+        areas: ['eletricidade', 'elétrica', 'comandos elétricos', 'tdah'],
+      }).areas,
+      ['eletricidade', 'comandos'],
+    );
     assert.ok(CAREER_GOALS.includes('co2'));
     const goals = sanitizeCareerGoals(['co2', 'abrir_empresa', 'qi'], 'quero crescer');
     assert.deepEqual(goals.goals, ['co2', 'abrir_empresa']);
@@ -320,5 +344,41 @@ describe('intelligent learning — tutor assessment guard', () => {
     assert.equal('school' in slim, true);
     assert.equal('rawGrades' in slim, false);
     assert.ok(tutorAllowedContextKeys().includes('competenceGaps'));
+    const fredId = answerSchoolIdentityQuestion('Em qual escola estou?', 'fred-do-frio');
+    assert.ok(fredId?.text.includes('Fred do Frio'));
+    assert.equal(fredId?.source, 'brand-context');
+    const cteId = answerSchoolIdentityQuestion('qual é a minha escola', 'cte');
+    assert.ok(cteId?.text.startsWith('Você está no ambiente CTE'));
+    assert.ok(!cteId?.text.startsWith('Você está no ambiente Fred'));
+    assert.equal(answerSchoolIdentityQuestion('o que é superquecimento?', 'cte'), null);
+  });
+});
+
+describe('intelligent learning — admin school filter + brand', () => {
+  it('filters companies/courses by schoolKey and keeps CTE placeholder distinct', () => {
+    const rows = [
+      { id: 1, name: 'Fred', schoolKey: 'fred-do-frio' },
+      { id: 2, name: 'CTE', schoolKey: 'cte' },
+      { id: 3, name: 'Orphan', schoolKey: null },
+    ];
+    assert.deepEqual(
+      filterEntitiesBySchool(rows, 'fred-do-frio').map((r) => r.id),
+      [1],
+    );
+    assert.deepEqual(
+      filterEntitiesBySchool(rows, 'cte').map((r) => r.id),
+      [2],
+    );
+    assert.deepEqual(
+      filterEntitiesBySchool(rows, null).map((r) => r.id),
+      [1, 2],
+    );
+    assert.equal(SCHOOL_BRANDS.cte.placeholder, true);
+    assert.equal(SCHOOL_BRANDS['fred-do-frio'].placeholder, false);
+    assert.notEqual(SCHOOL_BRANDS.cte.entryPath, SCHOOL_BRANDS['fred-do-frio'].entryPath);
+    assert.notEqual(
+      SCHOOL_BRANDS.cte.certificateIssuer,
+      SCHOOL_BRANDS['fred-do-frio'].certificateIssuer,
+    );
   });
 });

@@ -8,8 +8,39 @@ export const PCAR_AREAS = [
   'manutencao',
   'projetos',
   'automacao',
+  'eletricidade',
+  'comandos',
   'outro',
 ] as const;
+
+const AREA_ALIASES: Record<string, (typeof PCAR_AREAS)[number]> = {
+  comercial: 'comercial',
+  industrial: 'industrial',
+  supermercados: 'supermercados',
+  climatizacao: 'climatizacao',
+  climatização: 'climatizacao',
+  manutencao: 'manutencao',
+  manutenção: 'manutencao',
+  projetos: 'projetos',
+  automacao: 'automacao',
+  automação: 'automacao',
+  eletricidade: 'eletricidade',
+  eletrica: 'eletricidade',
+  elétrica: 'eletricidade',
+  'comandos eletricos': 'comandos',
+  'comandos elétricos': 'comandos',
+  comandos: 'comandos',
+  outro: 'outro',
+};
+
+export function normalizePcarArea(raw: string): (typeof PCAR_AREAS)[number] | null {
+  const key = raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+  return AREA_ALIASES[key] ?? null;
+}
 
 export const PCAR_EXPLANATION = ['visual', 'pratico', 'textual'] as const;
 export const PCAR_COMFORT = ['baixa', 'media', 'alta'] as const;
@@ -51,7 +82,13 @@ const CLINICAL =
 
 export function sanitizePcar(raw: Record<string, unknown>): PcarProfile {
   const years = clampNum(raw.experienceYears, 0, 50);
-  const areas = asList(raw.areas).filter((a) => (PCAR_AREAS as readonly string[]).includes(a));
+  const areas = [
+    ...new Set(
+      asList(raw.areas)
+        .map((a) => normalizePcarArea(a))
+        .filter((a): a is (typeof PCAR_AREAS)[number] => a != null && a !== 'outro'),
+    ),
+  ];
   const familiarity =
     raw.technicalFamiliarity === 'operacional' || raw.technicalFamiliarity === 'avancado'
       ? raw.technicalFamiliarity

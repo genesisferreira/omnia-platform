@@ -398,7 +398,7 @@ async function main() {
     return payload.create({ collection: 'lms-enrollments', data, overrideAccess: true });
   }
 
-  async function ensureOnboardingNotStarted(
+  async function ensureOnboardingForHomolog(
     studentId: string | number,
     schoolKey: 'fred-do-frio' | 'cte',
   ) {
@@ -408,25 +408,54 @@ async function main() {
       limit: 1,
       overrideAccess: true,
     });
-    const data = {
-      student: Number(studentId),
-      schoolKey,
-      status: 'NOT_STARTED',
-      currentStep: 'explanation',
-      exemptedBy: null,
-      exemptedReason: null,
-      exemptedAt: null,
-    };
     if (found.docs[0]) {
+      const status = String(found.docs[0].status || '');
+      if (status === 'COMPLETED' || status === 'EXEMPTED' || status === 'IN_PROGRESS') {
+        return found.docs[0];
+      }
       await payload.update({
         collection: 'ils-onboarding',
         id: found.docs[0].id,
-        data,
+        data: { schoolKey },
         overrideAccess: true,
       });
       return found.docs[0];
     }
-    return payload.create({ collection: 'ils-onboarding', data, overrideAccess: true });
+    return payload.create({
+      collection: 'ils-onboarding',
+      data: {
+        student: Number(studentId),
+        schoolKey,
+        status: 'NOT_STARTED',
+        currentStep: 'explanation',
+        exemptedBy: null,
+        exemptedReason: null,
+        exemptedAt: null,
+      },
+      overrideAccess: true,
+    });
+  }
+
+  async function closeLeftoverPublishedAssessments(courseId: string | number) {
+    const found = await payload.find({
+      collection: 'lms-assessments',
+      where: {
+        and: [{ course: { equals: courseId } }, { status: { equals: 'published' } }],
+      },
+      limit: 100,
+      overrideAccess: true,
+    });
+    let closed = 0;
+    for (const doc of found.docs) {
+      await payload.update({
+        collection: 'lms-assessments',
+        id: doc.id,
+        data: { status: 'closed' },
+        overrideAccess: true,
+      });
+      closed += 1;
+    }
+    return closed;
   }
 
   const fredCompany = await ensureSchoolCompany('fred-do-frio-academy', {
@@ -517,8 +546,10 @@ async function main() {
     cteCompany.id,
   );
 
-  await ensureOnboardingNotStarted(fredStudent.id, 'fred-do-frio');
-  await ensureOnboardingNotStarted(cteStudent.id, 'cte');
+  await ensureOnboardingForHomolog(fredStudent.id, 'fred-do-frio');
+  await ensureOnboardingForHomolog(cteStudent.id, 'cte');
+  const fredClosed = await closeLeftoverPublishedAssessments(fredCourse.id);
+  const cteClosed = await closeLeftoverPublishedAssessments(cteCourse.id);
 
   console.log('ILS_V11_FIXTURES_SEED_OK');
   console.log(
@@ -529,8 +560,9 @@ async function main() {
       cteCourse: { id: cteCourse.id, slug: CTE_COURSE_SLUG },
       fredClassId: fredClass.id,
       cteClassId: cteClass.id,
+      leftoverAssessmentsClosed: { fred: fredClosed, cte: cteClosed },
       users: createdUsers,
-      note: 'New students forced NOT_STARTED. Passwords not logged.',
+      note: 'Preserves in-progress/completed onboarding. Passwords not logged.',
     }),
   );
   process.exit(0);

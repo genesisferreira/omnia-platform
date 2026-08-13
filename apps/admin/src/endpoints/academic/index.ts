@@ -3,6 +3,7 @@ import type { Endpoint, PayloadRequest } from 'payload';
 import { requireLmsAuth, type LmsAuthContext } from '../../services/lms/auth-context';
 import {
   AcademicError,
+  closeAssessment,
   completeLesson,
   createAssessment,
   createClass,
@@ -20,6 +21,7 @@ import {
   listPendingAttempts,
   listStudentAssessments,
   listStudentGrades,
+  listTeachingAssessments,
   markNotificationRead,
   openAssessment,
   publishGrade,
@@ -386,6 +388,38 @@ const teachingBanksEp: Endpoint = {
   },
 };
 
+const teachingAssessmentsListEp: Endpoint = {
+  path: '/omnia/academic/teaching/assessments',
+  method: 'get',
+  handler: async (req) => {
+    try {
+      return ok({
+        items: await listTeachingAssessments(
+          req.payload,
+          auth(req),
+          num(req.searchParams?.get?.('courseId')),
+        ),
+      });
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingAssessmentCloseEp: Endpoint = {
+  path: '/omnia/academic/teaching/assessments/:id/close',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      return ok(await closeAssessment(req.payload, auth(req), id));
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
 const teachingAssessmentEp: Endpoint = {
   path: '/omnia/academic/teaching/assessments',
   method: 'post',
@@ -563,6 +597,8 @@ export const academicEndpoints: Endpoint[] = [
   teachingLessonEp,
   teachingQuestionEp,
   teachingBanksEp,
+  teachingAssessmentsListEp,
+  teachingAssessmentCloseEp,
   teachingAssessmentEp,
   teachingClassEp,
   teachingRosterEp,

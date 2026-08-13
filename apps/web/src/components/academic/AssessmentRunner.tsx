@@ -23,7 +23,6 @@ export function AssessmentRunner(props: {
 
   async function submit() {
     setBusy(true);
-    await fetch(`/api/academic/assessments/${props.assessmentId}/start`, { method: 'POST' });
     const res = await fetch(`/api/academic/assessments/${props.assessmentId}/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,7 +56,7 @@ export function AssessmentRunner(props: {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl space-y-6 overflow-x-hidden pb-24">
       <h1 className="font-heading text-2xl font-semibold">{props.title}</h1>
       {props.instructions ? (
         <p className="text-sm text-muted-foreground">{props.instructions}</p>
@@ -67,26 +66,35 @@ export function AssessmentRunner(props: {
           <legend className="text-sm font-medium">Questão {q.id}</legend>
           <p className="mb-3 text-sm">{q.prompt || `Tipo ${q.type}`}</p>
           {(q.options?.choices || []).map((c) => (
-            <label key={c.id} className="mb-1 flex items-center gap-2 text-sm">
+            <label
+              key={c.id}
+              className="mb-2 flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-muted/40"
+            >
               <input
                 type="radio"
                 name={`q-${q.id}`}
                 value={c.id}
+                className="h-4 w-4"
                 onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: c.id }))}
               />
-              {c.label}
+              <span>{c.label}</span>
             </label>
           ))}
           {q.type === 'short_answer' || q.type === 'essay' ? (
             <textarea
-              className="mt-2 w-full rounded-md border border-border bg-background p-2 text-sm"
+              className="mt-2 min-h-24 w-full rounded-md border border-border bg-background p-2 text-sm"
               rows={q.type === 'essay' ? 5 : 2}
               onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
             />
           ) : null}
         </fieldset>
       ))}
-      <Button type="button" onClick={() => void submit()} disabled={busy || !!result}>
+      <Button
+        type="button"
+        className="min-h-11 w-full sm:w-auto"
+        onClick={() => void submit()}
+        disabled={busy || !!result}
+      >
         {busy ? 'Enviando…' : 'Enviar respostas'}
       </Button>
       {result ? <p className="text-sm">{result}</p> : null}

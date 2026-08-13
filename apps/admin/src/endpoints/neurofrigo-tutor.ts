@@ -46,6 +46,48 @@ export const tutorChatEndpoint: Endpoint = {
     const subject = resolveSubjectUserKey(auth, body.userId != null ? String(body.userId) : null);
     if (isAuthResponse(subject)) return subject;
 
+    const { answerSchoolIdentityQuestion, isSchoolKey } =
+      await import('@omnia/intelligent-learning');
+    let schoolKey = isSchoolKey(body.schoolKey) ? body.schoolKey : null;
+    if (!schoolKey && /^\d+$/.test(subject.userKey)) {
+      try {
+        const { resolveActorSchool } = await import('../services/ils/engine');
+        schoolKey = await resolveActorSchool(req.payload, {
+          omniaUserId: subject.userKey,
+          role: auth.role === 'teacher' || auth.role === 'instructor' ? 'teacher' : 'student',
+          isAdmin: Boolean(auth.isStaff),
+          via: 'internal',
+        });
+      } catch {
+        /* escola autenticada é opcional para o Tutor EPIC16 */
+      }
+    }
+    const identity = answerSchoolIdentityQuestion(question, schoolKey);
+    if (identity) {
+      return json({
+        ok: true,
+        data: {
+          sessionId: body.sessionId ?? 'brand-context',
+          text: identity.text,
+          rawText: identity.text,
+          sources: [],
+          confidence: 1,
+          tookMs: 0,
+          model: 'brand-context',
+          provider: 'ils-brand',
+          tokens: { prompt: 0, completion: 0, total: 0 },
+          status: 'ok',
+          errorCode: null,
+          intent: 'school_identity',
+          grounding: { grounded: true, score: 1, reason: 'authenticated brand context' },
+          explainability: { source: identity.source },
+          sourceCount: 0,
+          assessmentGuard: null,
+          schoolKey: identity.schoolKey,
+        },
+      });
+    }
+
     const session = await resolveSessionScope(req, auth);
     const scope = bindRequestScope({
       isStaff: auth.isStaff,
@@ -76,7 +118,7 @@ export const tutorChatEndpoint: Endpoint = {
       requestStudyPlan: Boolean(body.requestStudyPlan),
       objective: body.objective != null ? String(body.objective) : null,
       officialAssessmentActive: body.officialAssessmentActive === true,
-      schoolKey: body.schoolKey != null ? String(body.schoolKey) : null,
+      schoolKey,
     });
 
     return json({
