@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { EnrollForm } from '@/components/academic/TeacherForms';
 import { fetchAcademic } from '@/lib/academic/client';
 import { requirePortalSession } from '@/lib/auth/require-session';
@@ -43,8 +44,14 @@ export default async function ProfessorAlunosPage() {
                 key={`${cls.id}-${s.studentId ?? i}`}
                 className="rounded-md border border-border px-3 py-2"
               >
-                Aluno #{s.studentId} · {s.course?.title || 'curso'} · {s.status} ·{' '}
-                {s.progressPercent ?? 0}%
+                {s.studentId ? (
+                  <Link className="underline" href={`/professor/alunos/${s.studentId}`}>
+                    Aluno #{s.studentId}
+                  </Link>
+                ) : (
+                  <>Aluno</>
+                )}{' '}
+                · {s.course?.title || 'curso'} · {s.status} · {s.progressPercent ?? 0}%
               </li>
             ))}
           </ul>

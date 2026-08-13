@@ -75,6 +75,8 @@ export const tutorChatEndpoint: Endpoint = {
         : (scope.companyIds[0] ?? null),
       requestStudyPlan: Boolean(body.requestStudyPlan),
       objective: body.objective != null ? String(body.objective) : null,
+      officialAssessmentActive: body.officialAssessmentActive === true,
+      schoolKey: body.schoolKey != null ? String(body.schoolKey) : null,
     });
 
     return json({

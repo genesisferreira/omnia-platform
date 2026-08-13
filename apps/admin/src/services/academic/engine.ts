@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import { gradeAttempt, studentSafeQuestion, type NativeQuestion } from '@omnia/assessment-engine';
+import { resolveSchoolKey, SCHOOL_BRANDS } from '@omnia/intelligent-learning';
 import type { CollectionSlug, Payload, Where } from 'payload';
 
 import type { LmsAuthContext } from '../lms/auth-context';
@@ -159,6 +160,7 @@ async function sipEvidence(
     sourceId?: string;
     summary: string;
     strength: number;
+    competencyKey?: string;
   },
 ) {
   try {
@@ -169,7 +171,7 @@ async function sipEvidence(
         course: input.course ?? null,
         sourceType: input.sourceType,
         sourceId: input.sourceId ?? null,
-        competencyKey: 'lms.academic',
+        competencyKey: input.competencyKey || 'lms.academic',
         strength: input.strength,
         confidence: 0.7,
         summary: input.summary,
@@ -397,6 +399,14 @@ export async function completeLesson(payload: Payload, auth: LmsAuthContext, les
     sourceId: `lesson:${lessonId}`,
     summary: `Aula concluída: ${String(lesson.title || lessonId)}`,
     strength: 0.4,
+    competencyKey: typeof lesson.competencyKey === 'string' ? lesson.competencyKey : undefined,
+  });
+  await emitSipe(payload, {
+    type: percent >= 100 ? 'COURSE_COMPLETED' : 'LESSON_COMPLETED',
+    studentId: userIdNum(auth),
+    courseId,
+    competencyKey: typeof lesson.competencyKey === 'string' ? lesson.competencyKey : 'fundamentos',
+    score: percent >= 100 ? 80 : 62,
   });
   if (percent >= 100) {
     await maybeIssueCertificate(payload, auth, courseId);
@@ -472,16 +482,18 @@ async function maybeIssueCertificate(payload: Payload, auth: LmsAuthContext, cou
   });
   if (existing[0]) return;
   const code = `OMN-${randomBytes(6).toString('hex').toUpperCase()}`;
+  const school = resolveSchoolKey({ schoolKey: course.schoolKey });
   await payload.create({
     collection: CERTS,
     data: {
       code,
       student: userIdNum(auth),
       course: courseId,
-      issuer: 'Omnia Frigo — LMS',
+      issuer: school ? SCHOOL_BRANDS[school].certificateIssuer : 'Omnia Frigo — LMS',
+      schoolKey: school,
       status: 'valid',
       issuedAt: new Date().toISOString(),
-    },
+    } as never,
     overrideAccess: true,
   });
   await notify(payload, {
@@ -610,13 +622,24 @@ export async function submitAttempt(
     },
     overrideAccess: true,
   });
+  const courseId = relId(assessment?.course) ?? undefined;
   await sipEvidence(payload, {
     userKey: String(auth.omniaUserId),
-    course: relId(assessment?.course) ?? undefined,
+    course: courseId,
     sourceType: 'attempt',
     sourceId: `attempt:${started.attemptId}`,
     summary: `Tentativa enviada na avaliação ${String(assessment?.title || assessmentId)}`,
     strength: graded.score / 100,
+    competencyKey:
+      typeof assessment?.competencyKey === 'string' ? assessment.competencyKey : undefined,
+  });
+  await emitSipe(payload, {
+    type: 'ASSESSMENT_ATTEMPTED',
+    studentId: userIdNum(auth),
+    courseId: courseId ?? null,
+    competencyKey:
+      typeof assessment?.competencyKey === 'string' ? assessment.competencyKey : 'fundamentos',
+    score: graded.score,
   });
   return {
     attemptId: started.attemptId,
@@ -1153,4 +1176,28 @@ function serializeNotif(row: Rec) {
     read: !!row.read,
     createdAt: row.createdAt ?? null,
   };
+}
+
+async function emitSipe(
+  payload: Payload,
+  input: {
+    type: 'LESSON_COMPLETED' | 'COURSE_COMPLETED' | 'ASSESSMENT_ATTEMPTED';
+    studentId: number;
+    courseId?: number | null;
+    competencyKey?: string | null;
+    score?: number | null;
+  },
+) {
+  try {
+    const { recordSipe, resolveActorSchool } = await import('../ils/engine');
+    const schoolKey = await resolveActorSchool(payload, {
+      omniaUserId: String(input.studentId),
+      role: 'student',
+      isAdmin: false,
+      via: 'internal',
+    });
+    await recordSipe(payload, { ...input, schoolKey });
+  } catch {
+    /* ILS é camada auxiliar — não quebra o LMS Core. */
+  }
 }

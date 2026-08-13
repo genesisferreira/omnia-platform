@@ -95,11 +95,32 @@ export async function runTutorAsk(
     ownerCompanyId?: string | null;
     requestStudyPlan?: boolean;
     objective?: string | null;
+    officialAssessmentActive?: boolean;
+    schoolKey?: string | null;
   },
 ) {
   const userKey = body.userId || 'anonymous';
   let sipBlock = '';
   let adaptiveBlock = '';
+  let guard = {
+    blocked: false,
+    reason: null as string | null,
+    safeQuestion: body.question,
+    systemPolicy: '',
+    schoolPolicy: '',
+  };
+  try {
+    const { tutorGuardForAsk } = await import('../ils/engine');
+    const { isSchoolKey } = await import('@omnia/intelligent-learning');
+    const schoolKey = isSchoolKey(body.schoolKey) ? body.schoolKey : null;
+    guard = tutorGuardForAsk({
+      question: body.question,
+      officialAssessmentActive: body.officialAssessmentActive === true,
+      schoolKey,
+    });
+  } catch {
+    /* ILS guard opcional — Tutor EPIC 16 permanece operacional. */
+  }
   if (userKey !== 'anonymous') {
     try {
       const ctx = await getSipAssistantContext(payload, {
@@ -125,7 +146,7 @@ export async function runTutorAsk(
   const tutor = await createTutorService(payload);
   const baseObjectives = body.lessonObjectives || '';
   const result = await tutor.ask({
-    question: body.question,
+    question: guard.safeQuestion,
     userId: body.userId,
     tenantId: body.tenantId,
     language: body.language,
@@ -137,7 +158,15 @@ export async function runTutorAsk(
     moduleTitle: body.moduleTitle,
     lessonId: body.lessonId,
     lessonTitle: body.lessonTitle,
-    lessonObjectives: [baseObjectives, sipBlock, adaptiveBlock].filter(Boolean).join('\n\n'),
+    lessonObjectives: [
+      guard.systemPolicy,
+      guard.schoolPolicy,
+      baseObjectives,
+      guard.blocked ? '' : sipBlock,
+      guard.blocked ? '' : adaptiveBlock,
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
     ownerCompanyId: body.ownerCompanyId,
     requestStudyPlan: body.requestStudyPlan,
     objective: body.objective,

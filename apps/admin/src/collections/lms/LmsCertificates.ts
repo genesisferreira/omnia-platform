@@ -47,6 +47,16 @@ export const LmsCertificates: CollectionConfig = {
     },
     { name: 'issuer', type: 'text', defaultValue: 'Omnia Frigo — LMS' },
     {
+      name: 'schoolKey',
+      type: 'select',
+      index: true,
+      label: 'Escola',
+      options: [
+        { label: 'Fred do Frio', value: 'fred-do-frio' },
+        { label: 'CTE', value: 'cte' },
+      ],
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

@@ -46,6 +46,15 @@ import {
   LmsQuestions,
 } from './src/collections/lms';
 import {
+  IlsAssessmentBlueprints,
+  IlsAuditEvents,
+  IlsCompetencyHistory,
+  IlsConsents,
+  IlsGeneratedExercises,
+  IlsInterventions,
+  IlsOnboarding,
+} from './src/collections/ils';
+import {
   EmbeddingQueue,
   KiProcessingRuns,
   KnowledgeChunks,
@@ -96,6 +105,7 @@ import {
 } from './src/endpoints/public-posts';
 import { resolveSiteEndpoint } from './src/endpoints/resolve-site';
 import { academicEndpoints } from './src/endpoints/academic';
+import { ilsEndpoints } from './src/endpoints/ils';
 import { lmsEndpoints } from './src/endpoints/lms';
 import { GlobalSettings } from './src/globals/GlobalSettings';
 import { PartnerNetworkDashboard } from './src/globals/PartnerNetworkDashboard';
@@ -180,6 +190,13 @@ export default buildConfig({
     LmsCertificates,
     LmsAcademicEvents,
     LmsNotifications,
+    IlsOnboarding,
+    IlsConsents,
+    IlsCompetencyHistory,
+    IlsInterventions,
+    IlsGeneratedExercises,
+    IlsAssessmentBlueprints,
+    IlsAuditEvents,
     LearningResources,
     KnowledgeChunks,
     EmbeddingQueue,
@@ -248,6 +265,7 @@ export default buildConfig({
     publicLessonEndpoint,
     ...lmsEndpoints,
     ...academicEndpoints,
+    ...ilsEndpoints,
     ...retrievalEndpoints,
     ...neurofrigoEndpoints,
     ...tutorEndpoints,

@@ -62,6 +62,16 @@ export const LmsEnrollments: CollectionConfig = {
       index: true,
     },
     {
+      name: 'schoolKey',
+      type: 'select',
+      index: true,
+      label: 'Escola',
+      options: [
+        { label: 'Fred do Frio', value: 'fred-do-frio' },
+        { label: 'CTE', value: 'cte' },
+      ],
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,

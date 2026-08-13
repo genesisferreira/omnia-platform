@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { AcademicShell } from '@/components/academic/AcademicShell';
+import { fetchAcademic } from '@/lib/academic/client';
 import { requirePortalSession } from '@/lib/auth/require-session';
 
 export const dynamic = 'force-dynamic';
@@ -15,8 +16,16 @@ export default async function ProfessorLayout({ children }: { children: React.Re
   if (!allowed) {
     redirect('/aluno');
   }
+  const ctx = await fetchAcademic<{
+    context?: { schoolName?: string | null; schoolKey?: string | null };
+  }>('ils/context', { user });
   return (
-    <AcademicShell role="teacher" userName={user.name || user.email}>
+    <AcademicShell
+      role="teacher"
+      userName={user.name || user.email}
+      schoolName={ctx.ok ? ctx.data.context?.schoolName : null}
+      schoolKey={ctx.ok ? ctx.data.context?.schoolKey : null}
+    >
       {children}
     </AcademicShell>
   );

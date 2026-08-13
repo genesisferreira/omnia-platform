@@ -29,6 +29,7 @@
     "@omnia/database": "workspace:*",
     "@omnia/learning-engine": "workspace:*",
     "@omnia/assessment-engine": "workspace:*",
+    "@omnia/intelligent-learning": "workspace:*",
     "@omnia/monitoring": "workspace:*",
     "@omnia/shared": "workspace:*",
     "@omnia/ui": "workspace:*",

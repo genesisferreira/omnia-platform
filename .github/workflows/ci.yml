@@ -111,6 +111,9 @@ jobs:
       - name: LMS Core + product completion ACL
         run: pnpm --filter @omnia/admin test:lms-core && pnpm --filter @omnia/admin test:lms-product-completion
 
+      - name: Intelligent Learning System V1
+        run: pnpm --filter @omnia/intelligent-learning test && pnpm --filter @omnia/admin test:intelligent-learning
+
       - name: Assessment engine native grade
         run: pnpm --filter @omnia/assessment-engine test
 

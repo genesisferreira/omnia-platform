@@ -12,6 +12,7 @@ const STUDENT_NAV = [
   { href: '/aluno/notas', label: 'Notas' },
   { href: '/aluno/certificados', label: 'Certificados' },
   { href: '/aluno/calendario', label: 'Calendário' },
+  { href: '/aluno/inteligencia', label: 'Acompanhamento' },
   { href: '/aluno/perfil', label: 'Perfil' },
 ];
 
@@ -25,6 +26,7 @@ const TEACHER_NAV = [
   { href: '/professor/questoes', label: 'Banco de questões' },
   { href: '/professor/notas', label: 'Correção' },
   { href: '/professor/progresso', label: 'Progresso' },
+  { href: '/professor/inteligencia', label: 'Turma' },
   { href: '/professor/relatorios', label: 'Relatórios' },
   { href: '/professor/calendario', label: 'Calendário' },
 ];
@@ -32,6 +34,8 @@ const TEACHER_NAV = [
 export function AcademicShell(props: {
   role: 'student' | 'teacher';
   userName: string;
+  schoolName?: string | null;
+  schoolKey?: string | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname() || '/aluno';
@@ -63,7 +67,7 @@ export function AcademicShell(props: {
       >
         <div className="border-b border-white/10 px-4 py-4">
           <Link href={home} className="font-heading text-lg font-bold tracking-tight">
-            Omnia {props.role === 'teacher' ? 'Professor' : 'Aluno'}
+            {props.schoolName || 'Omnia'} {props.role === 'teacher' ? 'Professor' : 'Aluno'}
           </Link>
           <p className="mt-1 truncate text-xs text-white/70">{props.userName}</p>
         </div>

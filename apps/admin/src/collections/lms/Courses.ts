@@ -122,6 +122,16 @@ export const Courses: CollectionConfig = {
       index: true,
     },
     {
+      name: 'schoolKey',
+      type: 'select',
+      index: true,
+      label: 'Escola',
+      options: [
+        { label: 'Fred do Frio', value: 'fred-do-frio' },
+        { label: 'CTE', value: 'cte' },
+      ],
+    },
+    {
       name: 'category',
       type: 'text',
       label: 'Categoria',

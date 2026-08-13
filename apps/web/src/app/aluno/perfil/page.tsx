@@ -17,6 +17,9 @@ export default async function AlunoPerfilPage() {
           <Link href="/meu-perfil">Editar perfil</Link>
         </Button>
         <Button asChild variant="outline">
+          <Link href="/aluno/inteligencia">Acompanhamento 360</Link>
+        </Button>
+        <Button asChild variant="outline">
           <Link href="/meu-perfil-inteligente">Perfil inteligente (SIP)</Link>
         </Button>
       </div>

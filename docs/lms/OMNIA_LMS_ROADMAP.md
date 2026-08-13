@@ -67,6 +67,20 @@ Macroentrega única (auditar → reutilizar → completar gaps):
 
 ---
 
+## Intelligent Learning System V1 (2026-08) — **implementado, homologação staging pendente**
+
+Camada sobre o LMS Core homologado (sem segundo LMS):
+
+- Multi-escola Fred do Frio / CTE (`schoolKey` em company/curso/turma/matrícula/certificado)
+- First login + onboarding + consentimento + PCAR + avaliação inicial adaptativa
+- Student 360 + SIPE + histórico de competências + IMT com evidência
+- Professor Cockpit `/professor/alunos/[id]` + inteligência de turma
+- Exercise generator com pipeline GENERATED → VALIDATED → AVAILABLE
+- Assessment blueprint + Tutor Assessment Guard
+- Doc: `INTELLIGENT_LEARNING_SYSTEM_V1.md`
+
+---
+
 ## Sprint 2.6 — Área do Aluno MVP
 
 - Dashboard, meus cursos, continuar estudando

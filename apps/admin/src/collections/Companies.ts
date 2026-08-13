@@ -209,6 +209,19 @@ export const Companies: CollectionConfig = {
               label: 'Tema visual',
             },
             {
+              name: 'schoolKey',
+              type: 'select',
+              index: true,
+              label: 'Escola educacional',
+              admin: {
+                description: 'Fred do Frio ou CTE. Vazio = empresa não-escolar.',
+              },
+              options: [
+                { label: 'Fred do Frio', value: 'fred-do-frio' },
+                { label: 'CTE', value: 'cte' },
+              ],
+            },
+            {
               name: 'displayOrder',
               type: 'number',
               required: true,
