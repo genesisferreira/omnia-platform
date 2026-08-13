@@ -31,6 +31,7 @@ import * as migration_20260810_200000_student_intelligence from './20260810_2000
 import * as migration_20260811_120000_adaptive_learning from './20260811_120000_adaptive_learning';
 import * as migration_20260813_120000_lms_product_completion from './20260813_120000_lms_product_completion';
 import * as migration_20260813_180000_intelligent_learning_v1 from './20260813_180000_intelligent_learning_v1';
+import * as migration_20260813_190000_ils_locked_rels from './20260813_190000_ils_locked_rels';
 
 export const migrations = [
   {
@@ -197,5 +198,10 @@ export const migrations = [
     up: migration_20260813_180000_intelligent_learning_v1.up,
     down: migration_20260813_180000_intelligent_learning_v1.down,
     name: '20260813_180000_intelligent_learning_v1',
+  },
+  {
+    up: migration_20260813_190000_ils_locked_rels.up,
+    down: migration_20260813_190000_ils_locked_rels.down,
+    name: '20260813_190000_ils_locked_rels',
   },
 ];
