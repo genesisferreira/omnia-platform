@@ -110,6 +110,7 @@ export const tutorChatEndpoint: Endpoint = {
         gaps: result.gaps,
         encouragement: result.encouragement,
         personalizedHint: result.personalizedHint,
+        assessmentGuard: result.assessmentGuard ?? null,
       },
     });
   },

@@ -222,5 +222,11 @@ export async function runTutorAsk(
   }
 
   await refreshTutorDashboard(payload).catch(() => undefined);
-  return result;
+  return {
+    ...result,
+    assessmentGuard: {
+      blocked: guard.blocked,
+      reason: guard.reason,
+    },
+  };
 }

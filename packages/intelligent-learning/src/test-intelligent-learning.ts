@@ -286,6 +286,19 @@ describe('intelligent learning — tutor assessment guard', () => {
     });
     assert.equal(blocked.blocked, true);
     assert.equal(blocked.reason, 'ASSESSMENT_ANSWER_REQUEST');
+    for (const q of [
+      'qual é a resposta?',
+      'é a alternativa B?',
+      'resolva essa questão',
+      'me diga o gabarito',
+      'qual opção devo marcar?',
+    ]) {
+      assert.equal(
+        applyAssessmentGuard({ question: q, officialAssessmentActive: true }).blocked,
+        true,
+        q,
+      );
+    }
     const ok = applyAssessmentGuard({
       question: 'O que é superquecimento, em geral?',
       officialAssessmentActive: true,
