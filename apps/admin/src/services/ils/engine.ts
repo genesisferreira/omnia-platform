@@ -88,6 +88,25 @@ async function findDocs(
 
 export const CONSENT_TEXT_VERSION = 'ils-onboarding-v1';
 
+async function schoolFromCourse(
+  payload: Payload,
+  courseId: number | null,
+): Promise<SchoolKey | null> {
+  if (!courseId) return null;
+  const course = rec(
+    await payload
+      .findByID({ collection: COURSES, id: courseId, depth: 1, overrideAccess: true })
+      .catch(() => null),
+  );
+  if (!course.id) return null;
+  return resolveSchoolKey({
+    schoolKey: course.schoolKey,
+    brandTheme: rec(course.ownerCompany).brandTheme,
+    slug: rec(course.ownerCompany).slug,
+    portalSlug: rec(course.ownerCompany).portalSlug,
+  });
+}
+
 export async function resolveActorSchool(
   payload: Payload,
   auth: LmsAuthContext,
@@ -95,22 +114,23 @@ export async function resolveActorSchool(
   const sid = userIdNum(auth);
   const enrollments = await findDocs(payload, ENROLLMENTS, { student: { equals: sid } }, 1, 20);
   for (const row of enrollments) {
-    const fromRow = isSchoolKey(row.schoolKey) ? row.schoolKey : null;
-    if (fromRow) return fromRow;
-    const courseId = relId(row.course);
-    if (!courseId) continue;
-    const course = rec(
-      await payload
-        .findByID({ collection: COURSES, id: courseId, depth: 1, overrideAccess: true })
-        .catch(() => null),
-    );
-    const key = resolveSchoolKey({
-      schoolKey: course.schoolKey,
-      brandTheme: rec(course.ownerCompany).brandTheme,
-      slug: rec(course.ownerCompany).slug,
-      portalSlug: rec(course.ownerCompany).portalSlug,
-    });
+    if (isSchoolKey(row.schoolKey)) return row.schoolKey;
+    const key = await schoolFromCourse(payload, relId(row.course));
     if (key) return key;
+  }
+  if (isTeacher(auth) || isAdmin(auth)) {
+    const taught = await findDocs(payload, CLASSES, { instructor: { equals: sid } }, 1, 20);
+    for (const row of taught) {
+      if (isSchoolKey(row.schoolKey)) return row.schoolKey;
+      const key = await schoolFromCourse(payload, relId(row.course));
+      if (key) return key;
+    }
+    const courses = await findDocs(payload, COURSES, { instructor: { equals: sid } }, 1, 20);
+    for (const row of courses) {
+      if (isSchoolKey(row.schoolKey)) return row.schoolKey;
+      const key = await schoolFromCourse(payload, Number(row.id));
+      if (key) return key;
+    }
   }
   return null;
 }
@@ -120,10 +140,12 @@ function denyCrossSchool(
   actor: SchoolKey | null,
   auth: LmsAuthContext,
 ) {
+  if (isAdmin(auth)) return;
+  if (!resource || !actor) return;
   const check = assertSchoolAccess({
     resourceSchool: resource,
     actorSchool: actor,
-    isAdmin: isAdmin(auth),
+    isAdmin: false,
   });
   if (!check.ok) throw new AcademicError(403, 'CROSS_SCHOOL', 'Recurso de outra escola');
 }
@@ -540,7 +562,22 @@ export async function student360(
   const schoolKey =
     schoolHint ||
     (enrollments.map((e) => e.schoolKey).find(isSchoolKey) as SchoolKey | undefined) ||
+    (await schoolFromCourse(payload, relId(enrollments[0]?.course))) ||
     actorSchool;
+  if (!self && isTeacher(auth) && !isAdmin(auth)) {
+    const studentCourses = enrollments
+      .map((e) => relId(e.course))
+      .filter((n): n is number => n != null);
+    const taught = await findDocs(payload, CLASSES, { instructor: { equals: userIdNum(auth) } });
+    const own = await findDocs(payload, COURSES, { instructor: { equals: userIdNum(auth) } });
+    const allowed = new Set<number>([
+      ...taught.map((c) => relId(c.course)).filter((n): n is number => n != null),
+      ...own.map((c) => Number(c.id)),
+    ]);
+    if (!studentCourses.some((id) => allowed.has(id))) {
+      throw new AcademicError(403, 'FORBIDDEN', 'Aluno fora das turmas autorizadas');
+    }
+  }
   if (!self) denyCrossSchool(schoolKey, actorSchool, auth);
 
   const progress = await findDocs(payload, PROGRESS, { student: { equals: studentId } }, 0, 200);
