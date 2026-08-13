@@ -40,7 +40,7 @@ export function schoolKeyFromCourseEvidence(input: {
 
 export function schoolKeyFromUniqueEnrollmentSchools(keys: unknown[]): SchoolKey | null {
   const unique = [...new Set(keys.filter(isSchoolKey))];
-  return unique.length === 1 ? unique[0] : null;
+  return unique.length === 1 ? (unique[0] ?? null) : null;
 }
 
 export function classifySchoolKeyGap(schoolKey: unknown): 'assigned' | 'legacy_unknown' {

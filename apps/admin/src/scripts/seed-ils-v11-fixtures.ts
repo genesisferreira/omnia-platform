@@ -471,44 +471,54 @@ async function main() {
     createdUsers[spec.key] = { id: user.id, email: spec.email, created: user.created };
   }
 
-  const fredCourse = await ensureFredCourse(fredCompany.id, createdUsers.fred_professor.id);
-  const cteCourse = await ensureCteCourse(cteCompany.id, createdUsers.cte_professor.id);
+  const mustUser = (key: string) => {
+    const row = createdUsers[key];
+    if (!row) throw new Error(`missing seeded user ${key}`);
+    return row;
+  };
+  const fredProfessor = mustUser('fred_professor');
+  const cteProfessor = mustUser('cte_professor');
+  const fredStudent = mustUser('fred_student_new');
+  const cteStudent = mustUser('cte_student_new');
+
+  const fredCourse = await ensureFredCourse(fredCompany.id, fredProfessor.id);
+  const cteCourse = await ensureCteCourse(cteCompany.id, cteProfessor.id);
   await ensureCteLessons(cteCourse.id);
 
   const fredClass = await ensureClass(
     FRED_CLASS_NAME,
     fredCourse.id,
-    createdUsers.fred_professor.id,
+    fredProfessor.id,
     'fred-do-frio',
     fredCompany.id,
   );
   const cteClass = await ensureClass(
     CTE_CLASS_NAME,
     cteCourse.id,
-    createdUsers.cte_professor.id,
+    cteProfessor.id,
     'cte',
     cteCompany.id,
   );
 
   await ensureEnrollment(
-    createdUsers.fred_student_new.id,
+    fredStudent.id,
     fredCourse.id,
     fredClass.id,
-    createdUsers.fred_professor.id,
+    fredProfessor.id,
     'fred-do-frio',
     fredCompany.id,
   );
   await ensureEnrollment(
-    createdUsers.cte_student_new.id,
+    cteStudent.id,
     cteCourse.id,
     cteClass.id,
-    createdUsers.cte_professor.id,
+    cteProfessor.id,
     'cte',
     cteCompany.id,
   );
 
-  await ensureOnboardingNotStarted(createdUsers.fred_student_new.id, 'fred-do-frio');
-  await ensureOnboardingNotStarted(createdUsers.cte_student_new.id, 'cte');
+  await ensureOnboardingNotStarted(fredStudent.id, 'fred-do-frio');
+  await ensureOnboardingNotStarted(cteStudent.id, 'cte');
 
   console.log('ILS_V11_FIXTURES_SEED_OK');
   console.log(
