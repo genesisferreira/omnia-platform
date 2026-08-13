@@ -83,7 +83,7 @@ Fluxos implementados nas rotas/APIs:
 - Professor: login → dashboard → curso/turma → aula → avaliação/questões → publish → tentativas → corrigir → publicar nota
 - Admin: Payload LMS + LMS Acadêmico (curso, turma, matrícula, professor, auditoria)
 
-Homologação humana em staging é o critério de GO.
+Homologação em staging 2026-08-13: PASS (ver STAGING_HOMOLOGATION). Certificado `OMN-20F104688EBD` emitido após fechar avaliações homolog 1–2.
 
 ## 32. Mobile
 
@@ -91,25 +91,17 @@ Homologação humana em staging é o critério de GO.
 
 ## 33–35. Unit tests / Security tests / CI
 
-Local (2026-08-13):
-
-- `test:lms-core` — GREEN
-- `test:lms-product-completion` — GREEN (ACL, cross-role, gabarito)
-- `@omnia/assessment-engine` native grade — GREEN
-- `test:epic16-portal-redirect` — GREEN (`/aluno`, `/professor`)
-- `generate:types` — GREEN
-- `typecheck` admin + web — GREEN
-- `lint` admin + web — GREEN (warnings pré-existentes)
-- CI workflow atualizado (LMS + assessment-engine)
-- CI remoto: **não executado** (branch ainda não pushada)
+- `test:lms-core` / `test:lms-product-completion` / native-grade — GREEN local e CI
+- CI run 31706806035 — Quality + Build **GREEN** (types, format, lint, tests, fresh migrate, importmap, Admin/Web/monorepo)
 
 ## 36–40. Staging SHA / Health / Landing / Moodle / Production
 
-- Staging SHA: **pendente** (código local na `feature/lms-product-completion`; sem commit/push nesta sessão)
-- Health: **não revalidado** nesta entrega (último known-good: R6 `7739dbf`)
-- Landing: não alterada
-- Moodle: write continua locked; connector RO intacto
-- Produção: **não tocada**
+- Staging SHA: `6db7f63838bce22b1f5dd46893f575b4ea01d337`
+- Backup: `/opt/omnia/backups/staging/lms-product-completion-20260813-135654` SHA256 `48e0b90567ae0453e2d1f4e046c21e11e95d3f5b748dee8a4b4c7bbb9cec3263`
+- Admin DEV healthy / Web 200
+- Landing 200 intacta
+- Moodle 200 RO intacto
+- Produção: **não tocada** (admin/web prod `:2.3.0` Up)
 
 ## 41. Bugs conhecidos
 
@@ -119,16 +111,13 @@ Local (2026-08-13):
 
 ## 42. Pendências
 
-- Commit + push da `feature/lms-product-completion`
-- Backup + migrate + deploy **somente staging**
-- Homologação humana dos 3 fluxos E2E em staging
-- EPIC 16 R6 validação contínua (Tutor / Dock / `/ia`)
-- Moodle write continua locked (intencional)
+- Homologação humana visual (UX premium / mobile device real)
+- EPIC 16 R6 continua em validação humana
+- Moodle write locked (intencional)
+- Intelligent Learning Layer (PCAR, Student 360, Adaptive Exams) — **próxima fase, não iniciar agora**
 
 ## 43. GO / NO-GO
 
-Critério: operar a escola (aluno, professor, admin acadêmico) em staging.
+Ver [LMS_PRODUCT_COMPLETION_STAGING_HOMOLOGATION.md](LMS_PRODUCT_COMPLETION_STAGING_HOMOLOGATION.md).
 
-**NO-GO** — produto implementado localmente; staging ainda não homologado.
-
-Não declarar GO só porque collections/endpoints existem.
+**LMS PRODUCT COMPLETION — STAGING GO** — CI GREEN, staging=HEAD do produto, health GREEN, E2E aluno/professor/admin/assessment/grade/certificado/ACL/cross-tenant/Tutor PASS, landing/Moodle/produção intactos.

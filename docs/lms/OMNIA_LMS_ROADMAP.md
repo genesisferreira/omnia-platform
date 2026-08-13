@@ -51,7 +51,7 @@
 
 ---
 
-## LMS Product Completion (2026-08) — **implementado, homologação humana**
+## LMS Product Completion (2026-08) — **STAGING GO**
 
 Macroentrega única (auditar → reutilizar → completar gaps):
 
@@ -60,7 +60,8 @@ Macroentrega única (auditar → reutilizar → completar gaps):
 - Assessment Engine nativo (MCQ/TF/short auto; dissertativa manual) **sem dual-write Moodle**
 - Moodle Connector permanece **read-only / write dry-run**
 - EPIC 16 R6 permanece em validação humana contínua
-- Docs: `LMS_PRODUCT_COMPLETION_AUDIT.md`, `LMS_PRODUCT_COMPLETION_ARCHITECTURE.md`, `LMS_PRODUCT_COMPLETION_DELIVERY_REPORT.md`
+- Docs: `LMS_PRODUCT_COMPLETION_AUDIT.md`, `LMS_PRODUCT_COMPLETION_ARCHITECTURE.md`, `LMS_PRODUCT_COMPLETION_DELIVERY_REPORT.md`, `LMS_PRODUCT_COMPLETION_STAGING_HOMOLOGATION.md`
+- Staging 2026-08-13: SHA `6db7f63`, CI GREEN, E2E PASS (aluno/professor/admin/ACL/certificado)
 
 **Fora desta entrega:** CRM, ERP, WhatsApp, n8n, produção, merge develop.
 
