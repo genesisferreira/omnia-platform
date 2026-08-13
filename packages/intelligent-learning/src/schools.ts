@@ -29,7 +29,7 @@ export const SCHOOL_BRANDS: Record<
     certificateIssuer: 'CTE — Formação Técnica',
     placeholder: true,
     notes:
-      'Branding configurável. Assets/cores oficiais CTE ainda não homologados — placeholders controlados.',
+      'CTE STAGING BRAND PLACEHOLDER. Sem assets oficiais no repositório. Logo slot, cores, nome, login/dashboard context e issuer configuráveis — identidade definitiva NÃO homologada.',
   },
 };
 

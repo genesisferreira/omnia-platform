@@ -12,6 +12,7 @@ export async function GET() {
       status,
       service: '@omnia/admin',
       timestamp: new Date().toISOString(),
+      gitSha: process.env.GIT_SHA || process.env.APP_VERSION || null,
       checks: {
         database: dbHealthy ? 'up' : 'down',
         payload: 'configured',

@@ -1,3 +1,4 @@
+import { isSchoolKey } from '@omnia/intelligent-learning';
 import type { CollectionSlug, Endpoint, PayloadRequest, Where } from 'payload';
 
 type ErrorBody = {
@@ -93,11 +94,15 @@ export const publicCoursesEndpoint: Endpoint = {
         Math.max(1, Number(url.searchParams.get('pageSize') || 12) || 12),
       );
       const q = url.searchParams.get('q')?.trim() || null;
+      const schoolKeyRaw = url.searchParams.get('schoolKey')?.trim() || null;
 
       const and: Where[] = [
         { status: { equals: 'published' } },
         { visibility: { equals: 'public' } },
       ];
+      if (isSchoolKey(schoolKeyRaw)) {
+        and.push({ schoolKey: { equals: schoolKeyRaw } });
+      }
       if (q) {
         and.push({
           or: [
@@ -133,6 +138,7 @@ export const publicCoursesEndpoint: Endpoint = {
           publishedAt: d.publishedAt ?? null,
           featuredImage: mediaDto(d.featuredImage),
           thumbnail: mediaDto(d.thumbnail),
+          schoolKey: typeof d.schoolKey === 'string' ? d.schoolKey : null,
         };
       });
 
@@ -217,6 +223,7 @@ export const publicCourseEndpoint: Endpoint = {
           featuredImage: mediaDto(c.featuredImage),
           thumbnail: mediaDto(c.thumbnail),
           seo: isRecord(c.seo) ? c.seo : null,
+          schoolKey: typeof c.schoolKey === 'string' ? c.schoolKey : null,
         },
         modules: modules.docs.map((mod) => {
           const m = asRecord(mod);

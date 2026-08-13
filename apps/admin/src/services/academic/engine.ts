@@ -921,6 +921,7 @@ export async function createClass(
         course: input.courseId,
         instructor: userIdNum(auth),
         ownerCompany: relId(course.ownerCompany),
+        schoolKey: resolveSchoolKey({ schoolKey: course.schoolKey }),
         startsAt: input.startsAt ?? null,
         endsAt: input.endsAt ?? null,
         capacity: input.capacity ?? null,
@@ -956,6 +957,7 @@ export async function enrollStudent(
         classRef: input.classId ?? null,
         instructor: userIdNum(auth),
         ownerCompany: relId(course?.ownerCompany),
+        schoolKey: resolveSchoolKey({ schoolKey: course?.schoolKey }),
         status: 'active',
         startedAt: new Date().toISOString(),
         progressPercent: 0,
@@ -1083,6 +1085,7 @@ function serializeCourse(course: Rec) {
     estimatedHours: course.estimatedHours ?? null,
     passingScore: course.passingScore ?? 70,
     certificateEnabled: course.certificateEnabled !== false,
+    schoolKey: resolveSchoolKey({ schoolKey: course.schoolKey }),
   };
 }
 
@@ -1110,6 +1113,7 @@ function serializeClass(row: Rec) {
     status: row.status,
     courseId: relId(row.course),
     instructorId: relId(row.instructor),
+    schoolKey: resolveSchoolKey({ schoolKey: row.schoolKey }),
     startsAt: row.startsAt ?? null,
     endsAt: row.endsAt ?? null,
     capacity: row.capacity ?? null,

@@ -8,6 +8,7 @@ import {
   canUseInOfficialAssessment,
   isAllowedWhileGated,
   resolveSchoolKey,
+  ruleGenerateExercise,
   SCHOOL_BRANDS,
 } from '@omnia/intelligent-learning';
 import { ilsEndpoints } from '../endpoints/ils';
@@ -48,5 +49,9 @@ describe('ils admin wiring', () => {
     });
     assert.equal(guard.blocked, true);
     assert.equal(canUseInOfficialAssessment('GENERATED'), false);
+    const a = ruleGenerateExercise({ competencyKey: 'termodinamica' });
+    const b = ruleGenerateExercise({ competencyKey: 'eletricidade' });
+    assert.notEqual(a.prompt, b.prompt);
+    assert.equal(a.generationMetadata.classification, 'RULE_GENERATED');
   });
 });

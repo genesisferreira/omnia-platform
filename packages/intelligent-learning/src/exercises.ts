@@ -21,6 +21,7 @@ export type GeneratedExercise = {
   sourceRefs: string[];
   generationMetadata: {
     model?: string | null;
+    classification?: GeneratorClassification;
     schoolKey: string | null;
     studentId?: number | null;
     courseId?: number | null;
@@ -57,6 +58,86 @@ export function promoteExercise(
 /** Exercício GENERATED não entra em prova oficial. */
 export function canUseInOfficialAssessment(status: ExerciseStatus): boolean {
   return status === 'AVAILABLE' || status === 'VALIDATED';
+}
+
+export type GeneratorClassification = 'RULE_GENERATED' | 'AI_GENERATED';
+
+const RULE_TEMPLATES: Record<
+  string,
+  { prompt: string; expectedAnswer: string; rubric: string; sourceRefs: string[] }
+> = {
+  termodinamica: {
+    prompt:
+      'Explique o superquecimento no evaporador: o que mede, onde se lê e por que um valor baixo indica risco de retorno de líquido.',
+    expectedAnswer:
+      'Superquecimento é a diferença entre a temperatura do vapor na saída do evaporador e a temperatura de saturação da pressão de evaporação. Valor baixo indica líquido próximo da sucção.',
+    rubric: 'Citar definição, ponto de medição e risco operacional. Sem diagnóstico clínico.',
+    sourceRefs: ['lms:fundamentos-refrigeracao-industrial', 'domain:termodinamica'],
+  },
+  eletricidade: {
+    prompt:
+      'Em um quadro de comando de câmara fria, descreva a função do disjuntor motor e o risco de operar com sobrecarga sem proteção térmica.',
+    expectedAnswer:
+      'O disjuntor motor protege contra curto e sobrecarga. Sem proteção térmica o motor pode aquecer além do isolante e falhar.',
+    rubric: 'Citar proteção elétrica e consequência operacional. Sem rótulo de capacidade mental.',
+    sourceRefs: ['lms:cte-normas-eletricas-industriais', 'domain:eletricidade'],
+  },
+  fundamentos: {
+    prompt:
+      'Liste os quatro componentes principais do ciclo de compressão a vapor e a função de cada um em uma frase.',
+    expectedAnswer:
+      'Compressor (eleva pressão), condensador (rejeita calor), dispositivo de expansão (queda de pressão), evaporador (absorve calor).',
+    rubric: 'Quatro componentes + função. Linguagem operacional.',
+    sourceRefs: ['lms:fundamentos-refrigeracao-industrial', 'domain:fundamentos'],
+  },
+};
+
+function fallbackRuleTemplate(competencyKey: string) {
+  return {
+    prompt: `Descreva, em linguagem operacional, o conceito de ${competencyKey} e um cuidado prático em planta.`,
+    expectedAnswer: `Definição operacional de ${competencyKey} + um risco ou boa prática associada.`,
+    rubric: `Exigir conceito + aplicação. Competência alvo: ${competencyKey}.`,
+    sourceRefs: [`domain:${competencyKey}`],
+  };
+}
+
+/** Motor V1.1: template/regra determinístico. Não declara LLM. */
+export function ruleGenerateExercise(input: {
+  competencyKey: string;
+  difficulty?: GeneratedExercise['difficulty'];
+  type?: GeneratedExercise['type'];
+  schoolKey?: string | null;
+  studentId?: number | null;
+  courseId?: number | null;
+  lessonId?: number | null;
+}): GeneratedExercise {
+  const key = input.competencyKey.trim().toLowerCase() || 'fundamentos';
+  const tpl = RULE_TEMPLATES[key] ?? fallbackRuleTemplate(key);
+  const difficulty = input.difficulty ?? 'beginner';
+  return {
+    exerciseId: `rule-${key}-${difficulty}`,
+    competencies: [key],
+    difficulty,
+    type: input.type ?? 'short_answer',
+    prompt: tpl.prompt,
+    expectedAnswer: tpl.expectedAnswer,
+    rubric: tpl.rubric,
+    explanation: `RULE_GENERATED · competência ${key} · dificuldade ${difficulty}`,
+    sourceRefs: tpl.sourceRefs,
+    generationMetadata: {
+      model: 'rule-template-v1',
+      classification: 'RULE_GENERATED',
+      schoolKey: input.schoolKey ?? null,
+      studentId: input.studentId ?? null,
+      courseId: input.courseId ?? null,
+      lessonId: input.lessonId ?? null,
+    },
+    status: 'GENERATED',
+  };
+}
+
+export function generatorClassification(): GeneratorClassification {
+  return 'RULE_GENERATED';
 }
 
 export function reinforcementPlan(input: {

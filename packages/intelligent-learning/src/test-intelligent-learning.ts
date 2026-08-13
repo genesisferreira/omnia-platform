@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import {
+  SCHOOLKEY_BACKFILL_POLICY,
+  classifySchoolKeyGap,
+  schoolKeyFromCompanyEvidence,
+  schoolKeyFromCourseEvidence,
+  schoolKeyFromUniqueEnrollmentSchools,
+} from './backfill';
 import { SCHOOL_KEYS, assertSchoolAccess, resolveSchoolKey, schoolsIsolated } from './schools';
 import {
   academicAccessAllowed,
@@ -28,7 +35,9 @@ import {
 } from './student-360';
 import {
   canUseInOfficialAssessment,
+  generatorClassification,
   promoteExercise,
+  ruleGenerateExercise,
   validateGeneratedExercise,
   type GeneratedExercise,
 } from './exercises';
@@ -71,6 +80,24 @@ describe('intelligent learning — multi-school', () => {
       }).ok,
       true,
     );
+  });
+
+  it('backfills schoolKey only with evidence and leaves unknown as legacy', () => {
+    assert.equal(schoolKeyFromCompanyEvidence({ brandTheme: 'fred' }), 'fred-do-frio');
+    assert.equal(schoolKeyFromCompanyEvidence({ slug: 'cte' }), 'cte');
+    assert.equal(schoolKeyFromCompanyEvidence({ slug: 'e16-company-a' }), null);
+    assert.equal(
+      schoolKeyFromCourseEvidence({ slug: 'fundamentos-refrigeracao-industrial' }),
+      'fred-do-frio',
+    );
+    assert.equal(schoolKeyFromCourseEvidence({ slug: 'curso-sem-evidencia' }), null);
+    assert.equal(
+      schoolKeyFromUniqueEnrollmentSchools(['fred-do-frio', 'fred-do-frio']),
+      'fred-do-frio',
+    );
+    assert.equal(schoolKeyFromUniqueEnrollmentSchools(['fred-do-frio', 'cte']), null);
+    assert.equal(classifySchoolKeyGap(null), 'legacy_unknown');
+    assert.ok(SCHOOLKEY_BACKFILL_POLICY.unknownLabel.includes('legacy'));
   });
 });
 
@@ -221,6 +248,13 @@ describe('intelligent learning — exercises + blueprint', () => {
     };
     assert.equal(validateGeneratedExercise(ex).ok, true);
     assert.equal(canUseInOfficialAssessment('GENERATED'), false);
+    const thermo = ruleGenerateExercise({ competencyKey: 'termodinamica' });
+    const electric = ruleGenerateExercise({ competencyKey: 'eletricidade' });
+    assert.equal(generatorClassification(), 'RULE_GENERATED');
+    assert.equal(thermo.generationMetadata.classification, 'RULE_GENERATED');
+    assert.notEqual(thermo.prompt, electric.prompt);
+    assert.ok(thermo.sourceRefs.length > 0);
+    assert.ok(electric.expectedAnswer);
     const validated = promoteExercise('GENERATED', 'validate');
     assert.equal(validated, 'VALIDATED');
     assert.equal(canUseInOfficialAssessment(validated), true);

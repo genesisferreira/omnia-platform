@@ -21,6 +21,7 @@ import {
   promoteExercise,
   requireOverrideReason,
   resolveSchoolKey,
+  ruleGenerateExercise,
   sanitizeCareerGoals,
   sanitizePcar,
   schoolAiContext,
@@ -857,26 +858,28 @@ export async function createExerciseDraft(
     throw new AcademicError(403, 'FORBIDDEN', 'Somente professor/admin');
   }
   const schoolKey = await resolveActorSchool(payload, auth);
-  const draft = {
-    exerciseId: `draft-${Date.now()}`,
-    competencies: [input.competencyKey],
-    difficulty: (input.difficulty as 'beginner') || 'beginner',
-    type: (input.type as 'short_answer') || 'short_answer',
-    prompt: input.prompt,
-    expectedAnswer: input.expectedAnswer ?? null,
-    rubric: null,
-    explanation: null,
-    sourceRefs: [],
-    generationMetadata: {
-      schoolKey,
-      studentId: input.studentId ?? null,
-      courseId: input.courseId ?? null,
-      lessonId: input.lessonId ?? null,
-      model: 'rule-template',
-    },
-    status: 'GENERATED' as const,
-  };
-  const check = validateGeneratedExercise(draft);
+  const generated = ruleGenerateExercise({
+    competencyKey: input.competencyKey,
+    difficulty:
+      input.difficulty === 'intermediate' || input.difficulty === 'advanced'
+        ? input.difficulty
+        : 'beginner',
+    type:
+      input.type === 'multiple_choice' ||
+      input.type === 'true_false' ||
+      input.type === 'short_answer' ||
+      input.type === 'diagnostic_case' ||
+      input.type === 'calculation'
+        ? input.type
+        : 'short_answer',
+    schoolKey,
+    studentId: input.studentId ?? null,
+    courseId: input.courseId ?? null,
+    lessonId: input.lessonId ?? null,
+  });
+  if (input.prompt.trim().length >= 12) generated.prompt = input.prompt.trim();
+  if (input.expectedAnswer) generated.expectedAnswer = input.expectedAnswer;
+  const check = validateGeneratedExercise(generated);
   if (!check.ok) throw new AcademicError(400, 'INVALID_EXERCISE', check.errors.join(','));
   const doc = rec(
     await payload.create({
@@ -888,12 +891,15 @@ export async function createExerciseDraft(
         student: input.studentId ?? null,
         instructor: userIdNum(auth),
         status: 'GENERATED',
-        type: draft.type,
-        difficulty: draft.difficulty,
-        prompt: draft.prompt,
-        expectedAnswer: draft.expectedAnswer,
-        competencies: draft.competencies,
-        generationMetadata: draft.generationMetadata,
+        type: generated.type,
+        difficulty: generated.difficulty,
+        prompt: generated.prompt,
+        expectedAnswer: generated.expectedAnswer,
+        rubric: generated.rubric,
+        explanation: generated.explanation,
+        competencies: generated.competencies,
+        sourceRefs: generated.sourceRefs,
+        generationMetadata: generated.generationMetadata,
       } as never,
       overrideAccess: true,
     }),
@@ -905,7 +911,11 @@ export async function createExerciseDraft(
     action: 'exercise_generated',
     nextJson: { id: doc.id, status: 'GENERATED' },
   });
-  return { exercise: doc, officialEligible: canUseInOfficialAssessment('GENERATED') };
+  return {
+    exercise: doc,
+    officialEligible: canUseInOfficialAssessment('GENERATED'),
+    classification: generated.generationMetadata.classification ?? 'RULE_GENERATED',
+  };
 }
 
 export async function validateExercise(

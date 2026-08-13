@@ -33,7 +33,14 @@ Se evidência total `< 4`: **insufficient** (não inventa número).
 
 ## CTE branding
 
-Estrutura configurável (`brandTheme=cte`, issuer CTE). Assets oficiais ainda não homologados — placeholder documentado.
+**CTE STAGING BRAND PLACEHOLDER.** Estrutura configurável (`brandTheme=cte`, issuer CTE, logo slot, cores, login/dashboard context). Assets oficiais **não existem no repositório** — identidade definitiva não inventada.
+
+## ILS V1.1 — data activation
+
+- Migration `20260813_200000_ils_schoolkey_backfill`: preenche `schoolKey` só com evidência (brandTheme/slug/owner/curso fixture Fred). NULL restante = `legacy/unknown`.
+- Seed `seed:ils-v11-fixtures`: aluno Fred/CTE novos com `onboardingStatus=NOT_STARTED`, cursos distintos, turmas e professores.
+- Gerador de exercício V1.1: `RULE_GENERATED` (template/regra). Não declara LLM.
+- Health Admin/Web expõe `gitSha` para alinhar runtime = git HEAD.
 
 ## Alunos legado
 

@@ -32,6 +32,7 @@ import * as migration_20260811_120000_adaptive_learning from './20260811_120000_
 import * as migration_20260813_120000_lms_product_completion from './20260813_120000_lms_product_completion';
 import * as migration_20260813_180000_intelligent_learning_v1 from './20260813_180000_intelligent_learning_v1';
 import * as migration_20260813_190000_ils_locked_rels from './20260813_190000_ils_locked_rels';
+import * as migration_20260813_200000_ils_schoolkey_backfill from './20260813_200000_ils_schoolkey_backfill';
 
 export const migrations = [
   {
@@ -203,5 +204,10 @@ export const migrations = [
     up: migration_20260813_190000_ils_locked_rels.up,
     down: migration_20260813_190000_ils_locked_rels.down,
     name: '20260813_190000_ils_locked_rels',
+  },
+  {
+    up: migration_20260813_200000_ils_schoolkey_backfill.up,
+    down: migration_20260813_200000_ils_schoolkey_backfill.down,
+    name: '20260813_200000_ils_schoolkey_backfill',
   },
 ];

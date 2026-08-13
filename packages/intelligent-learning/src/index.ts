@@ -6,3 +6,4 @@ export * from './sipe';
 export * from './student-360';
 export * from './exercises';
 export * from './tutor-guard';
+export * from './backfill';
