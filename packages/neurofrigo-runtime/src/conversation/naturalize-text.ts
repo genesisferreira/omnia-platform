@@ -95,6 +95,12 @@ export function applyRepetitionControl(input: {
   const maxSim = Math.max(...prev.map((p) => jaccardSimilarity(input.candidate, p)));
   if (maxSim < 0.72) return input.candidate;
 
+  // Contact / handoff: avoid collapsing confirmation into a generic menu.
+  if (/contact_handoff/i.test(String(input.dialogueIntent || ''))) {
+    if (maxSim < 0.9) return input.candidate;
+    return input.candidate;
+  }
+
   // Engineering / technical discovery: never collapse to a generic menu — keep progression.
   if (/engineering/i.test(String(input.dialogueIntent || ''))) {
     if (maxSim < 0.92) return input.candidate;

@@ -481,28 +481,25 @@ export function resolveDialogueTurn(input: {
         state.currentIntent === 'engineering_troubleshooting' ||
         state.currentIntent === 'services' ||
         Boolean(state.engineeringContext?.symptom) ||
+        state.engineeringContext?.equipment === 'cold_room' ||
         state.engineeringContext?.setpointC != null ||
         state.engineeringContext?.actualTempC != null;
 
-      if (commercialContext && !educationContext) {
-        state = applyStatePatch(state, {
-          contactTarget: 'commercial',
-          responsibleCompany: 'equipe comercial Omnia / Renovação',
-        });
-      } else if (technicalContext && !educationContext) {
+      // Recent technical/commercial need outranks a stale selectedCourse from earlier turns.
+      if (technicalContext) {
         state = applyStatePatch(state, {
           contactTarget: 'technical',
           responsibleCompany: 'Renovação Refrigeração',
+        });
+      } else if (commercialContext) {
+        state = applyStatePatch(state, {
+          contactTarget: 'commercial',
+          responsibleCompany: 'equipe comercial Omnia / Renovação',
         });
       } else if (educationContext) {
         state = applyStatePatch(state, {
           contactTarget: 'education',
           responsibleCompany: 'Fred do Frio / CTE',
-        });
-      } else if (technicalContext) {
-        state = applyStatePatch(state, {
-          contactTarget: 'technical',
-          responsibleCompany: 'Renovação Refrigeração',
         });
       }
     }
