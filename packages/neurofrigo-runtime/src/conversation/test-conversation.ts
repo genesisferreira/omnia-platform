@@ -229,7 +229,7 @@ describe('conversation experience r4', () => {
       retrieval,
       llm: new GroundedExtractiveProvider(),
     }).ask({
-      question: 'Preciso montar uma câmara frigorífica.',
+      question: 'Qual empresa procurar para montar uma câmara frigorífica?',
       assistantKey: 'concierge',
       channel: 'portal_public',
       identity: { role: 'anonymous' },

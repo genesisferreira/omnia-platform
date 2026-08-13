@@ -1,5 +1,5 @@
 /**
- * Humanize internal enums / strip mechanical leaks from user-facing text.
+ * Humanize enums / strip mechanical leaks / invisible repetition control (R6).
  */
 
 const LEVEL_MAP: Record<string, string> = {
@@ -21,6 +21,10 @@ export function naturalizeUserText(text: string): string {
   out = out.replace(/EPIC16_PUBLIC_INSTITUTIONAL_V\d+/gi, '');
   out = out.replace(/\[chunk:[^\]]+\]/gi, '');
   out = out.replace(/\b(RAG|Citations|Routing|PromptBuilder|Policy Engine|Vector Search)\b/gi, '');
+  // Strip leaked document structure / markdown headings
+  out = out.replace(/^#{1,6}\s*/gm, '');
+  out = out.replace(/\n#{1,6}\s+/g, '\n');
+  out = out.replace(/##\s*Prop[oó]sito e vis[aã]o[^\n]*/gi, '');
   out = out.replace(/\bn[ií]vel\s+beginner\b/gi, 'nível Iniciante');
   out = out.replace(/\bn[ií]vel\s+intermediate\b/gi, 'nível Intermediário');
   out = out.replace(/\bn[ií]vel\s+advanced\b/gi, 'nível Avançado');
@@ -29,8 +33,13 @@ export function naturalizeUserText(text: string): string {
   out = out.replace(/\bintermediate\b/gi, 'Intermediário');
   out = out.replace(/\badvanced\b/gi, 'Avançado');
   out = out.replace(/\bexpert\b/gi, 'Especialista');
-  // "Omnia Frigo Holding A Omnia Frigo Holding é"
   out = out.replace(/Omnia Frigo Holding\s+A\s+Omnia Frigo Holding/gi, 'A Omnia Frigo Holding');
+  // Strip visible anti-repetition engine boilerplate if any leaked
+  out = out.replace(/J[aá] apresentei[^\n]*/gim, '');
+  out = out.replace(/Para n[aã]o repetir[^\n]*/gim, '');
+  out = out.replace(/Como j[aá] falei[^\n]*/gim, '');
+  out = out.replace(/Vamos avan[cç]ar:?\s*/gim, '');
+  out = out.replace(/Me diga o pr[oó]ximo ponto[^\n]*/gim, '');
   out = out
     .replace(/\s{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
@@ -61,7 +70,7 @@ export function jaccardSimilarity(a: string, b: string): number {
 }
 
 /**
- * If the new answer largely repeats a previous assistant turn, rewrite toward progress.
+ * Invisible repetition control — never expose engine boilerplate to the user.
  */
 export function applyRepetitionControl(input: {
   candidate: string;
@@ -70,43 +79,59 @@ export function applyRepetitionControl(input: {
 }): string {
   const prev = input.previousAnswers.filter(Boolean).slice(-2);
   if (!prev.length) return input.candidate;
+  // Short qualification / clarification questions may legitimately repeat the ask.
+  if (
+    input.candidate.length < 220 &&
+    /\?\s*$/.test(input.candidate.trim()) &&
+    /course_recommendation|clarification|contact_handoff|commercial_discovery|engineering/i.test(
+      String(input.dialogueIntent || ''),
+    )
+  ) {
+    if (jaccardSimilarity(input.candidate, prev[prev.length - 1] || '') > 0.85) {
+      return input.candidate.replace(/\?\s*$/, ' — pode responder em uma frase?');
+    }
+    return input.candidate;
+  }
   const maxSim = Math.max(...prev.map((p) => jaccardSimilarity(input.candidate, p)));
   if (maxSim < 0.72) return input.candidate;
 
+  // Prefer progressive continuation without meta commentary.
   if (input.dialogueIntent === 'services') {
     return [
-      'Além da visão geral do ecossistema, os serviços técnicos ficam com a **Renovação Refrigeração** (engenharia, instalação, manutenção e retrofit).',
+      'No lado técnico, a referência é a Renovação Refrigeração (projeto, instalação, manutenção e retrofit).',
+      'Formação fica com Fred do Frio / CTE; tecnologia e IA com Neurofrigo Command IA.',
       '',
-      'Formação fica com Fred do Frio / CTE, e tecnologia/IA com Neurofrigo Command IA.',
-      '',
-      'Quer que eu detalhe o serviço técnico para o seu tipo de instalação?',
+      'Qual dessas frentes combina mais com o que você precisa agora?',
     ].join('\n');
   }
   if (input.dialogueIntent === 'institutional_overview') {
     return [
-      'Já apresentei o panorama da Omnia. Posso seguir por um caminho específico:',
-      '',
-      '- cursos publicados',
-      '- serviços técnicos',
-      '- empresa ideal para o seu caso',
-      '',
-      'Qual desses você prefere agora?',
+      'Se você me disser o que procura — formação, serviço técnico ou tecnologia — eu te direciono sem repetir o panorama geral.',
     ].join('\n');
   }
   if (input.dialogueIntent === 'teaching_rephrase') {
-    return [
-      'Vou explicar de outro jeito, mais direto:',
-      '',
-      input.candidate.split(/\n+/).slice(0, 3).join('\n'),
-      '',
-      'Se ainda estiver confuso, diga qual parte travou que eu uso um exemplo.',
-    ].join('\n');
+    const core = input.candidate
+      .split(/\n+/)
+      .filter((l) => !/j[aá] apresentei|n[aã]o repetir|vamos avan/i.test(l))
+      .slice(0, 4)
+      .join('\n');
+    return (
+      core ||
+      'Vou usar outra imagem mental: foque no efeito prático do conceito no campo, em uma frase.'
+    );
   }
-  return [
-    'Para não repetir o que já mostrei, vamos avançar:',
-    '',
-    input.candidate.split(/\n+/).slice(0, 4).join('\n'),
-    '',
-    'Me diga o próximo ponto que você quer aprofundar.',
-  ].join('\n');
+
+  // Generic: keep only novel trailing content / next-step ask — no lecture about repeating.
+  const lines = input.candidate
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter(
+      (l) => !/j[aá] apresentei|para n[aã]o repetir|como j[aá] falei|vamos avan[cç]ar/i.test(l),
+    );
+  const kept = lines.slice(-3).join('\n');
+  if (kept && jaccardSimilarity(kept, prev[prev.length - 1] || '') < 0.72) {
+    return kept;
+  }
+  return 'Quer que eu aprofunde um ponto específico disso, ou prefere o próximo passo prático?';
 }

@@ -20,6 +20,8 @@ import { resolveDialogueTurn } from '../conversation/follow-up-resolver';
 import { composeDialogueAnswer } from '../conversation/dialogue-compose';
 import { applyStatePatch } from '../conversation/conversation-state';
 import { applyRepetitionControl, naturalizeUserText } from '../conversation/naturalize-text';
+import { validateAndRewriteResponse } from '../conversation/response-validator';
+import { buildHandoffRequest } from '../conversation/action-router';
 import type { ConversationState } from '../conversation/dialogue-types';
 import type {
   ContextBuilderPort,
@@ -109,7 +111,7 @@ export class NeurofrigoRuntime {
       });
     }
 
-    // Dialogue-composed answers (clarification, catalog, recommendation, services map, etc.)
+    // Dialogue-composed answers (clarification, catalog, recommendation, services map, contact, etc.)
     const composed = composeDialogueAnswer({
       dialogueIntent: resolved.dialogueIntent,
       state: resolved.state,
@@ -129,18 +131,61 @@ export class NeurofrigoRuntime {
         previousAnswers,
         dialogueIntent: resolved.dialogueIntent,
       });
-      text = naturalizeUserText(text);
+      const validated = validateAndRewriteResponse({
+        text,
+        catalogLevels: publicCourses?.map((c) => ({ title: c.title, level: c.level })),
+      });
+      text = validated.text;
       const pendingOffer = composed.pendingOffer;
+      const handoff =
+        resolved.dialogueIntent === 'contact_handoff' && resolved.state.handoffPrepared
+          ? buildHandoffRequest({
+              source: assistantKey || 'concierge',
+              state: resolved.state,
+              sessionId: request.sessionId,
+              userId: request.identity.userId,
+              tenantId: request.identity.tenantId,
+            })
+          : null;
+      let pendingAction = resolved.state.pendingAction;
+      if (pendingOffer?.options.length === 1 && pendingOffer.options[0] === 'confirm_handoff') {
+        pendingAction = 'CONTACT_HANDOFF';
+      } else if (resolved.dialogueIntent === 'course_recommendation') {
+        pendingAction = 'COURSE_RECOMMENDATION';
+      } else if (resolved.dialogueIntent === 'course_catalog') {
+        pendingAction = 'COURSE_CATALOG';
+      } else if (resolved.dialogueIntent === 'contact_handoff' && !resolved.state.handoffPrepared) {
+        pendingAction = 'CONTACT_HANDOFF';
+      }
       const state = applyStatePatch(resolved.state, {
         currentIntent: resolved.dialogueIntent,
         currentTopic: composed.topic,
         pendingOffer,
+        pendingAction,
         lastAssistantText: text,
+        lastAssistantQuestion: /\?/.test(text)
+          ? text
+              .split('\n')
+              .filter((l) => l.includes('?'))
+              .slice(-1)[0] || null
+          : resolved.state.lastAssistantQuestion,
         selectedCourse:
           resolved.dialogueIntent === 'course_catalog' ||
           resolved.dialogueIntent === 'course_recommendation'
             ? publicCourses?.[0]?.title || resolved.state.selectedCourse
             : resolved.state.selectedCourse,
+        currentCourse:
+          publicCourses?.[0]?.title ||
+          resolved.state.currentCourse ||
+          resolved.state.selectedCourse,
+        responsibleCompany:
+          resolved.state.responsibleCompany ||
+          resolved.state.selectedCompany ||
+          resolved.state.currentCompany ||
+          resolved.state.contactTarget ||
+          null,
+        contactTarget: resolved.state.contactTarget,
+        selectedCompany: resolved.state.selectedCompany || resolved.state.responsibleCompany,
       });
       return this.finishDialogue({
         text,
@@ -156,6 +201,7 @@ export class NeurofrigoRuntime {
         dialogueIntent: resolved.dialogueIntent,
         justification: dialogueJustification(resolved.dialogueIntent),
         previousAnswers,
+        handoffRequest: handoff,
       });
     }
 
@@ -215,6 +261,11 @@ export class NeurofrigoRuntime {
           currentIntent: 'company_routing',
           pendingOffer: companyCompose.pendingOffer,
           lastAssistantText: text,
+          responsibleCompany:
+            resolved.state.responsibleCompany || resolved.state.selectedCompany || null,
+          contactTarget: resolved.state.contactTarget,
+          selectedCompany: resolved.state.selectedCompany || resolved.state.responsibleCompany,
+          currentCompany: resolved.state.currentCompany || resolved.state.selectedCompany,
         }),
         dialogueIntent: 'company_routing',
         justification: 'Roteamento institucional público entre empresas do ecossistema.',
@@ -694,7 +745,10 @@ export class NeurofrigoRuntime {
     justification: string;
     previousAnswers: string[];
     retrievalMeta?: RuntimeAnswer['retrieval'];
+    handoffRequest?: RuntimeAnswer['handoffRequest'];
   }): RuntimeAnswer {
+    const validated = validateAndRewriteResponse({ text: input.text });
+    const text = validated.text;
     const suggestedActions = buildSuggestedActions({
       assistantKey: input.assistantKey,
       channel: input.channel,
@@ -705,9 +759,9 @@ export class NeurofrigoRuntime {
       conversationKind: input.dialogueIntent,
     });
     return {
-      text: input.text,
+      text,
       formattedText: formatResponse({
-        text: input.text,
+        text,
         intent: input.intentHint,
         status: 'ok',
       }),
@@ -717,8 +771,8 @@ export class NeurofrigoRuntime {
       model: input.meta.model,
       provider: input.meta.name,
       promptTokens: 0,
-      completionTokens: Math.ceil(input.text.length / 4),
-      totalTokens: Math.ceil(input.text.length / 4),
+      completionTokens: Math.ceil(text.length / 4),
+      totalTokens: Math.ceil(text.length / 4),
       estimatedCostUsd: 0,
       status: 'ok',
       errorCode: null,
@@ -743,6 +797,7 @@ export class NeurofrigoRuntime {
       suggestedActions,
       dialogueState: input.state,
       dialogueIntent: input.dialogueIntent,
+      handoffRequest: input.handoffRequest ?? null,
       explainability: {
         sourceCount: input.sources.length,
         avgScore: input.sources.length

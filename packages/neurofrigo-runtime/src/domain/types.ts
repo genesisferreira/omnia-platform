@@ -176,9 +176,10 @@ export type RuntimeAnswer = {
   grounding: GroundingScore | null;
   explainability: Explainability | null;
   suggestedActions?: SuggestedAction[];
-  /** Session dialogue state snapshot (R5). */
+  /** Session dialogue state snapshot (R5/R6). */
   dialogueState?: import('../conversation/dialogue-types').ConversationState | null;
   dialogueIntent?: string | null;
+  handoffRequest?: import('../conversation/dialogue-types').HandoffRequest | null;
   retrieval?: Pick<
     RetrievalResult,
     'candidateCount' | 'afterAclCount' | 'recoveredTokens' | 'tookMs'

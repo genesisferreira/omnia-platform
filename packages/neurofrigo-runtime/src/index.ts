@@ -21,3 +21,7 @@ export * from './conversation/conversation-state';
 export * from './conversation/follow-up-resolver';
 export * from './conversation/naturalize-text';
 export * from './conversation/dialogue-compose';
+export * from './conversation/dialogue-acts';
+export * from './conversation/user-facts';
+export * from './conversation/action-router';
+export * from './conversation/response-validator';

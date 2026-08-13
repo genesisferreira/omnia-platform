@@ -130,11 +130,16 @@ export function applyStatePatch(
   state: ConversationState,
   patch: Partial<ConversationState>,
 ): ConversationState {
-  return {
+  const merged: ConversationState = {
     ...state,
     ...patch,
     knownFacts: patch.knownFacts ?? state.knownFacts,
+    knownUserFacts: patch.knownUserFacts ?? state.knownUserFacts ?? state.knownFacts,
     unresolvedReferences: patch.unresolvedReferences ?? state.unresolvedReferences,
+    resolvedReferences:
+      patch.resolvedReferences === undefined
+        ? state.resolvedReferences || {}
+        : { ...(state.resolvedReferences || {}), ...patch.resolvedReferences },
     commercialContext:
       patch.commercialContext === undefined
         ? state.commercialContext
@@ -143,7 +148,23 @@ export function applyStatePatch(
       patch.engineeringContext === undefined
         ? state.engineeringContext
         : { ...(state.engineeringContext || {}), ...(patch.engineeringContext || {}) },
+    contactData:
+      patch.contactData === undefined
+        ? state.contactData
+        : { ...(state.contactData || {}), ...(patch.contactData || {}) },
   };
+  // Keep semantic aliases in sync
+  if (merged.activeEntity && !merged.currentEntity) merged.currentEntity = merged.activeEntity;
+  if (merged.selectedCourse && !merged.currentCourse) merged.currentCourse = merged.selectedCourse;
+  if (merged.selectedCompany && !merged.currentCompany)
+    merged.currentCompany = merged.selectedCompany;
+  if (merged.userExperienceYears != null && merged.experienceYears == null) {
+    merged.experienceYears = merged.userExperienceYears;
+  }
+  if (merged.experienceYears != null && merged.userExperienceYears == null) {
+    merged.userExperienceYears = merged.experienceYears;
+  }
+  return merged;
 }
 
 export function pendingOfferFromOptions(

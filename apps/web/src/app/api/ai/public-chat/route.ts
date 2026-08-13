@@ -12,6 +12,12 @@ export const dynamic = 'force-dynamic';
 const ANON_COOKIE = 'omnia_ai_anon';
 const ANON_MAX_AGE = 60 * 60 * 24 * 7;
 
+/** Human chat: generous per anonymous session. Abuse: tighter per validated IP. */
+const HUMAN_CHAT_MAX = 120;
+const HUMAN_CHAT_WINDOW_MS = 15 * 60 * 1000;
+const ABUSE_IP_MAX = 60;
+const ABUSE_IP_WINDOW_MS = 5 * 60 * 1000;
+
 function readAnonId(request: Request): string | null {
   const cookie = request.headers.get('cookie') || '';
   const match = cookie.match(new RegExp(`(?:^|;\\s*)${ANON_COOKIE}=([^;]+)`));
@@ -36,6 +42,24 @@ function withAnonCookie(response: NextResponse, anonId: string, isNew: boolean):
     maxAge: ANON_MAX_AGE,
   });
   return response;
+}
+
+function rateLimitedResponse(retryAfterSeconds?: number): NextResponse {
+  const seconds = Math.max(1, retryAfterSeconds || 60);
+  const body = {
+    ok: false,
+    error: 'RATE_LIMITED',
+    message:
+      'Você enviou várias mensagens em pouco tempo. Aguarde alguns instantes e tente novamente.',
+    retryAfterSeconds: seconds,
+  };
+  return NextResponse.json(body, {
+    status: 429,
+    headers: {
+      'Retry-After': String(seconds),
+      'Cache-Control': 'no-store',
+    },
+  });
 }
 
 /**
@@ -76,22 +100,35 @@ export async function POST(request: Request) {
     );
   }
 
+  // Resolve anon id BEFORE rate limit so legitimate multi-turn uses session key.
+  const anon = ensureAnonId(request);
   const ip = clientIpFromHeaders(request.headers);
-  const rate = await checkRateLimit({
-    scope: 'ai-public-chat',
-    subjects: [{ value: `ip:${ip}` }],
-    max: 30,
-    windowMs: 15 * 60 * 1000,
+
+  // Dual policy: session (human) + IP (abuse). Both must pass.
+  const human = await checkRateLimit({
+    scope: 'ai-public-chat-human',
+    subjects: [{ value: `anon:${anon.id}`, hash: true }],
+    max: HUMAN_CHAT_MAX,
+    windowMs: HUMAN_CHAT_WINDOW_MS,
     onRedisUnavailable: 'fail-closed',
   });
-  if (!rate.allowed) {
-    return NextResponse.json(
-      { ok: false, error: rate.reason === 'redis_unavailable' ? 'UNAVAILABLE' : 'RATE_LIMITED' },
-      { status: rate.reason === 'redis_unavailable' ? 503 : 429 },
-    );
+  if (!human.allowed) {
+    const response = rateLimitedResponse(human.retryAfterSeconds);
+    return withAnonCookie(response, anon.id, anon.isNew);
   }
 
-  const anon = ensureAnonId(request);
+  const abuse = await checkRateLimit({
+    scope: 'ai-public-chat-abuse',
+    subjects: [{ value: `ip:${ip || 'unknown'}` }],
+    max: ABUSE_IP_MAX,
+    windowMs: ABUSE_IP_WINDOW_MS,
+    onRedisUnavailable: 'fail-closed',
+  });
+  if (!abuse.allowed) {
+    const response = rateLimitedResponse(abuse.retryAfterSeconds);
+    return withAnonCookie(response, anon.id, anon.isNew);
+  }
+
   const result = await fetchAiPublicChat({
     question,
     anonymousSessionId: anon.id,
@@ -102,7 +139,15 @@ export async function POST(request: Request) {
 
   if (!result.ok) {
     const response = NextResponse.json(
-      { ok: false, error: result.error, data: result.data },
+      {
+        ok: false,
+        error: result.error,
+        message:
+          result.error === 'RATE_LIMITED'
+            ? 'Você enviou várias mensagens em pouco tempo. Aguarde alguns instantes e tente novamente.'
+            : undefined,
+        data: result.data,
+      },
       { status: result.status },
     );
     return withAnonCookie(response, anon.id, anon.isNew);

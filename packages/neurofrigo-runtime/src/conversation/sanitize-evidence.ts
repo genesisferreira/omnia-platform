@@ -8,7 +8,7 @@ const INTERNAL_MARKERS = [
 ];
 
 /**
- * Strip fixture markers / chunk IDs / RAG internals from evidence text.
+ * Strip fixture markers / chunk IDs / RAG internals / document headings from evidence.
  */
 export function sanitizeEvidenceText(text: string): string {
   let out = String(text || '');
@@ -16,7 +16,9 @@ export function sanitizeEvidenceText(text: string): string {
     out = out.replace(re, ' ');
   }
   out = out
-    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/^#{1,6}\s*[^\n]*/gm, '')
+    .replace(/##\s*Prop[oó]sito[^\n]*/gi, '')
+    .replace(/Omnia Frigo Holding\s+A\s+Omnia Frigo Holding/gi, 'A Omnia Frigo Holding')
     .replace(/^\s*[-*•]\s+/gm, '')
     .replace(/\s+/g, ' ')
     .trim();
@@ -28,6 +30,10 @@ export function looksLikeInternalLeak(text: string): boolean {
     /EPIC16_PUBLIC/i.test(text) ||
     /\[chunk:\d+/i.test(text) ||
     /Pontos principais do material/i.test(text) ||
-    /\b(RAG|Citations|Routing|Vector Search|PromptBuilder|Policy Engine)\b/.test(text)
+    /^#{1,6}\s/m.test(text) ||
+    /##\s*Prop[oó]sito/i.test(text) ||
+    /\b(RAG|Citations|Routing|Vector Search|PromptBuilder|Policy Engine)\b/.test(text) ||
+    /J[aá] apresentei o panorama/i.test(text) ||
+    /Para n[aã]o repetir o que j[aá] mostrei/i.test(text)
   );
 }

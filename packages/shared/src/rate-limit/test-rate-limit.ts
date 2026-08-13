@@ -153,6 +153,34 @@ const run = async (): Promise<void> => {
     assert.ok((blocked.retryAfterSeconds ?? 0) >= 1);
   });
 
+  await test('R6 public chat: human session budget stays open while abuse IP trips', async () => {
+    resetRateLimitMemoryForTests();
+    const human = { value: `anon:session-${Date.now()}`, hash: true as const };
+    for (let i = 0; i < 50; i++) {
+      const d = await checkRateLimit({
+        scope: 'ai-public-chat-human',
+        subjects: [human],
+        max: 120,
+        windowMs: 15 * 60 * 1000,
+      });
+      assert.equal(d.allowed, true);
+    }
+    let abuseBlocked = false;
+    for (let i = 0; i < 70; i++) {
+      const d = await checkRateLimit({
+        scope: 'ai-public-chat-abuse',
+        subjects: [{ value: 'ip:203.0.113.50' }],
+        max: 60,
+        windowMs: 5 * 60 * 1000,
+      });
+      if (!d.allowed) {
+        abuseBlocked = true;
+        break;
+      }
+    }
+    assert.equal(abuseBlocked, true);
+  });
+
   console.log(`\n${passed} testes OK (rate-limit)`);
 };
 

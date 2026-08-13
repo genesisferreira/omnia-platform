@@ -199,9 +199,22 @@ export function AiChatWorkspace({
                 },
           ),
         });
-        const json = (await res.json()) as { ok?: boolean; data?: AiChatData; error?: string };
+        const json = (await res.json()) as {
+          ok?: boolean;
+          data?: AiChatData;
+          error?: string;
+          message?: string;
+          retryAfterSeconds?: number;
+        };
         if (!res.ok || !json.ok || !json.data) {
-          setError(json.error || 'Falha ao consultar a IA');
+          if (res.status === 429 || json.error === 'RATE_LIMITED') {
+            setError(
+              json.message ||
+                'Você enviou várias mensagens em pouco tempo. Aguarde alguns instantes e tente novamente.',
+            );
+          } else {
+            setError(json.error || 'Falha ao consultar a IA');
+          }
           return;
         }
         setSessionId(json.data.sessionId);
