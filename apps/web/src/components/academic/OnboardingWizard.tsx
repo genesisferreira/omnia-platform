@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@omnia/ui';
@@ -76,7 +77,7 @@ export function OnboardingWizard(props: { initial: Onboarding }) {
           <p>{state.result.summary}</p>
           <p className="text-sm text-muted-foreground">{state.result.nextAction}</p>
           <Button asChild>
-            <a href="/aluno">Ir para meus cursos</a>
+            <Link href="/aluno">Ir para meus cursos</Link>
           </Button>
         </CardContent>
       </Card>

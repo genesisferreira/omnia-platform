@@ -56,7 +56,6 @@ const PROGRESS = 'lms-lesson-progress' as CollectionSlug;
 const CERTS = 'lms-certificates' as CollectionSlug;
 const ASSESSMENTS = 'lms-assessments' as CollectionSlug;
 const COMPANIES = 'companies' as CollectionSlug;
-const QUESTIONS = 'lms-questions' as CollectionSlug;
 
 type Rec = Record<string, unknown>;
 
@@ -242,7 +241,6 @@ export async function getOnboarding(payload: Payload, auth: LmsAuthContext) {
 
 function humanizeFromState(row: Rec) {
   const estimates = (rec(row.assessmentState).estimates as DomainEstimate[]) || [];
-  const overall = overallTechnicalLevel(estimates);
   const ranked = [...estimates].sort((a, b) => b.score - a.score);
   const goals = rec(row.goals);
   const goalList = Array.isArray(goals.goals) ? (goals.goals as string[]) : [];
