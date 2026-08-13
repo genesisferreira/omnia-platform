@@ -322,12 +322,10 @@ export class NeurofrigoRuntime {
           pendingOffer: eng.pendingOffer,
           lastAssistantText: text,
           contactTarget: resolved.state.contactTarget || 'technical',
-          responsibleCompany:
-            resolved.state.responsibleCompany || 'Renovação Refrigeração',
+          responsibleCompany: resolved.state.responsibleCompany || 'Renovação Refrigeração',
         }),
         dialogueIntent: 'engineering_troubleshooting',
-        justification:
-          'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
+        justification: 'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
         previousAnswers,
       });
     }
