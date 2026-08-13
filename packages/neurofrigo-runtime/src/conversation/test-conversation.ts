@@ -205,4 +205,39 @@ describe('conversation experience r4', () => {
     assert.match(answer.text, /Fundamentos/);
     assert.ok((answer.suggestedActions?.length ?? 0) >= 1);
   });
+
+  it('company routing answers without retrieval dump', async () => {
+    let searched = false;
+    const retrieval: RetrievalPort = {
+      async search() {
+        searched = true;
+        return {
+          query: '',
+          tookMs: 0,
+          provider: 't',
+          model: 't',
+          dimensions: 1,
+          filters: {},
+          results: [],
+          recoveredTokens: 0,
+          candidateCount: 0,
+          afterAclCount: 0,
+        } satisfies RetrievalResult;
+      },
+    };
+    const answer = await new NeurofrigoRuntime({
+      retrieval,
+      llm: new GroundedExtractiveProvider(),
+    }).ask({
+      question: 'Preciso montar uma câmara frigorífica.',
+      assistantKey: 'concierge',
+      channel: 'portal_public',
+      identity: { role: 'anonymous' },
+      course: {},
+    });
+    assert.equal(searched, false);
+    assert.equal(answer.status, 'ok');
+    assert.match(answer.text, /Renovação Refrigeração/i);
+    assert.ok(!/Pontos principais|EPIC16|\[chunk:/i.test(answer.text));
+  });
 });

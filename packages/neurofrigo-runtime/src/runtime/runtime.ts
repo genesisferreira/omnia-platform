@@ -170,6 +170,40 @@ export class NeurofrigoRuntime {
       };
     }
 
+    // Company routing with institutional heuristics (Concierge) — no invention beyond public map.
+    if (
+      (request.channel === 'portal_public' || assistantKey === 'concierge') &&
+      /qual\s+empresa|quem\s+(faz|oferece|cuida|trabalha|instala)|procurar\s+para|c[aâ]mara\s+frigor|projeto\s+de\s+refrigera|montar\s+uma\s+c[aâ]mara/i.test(
+        request.question,
+      )
+    ) {
+      const text = synthesizeConversationalAnswer({
+        question: request.question,
+        evidence: [
+          {
+            text: 'Para projeto, instalação, manutenção ou câmara frigorífica, a empresa a procurar é a Renovação Refrigeração. Para cursos: Fred do Frio ou CTE. Para IA e automação: Neurofrigo Command IA.',
+          },
+        ],
+        intent: intentHint,
+        assistantKey,
+        channel: request.channel,
+        publicCourses,
+        history: request.conversationHistory,
+      });
+      return this.okSynthetic({
+        text,
+        intent: intentHint,
+        started,
+        meta,
+        assistantKey,
+        channel: request.channel,
+        question: request.question,
+        confidence: 0.88,
+        justification:
+          'Orientação institucional pública do ecossistema Omnia sobre qual empresa procurar.',
+      });
+    }
+
     try {
       const retrievalStarted = Date.now();
       const retrieval = await withTimeout(
