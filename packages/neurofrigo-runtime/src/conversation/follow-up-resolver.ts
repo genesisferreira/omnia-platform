@@ -115,19 +115,23 @@ function detectPrimaryIntent(question: string, state: ConversationState): Dialog
   ) {
     return 'engineering_troubleshooting';
   }
+  // Technical/cold-room evidence before commercial — bare "câmara fria" is NOT energy sales.
   if (
-    /supermercado|consumo de energia|loja|reduzir energia|oportunidade|c[aâ]mara fria|gasto aument/i.test(
+    /c[aâ]mara|n[aã]o chega|temperatura|suc[cç][aã]o|descarga|\bpsi\b|diagn|R404|fica em\s*-?\d+|tenho uma c[aâ]mara/i.test(
       q,
-    )
-  ) {
-    return 'commercial_discovery';
-  }
-  if (
-    /c[aâ]mara|n[aã]o chega|temperatura|suc[cç][aã]o|descarga|\bpsi\b|diagn|R404|fica em\s*-?\d+/i.test(
+    ) &&
+    !/consumo de energia|conta de energia|gasto aument|reduzir energia|supermercado|\d+\s*lojas?/i.test(
       q,
     )
   ) {
     return 'engineering_troubleshooting';
+  }
+  if (
+    /supermercado|consumo de energia|conta de energia|loja|reduzir energia|oportunidade|gasto aument|\d+\s*lojas?/i.test(
+      q,
+    )
+  ) {
+    return 'commercial_discovery';
   }
   if (
     /j[aá]\s+trabalho|come[cç]ando|anos?\s+com\s+refrigera|sou iniciante|especializa|comercial|industrial|migrar/i.test(
@@ -456,22 +460,46 @@ export function resolveDialogueTurn(input: {
     dialogueAct === 'HANDOFF_REQUEST'
   ) {
     if (!state.contactTarget && !state.responsibleCompany) {
-      if (
+      const educationGoal = /transition_to_industrial|forma[cç]|educa|curso/i.test(
+        String(state.userGoal || state.conversationGoal || ''),
+      );
+      const educationContext =
         state.currentIntent === 'course_catalog' ||
         state.currentIntent === 'course_recommendation' ||
-        state.selectedCourse ||
-        state.userGoal
-      ) {
+        Boolean(state.selectedCourse) ||
+        (educationGoal &&
+          (state.experienceYears != null ||
+            state.userExperienceYears != null ||
+            Boolean(state.technicalArea)));
+      const commercialContext =
+        state.currentIntent === 'commercial_discovery' ||
+        state.commercialContext?.storeCount != null ||
+        state.commercialContext?.numberOfUnits != null ||
+        state.commercialContext?.pain === 'energy_cost' ||
+        /energy|consumo/i.test(String(state.userGoal || ''));
+      const technicalContext =
+        state.currentIntent === 'engineering_troubleshooting' ||
+        state.currentIntent === 'services' ||
+        Boolean(state.engineeringContext?.symptom) ||
+        state.engineeringContext?.setpointC != null ||
+        state.engineeringContext?.actualTempC != null;
+
+      if (commercialContext && !educationContext) {
+        state = applyStatePatch(state, {
+          contactTarget: 'commercial',
+          responsibleCompany: 'equipe comercial Omnia / Renovação',
+        });
+      } else if (technicalContext && !educationContext) {
+        state = applyStatePatch(state, {
+          contactTarget: 'technical',
+          responsibleCompany: 'Renovação Refrigeração',
+        });
+      } else if (educationContext) {
         state = applyStatePatch(state, {
           contactTarget: 'education',
           responsibleCompany: 'Fred do Frio / CTE',
         });
-      } else if (
-        state.currentIntent === 'commercial_discovery' ||
-        state.commercialContext?.storeCount
-      ) {
-        state = applyStatePatch(state, { contactTarget: 'commercial' });
-      } else if (state.engineeringContext?.symptom || state.currentIntent === 'services') {
+      } else if (technicalContext) {
         state = applyStatePatch(state, {
           contactTarget: 'technical',
           responsibleCompany: 'Renovação Refrigeração',
@@ -552,9 +580,13 @@ export function resolveDialogueTurn(input: {
       currentIntent: 'engineering_troubleshooting',
       engineeringContext: {
         ...(state.engineeringContext || {}),
-        symptom:
-          state.engineeringContext?.symptom ||
-          (/c[aâ]mara|temperatura/i.test(normalized) ? normalized : null),
+        symptom: /n[aã]o chega|temperatura|sintoma|fica em|setpoint|psi|R404/i.test(normalized)
+          ? normalized
+          : state.engineeringContext?.symptom ||
+            (/c[aâ]mara|temperatura/i.test(normalized) ? normalized : null),
+        equipment:
+          state.engineeringContext?.equipment ||
+          (/c[aâ]mara/i.test(normalized) ? 'cold_room' : null),
       },
     });
     return {

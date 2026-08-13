@@ -300,12 +300,7 @@ export class NeurofrigoRuntime {
       });
     }
 
-    if (
-      resolved.dialogueIntent === 'engineering_troubleshooting' &&
-      (resolved.decision === 'NEEDS_CLARIFICATION' ||
-        resolved.state.engineeringContext?.suctionPsi != null ||
-        resolved.state.engineeringContext?.dischargePsi != null)
-    ) {
+    if (resolved.dialogueIntent === 'engineering_troubleshooting') {
       const eng = composeDialogueAnswer({
         dialogueIntent: 'engineering_troubleshooting',
         state: resolved.state,
@@ -326,9 +321,13 @@ export class NeurofrigoRuntime {
           currentIntent: 'engineering_troubleshooting',
           pendingOffer: eng.pendingOffer,
           lastAssistantText: text,
+          contactTarget: resolved.state.contactTarget || 'technical',
+          responsibleCompany:
+            resolved.state.responsibleCompany || 'Renovação Refrigeração',
         }),
         dialogueIntent: 'engineering_troubleshooting',
-        justification: 'Diagnóstico de engenharia multi-turn com pedido/uso de dados do usuário.',
+        justification:
+          'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
         previousAnswers,
       });
     }

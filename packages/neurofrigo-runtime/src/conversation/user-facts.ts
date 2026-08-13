@@ -95,7 +95,15 @@ export function extractAndApplyUserFacts(
     facts.push(`numberOfUnits=${n}`);
   }
 
-  if (/todas t[eê]m c[aâ]mara|c[aâ]mara fria|c[aâ]maras? frias?/i.test(q)) {
+  // Commercial cold-room fact: "todas têm…" or plural rooms while already in commercial qualification.
+  if (
+    /todas t[eê]m c[aâ]mara/i.test(q) ||
+    (/c[aâ]maras?\s+frias?/i.test(q) &&
+      (next.commercialContext?.storeCount != null ||
+        next.commercialContext?.numberOfUnits != null ||
+        next.commercialContext?.pain === 'energy_cost' ||
+        next.currentIntent === 'commercial_discovery'))
+  ) {
     next = applyStatePatch(next, {
       commercialContext: {
         ...(next.commercialContext || {}),
@@ -103,6 +111,33 @@ export function extractAndApplyUserFacts(
       },
     });
     facts.push('hasColdRooms=true');
+  }
+
+  if (
+    /tenho uma c[aâ]mara|uma c[aâ]mara fria|c[aâ]mara frigor|\bc[aâ]mara fria\b/i.test(q) &&
+    next.currentIntent !== 'commercial_discovery' &&
+    next.commercialContext?.storeCount == null &&
+    next.commercialContext?.pain !== 'energy_cost'
+  ) {
+    next = applyStatePatch(next, {
+      engineeringContext: {
+        ...(next.engineeringContext || {}),
+        equipment: next.engineeringContext?.equipment || 'cold_room',
+        symptom: next.engineeringContext?.symptom || q,
+      },
+    });
+    facts.push('equipment=cold_room');
+  }
+
+  if (/n[aã]o chega|n[aã]o atinge|fora de temperatura|demora a esfriar/i.test(q)) {
+    next = applyStatePatch(next, {
+      engineeringContext: {
+        ...(next.engineeringContext || {}),
+        equipment: next.engineeringContext?.equipment || 'cold_room',
+        symptom: q,
+      },
+    });
+    facts.push('symptom=temp_not_reaching');
   }
 
   if (/consumo|energia|conta de energia|gasto aument/i.test(q)) {

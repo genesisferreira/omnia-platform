@@ -248,16 +248,23 @@ describe('EPIC 16 R6 conversational intelligence', () => {
       state: t1.state,
       assistantKey: 'concierge',
     });
+    assert.equal(t2.answer.dialogueIntent, 'engineering_troubleshooting');
+    assert.ok(/câmara|Renovação|temperatura/i.test(t2.answer.text));
+    assert.ok(!/reduzir consumo de energia/i.test(t2.answer.text));
     const t3 = await turn(runtime, 'ela não chega na temperatura', {
       history: t2.history,
       state: t2.state,
     });
+    assert.ok(/câmara|temperatura|Renovação|sintoma/i.test(t3.answer.text));
+    assert.ok(!/reduzir consumo de energia/i.test(t3.answer.text));
     // Concierge may route to engineering intent in dialogue layer; contact should still work
     const t4 = await turn(runtime, 'quero falar com alguém', {
       history: t3.history,
       state: t3.state,
     });
     assert.equal(t4.answer.dialogueIntent, 'contact_handoff');
+    assert.ok(/Renovação|t[eé]cnic|equipe/i.test(t4.answer.text));
+    assert.ok(!/Fred do Frio|CTE \(forma/i.test(t4.answer.text));
     const t5 = await turn(runtime, 'quero um contato', {
       history: t4.history,
       state: t4.state,
@@ -365,6 +372,8 @@ describe('EPIC 16 R6 conversational intelligence', () => {
       channel: 'portal_chat',
     });
     assert.equal(t4.answer.dialogueIntent, 'contact_handoff');
+    assert.ok(/comercial|Renovação|equipe/i.test(t4.answer.text));
+    assert.ok(!/Fred do Frio \/ CTE \(forma/i.test(t4.answer.text));
   });
 
   it('Engineering multi-turn keeps measurements and e depois', async () => {

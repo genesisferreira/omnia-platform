@@ -169,6 +169,7 @@ export type ConversationState = {
     setpointC?: number | null;
     actualTempC?: number | null;
     nextStep?: string | null;
+    equipment?: string | null;
   } | null;
   tutorConcept: string | null;
   contactData: {

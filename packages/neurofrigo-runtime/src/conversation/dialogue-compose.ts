@@ -468,13 +468,24 @@ function composeCommercial(state: ConversationState): {
       topic: 'commercial_discovery',
     };
   }
+  if (/energy|consumo|energia/i.test(String(pain || state.userGoal || ''))) {
+    return {
+      text: [
+        'Entendi o objetivo de reduzir consumo de energia.',
+        '',
+        'É uma única instalação ou vocês têm mais unidades/lojas?',
+      ].join('\n'),
+      pendingOffer: null,
+      topic: 'commercial_discovery',
+    };
+  }
   return {
     text: [
-      'Entendi o objetivo de reduzir consumo de energia.',
+      'Entendi. Para eu direcionar melhor o time certo:',
       '',
-      'É uma única instalação ou vocês têm mais unidades/lojas?',
+      'O foco é reduzir consumo de energia, resolver um problema em câmara/instalação, ou avaliar modernização com monitoramento/IA?',
     ].join('\n'),
-    pendingOffer: null,
+    pendingOffer: pendingOfferFromOptions(['compare_options', 'contact_handoff'], 'choice'),
     topic: 'commercial_discovery',
   };
 }
@@ -554,6 +565,40 @@ function composeEngineering(state: ConversationState): {
         .filter(Boolean)
         .join('\n'),
       pendingOffer: pendingOfferFromOptions(['continue_diagnosis'], 'question'),
+      topic: 'engineering_troubleshooting',
+    };
+  }
+
+  // Early technical discovery when almost no measurements yet (Concierge-safe routing).
+  if (
+    missing.length >= 4 &&
+    (eng.equipment || /c[aâ]mara|temperatura/i.test(String(eng.symptom || '')))
+  ) {
+    const notReaching = /n[aã]o chega|n[aã]o atinge|fora de temperatura/i.test(
+      String(eng.symptom || ''),
+    );
+    if (notReaching) {
+      return {
+        text: [
+          'Anotei o sintoma: a câmara **não chega na temperatura**.',
+          '',
+          'No Concierge eu faço a descoberta e o encaminhamento — sem substituir o diagnóstico de engenharia.',
+          'A referência técnica no ecossistema é a **Renovação Refrigeração**.',
+          '',
+          'Quer que eu prepare o contato com a equipe técnica agora?',
+        ].join('\n'),
+        pendingOffer: pendingOfferFromOptions(['contact_handoff', 'continue_diagnosis'], 'choice'),
+        topic: 'engineering_troubleshooting',
+      };
+    }
+    return {
+      text: [
+        'Entendi que você tem uma câmara fria no cenário.',
+        '',
+        'Posso te direcionar à **Renovação Refrigeração** para atendimento técnico.',
+        'O que acontece com ela — não chega na temperatura, oscila, ou você quer serviço/projeto?',
+      ].join('\n'),
+      pendingOffer: pendingOfferFromOptions(['contact_handoff', 'continue_diagnosis'], 'choice'),
       topic: 'engineering_troubleshooting',
     };
   }

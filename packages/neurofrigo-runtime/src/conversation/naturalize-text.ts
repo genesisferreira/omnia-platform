@@ -95,6 +95,20 @@ export function applyRepetitionControl(input: {
   const maxSim = Math.max(...prev.map((p) => jaccardSimilarity(input.candidate, p)));
   if (maxSim < 0.72) return input.candidate;
 
+  // Engineering / technical discovery: never collapse to a generic menu — keep progression.
+  if (/engineering/i.test(String(input.dialogueIntent || ''))) {
+    if (maxSim < 0.92) return input.candidate;
+    const lines = input.candidate
+      .split(/\n+/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+    const novel = lines.filter((l) => jaccardSimilarity(l, prev[prev.length - 1] || '') < 0.55);
+    if (novel.length) {
+      return novel.join('\n');
+    }
+    return input.candidate;
+  }
+
   // Prefer progressive continuation without meta commentary.
   if (input.dialogueIntent === 'services') {
     return [
