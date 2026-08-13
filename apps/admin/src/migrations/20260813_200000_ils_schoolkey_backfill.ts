@@ -3,8 +3,8 @@ import { sql } from '@payloadcms/db-postgres';
 
 /**
  * ILS V1.1 — schoolKey backfill versionado.
- * Só preenche com evidência (brandTheme/slug/owner/course). NULL restante = legacy/unknown.
- * Não inventa escola.
+ * Cada collection tem ENUM próprio; copia via literal, nunca enum→enum.
+ * NULL restante = legacy/unknown. Não inventa escola.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -30,46 +30,66 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   `);
 
   await db.execute(sql`
-    UPDATE "courses" AS c
-    SET "school_key" = co."school_key"
-    FROM "companies" AS co
-    WHERE c."owner_company_id" = co."id"
-      AND c."school_key" IS NULL
-      AND co."school_key" IS NOT NULL
+    UPDATE "courses"
+    SET "school_key" = 'fred-do-frio'
+    WHERE "school_key" IS NULL
+      AND (
+        "slug" = 'fundamentos-refrigeracao-industrial'
+        OR "owner_company_id" IN (
+          SELECT "id" FROM "companies" WHERE "school_key" = 'fred-do-frio'
+        )
+      )
   `);
 
   await db.execute(sql`
     UPDATE "courses"
+    SET "school_key" = 'cte'
+    WHERE "school_key" IS NULL
+      AND "owner_company_id" IN (
+        SELECT "id" FROM "companies" WHERE "school_key" = 'cte'
+      )
+  `);
+
+  await db.execute(sql`
+    UPDATE "lms_classes"
     SET "school_key" = 'fred-do-frio'
     WHERE "school_key" IS NULL
-      AND "slug" = 'fundamentos-refrigeracao-industrial'
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'fred-do-frio')
   `);
 
   await db.execute(sql`
-    UPDATE "lms_classes" AS cl
-    SET "school_key" = c."school_key"
-    FROM "courses" AS c
-    WHERE cl."course_id" = c."id"
-      AND cl."school_key" IS NULL
-      AND c."school_key" IS NOT NULL
+    UPDATE "lms_classes"
+    SET "school_key" = 'cte'
+    WHERE "school_key" IS NULL
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'cte')
   `);
 
   await db.execute(sql`
-    UPDATE "lms_enrollments" AS e
-    SET "school_key" = c."school_key"
-    FROM "courses" AS c
-    WHERE e."course_id" = c."id"
-      AND e."school_key" IS NULL
-      AND c."school_key" IS NOT NULL
+    UPDATE "lms_enrollments"
+    SET "school_key" = 'fred-do-frio'
+    WHERE "school_key" IS NULL
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'fred-do-frio')
   `);
 
   await db.execute(sql`
-    UPDATE "lms_certificates" AS cert
-    SET "school_key" = c."school_key"
-    FROM "courses" AS c
-    WHERE cert."course_id" = c."id"
-      AND cert."school_key" IS NULL
-      AND c."school_key" IS NOT NULL
+    UPDATE "lms_enrollments"
+    SET "school_key" = 'cte'
+    WHERE "school_key" IS NULL
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'cte')
+  `);
+
+  await db.execute(sql`
+    UPDATE "lms_certificates"
+    SET "school_key" = 'fred-do-frio'
+    WHERE "school_key" IS NULL
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'fred-do-frio')
+  `);
+
+  await db.execute(sql`
+    UPDATE "lms_certificates"
+    SET "school_key" = 'cte'
+    WHERE "school_key" IS NULL
+      AND "course_id" IN (SELECT "id" FROM "courses" WHERE "school_key" = 'cte')
   `);
 
   await db.execute(sql`
@@ -80,7 +100,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'fred-do-frio'
       )
   `);
@@ -93,7 +113,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'cte'
       )
   `);
@@ -106,7 +126,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'fred-do-frio'
       )
   `);
@@ -119,7 +139,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'cte'
       )
   `);
@@ -132,7 +152,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'fred-do-frio'
       )
   `);
@@ -145,7 +165,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'cte'
       )
   `);
@@ -158,7 +178,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'fred-do-frio'
       )
   `);
@@ -171,7 +191,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
         SELECT "student_id" FROM "lms_enrollments"
         WHERE "school_key" IS NOT NULL AND "status" <> 'cancelled'
         GROUP BY "student_id"
-        HAVING COUNT(DISTINCT "school_key") = 1
+        HAVING COUNT(DISTINCT CAST("school_key" AS text)) = 1
            AND MIN(CAST("school_key" AS text)) = 'cte'
       )
   `);
