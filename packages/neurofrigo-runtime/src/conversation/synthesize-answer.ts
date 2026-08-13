@@ -73,10 +73,7 @@ function formatCourseLine(c: PublicCourseFact): string {
   const head = bits.join(' · ');
   const desc = c.shortDescription?.trim();
   const provider = c.providerHint?.trim();
-  const tail = [
-    desc || null,
-    provider ? `Oferecido no ecossistema por ${provider}.` : null,
-  ]
+  const tail = [desc || null, provider ? `Oferecido no ecossistema por ${provider}.` : null]
     .filter(Boolean)
     .join(' ');
   return `- ${head}${tail ? ` — ${tail}` : ''}`;
@@ -136,7 +133,9 @@ export function synthesizeConversationalAnswer(input: {
     if (/iniciante|melhor/i.test(question)) {
       if (courses.length) {
         const beginner =
-          courses.find((c) => /inician|fundament|b[aá]sic|intro/i.test(`${c.title} ${c.level} ${c.shortDescription}`)) ||
+          courses.find((c) =>
+            /inician|fundament|b[aá]sic|intro/i.test(`${c.title} ${c.level} ${c.shortDescription}`),
+          ) ||
           courses.find((c) => /beginner|b[aá]sic|fundament/i.test(String(c.level || ''))) ||
           courses[0]!;
         return [
@@ -171,7 +170,9 @@ export function synthesizeConversationalAnswer(input: {
     const lead =
       evidenceSentences.find((s) => /omnia frigo holding|hub integrador/i.test(s)) ||
       evidenceSentences[0];
-    const companies = evidenceSentences.find((s) => /renova[cç]|fred do frio|cte|neurofrigo/i.test(s));
+    const companies = evidenceSentences.find((s) =>
+      /renova[cç]|fred do frio|cte|neurofrigo/i.test(s),
+    );
     return [
       lead ||
         'A Omnia Frigo Holding é o hub integrador do ecossistema de refrigeração que une tradição, educação e inteligência artificial aplicada.',

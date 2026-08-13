@@ -46,8 +46,7 @@ describe('conversation experience r4', () => {
   });
 
   it('sanitizes evidence and detects leaks', () => {
-    const raw =
-      'EPIC16_PUBLIC_INSTITUTIONAL_V1 # Omnia Frigo Holding é o hub. [chunk:191]';
+    const raw = 'EPIC16_PUBLIC_INSTITUTIONAL_V1 # Omnia Frigo Holding é o hub. [chunk:191]';
     const clean = sanitizeEvidenceText(raw);
     assert.ok(!/EPIC16/i.test(clean));
     assert.ok(!/chunk:/i.test(clean));

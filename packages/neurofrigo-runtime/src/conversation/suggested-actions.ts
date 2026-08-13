@@ -41,7 +41,10 @@ export function buildSuggestedActions(input: {
     }
     if (key === 'tutor') {
       return uniq([
-        { label: 'Explicar conceitos relacionados', question: 'Quais conceitos relacionados estão no material?' },
+        {
+          label: 'Explicar conceitos relacionados',
+          question: 'Quais conceitos relacionados estão no material?',
+        },
         { label: 'Resumir a aula', question: 'Resuma o que é mais importante nesta aula.' },
       ]);
     }
@@ -66,12 +69,18 @@ export function buildSuggestedActions(input: {
     if (key === 'engineering') {
       return uniq([
         { label: 'Iniciar diagnóstico', question: 'Como estruturar um diagnóstico técnico?' },
-        { label: 'Comparar alternativas', question: 'Quais critérios usar para comparar soluções?' },
+        {
+          label: 'Comparar alternativas',
+          question: 'Quais critérios usar para comparar soluções?',
+        },
       ]);
     }
     if (key === 'commercial') {
       return uniq([
-        { label: 'Estruturar necessidade', question: 'Como estruturar minha necessidade comercial?' },
+        {
+          label: 'Estruturar necessidade',
+          question: 'Como estruturar minha necessidade comercial?',
+        },
         { label: 'Ver soluções', question: 'Quais soluções a Omnia possui para refrigeração?' },
       ]);
     }
@@ -121,7 +130,10 @@ export function buildSuggestedActions(input: {
           label: 'Continuar diagnóstico',
           question: 'Quais dados de pressão e temperatura você precisa para continuar?',
         },
-        { label: 'Comparar alternativas', question: 'Pode comparar as duas alternativas técnicas?' },
+        {
+          label: 'Comparar alternativas',
+          question: 'Pode comparar as duas alternativas técnicas?',
+        },
       ]);
     }
     return uniq([

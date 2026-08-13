@@ -267,6 +267,9 @@ describe('neurofrigo-runtime experience v2', () => {
       /informação pública/i,
     );
     assert.match(resolveNotFoundMessage({ assistantKey: 'engineering' }), /base técnica/i);
-    assert.match(resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }), /desta aula|autorizado/i);
+    assert.match(
+      resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }),
+      /desta aula|autorizado/i,
+    );
   });
 });

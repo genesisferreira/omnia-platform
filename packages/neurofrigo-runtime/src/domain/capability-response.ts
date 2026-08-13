@@ -92,7 +92,8 @@ function capabilityPresentation(
         'encontrar a empresa ou formação mais adequada ao seu objetivo',
         'obter informações institucionais sobre a Omnia Frigo Holding',
       ],
-      close: 'Pergunte sobre cursos, serviços ou o ecossistema — respondo com base nas informações públicas autorizadas.',
+      close:
+        'Pergunte sobre cursos, serviços ou o ecossistema — respondo com base nas informações públicas autorizadas.',
     };
   }
   if (key === 'tutor') {
@@ -105,7 +106,8 @@ function capabilityPresentation(
         'criar exercícios simples para verificar compreensão',
         'montar um plano de estudo a partir do que está publicado',
       ],
-      close: 'Traga a dúvida da aula atual — explico de forma clara e ancorada no material autorizado.',
+      close:
+        'Traga a dúvida da aula atual — explico de forma clara e ancorada no material autorizado.',
     };
   }
   if (key === 'commercial') {
@@ -131,7 +133,8 @@ function capabilityPresentation(
         'comparar alternativas técnicas com critérios claros',
         'pedir os dados críticos quando faltarem para um diagnóstico seguro',
       ],
-      close: 'Descreva o sistema ou o sintoma — avanço com evidência e perguntas de diagnóstico quando necessário.',
+      close:
+        'Descreva o sistema ou o sintoma — avanço com evidência e perguntas de diagnóstico quando necessário.',
     };
   }
   return {

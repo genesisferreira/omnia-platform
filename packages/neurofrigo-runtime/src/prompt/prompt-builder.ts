@@ -42,7 +42,9 @@ export class PromptBuilder implements PromptBuilderPort {
       -Math.max(0, input.limits.maxHistoryTurns),
     );
 
-    const assistantLine = input.assistantKey ? `Assistente: ${input.assistantKey}` : 'Assistente: omnia';
+    const assistantLine = input.assistantKey
+      ? `Assistente: ${input.assistantKey}`
+      : 'Assistente: omnia';
     const system = `${this.baseSystem}\n\n${assistantLine}\nIntenção detectada: ${intent}.\n${intentSystemAddon(intent)}`;
 
     const contextBlock = [

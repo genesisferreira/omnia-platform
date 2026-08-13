@@ -1,8 +1,4 @@
-import type {
-  RuntimeAnswer,
-  RuntimeRequest,
-  GuardrailLimits,
-} from '../domain/types';
+import type { RuntimeAnswer, RuntimeRequest, GuardrailLimits } from '../domain/types';
 import { DEFAULT_GUARDRAIL_LIMITS } from '../domain/types';
 import { buildCapabilityAnswer, isCapabilityQuestion } from '../domain/capability-response';
 import { ContextBuilder } from '../context/context-builder';
@@ -524,7 +520,9 @@ function humanExplainability(input: {
     input.channel === 'portal_public' || (input.assistantKey || '').toLowerCase() === 'concierge';
   if (isPublic) {
     return `Esta resposta foi elaborada com base em conteúdos institucionais públicos da Omnia Frigo${
-      input.sourceCount ? ` (${input.sourceCount} trecho${input.sourceCount > 1 ? 's' : ''} autorizado${input.sourceCount > 1 ? 's' : ''})` : ''
+      input.sourceCount
+        ? ` (${input.sourceCount} trecho${input.sourceCount > 1 ? 's' : ''} autorizado${input.sourceCount > 1 ? 's' : ''})`
+        : ''
     } e nas informações disponíveis para este assistente.`;
   }
   if ((input.assistantKey || '').toLowerCase() === 'tutor') {
