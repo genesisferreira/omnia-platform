@@ -28,6 +28,26 @@ export function resolvePageAiContext(pathname: string): AskAiContext {
     return ctx;
   }
 
+  if (path === '/aluno/onboarding' || path.startsWith('/aluno/onboarding/')) {
+    ctx.portalArea = 'onboarding';
+    return ctx;
+  }
+
+  if (path === '/aluno' || path.startsWith('/aluno/')) {
+    ctx.portalArea = 'student';
+    const courseMatch = path.match(/^\/aluno\/cursos\/([^/]+)(?:\/aula\/([^/]+))?/);
+    if (courseMatch?.[1]) {
+      ctx.courseTitle = decodeURIComponent(courseMatch[1]);
+      if (courseMatch[2]) ctx.lessonTitle = decodeURIComponent(courseMatch[2]);
+    }
+    return ctx;
+  }
+
+  if (path === '/professor' || path.startsWith('/professor/')) {
+    ctx.portalArea = 'teacher';
+    return ctx;
+  }
+
   const publicCourse = path.match(/^\/cursos\/([^/]+)(?:\/aula\/([^/]+))?/);
   if (publicCourse?.[1]) {
     ctx.portalArea = 'courses';
@@ -49,7 +69,20 @@ export function contextLabel(ctx: AskAiContext): string {
   if (ctx.courseTitle) return `Curso · ${ctx.courseTitle}`;
   if (ctx.courseId) return `Curso #${ctx.courseId}`;
   if (ctx.portalArea === 'ai_command_center') return 'Central de Inteligência';
-  if (ctx.portalArea === 'lms') return 'Área LMS';
+  if (ctx.portalArea === 'onboarding') return 'Boas-vindas';
+  if (ctx.portalArea === 'student') return 'Área do aluno';
+  if (ctx.portalArea === 'teacher') return 'Área do professor';
+  if (ctx.portalArea === 'lms') return 'LMS legado';
   if (ctx.portalArea === 'companies') return 'Empresas';
   return 'Portal Omnia';
+}
+
+export function isAcademicNativePath(pathname: string): boolean {
+  const path = pathname || '';
+  return (
+    path === '/aluno' ||
+    path.startsWith('/aluno/') ||
+    path === '/professor' ||
+    path.startsWith('/professor/')
+  );
 }

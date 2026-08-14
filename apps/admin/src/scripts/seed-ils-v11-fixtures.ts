@@ -402,6 +402,9 @@ async function main() {
     studentId: string | number,
     schoolKey: 'fred-do-frio' | 'cte',
   ) {
+    const forceReset = ['1', 'true', 'yes'].includes(
+      String(process.env.OMNIA_ILS_RESET_ONBOARDING || '').toLowerCase(),
+    );
     const found = await payload.find({
       collection: 'ils-onboarding',
       where: { student: { equals: studentId } },
@@ -410,16 +413,32 @@ async function main() {
     });
     if (found.docs[0]) {
       const status = String(found.docs[0].status || '');
-      if (status === 'COMPLETED' || status === 'EXEMPTED' || status === 'IN_PROGRESS') {
+      if (
+        !forceReset &&
+        (status === 'COMPLETED' || status === 'EXEMPTED' || status === 'IN_PROGRESS')
+      ) {
         return found.docs[0];
       }
-      await payload.update({
+      return payload.update({
         collection: 'ils-onboarding',
         id: found.docs[0].id,
-        data: { schoolKey },
+        data: forceReset
+          ? {
+              schoolKey,
+              status: 'NOT_STARTED',
+              currentStep: 'explanation',
+              pcar: null,
+              goals: null,
+              assessmentState: null,
+              consentId: null,
+              completedAt: null,
+              exemptedBy: null,
+              exemptedReason: null,
+              exemptedAt: null,
+            }
+          : { schoolKey },
         overrideAccess: true,
       });
-      return found.docs[0];
     }
     return payload.create({
       collection: 'ils-onboarding',

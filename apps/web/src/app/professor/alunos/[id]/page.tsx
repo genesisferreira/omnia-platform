@@ -99,11 +99,34 @@ export default async function ProfessorStudent360Page({
           {s.evidence}
         </p>
       ))}
-      <ul className="list-disc pl-5 text-sm">
-        {(p.learning?.recommendations || []).map((r) => (
-          <li key={r}>{r}</li>
-        ))}
-      </ul>
+      <Card>
+        <CardHeader>
+          <CardTitle>Exercícios / reforços sugeridos</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {(p.learning?.interventionsList || []).map((item, idx) => (
+            <div key={`${item.action}-${idx}`} className="rounded-md border border-border px-3 py-2">
+              <p className="font-medium">{item.action}</p>
+              <p className="text-muted-foreground">
+                Por quê: {item.reason || 'reforço pedagógico baseado no perfil do aluno'}
+              </p>
+            </div>
+          ))}
+          {!p.learning?.interventionsList?.length ? (
+            <p className="text-muted-foreground">
+              Nenhum exercício personalizado sugerido ainda. Use a intervenção abaixo quando
+              precisar registrar um reforço.
+            </p>
+          ) : null}
+          {(p.learning?.recommendations || []).length ? (
+            <ul className="list-disc pl-5 text-muted-foreground">
+              {p.learning?.recommendations?.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          ) : null}
+        </CardContent>
+      </Card>
       <InterventionForm studentId={Number(id)} />
       <Button asChild variant="outline">
         <Link href="/professor/notas">Ver tentativas</Link>

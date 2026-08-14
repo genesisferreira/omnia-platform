@@ -271,5 +271,9 @@ describe('neurofrigo-runtime experience v2', () => {
       resolveNotFoundMessage({ assistantKey: 'tutor', courseId: '1' }),
       /desta aula|autorizado/i,
     );
+    assert.match(
+      resolveNotFoundMessage({ portalArea: 'onboarding', assistantKey: 'tutor' }),
+      /boas-vindas|experiência|objetivo/i,
+    );
   });
 });

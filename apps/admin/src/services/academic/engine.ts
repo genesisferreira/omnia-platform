@@ -110,6 +110,12 @@ async function assertCanTeachCourse(
   const course = await getDoc(payload, COURSES, courseId, 0);
   if (!course) throw new AcademicError(404, 'NOT_FOUND', 'Curso não encontrado');
   if (isAdmin(auth)) return course;
+  const { resolveActorSchool } = await import('../ils/engine');
+  const actorSchool = await resolveActorSchool(payload, auth);
+  const courseSchool = resolveSchoolKey({ schoolKey: course.schoolKey });
+  if (actorSchool && courseSchool && actorSchool !== courseSchool) {
+    throw new AcademicError(403, 'CROSS_SCHOOL', 'Curso de outra escola');
+  }
   if (relId(course.instructor) === userIdNum(auth)) return course;
   const classes = await findDocs(payload, CLASSES, {
     and: [{ course: { equals: courseId } }, { instructor: { equals: userIdNum(auth) } }],
@@ -793,6 +799,256 @@ export async function createLesson(
   return { id: created.id, slug: created.slug };
 }
 
+export async function listTeachingLessons(
+  payload: Payload,
+  auth: LmsAuthContext,
+  opts?: { status?: 'draft' | 'published' | 'all'; courseId?: number | null },
+) {
+  if (!isTeacher(auth)) throw new AcademicError(403, 'FORBIDDEN', 'Área do professor');
+  const courses = await teachingCourses(payload, auth);
+  const courseIds = courses.map((c) => Number(c.id));
+  if (!courseIds.length) return [];
+  const filteredIds =
+    opts?.courseId && courseIds.includes(opts.courseId) ? [opts.courseId] : courseIds;
+  const modules = await findDocs(payload, MODULES, { course: { in: filteredIds } }, 0, 500);
+  const moduleIds = modules.map((m) => Number(m.id));
+  if (!moduleIds.length) return [];
+  const lessons = await findDocs(payload, LESSONS, { module: { in: moduleIds } }, 0, 500);
+  const status = opts?.status || 'all';
+  return lessons
+    .filter((lesson) => {
+      if (status === 'draft') return lesson.published !== true;
+      if (status === 'published') return lesson.published === true;
+      return true;
+    })
+    .map((lesson) => {
+      const mod = modules.find((m) => Number(m.id) === relId(lesson.module));
+      const course = courses.find((c) => Number(c.id) === relId(mod?.course));
+      return {
+        id: Number(lesson.id),
+        title: lesson.title,
+        slug: lesson.slug,
+        type: lesson.type,
+        published: lesson.published === true,
+        updatedAt: lesson.updatedAt ?? null,
+        moduleId: relId(lesson.module),
+        moduleTitle: mod?.title ?? null,
+        courseId: course ? Number(course.id) : null,
+        courseTitle: course?.title ?? null,
+        schoolKey: course?.schoolKey ?? null,
+      };
+    })
+    .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+}
+
+export async function getTeachingCourse(payload: Payload, auth: LmsAuthContext, courseId: number) {
+  const course = await assertCanTeachCourse(payload, auth, courseId);
+  const modules = await findDocs(payload, MODULES, { course: { equals: courseId } }, 0, 100);
+  const moduleIds = modules.map((m) => Number(m.id));
+  const lessons =
+    moduleIds.length === 0
+      ? []
+      : await findDocs(payload, LESSONS, { module: { in: moduleIds } }, 0, 500);
+  return {
+    course: serializeCourse(course),
+    modules: modules
+      .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+      .map((m) => ({
+        id: Number(m.id),
+        title: m.title,
+        slug: m.slug,
+        order: m.order ?? 0,
+        lessons: lessons
+          .filter((l) => relId(l.module) === Number(m.id))
+          .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+          .map((l) => ({
+            id: Number(l.id),
+            title: l.title,
+            slug: l.slug,
+            type: l.type,
+            published: l.published === true,
+            order: l.order ?? 0,
+          })),
+      })),
+  };
+}
+
+export async function createTeachingCourse(
+  payload: Payload,
+  auth: LmsAuthContext,
+  input: {
+    title: string;
+    slug: string;
+    shortDescription?: string;
+    level?: string;
+    estimatedHours?: number;
+    schoolKey?: string | null;
+  },
+) {
+  if (!isTeacher(auth)) throw new AcademicError(403, 'FORBIDDEN', 'Área do professor');
+  const { resolveActorSchool } = await import('../ils/engine');
+  const actorSchool = await resolveActorSchool(payload, auth);
+  const requested = resolveSchoolKey({ schoolKey: input.schoolKey });
+  if (!isAdmin(auth)) {
+    if (!actorSchool) {
+      throw new AcademicError(403, 'FORBIDDEN', 'Professor sem escola atribuída');
+    }
+    if (requested && requested !== actorSchool) {
+      throw new AcademicError(403, 'CROSS_SCHOOL', 'Não é permitido criar curso em outra escola');
+    }
+  }
+  const school = (isAdmin(auth) ? requested : actorSchool) || requested;
+  if (!school) {
+    throw new AcademicError(400, 'BAD_REQUEST', 'schoolKey obrigatório (fred-do-frio ou cte)');
+  }
+  const created = rec(
+    await payload.create({
+      collection: COURSES,
+      data: {
+        title: input.title,
+        slug: input.slug,
+        shortDescription: input.shortDescription ?? null,
+        level: input.level ?? 'beginner',
+        estimatedHours: input.estimatedHours ?? null,
+        instructor: userIdNum(auth),
+        schoolKey: school,
+        status: 'draft',
+      } as never,
+      overrideAccess: true,
+    }),
+  );
+  return serializeCourse(created);
+}
+
+export async function createTeachingModule(
+  payload: Payload,
+  auth: LmsAuthContext,
+  input: { courseId: number; title: string; slug: string; order?: number },
+) {
+  await assertCanTeachCourse(payload, auth, input.courseId);
+  const created = rec(
+    await payload.create({
+      collection: MODULES,
+      data: {
+        title: input.title,
+        slug: input.slug,
+        course: input.courseId,
+        order: input.order ?? 99,
+      } as never,
+      overrideAccess: true,
+    }),
+  );
+  return { id: Number(created.id), title: created.title, slug: created.slug };
+}
+
+export async function publishTeachingLesson(
+  payload: Payload,
+  auth: LmsAuthContext,
+  lessonId: number,
+) {
+  const lesson = await getDoc(payload, LESSONS, lessonId, 1);
+  if (!lesson) throw new AcademicError(404, 'NOT_FOUND', 'Aula não encontrada');
+  const mod = rec(lesson.module);
+  const courseId = relId(mod.course);
+  if (!courseId) throw new AcademicError(400, 'BAD_REQUEST', 'Aula sem curso');
+  await assertCanTeachCourse(payload, auth, courseId);
+  const updated = rec(
+    await payload.update({
+      collection: LESSONS,
+      id: lessonId,
+      data: { published: true } as never,
+      overrideAccess: true,
+    }),
+  );
+  return { id: Number(updated.id), published: true };
+}
+
+export async function attachLessonAsset(
+  payload: Payload,
+  auth: LmsAuthContext,
+  input: {
+    lessonId: number;
+    mediaId: number;
+    assetType: string;
+    title?: string;
+    order?: number;
+  },
+) {
+  const lesson = await getDoc(payload, LESSONS, input.lessonId, 1);
+  if (!lesson) throw new AcademicError(404, 'NOT_FOUND', 'Aula não encontrada');
+  const mod = rec(lesson.module);
+  const courseId = relId(mod.course);
+  if (!courseId) throw new AcademicError(400, 'BAD_REQUEST', 'Aula sem curso');
+  await assertCanTeachCourse(payload, auth, courseId);
+  const created = rec(
+    await payload.create({
+      collection: 'lesson-assets' as CollectionSlug,
+      data: {
+        lesson: input.lessonId,
+        media: input.mediaId,
+        assetType: input.assetType || 'attachment',
+        title: input.title || lesson.title,
+        order: input.order ?? 0,
+      } as never,
+      overrideAccess: true,
+    }),
+  );
+  return { id: Number(created.id), lessonId: input.lessonId };
+}
+
+export async function createLiveClass(
+  payload: Payload,
+  auth: LmsAuthContext,
+  input: {
+    title: string;
+    courseId: number;
+    classId?: number | null;
+    startsAt: string;
+    endsAt?: string | null;
+    meetingUrl: string;
+    platform?: string | null;
+    instructions?: string | null;
+    joinWindowMinutes?: number | null;
+  },
+) {
+  const course = await assertCanTeachCourse(payload, auth, input.courseId);
+  if (!input.meetingUrl.startsWith('https://')) {
+    throw new AcademicError(400, 'BAD_REQUEST', 'meetingUrl deve ser https://');
+  }
+  const created = rec(
+    await payload.create({
+      collection: EVENTS,
+      data: {
+        title: input.title,
+        type: 'class_session',
+        course: input.courseId,
+        classRef: input.classId ?? null,
+        instructor: userIdNum(auth),
+        ownerCompany: relId(course.ownerCompany),
+        startsAt: input.startsAt,
+        endsAt: input.endsAt ?? null,
+        meetingUrl: input.meetingUrl,
+        platform: input.platform ?? null,
+        instructions: input.instructions ?? null,
+        joinWindowMinutes: input.joinWindowMinutes ?? 15,
+      } as never,
+      overrideAccess: true,
+    }),
+  );
+  return serializeEvent(created);
+}
+
+export async function listLiveClasses(payload: Payload, auth: LmsAuthContext) {
+  if (!isTeacher(auth)) throw new AcademicError(403, 'FORBIDDEN', 'Área do professor');
+  const where: Where = {
+    and: [
+      { type: { equals: 'class_session' } },
+      ...(isAdmin(auth) ? [] : [{ instructor: { equals: userIdNum(auth) } }]),
+    ],
+  };
+  return (await findDocs(payload, EVENTS, where, 0, 100)).map(serializeEvent);
+}
+
 export async function createQuestion(
   payload: Payload,
   auth: LmsAuthContext,
@@ -1221,6 +1477,17 @@ function serializeCert(row: Rec) {
 }
 
 function serializeEvent(row: Rec) {
+  const startsAt = row.startsAt ? new Date(String(row.startsAt)).getTime() : 0;
+  const endsAt = row.endsAt ? new Date(String(row.endsAt)).getTime() : startsAt + 60 * 60 * 1000;
+  const windowMin = Number(row.joinWindowMinutes ?? 15);
+  const now = Date.now();
+  const joinOpen = startsAt - windowMin * 60_000;
+  const canJoin =
+    row.type === 'class_session' &&
+    typeof row.meetingUrl === 'string' &&
+    row.meetingUrl.startsWith('https://') &&
+    now >= joinOpen &&
+    now <= endsAt + windowMin * 60_000;
   return {
     id: row.id,
     title: row.title,
@@ -1228,6 +1495,13 @@ function serializeEvent(row: Rec) {
     startsAt: row.startsAt,
     endsAt: row.endsAt ?? null,
     courseId: relId(row.course),
+    classId: relId(row.classRef),
+    meetingUrl: typeof row.meetingUrl === 'string' ? row.meetingUrl : null,
+    platform: typeof row.platform === 'string' ? row.platform : null,
+    instructions: typeof row.instructions === 'string' ? row.instructions : null,
+    recordingUrl: typeof row.recordingUrl === 'string' ? row.recordingUrl : null,
+    joinWindowMinutes: windowMin,
+    canJoin,
   };
 }
 

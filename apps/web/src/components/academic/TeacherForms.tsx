@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@omnia/ui';
 
@@ -12,6 +13,7 @@ export function CreateLessonForm({
     modules?: Array<{ id: number; title: string }>;
   }>;
 }) {
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [courseId, setCourseId] = useState(courses[0]?.id ? String(courses[0].id) : '');
@@ -24,6 +26,10 @@ export function CreateLessonForm({
   const modules = selected?.modules ?? [];
 
   async function submit() {
+    if (!modules.length) {
+      setMsg('Crie um módulo neste curso antes de salvar a aula.');
+      return;
+    }
     const res = await fetch('/api/academic/teaching/lessons', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -35,7 +41,13 @@ export function CreateLessonForm({
         type,
       }),
     });
-    setMsg(res.ok ? 'Aula salva em rascunho.' : 'Não foi possível criar a aula.');
+    if (res.ok) {
+      setMsg('Aula salva em rascunho.');
+      router.push('/professor/rascunhos');
+      router.refresh();
+      return;
+    }
+    setMsg('Não foi possível criar a aula.');
   }
 
   return (
@@ -99,6 +111,245 @@ export function CreateLessonForm({
       </select>
       <Button type="submit" size="sm">
         Salvar rascunho
+      </Button>
+      {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
+    </form>
+  );
+}
+
+export function PublishLessonButton({ lessonId }: { lessonId: number }) {
+  const router = useRouter();
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={async () => {
+        const res = await fetch(`/api/academic/teaching/lessons/${lessonId}/publish`, {
+          method: 'POST',
+        });
+        setMsg(res.ok ? 'Publicada.' : 'Falha ao publicar.');
+        if (res.ok) router.refresh();
+      }}
+    >
+      {msg || 'Publicar'}
+    </Button>
+  );
+}
+
+export function CreateModuleForm({ courseId }: { courseId: number }) {
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <form
+      className="space-y-3 rounded-md border border-border p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const res = await fetch('/api/academic/teaching/modules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseId,
+            title,
+            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          }),
+        });
+        setMsg(res.ok ? 'Módulo criado.' : 'Não foi possível criar o módulo.');
+        if (res.ok) {
+          setTitle('');
+          router.refresh();
+        }
+      }}
+    >
+      <h2 className="text-sm font-semibold">Novo módulo</h2>
+      <input
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="Título do módulo"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <Button type="submit" size="sm">
+        Criar módulo
+      </Button>
+      {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
+    </form>
+  );
+}
+
+export function CreateCourseForm() {
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <form
+      className="space-y-3 rounded-md border border-border p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const res = await fetch('/api/academic/teaching/courses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            shortDescription: 'Rascunho criado no portal professor.',
+          }),
+        });
+        const data = (await res.json().catch(() => null)) as
+          | { id?: number; course?: { id?: number }; ok?: boolean }
+          | null;
+        const id = data?.id ?? data?.course?.id;
+        if (res.ok && id) {
+          setMsg('Curso criado em rascunho.');
+          router.push(`/professor/cursos/${id}`);
+          router.refresh();
+          return;
+        }
+        setMsg('Não foi possível criar o curso (verifique escola e permissões).');
+      }}
+    >
+      <h2 className="text-sm font-semibold">Novo curso (rascunho)</h2>
+      <p className="text-xs text-muted-foreground">
+        O curso fica vinculado automaticamente à sua escola (Fred ≠ CTE).
+      </p>
+      <input
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="Título"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <Button type="submit" size="sm">
+        Criar curso
+      </Button>
+      {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
+    </form>
+  );
+}
+
+export function AttachAssetForm({ lessonId }: { lessonId: number }) {
+  const router = useRouter();
+  const [mediaId, setMediaId] = useState('');
+  const [assetType, setAssetType] = useState('video');
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <form
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const res = await fetch(`/api/academic/teaching/lessons/${lessonId}/assets`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mediaId: Number(mediaId),
+            assetType,
+            title: `Material ${assetType}`,
+          }),
+        });
+        setMsg(res.ok ? 'Anexo salvo.' : 'Falha ao anexar (informe ID da Media).');
+        if (res.ok) router.refresh();
+      }}
+    >
+      <input
+        className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs"
+        placeholder="Media ID"
+        value={mediaId}
+        onChange={(e) => setMediaId(e.target.value)}
+        required
+      />
+      <select
+        className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+        value={assetType}
+        onChange={(e) => setAssetType(e.target.value)}
+      >
+        <option value="video">Vídeo</option>
+        <option value="pdf">PDF</option>
+        <option value="image">Imagem</option>
+        <option value="attachment">Anexo</option>
+      </select>
+      <Button type="submit" size="sm" variant="outline">
+        Anexar
+      </Button>
+      {msg ? <span className="text-xs text-muted-foreground">{msg}</span> : null}
+    </form>
+  );
+}
+
+export function CreateLiveClassForm({ courses }: { courses: Array<{ id: number; title: string }> }) {
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [courseId, setCourseId] = useState(courses[0]?.id ? String(courses[0].id) : '');
+  const [startsAt, setStartsAt] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
+  const [platform, setPlatform] = useState('Google Meet');
+  const [msg, setMsg] = useState<string | null>(null);
+  return (
+    <form
+      className="space-y-3 rounded-md border border-border p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const res = await fetch('/api/academic/teaching/live-classes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            courseId: Number(courseId),
+            startsAt: new Date(startsAt).toISOString(),
+            meetingUrl,
+            platform,
+            joinWindowMinutes: 15,
+          }),
+        });
+        setMsg(res.ok ? 'Aula ao vivo agendada.' : 'Não foi possível agendar.');
+        if (res.ok) {
+          setTitle('');
+          router.refresh();
+        }
+      }}
+    >
+      <h2 className="text-sm font-semibold">Agendar aula ao vivo</h2>
+      <input
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="Título"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <select
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        value={courseId}
+        onChange={(e) => setCourseId(e.target.value)}
+      >
+        {courses.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.title}
+          </option>
+        ))}
+      </select>
+      <input
+        type="datetime-local"
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        value={startsAt}
+        onChange={(e) => setStartsAt(e.target.value)}
+        required
+      />
+      <input
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="https://meet.google.com/..."
+        value={meetingUrl}
+        onChange={(e) => setMeetingUrl(e.target.value)}
+        required
+      />
+      <input
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="Plataforma"
+        value={platform}
+        onChange={(e) => setPlatform(e.target.value)}
+      />
+      <Button type="submit" size="sm">
+        Agendar
       </Button>
       {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
     </form>

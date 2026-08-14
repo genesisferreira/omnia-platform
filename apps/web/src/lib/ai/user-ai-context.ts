@@ -25,6 +25,8 @@ export function buildUserAiContext(
     currentPortalArea?: string | null;
     tenantId?: string | null;
     companyId?: string | null;
+    schoolKey?: string | null;
+    schoolName?: string | null;
   } = {},
 ): UserAiContext {
   const role = mapPortalRoleToAiRole(user.role);
@@ -40,5 +42,7 @@ export function buildUserAiContext(
     companyId: extras.companyId ?? null,
     currentPortalArea: extras.currentPortalArea ?? null,
     currentRoute: extras.currentRoute ?? null,
+    schoolKey: extras.schoolKey ?? null,
+    schoolName: extras.schoolName ?? null,
   };
 }

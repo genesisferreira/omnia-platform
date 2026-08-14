@@ -33,6 +33,7 @@ import * as migration_20260813_120000_lms_product_completion from './20260813_12
 import * as migration_20260813_180000_intelligent_learning_v1 from './20260813_180000_intelligent_learning_v1';
 import * as migration_20260813_190000_ils_locked_rels from './20260813_190000_ils_locked_rels';
 import * as migration_20260813_200000_ils_schoolkey_backfill from './20260813_200000_ils_schoolkey_backfill';
+import * as migration_20260814_120000_lms_live_class_fields from './20260814_120000_lms_live_class_fields';
 
 export const migrations = [
   {
@@ -209,5 +210,10 @@ export const migrations = [
     up: migration_20260813_200000_ils_schoolkey_backfill.up,
     down: migration_20260813_200000_ils_schoolkey_backfill.down,
     name: '20260813_200000_ils_schoolkey_backfill',
+  },
+  {
+    up: migration_20260814_120000_lms_live_class_fields.up,
+    down: migration_20260814_120000_lms_live_class_fields.down,
+    name: '20260814_120000_lms_live_class_fields',
   },
 ];

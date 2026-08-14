@@ -17,6 +17,9 @@ export type AiChatWorkspaceProps = {
   onAssistantIdChange?: (id: string) => void;
   suggestions?: string[];
   className?: string;
+  /** Academic shells: hide agent selector; auto-route only. */
+  hideAssistantPicker?: boolean;
+  brandLabel?: string;
 };
 
 const DEFAULT_SUGGESTIONS = [
@@ -73,6 +76,8 @@ export function AiChatWorkspace({
   onAssistantIdChange,
   suggestions,
   className,
+  hideAssistantPicker = false,
+  brandLabel,
 }: AiChatWorkspaceProps) {
   const isPublic = mode === 'public';
   const resolvedSuggestions = suggestions ?? (isPublic ? PUBLIC_SUGGESTIONS : DEFAULT_SUGGESTIONS);
@@ -285,6 +290,15 @@ export function AiChatWorkspace({
                 Atendimento institucional — cursos, serviços e refrigeração.
               </p>
             </div>
+          ) : hideAssistantPicker ? (
+            <div>
+              <p className="text-sm font-medium">{brandLabel || 'Assistente'}</p>
+              <p
+                className={`text-xs ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-500'}`}
+              >
+                Acompanhamento adaptado ao seu contexto. Você não precisa escolher agentes.
+              </p>
+            </div>
           ) : (
             <>
               <label className="block text-sm font-medium" htmlFor={`${baseId}-assistant`}>
@@ -311,15 +325,17 @@ export function AiChatWorkspace({
               </select>
             </>
           )}
-          <p
-            className={`text-sm ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-400'}`}
-          >
-            {assistantId === 'auto'
-              ? 'A Omnia AI escolhe o especialista adequado conforme sua identidade e contexto.'
-              : selected?.description ||
-                'Assistente Omnia — respostas ancoradas no material autorizado.'}
-          </p>
-          {specialistLabel ? (
+          {!hideAssistantPicker ? (
+            <p
+              className={`text-sm ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-400'}`}
+            >
+              {assistantId === 'auto'
+                ? 'A Omnia AI escolhe o especialista adequado conforme sua identidade e contexto.'
+                : selected?.description ||
+                  'Assistente Omnia — respostas ancoradas no material autorizado.'}
+            </p>
+          ) : null}
+          {specialistLabel && !hideAssistantPicker ? (
             <p
               className={`text-xs ${variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-500'}`}
             >

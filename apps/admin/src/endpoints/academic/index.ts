@@ -3,28 +3,36 @@ import type { Endpoint, PayloadRequest } from 'payload';
 import { requireLmsAuth, type LmsAuthContext } from '../../services/lms/auth-context';
 import {
   AcademicError,
+  attachLessonAsset,
   closeAssessment,
   completeLesson,
   createAssessment,
   createClass,
   createLesson,
+  createLiveClass,
   createQuestion,
+  createTeachingCourse,
+  createTeachingModule,
   enrollStudent,
   getEnrolledCourse,
   getEnrolledLesson,
+  getTeachingCourse,
   gradeManual,
   listCalendar,
   listCertificates,
   listClassRoster,
+  listLiveClasses,
   listMyCourses,
   listNotifications,
   listPendingAttempts,
   listStudentAssessments,
   listStudentGrades,
   listTeachingAssessments,
+  listTeachingLessons,
   markNotificationRead,
   openAssessment,
   publishGrade,
+  publishTeachingLesson,
   startAttempt,
   studentDashboard,
   submitAttempt,
@@ -344,6 +352,195 @@ const teachingLessonEp: Endpoint = {
   },
 };
 
+const teachingLessonsListEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons',
+  method: 'get',
+  handler: async (req) => {
+    try {
+      const url = new URL(req.url || '', 'http://local');
+      const statusRaw = url.searchParams.get('status');
+      const status =
+        statusRaw === 'draft' || statusRaw === 'published' || statusRaw === 'all'
+          ? statusRaw
+          : 'draft';
+      const courseId = num(url.searchParams.get('courseId'));
+      return ok({
+        items: await listTeachingLessons(req.payload, auth(req), {
+          status,
+          courseId,
+        }),
+      });
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingCourseDetailEp: Endpoint = {
+  path: '/omnia/academic/teaching/courses/:id',
+  method: 'get',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      return ok(await getTeachingCourse(req.payload, auth(req), id));
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingCourseCreateEp: Endpoint = {
+  path: '/omnia/academic/teaching/courses',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const b = await readBody(req);
+      if (typeof b.title !== 'string' || typeof b.slug !== 'string') {
+        return json(400, {
+          ok: false,
+          error: { code: 'BAD_REQUEST', message: 'dados incompletos' },
+        });
+      }
+      return ok(
+        await createTeachingCourse(req.payload, auth(req), {
+          title: b.title,
+          slug: b.slug,
+          shortDescription: typeof b.shortDescription === 'string' ? b.shortDescription : undefined,
+          level: typeof b.level === 'string' ? b.level : undefined,
+          estimatedHours: num(b.estimatedHours) || undefined,
+          schoolKey: typeof b.schoolKey === 'string' ? b.schoolKey : null,
+        }),
+        201,
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingModuleCreateEp: Endpoint = {
+  path: '/omnia/academic/teaching/modules',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const b = await readBody(req);
+      const courseId = num(b.courseId);
+      if (!courseId || typeof b.title !== 'string' || typeof b.slug !== 'string') {
+        return json(400, {
+          ok: false,
+          error: { code: 'BAD_REQUEST', message: 'dados incompletos' },
+        });
+      }
+      return ok(
+        await createTeachingModule(req.payload, auth(req), {
+          courseId,
+          title: b.title,
+          slug: b.slug,
+          order: num(b.order) || undefined,
+        }),
+        201,
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingLessonPublishEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons/:id/publish',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      return ok(await publishTeachingLesson(req.payload, auth(req), id));
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingLessonAssetEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons/:id/assets',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      const b = await readBody(req);
+      const mediaId = num(b.mediaId);
+      if (!id || !mediaId) {
+        return json(400, {
+          ok: false,
+          error: { code: 'BAD_REQUEST', message: 'lessonId/mediaId' },
+        });
+      }
+      return ok(
+        await attachLessonAsset(req.payload, auth(req), {
+          lessonId: id,
+          mediaId,
+          assetType: typeof b.assetType === 'string' ? b.assetType : 'attachment',
+          title: typeof b.title === 'string' ? b.title : undefined,
+          order: num(b.order) || undefined,
+        }),
+        201,
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingLiveListEp: Endpoint = {
+  path: '/omnia/academic/teaching/live-classes',
+  method: 'get',
+  handler: async (req) => {
+    try {
+      return ok({ items: await listLiveClasses(req.payload, auth(req)) });
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingLiveCreateEp: Endpoint = {
+  path: '/omnia/academic/teaching/live-classes',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const b = await readBody(req);
+      const courseId = num(b.courseId);
+      if (
+        !courseId ||
+        typeof b.title !== 'string' ||
+        typeof b.startsAt !== 'string' ||
+        typeof b.meetingUrl !== 'string'
+      ) {
+        return json(400, {
+          ok: false,
+          error: { code: 'BAD_REQUEST', message: 'dados incompletos' },
+        });
+      }
+      return ok(
+        await createLiveClass(req.payload, auth(req), {
+          title: b.title,
+          courseId,
+          classId: num(b.classId),
+          startsAt: b.startsAt,
+          endsAt: typeof b.endsAt === 'string' ? b.endsAt : null,
+          meetingUrl: b.meetingUrl,
+          platform: typeof b.platform === 'string' ? b.platform : null,
+          instructions: typeof b.instructions === 'string' ? b.instructions : null,
+          joinWindowMinutes: num(b.joinWindowMinutes) || 15,
+        }),
+        201,
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
 const teachingQuestionEp: Endpoint = {
   path: '/omnia/academic/teaching/questions',
   method: 'post',
@@ -594,7 +791,15 @@ export const academicEndpoints: Endpoint[] = [
   notifReadEp,
   teachingDashEp,
   teachingCoursesEp,
+  teachingCourseDetailEp,
+  teachingCourseCreateEp,
+  teachingModuleCreateEp,
+  teachingLessonsListEp,
   teachingLessonEp,
+  teachingLessonPublishEp,
+  teachingLessonAssetEp,
+  teachingLiveListEp,
+  teachingLiveCreateEp,
   teachingQuestionEp,
   teachingBanksEp,
   teachingAssessmentsListEp,

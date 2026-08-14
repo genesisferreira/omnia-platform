@@ -71,5 +71,39 @@ export const LmsAcademicEvents: CollectionConfig = {
       type: 'date',
       admin: { date: { pickerAppearance: 'dayAndTime' } },
     },
+    {
+      name: 'meetingUrl',
+      type: 'text',
+      label: 'URL da reunião (https)',
+      admin: {
+        description: 'Link externo autorizado (Meet/Zoom/Teams). Sem SDK embutido.',
+        condition: (_, siblingData) => siblingData?.type === 'class_session',
+      },
+    },
+    {
+      name: 'platform',
+      type: 'text',
+      label: 'Plataforma',
+      admin: { condition: (_, siblingData) => siblingData?.type === 'class_session' },
+    },
+    {
+      name: 'instructions',
+      type: 'textarea',
+      label: 'Instruções',
+      admin: { condition: (_, siblingData) => siblingData?.type === 'class_session' },
+    },
+    {
+      name: 'recordingUrl',
+      type: 'text',
+      label: 'URL da gravação',
+      admin: { condition: (_, siblingData) => siblingData?.type === 'class_session' },
+    },
+    {
+      name: 'joinWindowMinutes',
+      type: 'number',
+      defaultValue: 15,
+      label: 'Janela de entrada (minutos)',
+      admin: { condition: (_, siblingData) => siblingData?.type === 'class_session' },
+    },
   ],
 };

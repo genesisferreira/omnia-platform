@@ -119,4 +119,6 @@ export type UserAiContext = {
   companyId?: string | null;
   currentPortalArea?: string | null;
   currentRoute?: string | null;
+  schoolKey?: string | null;
+  schoolName?: string | null;
 };

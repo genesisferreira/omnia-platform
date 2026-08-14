@@ -2,14 +2,20 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
+import { schoolBrand } from '@omnia/intelligent-learning';
 import { AiChatWorkspace } from '@/components/ai/AiChatWorkspace';
 import { useAiExperience } from '@/components/ai/AiExperienceProvider';
+import { isAcademicNativePath } from '@/lib/ai/page-context';
 
 /**
  * Global floating AI Dock — authenticated Command Center session OR public Concierge.
  */
 export function AiDock() {
+  const pathname = usePathname() || '';
+  const academic = isAcademicNativePath(pathname);
+  const onboarding = pathname.startsWith('/aluno/onboarding');
   const {
     authenticated,
     user,
@@ -32,6 +38,24 @@ export function AiDock() {
 
   const isPublic = authenticated === false;
   const ready = authenticated === true || authenticated === false;
+  const hidePicker = academic || onboarding;
+  const brand = schoolBrand(user?.schoolKey);
+  const isStaff =
+    user?.role === 'teacher' ||
+    user?.role === 'instructor' ||
+    user?.role === 'admin' ||
+    user?.role === 'manager';
+  const brandLabel = onboarding
+    ? brand
+      ? `Assistente ${brand.shortName}`
+      : 'Assistente educacional'
+    : brand
+      ? isStaff
+        ? `Assistente ${brand.shortName}`
+        : `Tutor ${brand.shortName}`
+      : isStaff
+        ? 'Assistente da escola'
+        : 'Tutor da escola';
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +76,10 @@ export function AiDock() {
     setTurns([]);
     setAssistantId(isPublic ? 'concierge' : 'auto');
   }, [isPublic, setSessionId, setTurns, setAssistantId]);
+
+  useEffect(() => {
+    if (hidePicker && !isPublic) setAssistantId('auto');
+  }, [hidePicker, isPublic, setAssistantId, pathname]);
 
   if (!ready) return null;
 
@@ -166,10 +194,12 @@ export function AiDock() {
               context={pageContext}
               sessionId={sessionId}
               turns={turns}
-              assistantId={isPublic ? 'concierge' : assistantId}
+              assistantId={isPublic ? 'concierge' : hidePicker ? 'auto' : assistantId}
               onSessionIdChange={setSessionId}
               onTurnsChange={setTurns}
               onAssistantIdChange={setAssistantId}
+              hideAssistantPicker={hidePicker}
+              brandLabel={brandLabel}
               className="h-full border-0"
             />
           </div>

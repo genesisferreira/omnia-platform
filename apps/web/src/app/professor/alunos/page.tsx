@@ -35,6 +35,11 @@ export default async function ProfessorAlunosPage() {
   return (
     <div className="space-y-6">
       <h1 className="font-heading text-2xl font-semibold">Alunos das turmas</h1>
+      {!classes.length ? (
+        <p className="rounded-md border border-dashed border-border px-4 py-8 text-sm text-muted-foreground">
+          Você ainda não possui turmas. Crie uma turma para acompanhar alunos.
+        </p>
+      ) : null}
       {rosters.map(({ cls, students }) => (
         <section key={cls.id} className="space-y-2">
           <h2 className="text-sm font-semibold">{cls.name}</h2>

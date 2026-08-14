@@ -124,6 +124,21 @@ export default async function MinhaContaPage() {
               </Button>
             </CardContent>
           </Card>
+
+          <Card className="border-omnia-deep-blue/10 sm:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg">LMS legado (Moodle)</CardTitle>
+              <CardDescription>
+                Somente para contas com Identity Link legado. A experiência acadêmica nativa é
+                /aluno e /professor.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link href="/lms">Abrir LMS legado (read-only)</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <form action="/api/auth/logout" method="post">

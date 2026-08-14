@@ -15,6 +15,7 @@ export type GuardrailContext = {
   assistantKey?: string | null;
   channel?: string | null;
   courseId?: string | null;
+  portalArea?: string | null;
 };
 
 /** Tokens genéricos que não provam relevância ao conteúdo técnico. */

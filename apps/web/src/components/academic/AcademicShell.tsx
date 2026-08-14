@@ -7,6 +7,7 @@ import { schoolBrand } from '@omnia/intelligent-learning';
 import { Button, cn } from '@omnia/ui';
 
 import { BrandBanner, BrandMark } from '@/components/academic/BrandContext';
+import { useOptionalAiExperience } from '@/components/ai/AiExperienceProvider';
 
 const STUDENT_NAV = [
   { href: '/aluno', label: 'Dashboard', exact: true },
@@ -22,7 +23,9 @@ const STUDENT_NAV = [
 const TEACHER_NAV = [
   { href: '/professor', label: 'Dashboard', exact: true },
   { href: '/professor/cursos', label: 'Meus cursos' },
+  { href: '/professor/rascunhos', label: 'Meus rascunhos' },
   { href: '/professor/conteudo', label: 'Conteúdo' },
+  { href: '/professor/aulas-ao-vivo', label: 'Aulas ao vivo' },
   { href: '/professor/turmas', label: 'Turmas' },
   { href: '/professor/alunos', label: 'Alunos' },
   { href: '/professor/avaliacoes', label: 'Avaliações' },
@@ -43,9 +46,16 @@ export function AcademicShell(props: {
 }) {
   const pathname = usePathname() || '/aluno';
   const [open, setOpen] = useState(false);
+  const ai = useOptionalAiExperience();
   const nav = props.role === 'teacher' ? TEACHER_NAV : STUDENT_NAV;
   const home = props.role === 'teacher' ? '/professor' : '/aluno';
   const brand = schoolBrand(props.schoolKey);
+  const schoolLabel = props.schoolName || brand?.name || 'Escola';
+  const assistantLabel = brand
+    ? props.role === 'teacher'
+      ? `Assistente ${brand.shortName}`
+      : `Tutor ${brand.shortName}`
+    : 'Assistente';
   const sidebarClass = brand
     ? brand.theme === 'fred'
       ? 'bg-emerald-900 text-white'
@@ -57,6 +67,7 @@ export function AcademicShell(props: {
       className="flex min-h-screen overflow-x-hidden bg-lms-surface text-foreground"
       data-school-key={props.schoolKey || ''}
       data-brand-placeholder={brand?.placeholder ? 'true' : 'false'}
+      data-lms-native="true"
     >
       <a
         href="#conteudo-academico"
@@ -80,16 +91,15 @@ export function AcademicShell(props: {
         )}
       >
         <div className="border-b border-white/10 px-4 py-4">
-          <Link href={home} className="block">
+          <Link href={home} className="block" aria-label={`${schoolLabel} — início`}>
             <BrandMark schoolKey={props.schoolKey} />
             <span className="mt-2 block text-sm text-white/80">
-              {props.schoolName || brand?.name || 'Omnia LMS'} ·{' '}
-              {props.role === 'teacher' ? 'professor' : 'aluno'}
+              {schoolLabel} · {props.role === 'teacher' ? 'professor' : 'aluno'}
             </span>
           </Link>
           <p className="mt-1 truncate text-xs text-white/70">{props.userName}</p>
         </div>
-        <nav className="flex-1 space-y-1 p-3" aria-label="Navegação acadêmica">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Navegação acadêmica">
           {nav.map((item) => {
             const active = item.exact
               ? pathname === item.href
@@ -109,14 +119,21 @@ export function AcademicShell(props: {
             );
           })}
         </nav>
-        <div className="border-t border-white/10 p-3 text-xs text-white/60">
-          <Link href="/ia" className="hover:underline">
-            Tutor IA
+        <div className="space-y-2 border-t border-white/10 p-3 text-xs text-white/70">
+          <button
+            type="button"
+            className="block w-full min-h-11 rounded-md bg-white/10 px-3 py-2 text-left font-medium text-white hover:bg-white/15"
+            onClick={() => {
+              setOpen(false);
+              ai?.setOpen(true);
+            }}
+          >
+            {assistantLabel}
+          </button>
+          <Link href="/minha-conta" className="block px-1 hover:underline" onClick={() => setOpen(false)}>
+            Minha conta
           </Link>
-          {' · '}
-          <Link href="/lms" className="hover:underline">
-            LMS Moodle
-          </Link>
+          <p className="px-1 text-[10px] text-white/40">Tecnologia Omnia</p>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
