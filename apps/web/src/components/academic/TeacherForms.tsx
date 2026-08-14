@@ -197,9 +197,11 @@ export function CreateCourseForm() {
             shortDescription: 'Rascunho criado no portal professor.',
           }),
         });
-        const data = (await res.json().catch(() => null)) as
-          | { id?: number; course?: { id?: number }; ok?: boolean }
-          | null;
+        const data = (await res.json().catch(() => null)) as {
+          id?: number;
+          course?: { id?: number };
+          ok?: boolean;
+        } | null;
         const id = data?.id ?? data?.course?.id;
         if (res.ok && id) {
           setMsg('Curso criado em rascunho.');
@@ -277,7 +279,11 @@ export function AttachAssetForm({ lessonId }: { lessonId: number }) {
   );
 }
 
-export function CreateLiveClassForm({ courses }: { courses: Array<{ id: number; title: string }> }) {
+export function CreateLiveClassForm({
+  courses,
+}: {
+  courses: Array<{ id: number; title: string }>;
+}) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [courseId, setCourseId] = useState(courses[0]?.id ? String(courses[0].id) : '');

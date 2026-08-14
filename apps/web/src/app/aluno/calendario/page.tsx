@@ -49,7 +49,9 @@ export default async function AlunoCalendarioPage() {
                     Entrar na aula
                   </a>
                 ) : e.type === 'class_session' ? (
-                  <span className="text-xs text-muted-foreground">Disponível na janela da aula</span>
+                  <span className="text-xs text-muted-foreground">
+                    Disponível na janela da aula
+                  </span>
                 ) : null}
               </div>
             </li>

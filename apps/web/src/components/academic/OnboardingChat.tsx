@@ -80,8 +80,10 @@ export function OnboardingChat(props: { initial: Onboarding }) {
         'Estou começando agora',
       ];
     }
-    if (step === 'goals') return ['Quero melhorar minha qualificação', 'Quero refrigeração comercial'];
-    if (step === 'assessment') return question?.question ? ['Verdadeiro', 'Falso'] : ['Iniciar questões'];
+    if (step === 'goals')
+      return ['Quero melhorar minha qualificação', 'Quero refrigeração comercial'];
+    if (step === 'assessment')
+      return question?.question ? ['Verdadeiro', 'Falso'] : ['Iniciar questões'];
     if (state.academicAllowed) return ['Ir para meus cursos'];
     return [];
   }, [step, question, state.academicAllowed]);

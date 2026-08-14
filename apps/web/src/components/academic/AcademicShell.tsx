@@ -130,7 +130,11 @@ export function AcademicShell(props: {
           >
             {assistantLabel}
           </button>
-          <Link href="/minha-conta" className="block px-1 hover:underline" onClick={() => setOpen(false)}>
+          <Link
+            href="/minha-conta"
+            className="block px-1 hover:underline"
+            onClick={() => setOpen(false)}
+          >
             Minha conta
           </Link>
           <p className="px-1 text-[10px] text-white/40">Tecnologia Omnia</p>

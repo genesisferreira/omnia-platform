@@ -105,7 +105,10 @@ export default async function ProfessorStudent360Page({
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {(p.learning?.interventionsList || []).map((item, idx) => (
-            <div key={`${item.action}-${idx}`} className="rounded-md border border-border px-3 py-2">
+            <div
+              key={`${item.action}-${idx}`}
+              className="rounded-md border border-border px-3 py-2"
+            >
               <p className="font-medium">{item.action}</p>
               <p className="text-muted-foreground">
                 Por quê: {item.reason || 'reforço pedagógico baseado no perfil do aluno'}
