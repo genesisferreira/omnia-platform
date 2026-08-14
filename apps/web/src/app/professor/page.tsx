@@ -57,8 +57,8 @@ export default async function ProfessorDashboardPage() {
         <Link className="underline" href="/professor/notas">
           Corrigir
         </Link>
-        <Link className="underline" href="/ia">
-          IA pedagógica
+        <Link className="underline" href="/professor/inteligencia">
+          Inteligência da turma
         </Link>
       </div>
     </div>

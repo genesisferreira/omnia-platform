@@ -46,8 +46,8 @@ export default async function ProfessorRelatoriosPage() {
             <Link className="block underline" href="/professor/alunos">
               Ver alunos
             </Link>
-            <Link className="block underline" href="/ia">
-              IA pedagógica
+            <Link className="block underline" href="/professor/inteligencia">
+              Inteligência da turma
             </Link>
           </CardContent>
         </Card>

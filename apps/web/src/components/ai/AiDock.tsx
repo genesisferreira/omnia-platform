@@ -134,7 +134,7 @@ export function AiDock() {
               >
                 Entrar
               </Link>
-            ) : (
+            ) : hidePicker ? null : (
               <Link
                 href="/ia"
                 className="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:border-cyan-500/50"

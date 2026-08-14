@@ -46,7 +46,7 @@ export default async function AlunoDashboardPage() {
           </Button>
         ) : null}
         <Button asChild variant="outline">
-          <Link href="/ia">Abrir Tutor IA</Link>
+          <Link href="/aluno/cursos">Ver meus cursos</Link>
         </Button>
         <Button asChild variant="outline">
           <Link href="/cursos">Catálogo</Link>
