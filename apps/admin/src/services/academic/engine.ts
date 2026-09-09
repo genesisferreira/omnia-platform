@@ -1052,6 +1052,7 @@ export async function attachLessonAsset(
   const courseId = relId(mod.course);
   if (!courseId) throw new AcademicError(400, 'BAD_REQUEST', 'Aula sem curso');
   await assertCanTeachCourse(payload, auth, courseId);
+  const course = await getDoc(payload, COURSES, courseId, 0);
   const created = rec(
     await payload.create({
       collection: 'lesson-assets' as CollectionSlug,
@@ -1065,6 +1066,21 @@ export async function attachLessonAsset(
       overrideAccess: true,
     }),
   );
+  if (course) {
+    const school = resolveSchoolKey({ schoolKey: course.schoolKey });
+    await payload
+      .update({
+        collection: 'media' as CollectionSlug,
+        id: input.mediaId,
+        data: {
+          visibility: 'school',
+          schoolKey: school,
+          ownerCompany: relId(course.ownerCompany) ?? undefined,
+        } as never,
+        overrideAccess: true,
+      })
+      .catch(() => null);
+  }
   return { id: Number(created.id), lessonId: input.lessonId };
 }
 

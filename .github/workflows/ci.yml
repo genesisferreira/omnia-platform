@@ -117,6 +117,9 @@ jobs:
       - name: Media staticDir resolution
         run: pnpm --filter @omnia/admin test:media-static-dir
 
+      - name: Media binary ACL policy
+        run: pnpm --filter @omnia/admin test:media-acl
+
       - name: Intelligent Learning System V1
         run: pnpm --filter @omnia/intelligent-learning test && pnpm --filter @omnia/admin test:intelligent-learning
 
