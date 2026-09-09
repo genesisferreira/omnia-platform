@@ -475,7 +475,10 @@ const teachingLessonUpdateEp: Endpoint = {
       return ok(
         await updateTeachingLesson(req.payload, auth(req), id, {
           title: typeof b.title === 'string' ? b.title : undefined,
-          summary: typeof b.summary === 'string' || b.summary === null ? (b.summary as string | null) : undefined,
+          summary:
+            typeof b.summary === 'string' || b.summary === null
+              ? (b.summary as string | null)
+              : undefined,
           content: b.content,
           type: typeof b.type === 'string' ? b.type : undefined,
           externalUrl:

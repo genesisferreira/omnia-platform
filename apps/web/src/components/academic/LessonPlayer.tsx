@@ -182,7 +182,9 @@ function AssetView({ asset }: { asset: Asset }) {
           const text = await res.text();
           if (text.includes('Something went wrong') || text.includes('"errors"')) {
             if (!cancelled) {
-              setMediaError('Material temporariamente indisponível. Tente baixar ou volte mais tarde.');
+              setMediaError(
+                'Material temporariamente indisponível. Tente baixar ou volte mais tarde.',
+              );
             }
             return;
           }

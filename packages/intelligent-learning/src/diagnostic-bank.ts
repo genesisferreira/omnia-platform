@@ -283,8 +283,10 @@ export function gradeDiagnosticAnswer(q: DiagnosticQuestion, raw: unknown): bool
     .toLowerCase();
   const expected = q.correctValue.toLowerCase();
   if (q.type === 'true_false') {
-    const affirmative = value === 'true' || value === 'verdadeiro' || value === '1' || value === 'sim';
-    const negative = value === 'false' || value === 'falso' || value === '0' || value === 'nao' || value === 'não';
+    const affirmative =
+      value === 'true' || value === 'verdadeiro' || value === '1' || value === 'sim';
+    const negative =
+      value === 'false' || value === 'falso' || value === '0' || value === 'nao' || value === 'não';
     if (expected === 'true' || expected === 'verdadeiro') return affirmative;
     if (expected === 'false' || expected === 'falso') return negative;
   }
@@ -292,12 +294,18 @@ export function gradeDiagnosticAnswer(q: DiagnosticQuestion, raw: unknown): bool
 }
 
 /** Garante variedade semântica mínima (anti-regressão do template único). */
-export function assertDiagnosticSemanticVariety(bank: DiagnosticQuestion[] = buildDiagnosticBank()): {
+export function assertDiagnosticSemanticVariety(
+  bank: DiagnosticQuestion[] = buildDiagnosticBank(),
+): {
   ok: boolean;
   uniquePrompts: number;
   total: number;
 } {
   const prompts = bank.map((q) => q.prompt.trim().toLowerCase());
   const unique = new Set(prompts);
-  return { ok: unique.size === prompts.length && prompts.length >= TECHNICAL_DOMAINS.length * 3, uniquePrompts: unique.size, total: prompts.length };
+  return {
+    ok: unique.size === prompts.length && prompts.length >= TECHNICAL_DOMAINS.length * 3,
+    uniquePrompts: unique.size,
+    total: prompts.length,
+  };
 }

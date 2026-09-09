@@ -193,11 +193,8 @@ describe('intelligent learning — adaptive initial assessment', () => {
   });
 
   it('diagnostic bank has unique semantic prompts and real grading', async () => {
-    const {
-      assertDiagnosticSemanticVariety,
-      buildDiagnosticBank,
-      gradeDiagnosticAnswer,
-    } = await import('./diagnostic-bank');
+    const { assertDiagnosticSemanticVariety, buildDiagnosticBank, gradeDiagnosticAnswer } =
+      await import('./diagnostic-bank');
     const bank = buildDiagnosticBank();
     const variety = assertDiagnosticSemanticVariety(bank);
     assert.equal(variety.ok, true);

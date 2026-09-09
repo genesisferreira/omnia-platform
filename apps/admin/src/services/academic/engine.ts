@@ -829,7 +829,8 @@ export async function updateTeachingLesson(
   if (input.summary !== undefined) data.summary = input.summary;
   if (input.content !== undefined) data.content = input.content;
   if (typeof input.type === 'string') data.type = input.type;
-  if (input.externalUrl !== undefined) data.externalUrl = sanitizeLessonExternalUrl(input.externalUrl);
+  if (input.externalUrl !== undefined)
+    data.externalUrl = sanitizeLessonExternalUrl(input.externalUrl);
   if (typeof input.order === 'number') data.order = input.order;
   if (typeof input.published === 'boolean') data.published = input.published;
   const updated = rec(
