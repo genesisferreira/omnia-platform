@@ -27,10 +27,7 @@ export function composeLmsNextStepAnswer(input: {
   const course = input.courseTitle?.trim() || 'seu curso';
 
   if (next) {
-    const lines = [
-      `Seu próximo passo no LMS (${course}) é **${next.title}**.`,
-      next.reason,
-    ];
+    const lines = [`Seu próximo passo no LMS (${course}) é **${next.title}**.`, next.reason];
     if (input.currentLessonTitle) {
       lines.splice(
         1,
@@ -44,7 +41,9 @@ export function composeLmsNextStepAnswer(input: {
     if (review && review.lessonId !== next.lessonId) {
       lines.push(`Se quiser reforçar antes, revise **${review.title}**.`);
     }
-    lines.push('Isso vem do seu progresso autorizado no curso — não de um trecho genérico da aula.');
+    lines.push(
+      'Isso vem do seu progresso autorizado no curso — não de um trecho genérico da aula.',
+    );
     return lines.filter(Boolean).join('\n');
   }
 

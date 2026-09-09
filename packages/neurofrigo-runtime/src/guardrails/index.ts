@@ -79,8 +79,7 @@ export function hasLexicalOverlap(question: string, chunks: CitationResult[]): b
   let hits = 0;
   for (const token of qTokens) {
     const matched =
-      docBlob.includes(token) ||
-      (token.length >= 6 && docBlob.includes(token.slice(0, 6)));
+      docBlob.includes(token) || (token.length >= 6 && docBlob.includes(token.slice(0, 6)));
     if (matched) hits += 1;
   }
   // Require at least one hit; for longer questions require 2+ to avoid

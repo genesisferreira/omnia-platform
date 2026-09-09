@@ -92,7 +92,11 @@ export function scorePassageRelevance(question: string, passageText: string): nu
 
 export const PASSAGE_RELEVANCE_MIN = 0.34;
 
-export function isPassageRelevant(question: string, passageText: string, min = PASSAGE_RELEVANCE_MIN): boolean {
+export function isPassageRelevant(
+  question: string,
+  passageText: string,
+  min = PASSAGE_RELEVANCE_MIN,
+): boolean {
   return scorePassageRelevance(question, passageText) >= min;
 }
 

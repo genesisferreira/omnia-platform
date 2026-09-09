@@ -86,15 +86,37 @@ describe('authorized lesson passages (RC2.4 Tutor quality)', () => {
 
   it('UNSUPPORTED_RELEVANCE_REJECT: XYZ-999 does not ground on condensador', () => {
     const passages = chunkAuthorizedText(CONDENSADOR_BODY, { idPrefix: 'lesson-21' });
-    const q =
-      'Qual a formula secreta do refrigerante XYZ-999 inexistente para resetar ECU?';
+    const q = 'Qual a formula secreta do refrigerante XYZ-999 inexistente para resetar ECU?';
     assert.equal(isPassageRelevant(q, CONDENSADOR_BODY), false);
     const hits = selectRelevantAuthorizedPassages(q, passages);
     assert.equal(hits.length, 0, 'must not reuse condensador passage');
   });
 
   it('does not auto-approve empty significant tokens', () => {
-    assert.equal(hasLexicalOverlap('ok?', [{ text: CONDENSADOR_BODY, score: 1, similarity: 1, chunkId: 'x', tokenEstimate: 1, language: 'pt-BR', tags: [], citation: { knowledgeDocumentId: null, courseId: null, moduleId: null, lessonId: null, learningResourceId: null, chunkId: 'x', page: null, version: null } }]), false);
+    assert.equal(
+      hasLexicalOverlap('ok?', [
+        {
+          text: CONDENSADOR_BODY,
+          score: 1,
+          similarity: 1,
+          chunkId: 'x',
+          tokenEstimate: 1,
+          language: 'pt-BR',
+          tags: [],
+          citation: {
+            knowledgeDocumentId: null,
+            courseId: null,
+            moduleId: null,
+            lessonId: null,
+            learningResourceId: null,
+            chunkId: 'x',
+            page: null,
+            version: null,
+          },
+        },
+      ]),
+      false,
+    );
   });
 
   it('NO_COPY_PASTE_REPETITION: diagnostic questions get distinct synthesis', () => {
@@ -127,7 +149,10 @@ describe('authorized lesson passages (RC2.4 Tutor quality)', () => {
     assert.match(a2.toLowerCase(), /press/);
     assert.notEqual(a1.slice(0, 80), a2.slice(0, 80));
     assert.notEqual(a2.slice(0, 80), a3.slice(0, 80));
-    assert.match(a5.toLowerCase(), /n[aã]o encontrei|suficientemente relacionado|material autorizado/);
+    assert.match(
+      a5.toLowerCase(),
+      /n[aã]o encontrei|suficientemente relacionado|material autorizado/,
+    );
     assert.doesNotMatch(a5.toLowerCase(), /fun[cç][aã]o do condensador/);
   });
 

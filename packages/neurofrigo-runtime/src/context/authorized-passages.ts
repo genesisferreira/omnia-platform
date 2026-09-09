@@ -5,10 +5,7 @@
  */
 import type { CitationResult } from '@omnia/retrieval';
 
-import {
-  PASSAGE_RELEVANCE_MIN,
-  scorePassageRelevance,
-} from './passage-relevance';
+import { PASSAGE_RELEVANCE_MIN, scorePassageRelevance } from './passage-relevance';
 
 export type AuthorizedPassage = {
   id: string;

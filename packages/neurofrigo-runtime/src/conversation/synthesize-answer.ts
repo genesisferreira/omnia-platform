@@ -232,19 +232,22 @@ export function synthesizeConversationalAnswer(input: {
 
   // Tutor pedagogical tone — grounded synthesis, not lead-sentence dump
   if (assistant === 'tutor' || input.intent === 'explanation' || input.intent === 'definition') {
-    const ranked = rankSentencesByRelevance(question, evidenceSentences, PASSAGE_RELEVANCE_MIN * 0.85);
+    const ranked = rankSentencesByRelevance(
+      question,
+      evidenceSentences,
+      PASSAGE_RELEVANCE_MIN * 0.85,
+    );
     if (!ranked.length) {
       return 'Não encontrei no material autorizado desta aula um trecho suficientemente relacionado a essa pergunta. Reformule com o conceito da aula ou avance para o próximo passo no LMS.';
     }
     const primary = ranked[0]!.text;
     const support = ranked.slice(1, 3).map((s) => s.text);
-    const whyLead = /por\s+que|porque|pra\s+que|para\s+que|qual\s+(deve\s+ser\s+)?(o\s+)?primeiro|o\s+que\s+faz/i.test(
-      question,
-    );
+    const whyLead =
+      /por\s+que|porque|pra\s+que|para\s+que|qual\s+(deve\s+ser\s+)?(o\s+)?primeiro|o\s+que\s+faz/i.test(
+        question,
+      );
     const lines = [
-      whyLead
-        ? primary
-        : `Com base no material autorizado da aula: ${primary}`,
+      whyLead ? primary : `Com base no material autorizado da aula: ${primary}`,
       '',
       ...(support.length ? support.map((s) => `- ${s}`) : []),
       '',
