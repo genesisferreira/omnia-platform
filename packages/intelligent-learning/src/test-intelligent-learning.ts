@@ -191,6 +191,32 @@ describe('intelligent learning — adaptive initial assessment', () => {
     assert.equal(overall.label === 'operacional' || overall.label === 'iniciante', true);
     assert.ok(overall.evidenceCount >= 4);
   });
+
+  it('diagnostic bank has unique semantic prompts and real grading', async () => {
+    const {
+      assertDiagnosticSemanticVariety,
+      buildDiagnosticBank,
+      gradeDiagnosticAnswer,
+    } = await import('./diagnostic-bank');
+    const bank = buildDiagnosticBank();
+    const variety = assertDiagnosticSemanticVariety(bank);
+    assert.equal(variety.ok, true);
+    assert.equal(variety.total, TECHNICAL_DOMAINS.length * 3);
+    const falseQ = bank.find((q) => q.correctValue === 'false');
+    assert.ok(falseQ);
+    assert.equal(gradeDiagnosticAnswer(falseQ!, 'verdadeiro'), false);
+    assert.equal(gradeDiagnosticAnswer(falseQ!, 'falso'), true);
+    const trueQ = bank.find((q) => q.correctValue === 'true' && q.difficulty === 1);
+    assert.ok(trueQ);
+    assert.equal(gradeDiagnosticAnswer(trueQ!, 'sim'), true);
+    const afterCorrect = nextAdaptiveQuestion(bank, [
+      { questionId: `${trueQ!.domain}-2`, correct: true },
+    ]);
+    assert.ok(afterCorrect.question);
+    const nextFull = bank.find((q) => q.id === afterCorrect.question!.id);
+    assert.ok(nextFull);
+    assert.notEqual(nextFull!.prompt, trueQ!.prompt);
+  });
 });
 
 describe('intelligent learning — SIPE + competencies + IMT', () => {

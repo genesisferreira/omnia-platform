@@ -346,6 +346,7 @@ export async function getEnrolledLesson(
       type: lesson.type,
       summary: lesson.summary ?? null,
       content: lesson.content ?? null,
+      externalUrl: typeof lesson.externalUrl === 'string' ? lesson.externalUrl : null,
       completed: flat[idx]?.completed ?? false,
     },
     assets: assets.map((a) => ({
@@ -778,9 +779,11 @@ export async function createLesson(
     type?: string;
     summary?: string;
     content?: unknown;
+    externalUrl?: string | null;
   },
 ) {
   await assertCanTeachCourse(payload, auth, input.courseId);
+  const externalUrl = sanitizeLessonExternalUrl(input.externalUrl);
   const created = rec(
     await payload.create({
       collection: LESSONS,
@@ -790,13 +793,81 @@ export async function createLesson(
         module: input.moduleId,
         type: (input.type as 'text' | 'video' | 'pdf' | 'download' | 'external_link') || 'text',
         summary: input.summary ?? null,
+        content: input.content ?? null,
+        externalUrl,
         order: 99,
         published: false,
       } as never,
       overrideAccess: true,
     }),
   );
-  return { id: created.id, slug: created.slug };
+  return { id: created.id, slug: created.slug, externalUrl };
+}
+
+export async function updateTeachingLesson(
+  payload: Payload,
+  auth: LmsAuthContext,
+  lessonId: number,
+  input: {
+    title?: string;
+    summary?: string | null;
+    content?: unknown;
+    type?: string;
+    externalUrl?: string | null;
+    order?: number;
+    published?: boolean;
+  },
+) {
+  const lesson = await getDoc(payload, LESSONS, lessonId, 1);
+  if (!lesson) throw new AcademicError(404, 'NOT_FOUND', 'Aula não encontrada');
+  const moduleDoc = rec(lesson.module);
+  const courseId = relId(moduleDoc.course) ?? relId(lesson.course);
+  if (!courseId) throw new AcademicError(400, 'BAD_REQUEST', 'Aula sem curso');
+  await assertCanTeachCourse(payload, auth, courseId);
+  const data: Record<string, unknown> = {};
+  if (typeof input.title === 'string') data.title = input.title;
+  if (input.summary !== undefined) data.summary = input.summary;
+  if (input.content !== undefined) data.content = input.content;
+  if (typeof input.type === 'string') data.type = input.type;
+  if (input.externalUrl !== undefined) data.externalUrl = sanitizeLessonExternalUrl(input.externalUrl);
+  if (typeof input.order === 'number') data.order = input.order;
+  if (typeof input.published === 'boolean') data.published = input.published;
+  const updated = rec(
+    await payload.update({
+      collection: LESSONS,
+      id: lessonId,
+      data: data as never,
+      overrideAccess: true,
+    }),
+  );
+  return {
+    id: Number(updated.id),
+    slug: updated.slug,
+    published: updated.published === true,
+    externalUrl: typeof updated.externalUrl === 'string' ? updated.externalUrl : null,
+  };
+}
+
+function sanitizeLessonExternalUrl(raw: string | null | undefined): string | null {
+  if (raw == null) return null;
+  const trimmed = String(raw).trim();
+  if (!trimmed) return null;
+  // Bloqueia esquemas perigosos antes do parse (javascript:/data: etc.)
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('file:')) {
+    throw new AcademicError(400, 'BAD_REQUEST', 'URL externa insegura');
+  }
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new AcademicError(400, 'BAD_REQUEST', 'URL externa inválida');
+  }
+  const protocol = url.protocol.toLowerCase();
+  if (protocol !== 'https:' && protocol !== 'http:') {
+    throw new AcademicError(400, 'BAD_REQUEST', 'URL externa insegura');
+  }
+  return trimmed;
 }
 
 export async function listTeachingLessons(

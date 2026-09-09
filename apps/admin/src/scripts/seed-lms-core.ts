@@ -140,9 +140,9 @@ async function main() {
     data: {
       title: 'Bem-vindo ao curso (vídeo)',
       slug: 'bem-vindo-video',
-      summary: 'Aula em vídeo (URL externa de exemplo).',
+      summary: 'Aula de vídeo — URL deve ser definida no authoring (sem fixture de exemplo).',
       type: 'video',
-      externalUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      externalUrl: null,
       duration: 12,
       order: 1,
       published: true,

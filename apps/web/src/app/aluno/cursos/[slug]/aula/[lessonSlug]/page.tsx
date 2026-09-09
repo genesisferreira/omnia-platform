@@ -19,6 +19,8 @@ export default async function AlunoAulaPage({ params }: PageProps) {
       title: string;
       type?: string | null;
       summary?: string | null;
+      content?: unknown;
+      externalUrl?: string | null;
       completed?: boolean;
     };
     assets?: Array<{

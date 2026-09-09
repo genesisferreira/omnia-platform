@@ -110,7 +110,7 @@ export function OnboardingChat(props: { initial: Onboarding }) {
           ...m,
           {
             role: 'assistant',
-            text: `Perfeito. Para seguir, preciso do seu consentimento educacional (versão ${data.onboarding?.consentVersion || state.consentVersion || 'atual'}). Seus dados serão usados só para adaptar a formação. Você concorda?`,
+            text: 'Perfeito. Para seguir, preciso do seu consentimento educacional. Seus dados serão usados só para adaptar a formação. Você concorda?',
           },
         ]);
         return;

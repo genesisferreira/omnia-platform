@@ -444,25 +444,23 @@ export function AiChatWorkspace({
                     </div>
                   </div>
                 ) : null}
-                <div
-                  className={`flex flex-wrap items-center gap-2 text-xs ${
-                    variant === 'embedded' ? 'text-muted-foreground' : 'text-zinc-500'
-                  }`}
-                >
-                  {Number.isFinite(turn.answer.tookMs) ? (
-                    <>
-                      <span>{turn.answer.tookMs} ms</span>
-                      <span>·</span>
-                    </>
-                  ) : null}
-                  {formatConfidenceLabel(turn.answer.confidence) ? (
-                    <>
-                      <span>{formatConfidenceLabel(turn.answer.confidence)}</span>
-                      <span>·</span>
-                    </>
-                  ) : null}
-                  <span>{turn.answer.sourceCount ?? turn.answer.sources.length} fontes</span>
-                </div>
+                {variant === 'command' ? (
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                    {Number.isFinite(turn.answer.tookMs) ? (
+                      <>
+                        <span>{turn.answer.tookMs} ms</span>
+                        <span>·</span>
+                      </>
+                    ) : null}
+                    {formatConfidenceLabel(turn.answer.confidence) ? (
+                      <>
+                        <span>{formatConfidenceLabel(turn.answer.confidence)}</span>
+                        <span>·</span>
+                      </>
+                    ) : null}
+                    <span>{turn.answer.sourceCount ?? turn.answer.sources.length} fontes</span>
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"

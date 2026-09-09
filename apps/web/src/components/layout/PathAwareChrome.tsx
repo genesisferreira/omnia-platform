@@ -54,5 +54,8 @@ export function PortalAiShell({ children }: { children: React.ReactNode }) {
 function LmsAwareDock() {
   const pathname = usePathname() || '';
   if (!isAcademicShell(pathname)) return null;
+  // FPA-006: aula nativa já tem TutorPanel contextual — não duplicar AiDock
+  if (/^\/aluno\/cursos\/[^/]+\/aula\//.test(pathname)) return null;
+  if (pathname.startsWith('/aluno/onboarding')) return null;
   return <AiDock />;
 }

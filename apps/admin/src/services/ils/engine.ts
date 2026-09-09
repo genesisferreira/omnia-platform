@@ -10,10 +10,12 @@ import {
   assertSchoolAccess,
   attentionSignals,
   blueprintsEquivalent,
+  buildDiagnosticBank,
   canUseInOfficialAssessment,
   computeImt,
   filterEntitiesBySchool,
   filterTutorContext,
+  gradeDiagnosticAnswer,
   humanizeResult,
   isSchoolKey,
   nextAdaptiveQuestion,
@@ -33,6 +35,7 @@ import {
   type BankQuestion,
   type Blueprint,
   type CompetencySnapshot,
+  type DiagnosticQuestion,
   type DomainEstimate,
   type OnboardingStatus,
   type SchoolKey,
@@ -372,21 +375,8 @@ export async function saveGoals(
   return getOnboarding(payload, auth);
 }
 
-function seedBank(): BankQuestion[] {
-  return TECHNICAL_DOMAINS.flatMap((domain) =>
-    ([1, 2, 3] as const).map((d) => ({
-      id: `${domain}-${d}`,
-      domain,
-      difficulty: d,
-      type: 'true_false' as const,
-    })),
-  );
-}
-
-function domainPrompt(q: BankQuestion): string {
-  const label = DOMAIN_LABELS[q.domain];
-  const level = q.difficulty === 1 ? 'básico' : q.difficulty === 3 ? 'avançado' : 'intermediário';
-  return `Sobre ${label} (${level}): em operação real, segurança e interpretação técnica devem anteceder qualquer atalho. Esta afirmação é verdadeira?`;
+function seedBank(): DiagnosticQuestion[] {
+  return buildDiagnosticBank();
 }
 
 export async function assessmentNext(payload: Payload, auth: LmsAuthContext) {
@@ -413,7 +403,7 @@ export async function assessmentNext(payload: Payload, auth: LmsAuthContext) {
           domain: nxt.question.domain,
           domainLabel: DOMAIN_LABELS[nxt.question.domain],
           difficulty: nxt.question.difficulty,
-          prompt: domainPrompt(nxt.question),
+          prompt: (nxt.question as DiagnosticQuestion).prompt,
           type: nxt.question.type,
         }
       : null,
@@ -440,8 +430,7 @@ export async function assessmentAnswer(
   const bank = seedBank();
   const q = bank.find((b) => b.id === input.questionId);
   if (!q) throw new AcademicError(400, 'BAD_REQUEST', 'Questão inválida');
-  const value = String(input.value ?? '').toLowerCase();
-  const correct = value === 'true' || value === 'verdadeiro' || value === '1' || value === 'sim';
+  const correct = gradeDiagnosticAnswer(q, input.value);
   answers.push({ questionId: q.id, correct });
   const nxt = nextAdaptiveQuestion(bank, answers);
   const overall = overallTechnicalLevel(nxt.estimates);

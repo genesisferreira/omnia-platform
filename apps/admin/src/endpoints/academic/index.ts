@@ -39,6 +39,7 @@ import {
   teacherDashboard,
   teachingBanks,
   teachingCourses,
+  updateTeachingLesson,
   verifyCertificate,
 } from '../../services/academic/engine';
 
@@ -343,6 +344,8 @@ const teachingLessonEp: Endpoint = {
           slug: b.slug,
           type: typeof b.type === 'string' ? b.type : 'text',
           summary: typeof b.summary === 'string' ? b.summary : undefined,
+          content: b.content,
+          externalUrl: typeof b.externalUrl === 'string' ? b.externalUrl : null,
         }),
         201,
       );
@@ -455,6 +458,34 @@ const teachingLessonPublishEp: Endpoint = {
       const id = num(req.routeParams?.id);
       if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
       return ok(await publishTeachingLesson(req.payload, auth(req), id));
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingLessonUpdateEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons/:id',
+  method: 'patch',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      const b = await readBody(req);
+      return ok(
+        await updateTeachingLesson(req.payload, auth(req), id, {
+          title: typeof b.title === 'string' ? b.title : undefined,
+          summary: typeof b.summary === 'string' || b.summary === null ? (b.summary as string | null) : undefined,
+          content: b.content,
+          type: typeof b.type === 'string' ? b.type : undefined,
+          externalUrl:
+            typeof b.externalUrl === 'string' || b.externalUrl === null
+              ? (b.externalUrl as string | null)
+              : undefined,
+          order: typeof b.order === 'number' ? b.order : undefined,
+          published: typeof b.published === 'boolean' ? b.published : undefined,
+        }),
+      );
     } catch (err) {
       return fail(err);
     }
@@ -797,6 +828,7 @@ export const academicEndpoints: Endpoint[] = [
   teachingLessonsListEp,
   teachingLessonEp,
   teachingLessonPublishEp,
+  teachingLessonUpdateEp,
   teachingLessonAssetEp,
   teachingLiveListEp,
   teachingLiveCreateEp,

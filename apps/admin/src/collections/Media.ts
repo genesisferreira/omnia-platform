@@ -1,10 +1,37 @@
-import type { CollectionConfig } from 'payload';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import type { Access, CollectionConfig } from 'payload';
+
+import { isStaffRole, type PlatformRole } from '@omnia/constants';
 
 import { staffOnly } from '../access/rbac';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Diretório estável — evita CWD do container apontar para pasta vazia (FPA-003). */
+export function resolveMediaStaticDir(): string {
+  if (process.env.PAYLOAD_MEDIA_DIR?.trim()) {
+    return path.resolve(process.env.PAYLOAD_MEDIA_DIR.trim());
+  }
+  return path.resolve(__dirname, '../../media');
+}
+
+const instructorOrStaffCreate: Access = ({ req }) => {
+  const role = (req.user as { role?: PlatformRole } | null)?.role;
+  if (!role) return false;
+  if (isStaffRole(role)) return true;
+  return role === 'instructor';
+};
+
 /**
- * Media Library — upload local no Sprint 2.
+ * Media Library — upload local.
  * Integração MinIO documentada em src/storage/README.md
+ *
+ * ACL: leitura pública de metadados/URLs necessárias ao portal;
+ * create permitido a staff + instructor (authoring).
+ * Consumo cross-school deve ser reforçado via lesson/enrollment no player acadêmico —
+ * não abrir write público.
  */
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -12,7 +39,7 @@ export const Media: CollectionConfig = {
     group: 'Conteúdo',
   },
   upload: {
-    staticDir: 'media',
+    staticDir: resolveMediaStaticDir(),
     mimeTypes: [
       'image/*',
       'video/*',
@@ -45,9 +72,10 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
   },
   access: {
-    // Leitura pública necessária para URLs de mídia no Portal.
+    // Leitura pública necessária para URLs de mídia no Portal (imagens/PDF publicados).
+    // Serve de ficheiro continua a exigir ficheiro presente em staticDir.
     read: () => true,
-    create: staffOnly,
+    create: instructorOrStaffCreate,
     update: staffOnly,
     delete: staffOnly,
   },

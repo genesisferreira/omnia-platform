@@ -2,6 +2,7 @@ export * from './schools';
 export * from './onboarding';
 export * from './pcar';
 export * from './assessment';
+export * from './diagnostic-bank';
 export * from './sipe';
 export * from './student-360';
 export * from './exercises';

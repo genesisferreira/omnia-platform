@@ -21,6 +21,9 @@ export function CreateLessonForm({
     courses[0]?.modules?.[0]?.id ? String(courses[0].modules[0].id) : '',
   );
   const [type, setType] = useState('text');
+  const [summary, setSummary] = useState('');
+  const [externalUrl, setExternalUrl] = useState('');
+  const [content, setContent] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const selected = courses.find((c) => String(c.id) === courseId);
   const modules = selected?.modules ?? [];
@@ -39,6 +42,9 @@ export function CreateLessonForm({
         title,
         slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         type,
+        summary: summary || undefined,
+        content: content || undefined,
+        externalUrl: type === 'video' || type === 'external_link' ? externalUrl || null : null,
       }),
     });
     if (res.ok) {
@@ -105,10 +111,34 @@ export function CreateLessonForm({
         onChange={(e) => setType(e.target.value)}
       >
         <option value="text">Texto</option>
-        <option value="video">Vídeo</option>
+        <option value="video">Vídeo externo</option>
         <option value="pdf">PDF</option>
         <option value="download">Download</option>
       </select>
+      <textarea
+        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        placeholder="Resumo (opcional)"
+        rows={2}
+        value={summary}
+        onChange={(e) => setSummary(e.target.value)}
+      />
+      {type === 'video' ? (
+        <input
+          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          placeholder="URL do vídeo (YouTube/Vimeo/https)"
+          value={externalUrl}
+          onChange={(e) => setExternalUrl(e.target.value)}
+        />
+      ) : null}
+      {type === 'text' ? (
+        <textarea
+          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          placeholder="Conteúdo textual da aula"
+          rows={5}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      ) : null}
       <Button type="submit" size="sm">
         Salvar rascunho
       </Button>

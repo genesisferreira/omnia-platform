@@ -179,11 +179,12 @@ export function TutorPanel({ context }: { context: AskAiContext }) {
                 <div className="whitespace-pre-wrap text-sm text-muted-foreground">
                   {turn.answer.text}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {turn.answer.levelLabel || turn.answer.level || '—'} · {turn.answer.tookMs} ms ·
-                  fontes {turn.answer.sourceCount ?? 0}
-                  {turn.answer.personalizedHint ? ` · ${turn.answer.personalizedHint}` : ''}
-                </p>
+                {turn.answer.personalizedHint || turn.answer.levelLabel || turn.answer.level ? (
+                  <p className="text-xs text-muted-foreground">
+                    {turn.answer.personalizedHint ||
+                      `Resposta adaptada ao nível ${turn.answer.levelLabel || turn.answer.level}.`}
+                  </p>
+                ) : null}
                 {turn.answer.encouragement ? (
                   <p className="text-sm text-foreground">{turn.answer.encouragement}</p>
                 ) : null}
