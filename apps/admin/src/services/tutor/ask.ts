@@ -12,7 +12,15 @@ import { refreshTutorDashboard } from './dashboard';
 export async function createTutorService(payload: Payload): Promise<TutorService> {
   return new TutorService({
     runtime: {
-      ask: (request) => runNeurofrigoAsk(payload, request),
+      ask: async (request) => {
+        const result = await runNeurofrigoAsk(payload, {
+          ...request,
+          // Tutor surface must stay on Tutor — do not re-route to HVAC/engineering.
+          assistantId: request.assistantKey || 'tutor',
+          orchestrate: true,
+        });
+        return { answer: result.answer, sessionId: result.sessionId };
+      },
     },
     students: {
       getOrSync: (input) => syncStudentProfile(payload, input),
@@ -145,6 +153,20 @@ export async function runTutorAsk(
 
   const tutor = await createTutorService(payload);
   const baseObjectives = body.lessonObjectives || '';
+
+  let authorizedPassages: import('@omnia/neurofrigo-runtime').AuthorizedPassage[] = [];
+  try {
+    const { loadAuthorizedLessonPassages } = await import('./lesson-context');
+    authorizedPassages = await loadAuthorizedLessonPassages(payload, {
+      courseId: body.courseId,
+      lessonId: body.lessonId,
+      userId: body.userId,
+      schoolKey: body.schoolKey ?? null,
+    });
+  } catch {
+    authorizedPassages = [];
+  }
+
   const result = await tutor.ask({
     question: guard.safeQuestion,
     userId: body.userId,
@@ -170,6 +192,10 @@ export async function runTutorAsk(
     ownerCompanyId: body.ownerCompanyId,
     requestStudyPlan: body.requestStudyPlan,
     objective: body.objective,
+    assistantKey: 'tutor',
+    domainContext: {
+      authorizedPassages: authorizedPassages.length ? authorizedPassages : null,
+    },
   });
 
   if (result.studyPlan) {

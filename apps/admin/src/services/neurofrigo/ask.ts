@@ -328,7 +328,9 @@ export async function runNeurofrigoAsk(
       ? 'commercial'
       : preferred === 'engineering'
         ? 'engineering'
-        : plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
+        : preferred === 'tutor'
+          ? 'tutor'
+          : plan?.agent.assistantKey || (preferred === 'auto' ? 'tutor' : preferred);
 
   if (assistantKey === 'commercial' && !request.skipCommercialEnrichment) {
     const { runCommercialAsk } = await import('../commercial/ask');

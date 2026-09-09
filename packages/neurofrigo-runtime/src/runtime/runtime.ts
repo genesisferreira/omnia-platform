@@ -22,6 +22,7 @@ import { applyStatePatch } from '../conversation/conversation-state';
 import { applyRepetitionControl, naturalizeUserText } from '../conversation/naturalize-text';
 import { validateAndRewriteResponse } from '../conversation/response-validator';
 import { buildHandoffRequest } from '../conversation/action-router';
+import { mergeRetrievalWithAuthorizedPassages } from '../context/authorized-passages';
 import type { ConversationState } from '../conversation/dialogue-types';
 import type {
   ContextBuilderPort,
@@ -67,6 +68,8 @@ export class NeurofrigoRuntime {
     const intentHint = classifyIntent(request.question);
     const assistantKey = request.assistantKey ?? null;
     const publicCourses = request.domainContext?.publicCourses ?? null;
+    const authorizedPassages = request.domainContext?.authorizedPassages ?? null;
+    const hasAuthorizedLessonContext = Boolean(authorizedPassages?.length);
     const previousAnswers = (request.conversationHistory || []).map((t) => t.answer);
 
     const resolved = resolveDialogueTurn({
@@ -74,6 +77,7 @@ export class NeurofrigoRuntime {
       history: request.conversationHistory,
       persistedState: request.dialogueState,
       assistantKey,
+      hasAuthorizedLessonContext,
     });
 
     // Capability meta-questions (no retrieval) — unless dialogue already handled affirmations.
@@ -301,33 +305,36 @@ export class NeurofrigoRuntime {
     }
 
     if (resolved.dialogueIntent === 'engineering_troubleshooting') {
-      const eng = composeDialogueAnswer({
-        dialogueIntent: 'engineering_troubleshooting',
-        state: resolved.state,
-        clarificationText: resolved.clarificationText,
-      });
-      const text = naturalizeUserText(eng.text);
-      return this.finishDialogue({
-        text,
-        started,
-        meta,
-        intentHint,
-        assistantKey,
-        channel: request.channel,
-        question: request.question,
-        confidence: 0.82,
-        sources: [],
-        state: applyStatePatch(resolved.state, {
-          currentIntent: 'engineering_troubleshooting',
-          pendingOffer: eng.pendingOffer,
-          lastAssistantText: text,
-          contactTarget: resolved.state.contactTarget || 'technical',
-          responsibleCompany: resolved.state.responsibleCompany || 'Renovação Refrigeração',
-        }),
-        dialogueIntent: 'engineering_troubleshooting',
-        justification: 'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
-        previousAnswers,
-      });
+      // Tutor + authorized LMS lesson: fall through to retrieval/grounding path.
+      if (!(assistantKey === 'tutor' && hasAuthorizedLessonContext)) {
+        const eng = composeDialogueAnswer({
+          dialogueIntent: 'engineering_troubleshooting',
+          state: resolved.state,
+          clarificationText: resolved.clarificationText,
+        });
+        const text = naturalizeUserText(eng.text);
+        return this.finishDialogue({
+          text,
+          started,
+          meta,
+          intentHint,
+          assistantKey,
+          channel: request.channel,
+          question: request.question,
+          confidence: 0.82,
+          sources: [],
+          state: applyStatePatch(resolved.state, {
+            currentIntent: 'engineering_troubleshooting',
+            pendingOffer: eng.pendingOffer,
+            lastAssistantText: text,
+            contactTarget: resolved.state.contactTarget || 'technical',
+            responsibleCompany: resolved.state.responsibleCompany || 'Renovação Refrigeração',
+          }),
+          dialogueIntent: 'engineering_troubleshooting',
+          justification: 'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
+          previousAnswers,
+        });
+      }
     }
 
     // Teaching rephrase/example/check without requiring retrieval hit
@@ -402,9 +409,15 @@ export class NeurofrigoRuntime {
       );
       const retrievalTookMs = Date.now() - retrievalStarted;
 
-      const guarded = applyRetrievalGuardrails(
+      const merged = mergeRetrievalWithAuthorizedPassages(
         this.buildRetrievalQuery(retrievalRequest, resolved.state),
         retrieval.results,
+        authorizedPassages,
+      );
+
+      const guarded = applyRetrievalGuardrails(
+        this.buildRetrievalQuery(retrievalRequest, resolved.state),
+        merged.chunks,
         this.limits,
         {
           assistantKey,
@@ -694,9 +707,17 @@ export class NeurofrigoRuntime {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'runtime_error';
       const isTimeout = message === 'TIMEOUT' || /timeout/i.test(message);
+      const isRetrieval =
+        !isTimeout &&
+        (/retrieval|vector|embedding|ECONNREFUSED|ENOTFOUND|fetch failed|404|502|503/i.test(
+          message,
+        ) ||
+          /RETRIEVAL_/i.test(message));
       const text = isTimeout
         ? 'A solicitação excedeu o tempo limite. Tente novamente.'
-        : 'Ocorreu um erro ao processar sua pergunta. Tente novamente em instantes.';
+        : isRetrieval
+          ? 'Não foi possível consultar o conhecimento autorizado agora. Tente novamente em instantes.'
+          : 'Ocorreu um erro ao processar sua pergunta. Tente novamente em instantes.';
       return {
         text,
         formattedText: formatResponse({
@@ -714,9 +735,7 @@ export class NeurofrigoRuntime {
         totalTokens: 0,
         estimatedCostUsd: 0,
         status: isTimeout ? 'timeout' : 'error',
-        errorCode: isTimeout
-          ? 'TIMEOUT'
-          : `RUNTIME_ERROR:${message.replace(/\s+/g, ' ').slice(0, 160)}`,
+        errorCode: isTimeout ? 'TIMEOUT' : isRetrieval ? 'RETRIEVAL_ERROR' : 'RUNTIME_ERROR',
         intent: intentHint,
         grounding: null,
         suggestedActions: [],

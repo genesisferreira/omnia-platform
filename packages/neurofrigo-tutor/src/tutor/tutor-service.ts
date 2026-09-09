@@ -74,6 +74,8 @@ export class TutorService {
     const runtimeRequest: RuntimeRequest = {
       question: request.question,
       sessionId: request.sessionId ?? null,
+      assistantKey: request.assistantKey ?? 'tutor',
+      channel: 'portal_chat',
       identity: {
         userId,
         role: request.role ?? 'student',
@@ -93,6 +95,7 @@ export class TutorService {
           `Nível ${LEVEL_LABELS[learning.level]}. Progresso ${Math.round(student.progressPercent)}%. ${personalizedHint}`,
         ownerCompanyId: request.ownerCompanyId ?? null,
       },
+      domainContext: request.domainContext ?? null,
     };
 
     const { answer, sessionId } = await this.deps.runtime.ask(runtimeRequest);

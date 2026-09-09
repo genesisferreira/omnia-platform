@@ -1,6 +1,7 @@
 export * from './domain/types';
 export * from './ports';
 export * from './context/context-builder';
+export * from './context/authorized-passages';
 export * from './prompt/prompt-builder';
 export * from './guardrails';
 export * from './intent/classify-intent';

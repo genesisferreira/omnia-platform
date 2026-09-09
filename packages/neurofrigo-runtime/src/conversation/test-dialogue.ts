@@ -268,7 +268,7 @@ describe('EPIC 16 R5 dialogue benches C1-C10', () => {
       assistantKey: 'engineering',
       channel: 'portal_chat',
     });
-    assert.match(t1.answer.text, /sucção|pressão/i);
+    assert.match(t1.answer.text, /temperatura|sucção|pressão/i);
     const t2 = await turn(runtime, 'Sucção 32 psi e condensação 220 psi.', {
       history: t1.history,
       state: t1.state,

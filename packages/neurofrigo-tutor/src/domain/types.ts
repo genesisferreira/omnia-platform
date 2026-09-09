@@ -120,6 +120,9 @@ export type TutorAskRequest = {
   /** Se true, tenta gerar plano a partir do objetivo na pergunta. */
   requestStudyPlan?: boolean;
   objective?: string | null;
+  /** Pin surface assistant (Tutor endpoint always passes tutor). */
+  assistantKey?: string | null;
+  domainContext?: RuntimeRequest['domainContext'];
 };
 
 export type TutorAnswer = {

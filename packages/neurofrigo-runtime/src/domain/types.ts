@@ -52,6 +52,7 @@ export type RuntimeRequest = {
   /**
    * Live domain facts (LMS catalog etc.) — not RAG.
    * Conversation layer may synthesize from these without inventing.
+   * authorizedPassages: published LMS lesson text in Tutor scope (Retrieval-before-Runtime merge).
    */
   domainContext?: {
     publicCourses?: Array<{
@@ -63,6 +64,7 @@ export type RuntimeRequest = {
       estimatedHours?: number | null;
       providerHint?: string | null;
     }> | null;
+    authorizedPassages?: import('../context/authorized-passages').AuthorizedPassage[] | null;
   } | null;
   /** Persisted dialogue state from session (R5). */
   dialogueState?: import('../conversation/dialogue-types').ConversationState | null;

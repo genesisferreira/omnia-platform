@@ -162,6 +162,8 @@ export function resolveDialogueTurn(input: {
   history?: ConversationTurn[] | null;
   persistedState?: ConversationState | null;
   assistantKey?: string | null;
+  /** When true (Tutor + published lesson passages), prefer retrieval over engineering skip. */
+  hasAuthorizedLessonContext?: boolean;
 }): ResolvedDialogueTurn {
   const originalQuestion = input.question.trim();
   const normalized = normalizeUserUtterance(originalQuestion);
@@ -572,6 +574,23 @@ export function resolveDialogueTurn(input: {
     dialogueIntent === 'engineering_troubleshooting' ||
     state.currentIntent === 'engineering_troubleshooting'
   ) {
+    // Native LMS Tutor with authorized lesson context must retrieve/ground — do not skip.
+    if (input.assistantKey === 'tutor' && input.hasAuthorizedLessonContext) {
+      state = applyStatePatch(state, {
+        previousIntent: state.currentIntent,
+        currentIntent: 'teaching',
+        tutorConcept: state.tutorConcept || 'diagnostico_aula',
+      });
+      return {
+        originalQuestion,
+        effectiveQuestion: originalQuestion,
+        dialogueIntent: 'teaching',
+        dialogueAct,
+        decision: 'CAN_ANSWER',
+        state,
+        skipRetrieval: false,
+      };
+    }
     state = applyStatePatch(state, {
       previousIntent: state.currentIntent,
       currentIntent: 'engineering_troubleshooting',
