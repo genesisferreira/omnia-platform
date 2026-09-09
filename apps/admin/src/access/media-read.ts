@@ -88,10 +88,7 @@ export function buildMediaReadWhere(actor: MediaAccessActor | null): boolean | W
     return true;
   }
 
-  const or: Where[] = [
-    { visibility: { equals: 'public' } },
-    { uploadedBy: { equals: actor.id } },
-  ];
+  const or: Where[] = [{ visibility: { equals: 'public' } }, { uploadedBy: { equals: actor.id } }];
 
   const schools = (actor.schoolKeys ?? []).filter(isSchoolKey);
   if (schools.length === 1) {
@@ -106,10 +103,7 @@ export function buildMediaReadWhere(actor: MediaAccessActor | null): boolean | W
 
   if (actor.companyId != null) {
     or.push({
-      and: [
-        { visibility: { equals: 'tenant' } },
-        { ownerCompany: { equals: actor.companyId } },
-      ],
+      and: [{ visibility: { equals: 'tenant' } }, { ownerCompany: { equals: actor.companyId } }],
     });
   }
 

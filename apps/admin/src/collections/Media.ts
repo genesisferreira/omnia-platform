@@ -7,11 +7,7 @@ import type { Access, CollectionBeforeChangeHook, CollectionConfig } from 'paylo
 import { isStaffRole, type PlatformRole } from '@omnia/constants';
 import { isSchoolKey, type SchoolKey } from '@omnia/intelligent-learning';
 
-import {
-  mediaReadAccess,
-  normalizeVisibility,
-  type MediaVisibility,
-} from '../access/media-read';
+import { mediaReadAccess, normalizeVisibility, type MediaVisibility } from '../access/media-read';
 import { getRelationId, getUserRole, staffOnly } from '../access/rbac';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -97,9 +93,7 @@ async function actorSchoolKeys(
 
 const stampMediaAuthDefaults: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   const user = req.user as
-    | { id?: string | number; role?: unknown; company?: unknown }
-    | null
-    | undefined;
+    { id?: string | number; role?: unknown; company?: unknown } | null | undefined;
   if (!user?.id) return data;
 
   const role = getUserRole(user);
@@ -123,7 +117,11 @@ const stampMediaAuthDefaults: CollectionBeforeChangeHook = async ({ data, req, o
 
   // Non-staff cannot forge another school or force public.
   if (!staff) {
-    if (requestedSchool != null && isSchoolKey(requestedSchool) && !schools.includes(requestedSchool)) {
+    if (
+      requestedSchool != null &&
+      isSchoolKey(requestedSchool) &&
+      !schools.includes(requestedSchool)
+    ) {
       throw new Error('CROSS_SCHOOL: schoolKey não autorizado para este usuário');
     }
     if (normalizeVisibility(next.visibility) === 'public') {

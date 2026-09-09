@@ -16,7 +16,10 @@ describe('media ACL policy', () => {
 
   it('allows anonymous only for explicit public', () => {
     assert.equal(decideMediaBinaryAccess(null, { visibility: 'public' }), 'ALLOW');
-    assert.equal(decideMediaBinaryAccess(null, { visibility: 'school', schoolKey: 'fred-do-frio' }), 'DENY');
+    assert.equal(
+      decideMediaBinaryAccess(null, { visibility: 'school', schoolKey: 'fred-do-frio' }),
+      'DENY',
+    );
     assert.equal(decideMediaBinaryAccess(null, { visibility: 'private' }), 'DENY');
     assert.equal(decideMediaBinaryAccess(null, { visibility: null }), 'DENY');
   });
@@ -48,10 +51,7 @@ describe('media ACL policy', () => {
 
   it('denies Fred student reading CTE school media', () => {
     const fred = { id: 1, role: 'student' as const, schoolKeys: ['fred-do-frio' as const] };
-    assert.equal(
-      decideMediaBinaryAccess(fred, { visibility: 'school', schoolKey: 'cte' }),
-      'DENY',
-    );
+    assert.equal(decideMediaBinaryAccess(fred, { visibility: 'school', schoolKey: 'cte' }), 'DENY');
   });
 
   it('allows instructor same school; denies cross-school instructor', () => {
@@ -76,10 +76,7 @@ describe('media ACL policy', () => {
 
   it('staff/admin can read protected media', () => {
     assert.equal(
-      decideMediaBinaryAccess(
-        { id: 9, role: 'admin', schoolKeys: [] },
-        { visibility: 'private' },
-      ),
+      decideMediaBinaryAccess({ id: 9, role: 'admin', schoolKeys: [] }, { visibility: 'private' }),
       'ALLOW',
     );
   });
