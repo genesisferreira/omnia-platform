@@ -23,6 +23,8 @@ x-bootstrap-environment: &bootstrap-environment
   APP_ENV: ${APP_ENV:-production}
   DATABASE_URL: ${DATABASE_URL}
   PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+  # Canonical media path — must match volume mount on services that write media.
+  PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
   NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
   NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
   OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
@@ -193,7 +195,11 @@ services:
       GEOCODING_TIMEOUT_MS: ${GEOCODING_TIMEOUT_MS:-8000}
       POSTAL_CODE_PROVIDER: ${POSTAL_CODE_PROVIDER:-auto}
       POSTAL_CODE_API_TIMEOUT_MS: ${POSTAL_CODE_API_TIMEOUT_MS:-5000}
+      PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
     volumes:
+      # Canonical path. Temporary dual-mount keeps legacy apps/admin/media writes
+      # on the same prod volume until all writers honor PAYLOAD_MEDIA_DIR.
+      - omnia_platform_admin_media_prod:/app/media
       - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_proxy
@@ -264,6 +270,7 @@ services:
     environment:
       <<: *bootstrap-environment
     volumes:
+      - omnia_platform_admin_media_prod:/app/media
       - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_prod_internal
@@ -314,6 +321,7 @@ services:
     environment:
       <<: *bootstrap-environment
     volumes:
+      - omnia_platform_admin_media_prod:/app/media
       - omnia_platform_admin_media_prod:/app/apps/admin/media
     networks:
       - omnia_prod_internal

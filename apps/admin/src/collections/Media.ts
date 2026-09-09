@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,11 +10,24 @@ import { staffOnly } from '../access/rbac';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/** Diretório estável — evita CWD do container apontar para pasta vazia (FPA-003). */
-export function resolveMediaStaticDir(): string {
-  if (process.env.PAYLOAD_MEDIA_DIR?.trim()) {
-    return path.resolve(process.env.PAYLOAD_MEDIA_DIR.trim());
+/** Canonical persistent media path inside Docker images (see Dockerfile VOLUME). */
+export const CANONICAL_MEDIA_PATH = '/app/media';
+
+/**
+ * Resolve Payload upload staticDir.
+ * Priority: PAYLOAD_MEDIA_DIR → /app/media (Docker) → apps/admin/media (local).
+ */
+export function resolveMediaStaticDir(
+  env: NodeJS.ProcessEnv = process.env,
+  exists: (p: string) => boolean = existsSync,
+): string {
+  const fromEnv = env.PAYLOAD_MEDIA_DIR?.trim();
+  if (fromEnv) {
+    // Keep POSIX absolute paths intact (Docker Linux); resolve only relative ones.
+    if (fromEnv.startsWith('/')) return fromEnv;
+    return path.resolve(fromEnv);
   }
+  if (exists(CANONICAL_MEDIA_PATH)) return CANONICAL_MEDIA_PATH;
   return path.resolve(__dirname, '../../media');
 }
 
@@ -30,8 +44,8 @@ const instructorOrStaffCreate: Access = ({ req }) => {
  *
  * ACL: leitura pública de metadados/URLs necessárias ao portal;
  * create permitido a staff + instructor (authoring).
- * Consumo cross-school deve ser reforçado via lesson/enrollment no player acadêmico —
- * não abrir write público.
+ * Persistência: PAYLOAD_MEDIA_DIR=/app/media + volume no mesmo path.
+ * Não resolver persistência tornando Media write-público.
  */
 export const Media: CollectionConfig = {
   slug: 'media',

@@ -48,6 +48,7 @@
     "seed:knowledge-hub-load": "tsx src/scripts/seed-knowledge-hub-load.ts",
     "seed:lms-core": "tsx src/scripts/seed-lms-core.ts",
     "test:lms-core": "tsx --test src/scripts/test-lms-core.ts",
+    "test:media-static-dir": "tsx --test src/scripts/test-media-static-dir.ts",
     "test:lms-product-completion": "tsx --test src/scripts/test-lms-product-completion.ts ../../packages/assessment-engine/src/**/test-*.ts",
     "test:intelligent-learning": "tsx --test ../../packages/intelligent-learning/src/**/test-*.ts src/scripts/test-intelligent-learning.ts",
     "seed:knowledge-intelligence": "tsx src/scripts/seed-knowledge-intelligence.ts",

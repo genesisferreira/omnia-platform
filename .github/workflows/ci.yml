@@ -114,6 +114,9 @@ jobs:
       - name: LMS Core + product completion ACL
         run: pnpm --filter @omnia/admin test:lms-core && pnpm --filter @omnia/admin test:lms-product-completion
 
+      - name: Media staticDir resolution
+        run: pnpm --filter @omnia/admin test:media-static-dir
+
       - name: Intelligent Learning System V1
         run: pnpm --filter @omnia/intelligent-learning test && pnpm --filter @omnia/admin test:intelligent-learning
 
