@@ -29,7 +29,7 @@ function stripHtml(raw: string): string {
 /** Split long lesson text into ~800-char passages for guardrail overlap. */
 export function chunkAuthorizedText(
   text: string,
-  opts: { idPrefix: string; title?: string | null; meta?: Partial<AuthorizedPassage> } ,
+  opts: { idPrefix: string; title?: string | null; meta?: Partial<AuthorizedPassage> },
 ): AuthorizedPassage[] {
   const clean = stripHtml(text);
   if (clean.length < 40) return [];

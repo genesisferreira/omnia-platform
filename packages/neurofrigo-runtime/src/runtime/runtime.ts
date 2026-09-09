@@ -331,7 +331,8 @@ export class NeurofrigoRuntime {
             responsibleCompany: resolved.state.responsibleCompany || 'Renovação Refrigeração',
           }),
           dialogueIntent: 'engineering_troubleshooting',
-          justification: 'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
+          justification:
+            'Descoberta/diagnóstico de engenharia multi-turn — sem retrieval genérico.',
           previousAnswers,
         });
       }

@@ -29,9 +29,7 @@ export async function loadAuthorizedLessonPassages(
   const courseSchool = isSchoolKey(String((course as { schoolKey?: string }).schoolKey || ''))
     ? (String((course as { schoolKey?: string }).schoolKey) as SchoolKey)
     : null;
-  const actorSchool = isSchoolKey(input.schoolKey || '')
-    ? (input.schoolKey as SchoolKey)
-    : null;
+  const actorSchool = isSchoolKey(input.schoolKey || '') ? (input.schoolKey as SchoolKey) : null;
   if (actorSchool && courseSchool && actorSchool !== courseSchool) {
     return [];
   }
@@ -41,10 +39,7 @@ export async function loadAuthorizedLessonPassages(
     const enr = await payload.find({
       collection: 'lms-enrollments',
       where: {
-        and: [
-          { student: { equals: Number(input.userId) } },
-          { course: { equals: courseId } },
-        ],
+        and: [{ student: { equals: Number(input.userId) } }, { course: { equals: courseId } }],
       },
       limit: 1,
       depth: 0,
