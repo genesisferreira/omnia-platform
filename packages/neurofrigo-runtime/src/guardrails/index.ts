@@ -68,21 +68,26 @@ export function significantTokens(text: string): Set<string> {
 
 export function hasLexicalOverlap(question: string, chunks: CitationResult[]): boolean {
   const qTokens = significantTokens(question);
-  if (qTokens.size === 0) return true;
+  // Empty significant tokens must NOT auto-approve evidence (Tutor dump bug).
+  if (qTokens.size === 0) return false;
 
   const docBlob = chunks
     .slice(0, 4)
     .map((c) => stripDiacritics((c.text || '').toLowerCase()))
     .join(' ');
 
+  let hits = 0;
   for (const token of qTokens) {
-    if (docBlob.includes(token)) return true;
-    if (token.length >= 6) {
-      const prefix = token.slice(0, 6);
-      if (docBlob.includes(prefix)) return true;
-    }
+    const matched =
+      docBlob.includes(token) ||
+      (token.length >= 6 && docBlob.includes(token.slice(0, 6)));
+    if (matched) hits += 1;
   }
-  return false;
+  // Require at least one hit; for longer questions require 2+ to avoid
+  // single domain-token false positives (e.g. only "refrigerante").
+  if (hits === 0) return false;
+  if (qTokens.size >= 4 && hits < 2) return false;
+  return true;
 }
 
 export function applyRetrievalGuardrails(

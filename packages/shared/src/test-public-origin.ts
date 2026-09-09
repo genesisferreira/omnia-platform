@@ -7,11 +7,41 @@ import {
   getConfiguredPublicOrigin,
   isInternalHostname,
   resolveBrowserLocation,
+  resolvePublicAbsoluteRedirect,
   sanitizeRelativePath,
   urlLeaksInternalHost,
 } from './public-origin';
 
 describe('public origin / browser redirect', () => {
+  it('ADMIN_ROOT_ABSOLUTE_REDIRECT_OK', () => {
+    const abs = resolvePublicAbsoluteRedirect({
+      path: '/login',
+      configuredOrigin: 'https://admin.omniafrigo.com.br',
+      forwardedHost: '0.0.0.0:3000',
+      forwardedProto: 'http',
+      nodeEnv: 'production',
+    });
+    assert.equal(abs, 'https://admin.omniafrigo.com.br/login');
+    assert.equal(urlLeaksInternalHost(abs!), false);
+
+    const viaForward = resolvePublicAbsoluteRedirect({
+      path: '/login',
+      configuredOrigin: '',
+      forwardedHost: 'admin.dev.omniafrigo.com.br',
+      forwardedProto: 'https',
+      nodeEnv: 'production',
+    });
+    assert.equal(viaForward, 'https://admin.dev.omniafrigo.com.br/login');
+
+    const blocked = resolvePublicAbsoluteRedirect({
+      path: '/login',
+      configuredOrigin: 'http://0.0.0.0:3000',
+      forwardedHost: '0.0.0.0',
+      nodeEnv: 'production',
+    });
+    assert.equal(blocked, null);
+  });
+
   it('PUBLIC_ORIGIN_RESOLUTION_OK', () => {
     const staging = getConfiguredPublicOrigin({
       configuredUrl: 'https://dev.omniafrigo.com.br',

@@ -1,4 +1,4 @@
-import type { RuntimeRequest } from '@omnia/neurofrigo-runtime';
+import type { RuntimeAnswer, RuntimeRequest } from '@omnia/neurofrigo-runtime';
 
 import type {
   AiSignalsPort,
@@ -16,6 +16,7 @@ import {
   mergeLearningSignals,
 } from '../personalization/level';
 import { LEVEL_LABELS } from '../domain/types';
+import { composeLmsNextStepAnswer, isLmsNextStepQuestion } from '../intent/lms-next-step';
 import { buildRecommendations, buildStudyPlan, detectGaps } from '../recommendations';
 
 export type TutorServiceDeps = {
@@ -71,6 +72,89 @@ export class TutorService {
     const personalizedHint = buildPersonalizedHint(learning.level);
     const profileLabel = buildProfileLabel(learning.level, student);
 
+    const recommendations = catalog
+      ? buildRecommendations({
+          catalog,
+          student,
+          learning,
+          currentLessonId: request.lessonId,
+        })
+      : [];
+
+    const studyPlan =
+      wantsPlan && objective && catalog ? buildStudyPlan({ objective, catalog, student }) : null;
+
+    const gaps = catalog ? detectGaps({ learning, catalog }) : [];
+    const encouragement = buildEncouragement(learning.level, student, gaps.length);
+
+    // LMS navigation — answer from progress/recommendations, not Knowledge dump.
+    if (isLmsNextStepQuestion(request.question)) {
+      const text = composeLmsNextStepAnswer({
+        courseTitle: request.courseTitle ?? catalog?.courseTitle,
+        progressPercent: student.progressPercent,
+        currentLessonTitle: request.lessonTitle,
+        recommendations,
+        student,
+      });
+      const answer: RuntimeAnswer = {
+        text,
+        formattedText: text,
+        sources: [],
+        confidence: 0.95,
+        tookMs: 0,
+        model: 'lms-next-step',
+        provider: 'tutor-lms',
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        estimatedCostUsd: 0,
+        status: 'ok',
+        intent: 'procedural',
+        grounding: {
+          score: 1,
+          sourceCount: 0,
+          avgSimilarity: 1,
+          coverage: 1,
+          contextChars: 0,
+          confidence: 0.95,
+        },
+        explainability: {
+          sourceCount: 0,
+          avgScore: 1,
+          confidence: 0.95,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: 'procedural',
+          justification: 'Answered from LMS progress/catalog, not retrieval dump.',
+        },
+        dialogueIntent: 'lms_next_step',
+      };
+
+      await this.deps.learning.recordUsage({
+        userId,
+        courseId,
+        question: request.question,
+        groundingScore: 1,
+        confidence: 0.95,
+        status: 'ok',
+      });
+
+      return {
+        answer,
+        sessionId: request.sessionId ?? `lms-next-${Date.now()}`,
+        level: learning.level,
+        levelLabel: LEVEL_LABELS[learning.level],
+        student,
+        learning,
+        recommendations,
+        studyPlan,
+        gaps,
+        encouragement,
+        personalizedHint,
+      };
+    }
+
     const runtimeRequest: RuntimeRequest = {
       question: request.question,
       sessionId: request.sessionId ?? null,
@@ -108,21 +192,6 @@ export class TutorService {
       confidence: answer.confidence ?? 0,
       status: answer.status,
     });
-
-    const recommendations = catalog
-      ? buildRecommendations({
-          catalog,
-          student,
-          learning,
-          currentLessonId: request.lessonId,
-        })
-      : [];
-
-    const studyPlan =
-      wantsPlan && objective && catalog ? buildStudyPlan({ objective, catalog, student }) : null;
-
-    const gaps = catalog ? detectGaps({ learning, catalog }) : [];
-    const encouragement = buildEncouragement(learning.level, student, gaps.length);
 
     return {
       answer,

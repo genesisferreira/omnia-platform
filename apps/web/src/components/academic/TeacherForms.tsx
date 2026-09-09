@@ -444,24 +444,41 @@ export function CreateClassForm({ courses }: { courses: Array<{ id: number; titl
 export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; title: string }> }) {
   const [prompt, setPrompt] = useState('');
   const [courseId, setCourseId] = useState(courses[0]?.id ? String(courses[0].id) : '');
+  const [qType, setQType] = useState<'multiple_choice' | 'true_false' | 'short_answer' | 'essay'>(
+    'multiple_choice',
+  );
   const [correct, setCorrect] = useState('b');
+  const [tfCorrect, setTfCorrect] = useState<'true' | 'false'>('true');
   const [msg, setMsg] = useState<string | null>(null);
 
   async function submit() {
+    const body: Record<string, unknown> = {
+      courseId: Number(courseId),
+      prompt,
+      type: qType,
+    };
+    if (qType === 'multiple_choice') {
+      body.options = {
+        choices: [
+          { id: 'a', label: 'Alternativa A', correct: correct === 'a' },
+          { id: 'b', label: 'Alternativa B', correct: correct === 'b' },
+        ],
+      };
+    } else if (qType === 'true_false') {
+      body.options = {
+        choices: [
+          { id: 'true', label: 'Verdadeiro', correct: tfCorrect === 'true' },
+          { id: 'false', label: 'Falso', correct: tfCorrect === 'false' },
+        ],
+      };
+    } else {
+      body.options = { rubricHint: 'Resposta aberta — correção manual/professor.' };
+    }
+
     const res = await fetch('/api/academic/teaching/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        courseId: Number(courseId),
-        prompt,
-        type: 'multiple_choice',
-        options: {
-          choices: [
-            { id: 'a', label: 'Alternativa A', correct: correct === 'a' },
-            { id: 'b', label: 'Alternativa B', correct: correct === 'b' },
-          ],
-        },
-      }),
+      body: JSON.stringify(body),
     });
     const data = (await res.json().catch(() => null)) as { id?: number } | null;
     setMsg(res.ok ? `Questão #${data?.id} criada.` : 'Falha ao criar questão.');
@@ -475,7 +492,7 @@ export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; t
         void submit();
       }}
     >
-      <h2 className="text-sm font-semibold">Nova questão (múltipla escolha)</h2>
+      <h2 className="text-sm font-semibold">Nova questão</h2>
       <textarea
         className="w-full rounded-md border border-border bg-background p-2 text-sm"
         rows={3}
@@ -494,17 +511,52 @@ export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; t
           </option>
         ))}
       </select>
-      <label className="text-sm">
-        Gabarito
+      <label className="block text-sm">
+        Tipo
         <select
-          className="ml-2 rounded-md border border-border bg-background px-2 py-1"
-          value={correct}
-          onChange={(e) => setCorrect(e.target.value)}
+          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          value={qType}
+          onChange={(e) =>
+            setQType(e.target.value as 'multiple_choice' | 'true_false' | 'short_answer' | 'essay')
+          }
         >
-          <option value="a">A</option>
-          <option value="b">B</option>
+          <option value="multiple_choice">Múltipla escolha</option>
+          <option value="true_false">Verdadeiro / Falso</option>
+          <option value="short_answer">Resposta curta</option>
+          <option value="essay">Dissertativa</option>
         </select>
       </label>
+      {qType === 'multiple_choice' ? (
+        <label className="text-sm">
+          Gabarito
+          <select
+            className="ml-2 rounded-md border border-border bg-background px-2 py-1"
+            value={correct}
+            onChange={(e) => setCorrect(e.target.value)}
+          >
+            <option value="a">A</option>
+            <option value="b">B</option>
+          </select>
+        </label>
+      ) : null}
+      {qType === 'true_false' ? (
+        <label className="text-sm">
+          Gabarito
+          <select
+            className="ml-2 rounded-md border border-border bg-background px-2 py-1"
+            value={tfCorrect}
+            onChange={(e) => setTfCorrect(e.target.value as 'true' | 'false')}
+          >
+            <option value="true">Verdadeiro</option>
+            <option value="false">Falso</option>
+          </select>
+        </label>
+      ) : null}
+      {qType === 'short_answer' || qType === 'essay' ? (
+        <p className="text-xs text-muted-foreground">
+          Questões abertas usam correção manual do professor (sem gabarito automático).
+        </p>
+      ) : null}
       <Button type="submit" size="sm">
         Criar questão
       </Button>

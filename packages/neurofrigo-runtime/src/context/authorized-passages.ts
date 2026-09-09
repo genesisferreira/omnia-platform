@@ -5,7 +5,10 @@
  */
 import type { CitationResult } from '@omnia/retrieval';
 
-import { hasLexicalOverlap, significantTokens } from '../guardrails';
+import {
+  PASSAGE_RELEVANCE_MIN,
+  scorePassageRelevance,
+} from './passage-relevance';
 
 export type AuthorizedPassage = {
   id: string;
@@ -51,28 +54,38 @@ export function chunkAuthorizedText(
 }
 
 /**
- * Select passages that lexically overlap the question (same spirit as retrieval guardrails).
- * Score is high enough to pass minSimilarity (0.35) without inventing vector hits.
+ * Select passages that are actually relevant to the question.
+ * Does NOT use the first authorized passage just because it exists.
+ * Weak single-token domain overlap (e.g. only "refrigerante") is rejected.
  */
 export function selectRelevantAuthorizedPassages(
   question: string,
   passages: AuthorizedPassage[] | null | undefined,
+  minRelevance = PASSAGE_RELEVANCE_MIN,
 ): CitationResult[] {
   if (!passages?.length) return [];
-  const qTokens = significantTokens(question);
-  const hits: CitationResult[] = [];
+  const scored: Array<{ passage: AuthorizedPassage; text: string; relevance: number }> = [];
 
   for (const p of passages) {
     const text = stripHtml(p.text);
     if (text.length < 40) continue;
-    const asCitation: CitationResult = {
+    const relevance = scorePassageRelevance(question, text);
+    if (relevance < minRelevance) continue;
+    scored.push({ passage: p, text, relevance });
+  }
+
+  scored.sort((a, b) => b.relevance - a.relevance);
+
+  return scored.slice(0, 4).map(({ passage: p, text, relevance }) => {
+    const sim = Math.min(0.92, 0.55 + relevance * 0.4);
+    return {
       chunkId: `auth:${p.id}`,
       text,
-      score: 0.82,
-      similarity: 0.82,
+      score: sim,
+      similarity: sim,
       tokenEstimate: Math.max(1, Math.ceil(text.length / 4)),
       language: 'pt-BR',
-      tags: [p.sourceType, p.schoolKey || ''].filter(Boolean),
+      tags: [p.sourceType, p.schoolKey || '', `rel:${relevance.toFixed(2)}`].filter(Boolean),
       citation: {
         knowledgeDocumentId: null,
         courseId: p.courseId ?? null,
@@ -83,39 +96,8 @@ export function selectRelevantAuthorizedPassages(
         page: null,
         version: null,
       },
-    };
-    if (qTokens.size === 0 || hasLexicalOverlap(question, [asCitation])) {
-      hits.push(asCitation);
-    }
-  }
-
-  // If nothing overlapped but we have a single rich lesson body, keep top passage
-  // only when question tokens appear in the combined blob (prefix match already in hasLexicalOverlap).
-  if (!hits.length && passages.length) {
-    const blob = passages.map((p) => stripHtml(p.text)).join(' ');
-    const fake: CitationResult = {
-      chunkId: `auth:${passages[0]!.id}`,
-      text: blob.slice(0, 1200),
-      score: 0.7,
-      similarity: 0.7,
-      tokenEstimate: 300,
-      language: 'pt-BR',
-      tags: ['lms_lesson'],
-      citation: {
-        knowledgeDocumentId: null,
-        courseId: passages[0]!.courseId ?? null,
-        moduleId: passages[0]!.moduleId ?? null,
-        lessonId: passages[0]!.lessonId ?? null,
-        learningResourceId: null,
-        chunkId: `auth:${passages[0]!.id}`,
-        page: null,
-        version: null,
-      },
-    };
-    if (hasLexicalOverlap(question, [fake])) hits.push(fake);
-  }
-
-  return hits.slice(0, 4);
+    } satisfies CitationResult;
+  });
 }
 
 export function mergeRetrievalWithAuthorizedPassages(

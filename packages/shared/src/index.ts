@@ -7,6 +7,7 @@ export {
   isInternalHostname,
   isLoopbackHostname,
   resolveBrowserLocation,
+  resolvePublicAbsoluteRedirect,
   sanitizeRelativePath,
   urlLeaksInternalHost,
   type PublicOriginResult,

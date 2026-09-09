@@ -73,35 +73,8 @@ export async function loadAuthorizedLessonPassages(
     }
   }
 
-  if (!lesson || lesson.published === false) {
-    // Fallback: first published content-rich lesson in course
-    const modules = await payload.find({
-      collection: 'course-modules',
-      where: { course: { equals: courseId } },
-      limit: 20,
-      depth: 0,
-      overrideAccess: true,
-      sort: 'order',
-    });
-    for (const m of modules.docs) {
-      const lessons = await payload.find({
-        collection: 'lessons',
-        where: {
-          and: [{ module: { equals: m.id } }, { published: { equals: true } }],
-        },
-        limit: 30,
-        depth: 0,
-        overrideAccess: true,
-        sort: 'order',
-      });
-      const rich = lessons.docs.find((l) => String(l.content || l.summary || '').length > 80);
-      if (rich) {
-        lesson = rich as unknown as Record<string, unknown>;
-        break;
-      }
-    }
-  }
-
+  // Never dump the first course lesson as a substitute for the open lesson.
+  // Missing/invalid/unpublished lesson → empty → runtime not_found (or LMS next-step).
   if (!lesson || lesson.published === false) return [];
 
   const title = String(lesson.title || 'Aula');

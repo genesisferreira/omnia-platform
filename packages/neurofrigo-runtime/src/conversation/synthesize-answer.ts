@@ -1,4 +1,5 @@
 import { sanitizeEvidenceText } from './sanitize-evidence';
+import { PASSAGE_RELEVANCE_MIN, rankSentencesByRelevance } from '../context/passage-relevance';
 
 export type EvidenceItem = {
   id?: string;
@@ -229,18 +230,27 @@ export function synthesizeConversationalAnswer(input: {
     ].join('\n');
   }
 
-  // Tutor pedagogical tone
+  // Tutor pedagogical tone — grounded synthesis, not lead-sentence dump
   if (assistant === 'tutor' || input.intent === 'explanation' || input.intent === 'definition') {
-    const lead = evidenceSentences[0]!;
-    const rest = evidenceSentences.slice(1, 3);
+    const ranked = rankSentencesByRelevance(question, evidenceSentences, PASSAGE_RELEVANCE_MIN * 0.85);
+    if (!ranked.length) {
+      return 'Não encontrei no material autorizado desta aula um trecho suficientemente relacionado a essa pergunta. Reformule com o conceito da aula ou avance para o próximo passo no LMS.';
+    }
+    const primary = ranked[0]!.text;
+    const support = ranked.slice(1, 3).map((s) => s.text);
+    const whyLead = /por\s+que|porque|pra\s+que|para\s+que|qual\s+(deve\s+ser\s+)?(o\s+)?primeiro|o\s+que\s+faz/i.test(
+      question,
+    );
     const lines = [
-      lead,
+      whyLead
+        ? primary
+        : `Com base no material autorizado da aula: ${primary}`,
       '',
-      ...(rest.length ? rest.map((s) => `- ${s}`) : []),
+      ...(support.length ? support.map((s) => `- ${s}`) : []),
       '',
       input.intent === 'troubleshooting'
-        ? 'Se quiser, seguimos com um exemplo ou uma verificação passo a passo.'
-        : 'Se quiser, posso explicar de outro jeito, dar um exemplo ou fazer uma pergunta para verificar se ficou claro.',
+        ? 'Próximo passo de estudo: confirme no equipamento os parâmetros que o material correlaciona (não use um único indicador isolado).'
+        : 'Se quiser, posso explicar de outro jeito, dar um exemplo ou indicar o próximo passo no curso.',
     ];
     return lines.filter((l, i, arr) => !(l === '' && arr[i - 1] === '')).join('\n');
   }

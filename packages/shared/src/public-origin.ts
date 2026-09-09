@@ -150,6 +150,39 @@ export function resolveBrowserLocation(path: string, fallback = '/'): string {
   return sanitizeRelativePath(path, fallback);
 }
 
+/**
+ * Absolute redirect URL for Next.js middleware.
+ * Relative Location `/login` is re-parsed by NextURL and throws Invalid URL.
+ * Prefer configured public origin, then trusted forwarded host (never 0.0.0.0).
+ */
+export function resolvePublicAbsoluteRedirect(args: {
+  path: string;
+  configuredOrigin?: string | null;
+  forwardedHost?: string | null;
+  forwardedProto?: string | null;
+  nodeEnv?: string;
+}): string | null {
+  const path = args.path.startsWith('/') && !args.path.startsWith('//') ? args.path : '/login';
+  const candidates: string[] = [];
+  if (args.configuredOrigin?.trim()) candidates.push(args.configuredOrigin.trim());
+  const host = (args.forwardedHost || '').split(',')[0]?.trim();
+  if (host && !isInternalHostname(host) && !isBindHostname(host)) {
+    const proto = (args.forwardedProto || 'https').split(',')[0]?.trim() || 'https';
+    candidates.push(`${proto}://${host}`);
+  }
+  for (const raw of candidates) {
+    const parsed = getConfiguredPublicOrigin({
+      configuredUrl: raw,
+      nodeEnv: args.nodeEnv || 'production',
+      fallbackDev: 'http://localhost:3001',
+    });
+    if (parsed.ok && !urlLeaksInternalHost(parsed.origin)) {
+      return `${parsed.origin}${path}`;
+    }
+  }
+  return null;
+}
+
 export function assertNoInternalHostLeak(value: string): boolean {
   return !urlLeaksInternalHost(value) && !isInternalHostname(hostnameFromUrl(value));
 }
