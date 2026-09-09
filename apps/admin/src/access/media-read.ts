@@ -156,6 +156,12 @@ async function resolveActorSchoolKeys(
       depth?: number;
       overrideAccess?: boolean;
     }) => Promise<{ docs: Array<Record<string, unknown>> }>;
+    findByID?: (args: {
+      collection: string;
+      id: string | number;
+      depth?: number;
+      overrideAccess?: boolean;
+    }) => Promise<unknown>;
   },
   actor: { id: string | number; role: PlatformRole | null },
 ): Promise<SchoolKey[]> {
@@ -194,6 +200,44 @@ async function resolveActorSchoolKeys(
         overrideAccess: true,
       });
       for (const row of courses.docs) addSchool(row.schoolKey);
+    } catch {
+      // ignore
+    }
+    try {
+      const classes = await payload.find({
+        collection: 'lms-classes',
+        where: { instructor: { equals: actor.id } },
+        limit: 50,
+        depth: 1,
+        overrideAccess: true,
+      });
+      for (const row of classes.docs) {
+        addSchool(row.schoolKey);
+        const course = row.course;
+        if (course && typeof course === 'object' && 'schoolKey' in course) {
+          addSchool((course as { schoolKey?: unknown }).schoolKey);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (payload.findByID) {
+    try {
+      const userDoc = await payload.findByID({
+        collection: 'users',
+        id: actor.id,
+        depth: 1,
+        overrideAccess: true,
+      });
+      const company = (userDoc as { company?: unknown } | null)?.company;
+      if (company && typeof company === 'object' && company !== null) {
+        const c = company as { schoolKey?: unknown; brandTheme?: unknown; slug?: unknown };
+        if (isSchoolKey(c.schoolKey)) addSchool(c.schoolKey);
+        else if (c.brandTheme === 'fred' || c.slug === 'fred-do-frio') addSchool('fred-do-frio');
+        else if (c.brandTheme === 'cte' || c.slug === 'cte') addSchool('cte');
+      }
     } catch {
       // ignore
     }

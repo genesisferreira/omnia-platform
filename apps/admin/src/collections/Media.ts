@@ -48,6 +48,12 @@ async function actorSchoolKeys(
       depth?: number;
       overrideAccess?: boolean;
     }) => Promise<{ docs: unknown[] }>;
+    findByID: (args: {
+      collection: string;
+      id: string | number;
+      depth?: number;
+      overrideAccess?: boolean;
+    }) => Promise<unknown>;
   },
   userId: string | number,
   role: PlatformRole | null,
@@ -87,7 +93,45 @@ async function actorSchoolKeys(
     } catch {
       // ignore
     }
+    try {
+      const classes = await payload.find({
+        collection: 'lms-classes',
+        where: { instructor: { equals: userId } },
+        limit: 50,
+        depth: 1,
+        overrideAccess: true,
+      });
+      for (const row of classes.docs as Array<Record<string, unknown>>) {
+        add(row.schoolKey);
+        const course = row.course;
+        if (course && typeof course === 'object' && course !== null && 'schoolKey' in course) {
+          add((course as { schoolKey?: unknown }).schoolKey);
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
+
+  // Company brand/school assignment (Fred/CTE professors often keyed via company).
+  try {
+    const userDoc = await payload.findByID({
+      collection: 'users',
+      id: userId,
+      depth: 1,
+      overrideAccess: true,
+    });
+    const company = (userDoc as { company?: unknown } | null)?.company;
+    if (company && typeof company === 'object' && company !== null) {
+      const c = company as { schoolKey?: unknown; brandTheme?: unknown; slug?: unknown };
+      if (isSchoolKey(c.schoolKey)) add(c.schoolKey);
+      else if (c.brandTheme === 'fred' || c.slug === 'fred-do-frio') add('fred-do-frio');
+      else if (c.brandTheme === 'cte' || c.slug === 'cte') add('cte');
+    }
+  } catch {
+    // ignore
+  }
+
   return [...keys];
 }
 
@@ -117,12 +161,14 @@ const stampMediaAuthDefaults: CollectionBeforeChangeHook = async ({ data, req, o
 
   // Non-staff cannot forge another school or force public.
   if (!staff) {
-    if (
-      requestedSchool != null &&
-      isSchoolKey(requestedSchool) &&
-      !schools.includes(requestedSchool)
-    ) {
-      throw new Error('CROSS_SCHOOL: schoolKey não autorizado para este usuário');
+    if (requestedSchool != null && isSchoolKey(requestedSchool)) {
+      if (schools.length > 0 && !schools.includes(requestedSchool)) {
+        throw new Error('CROSS_SCHOOL: schoolKey não autorizado para este usuário');
+      }
+      if (schools.length === 0) {
+        // Cannot verify yet — drop client-supplied key (never silent public).
+        delete next.schoolKey;
+      }
     }
     if (normalizeVisibility(next.visibility) === 'public') {
       throw new Error('FORBIDDEN: apenas staff pode marcar Media como public');
