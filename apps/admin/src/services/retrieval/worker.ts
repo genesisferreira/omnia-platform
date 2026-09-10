@@ -260,6 +260,7 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
     }
   }
 
+  const ownerCompanyId = relId(chunk.ownerCompany);
   const record: VectorRecord = {
     id: vectorId,
     chunkId: String(chunk.id),
@@ -271,7 +272,9 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
     courseId: relId(chunk.course),
     moduleId: relId(chunk.module),
     lessonId: relId(chunk.lesson),
-    ownerCompanyId: relId(chunk.ownerCompany),
+    ownerCompanyId,
+    // Epic 17: company tenant isolation on vectors (ACL + governance gate).
+    tenantId: ownerCompanyId,
     schoolKey,
     knowledgeScope,
     retrievalEligible,

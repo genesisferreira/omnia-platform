@@ -161,10 +161,13 @@ function denyAgentForAcademicSchool(
   agentKey: string | null | undefined,
 ): GovernanceEligibilityDecision | null {
   if (!agentKey) return null;
-  if (agentKey === 'commercial') {
+  const key = agentKey.toLowerCase();
+  // School academic knowledge: Tutor (and school-aware teaching assistants) only.
+  // Engineering/Commercial require OMNIA_APPROVED institutional authorization.
+  if (key === 'commercial' || key === 'engineering' || key === 'neurofrigo-technology') {
     return {
       allow: false,
-      reason: 'Commercial IA cannot consume school academic knowledge',
+      reason: 'Non-tutor agents cannot consume SCHOOL_APPROVED academic knowledge',
       code: 'DENY_AGENT',
     };
   }

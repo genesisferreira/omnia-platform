@@ -5,6 +5,7 @@
 - **LMS / lesson-asset learning resources** → default `COURSE_PRIVATE`, `retrievalEligible=false`, `autoProcess=false`.
 - **Existing Knowledge Hub documents** with `allowAiUse=true` or `publicationStatus=published` → preserve `OMNIA_APPROVED` + `retrievalEligible=true` (do **not** downgrade EPIC 10 official knowledge).
 - **No automatic promotion** of professor course content into Hub AI retrieval.
+- **On SCHOOL/OMNIA approval** → governed KI ingest from lesson text (media txt + learning-resource) with scope/school/agent metadata; revoke clears `retrievalEligible`.
 
 ## Migration
 

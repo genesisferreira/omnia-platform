@@ -338,17 +338,127 @@ export async function submitLessonForKnowledgeReview(args: {
   return created;
 }
 
+async function ensureLessonTextLearningResource(args: {
+  payload: Payload;
+  submission: Record<string, unknown>;
+  req?: PayloadRequest;
+}): Promise<{ learningResourceId: number; sourceBuffer: Buffer; text: string } | null> {
+  const { payload, submission, req } = args;
+  const lessonId = relId(submission.lesson as Rel);
+  if (lessonId == null) return null;
+
+  const lesson = (await payload.findByID({
+    collection: 'lessons',
+    id: lessonId,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })) as unknown as Record<string, unknown>;
+
+  const title = String(lesson.title || submission.title || `Aula ${lessonId}`);
+  const text = [title, String(lesson.summary || ''), String(lesson.content || '')]
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join('\n\n')
+    .trim();
+  if (!text) return null;
+
+  const sourceBuffer = Buffer.from(text, 'utf8');
+  const courseId = relId(submission.course as Rel);
+  const ownerCompanyId = relId(submission.ownerCompany as Rel);
+  const versionHash =
+    typeof submission.contentVersionHash === 'string' ? submission.contentVersionHash : '';
+
+  const existing = await payload.find({
+    collection: 'learning-resources',
+    where: {
+      and: [
+        { lesson: { equals: lessonId } },
+        { resourceType: { equals: 'txt' } },
+        { origin: { equals: 'upload' } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+
+  let learningResourceId = relId(existing.docs[0]?.id as Rel);
+  if (learningResourceId == null) {
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: `Governance lesson ${lessonId}` },
+      file: {
+        data: sourceBuffer,
+        mimetype: 'text/plain',
+        name: `governance-lesson-${lessonId}-${Date.now()}.txt`,
+        size: sourceBuffer.length,
+      },
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    } as never);
+
+    const created = await payload.create({
+      collection: 'learning-resources',
+      data: {
+        title,
+        media: media.id,
+        lesson: lessonId,
+        course: courseId ?? undefined,
+        resourceType: 'txt',
+        origin: 'upload',
+        processingStatus: 'pending',
+        autoProcess: false,
+        language: 'pt-BR',
+        version: versionHash.slice(0, 12) || '1.0.0',
+        knowledgeScope: 'COURSE_PRIVATE',
+        retrievalEligible: false,
+        governanceState: 'COURSE_PRIVATE',
+        schoolKey: typeof submission.schoolKey === 'string' ? submission.schoolKey : undefined,
+        ownerCompany: ownerCompanyId ?? undefined,
+        contentVersionHash: versionHash || undefined,
+        tags: [{ tag: 'governance-lesson' }, { tag: `lesson:${lessonId}` }],
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    });
+    learningResourceId = relId(created.id);
+  }
+
+  if (learningResourceId == null) return null;
+  return { learningResourceId, sourceBuffer, text };
+}
+
 async function applyHubEligibility(args: {
   payload: Payload;
   submission: Record<string, unknown>;
+  submissionId: string | number;
   state: GovernanceState;
   scope: KnowledgeScope;
+  actorId: string | number;
   req?: PayloadRequest;
 }) {
-  const { payload, submission, state, scope, req } = args;
+  const { payload, submission, submissionId, state, scope, actorId, req } = args;
   const eligible = isRetrievalEligibleState(state) && isHubIngestionEligible(state);
-  const learningResourceId = relId(submission.learningResource as Rel);
-  const knowledgeDocumentId = relId(submission.knowledgeDocument as Rel);
+  let learningResourceId = relId(submission.learningResource as Rel);
+  let knowledgeDocumentId = relId(submission.knowledgeDocument as Rel);
+  const versionHash =
+    typeof submission.contentVersionHash === 'string' ? submission.contentVersionHash : null;
+
+  let sourceBuffer: Buffer | undefined;
+  let preText: string | undefined;
+
+  if (eligible && learningResourceId == null) {
+    const ensured = await ensureLessonTextLearningResource({ payload, submission, req });
+    if (ensured) {
+      learningResourceId = ensured.learningResourceId;
+      sourceBuffer = ensured.sourceBuffer;
+      preText = ensured.text;
+    }
+  }
 
   if (knowledgeDocumentId != null) {
     await payload.update({
@@ -361,6 +471,26 @@ async function applyHubEligibility(args: {
         schoolKey: submission.schoolKey,
         retrievalEligible: eligible,
         governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
+        assessmentSecret: submission.assessmentSecret === true,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true },
+    });
+  }
+
+  if (learningResourceId != null && !eligible) {
+    await payload.update({
+      collection: 'learning-resources',
+      id: learningResourceId,
+      data: {
+        autoProcess: false,
+        knowledgeScope: scope,
+        schoolKey: submission.schoolKey,
+        retrievalEligible: false,
+        governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
       } as never,
       overrideAccess: true,
       req,
@@ -369,6 +499,18 @@ async function applyHubEligibility(args: {
   }
 
   if (eligible && learningResourceId != null) {
+    await writeKnowledgeAudit(
+      payload,
+      {
+        action: 'ingestion_started',
+        entityType: 'knowledge-governance-submissions',
+        entityId: String(submissionId),
+        actorId: String(actorId),
+        nextState: { learningResourceId, scope, state },
+      },
+      req,
+    );
+
     await payload.update({
       collection: 'learning-resources',
       id: learningResourceId,
@@ -379,19 +521,29 @@ async function applyHubEligibility(args: {
         schoolKey: submission.schoolKey,
         retrievalEligible: true,
         governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
       } as never,
       overrideAccess: true,
       req,
       context: { governancePipelineActive: true },
     });
-    void processLearningResource({
+
+    const processed = await processLearningResource({
       payload,
       learningResourceId,
       req,
+      sourceBuffer,
+      sourceMimeType: sourceBuffer ? 'text/plain' : undefined,
+      sourceFilename: sourceBuffer ? `governance-lesson-${learningResourceId}.txt` : undefined,
+      preExtracted: preText
+        ? { text: preText, meta: { language: 'pt-BR', encoding: 'utf-8' } }
+        : undefined,
       hubOverrides: {
         allowAiUse: true,
         publicationStatus: 'published',
         humanReviewRequired: false,
+        securityClassification: 'STUDENT',
+        ownerCompany: relId(submission.ownerCompany as Rel) ?? undefined,
         allowedAgents:
           scope === 'OMNIA_APPROVED' ? ['tutor', 'engineering', 'concierge'] : ['tutor'],
         tags: [
@@ -399,8 +551,58 @@ async function applyHubEligibility(args: {
           `school:${String(submission.schoolKey || '')}`,
           `governance:${state}`,
         ],
+        revisionNotes: `Epic 17 governed ingest (${scope}/${state}).`,
       },
     });
+
+    knowledgeDocumentId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
+
+    if (knowledgeDocumentId != null) {
+      await payload.update({
+        collection: 'knowledge-documents',
+        id: knowledgeDocumentId,
+        data: {
+          allowAiUse: true,
+          publicationStatus: 'published',
+          knowledgeScope: scope,
+          schoolKey: submission.schoolKey,
+          retrievalEligible: true,
+          governanceState: state,
+          contentVersionHash: versionHash ?? undefined,
+          assessmentSecret: false,
+        } as never,
+        overrideAccess: true,
+        req,
+        context: { governancePipelineActive: true },
+      });
+    }
+
+    await kgUpdate(
+      payload,
+      submissionId,
+      {
+        learningResource: learningResourceId,
+        knowledgeDocument: knowledgeDocumentId ?? undefined,
+      },
+      req,
+    );
+
+    await writeKnowledgeAudit(
+      payload,
+      {
+        action: 'ingestion_completed',
+        entityType: 'knowledge-governance-submissions',
+        entityId: String(submissionId),
+        actorId: String(actorId),
+        nextState: {
+          learningResourceId,
+          knowledgeDocumentId,
+          ok: processed.ok,
+          chunkCount: processed.chunkCount,
+        },
+      },
+      req,
+    );
   }
 }
 
@@ -507,8 +709,10 @@ export async function reviewGovernanceSubmission(args: {
   await applyHubEligibility({
     payload,
     submission: { ...doc, ...updated },
+    submissionId,
     state: to,
     scope,
+    actorId,
     req,
   });
 

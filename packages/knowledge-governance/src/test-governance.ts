@@ -113,6 +113,32 @@ describe('retrieval scope enforcement', () => {
     assert.equal(cte.code, 'DENY_SCHOOL');
   });
 
+  it('CTE private → Fred DENY; CTE private → CTE ALLOW', () => {
+    const ctePrivate = {
+      ...fredPrivate,
+      schoolKey: 'cte',
+      courseId: 22,
+    };
+    assert.equal(
+      evaluateRetrievalEligibility(ctePrivate, {
+        schoolKey: 'fred-do-frio',
+        agentKey: 'tutor',
+        channel: 'tutor',
+        activeCourseId: 22,
+      }).allow,
+      false,
+    );
+    assert.equal(
+      evaluateRetrievalEligibility(ctePrivate, {
+        schoolKey: 'cte',
+        agentKey: 'tutor',
+        channel: 'tutor',
+        activeCourseId: 22,
+      }).allow,
+      true,
+    );
+  });
+
   it('Fred school approved ALLOW; CTE DENY', () => {
     assert.equal(
       evaluateRetrievalEligibility(fredSchool, {
@@ -200,6 +226,46 @@ describe('retrieval scope enforcement', () => {
       activeCourseId: 10,
     });
     assert.equal(d.allow, false);
+  });
+
+  it('Engineering unauthorized for SCHOOL academic; authorized Omnia PASS', () => {
+    assert.equal(
+      evaluateRetrievalEligibility(fredSchool, {
+        schoolKey: 'fred-do-frio',
+        agentKey: 'engineering',
+        channel: 'portal_chat',
+      }).allow,
+      false,
+    );
+    assert.equal(
+      evaluateRetrievalEligibility(fredSchool, {
+        schoolKey: 'fred-do-frio',
+        agentKey: 'commercial',
+        channel: 'portal_chat',
+      }).allow,
+      false,
+    );
+    assert.equal(
+      evaluateRetrievalEligibility(omnia, {
+        agentKey: 'engineering',
+        channel: 'portal_chat',
+      }).allow,
+      true,
+    );
+  });
+
+  it('revocation flips retrieval eligibility', () => {
+    const before = evaluateRetrievalEligibility(fredSchool, {
+      schoolKey: 'fred-do-frio',
+      agentKey: 'tutor',
+      channel: 'portal_chat',
+    });
+    const after = evaluateRetrievalEligibility(
+      { ...fredSchool, retrievalEligible: false },
+      { schoolKey: 'fred-do-frio', agentKey: 'tutor', channel: 'portal_chat' },
+    );
+    assert.equal(before.allow, true);
+    assert.equal(after.allow, false);
   });
 });
 

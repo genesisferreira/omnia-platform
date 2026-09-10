@@ -105,6 +105,9 @@ jobs:
       - name: Retrieval ACL contracts
         run: pnpm --filter @omnia/retrieval test
 
+      - name: EPIC 17 Knowledge Governance
+        run: pnpm --filter @omnia/knowledge-governance test
+
       - name: Adaptive Learning unit tests
         run: pnpm --filter @omnia/adaptive-learning test
 
