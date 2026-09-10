@@ -150,6 +150,7 @@ export async function runTutorAsk(
         status: 'not_found' as const,
         intent: 'explanation' as const,
         grounding: null,
+        errorCode: null,
         explainability: {
           sourceCount: 0,
           avgScore: 0,
