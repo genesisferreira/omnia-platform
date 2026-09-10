@@ -751,9 +751,10 @@ export async function ensureLearningResourceFromLessonAsset(args: {
   payload: Payload;
   lessonAssetId: string | number;
   req?: PayloadRequest;
+  /** Epic 17 default: false — Hub AI ingest requires human approval. */
   process?: boolean;
 }): Promise<{ learningResourceId: string | number | null; processed: boolean }> {
-  const { payload, lessonAssetId, req, process = true } = args;
+  const { payload, lessonAssetId, req, process = false } = args;
 
   const asset = (await payload.findByID({
     collection: 'lesson-assets',
@@ -799,6 +800,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
   let instructorId: number | null = null;
   let category: string | null = null;
   let language = 'pt-BR';
+  let schoolKey: string | null = null;
 
   if (lessonId != null) {
     const lesson = (await payload.findByID({
@@ -830,6 +832,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
         instructorId = relId(course.instructor as Rel);
         category = typeof course.category === 'string' ? course.category : null;
         language = typeof course.language === 'string' ? course.language : 'pt-BR';
+        schoolKey = typeof course.schoolKey === 'string' ? course.schoolKey : null;
       }
     }
   }
@@ -855,7 +858,12 @@ export async function ensureLearningResourceFromLessonAsset(args: {
     language,
     origin: 'lms_lesson_asset' as const,
     processingStatus: 'pending' as const,
-    autoProcess: true,
+    // Epic 17: LMS academic content stays COURSE_PRIVATE — no auto Hub AI ingest.
+    autoProcess: false,
+    knowledgeScope: 'COURSE_PRIVATE',
+    retrievalEligible: false,
+    governanceState: 'COURSE_PRIVATE',
+    schoolKey: schoolKey ?? undefined,
     ownerCompany: ownerCompanyId ?? undefined,
     instructor: instructorId ?? undefined,
     category: category ?? undefined,

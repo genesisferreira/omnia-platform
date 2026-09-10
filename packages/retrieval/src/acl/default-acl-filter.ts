@@ -1,3 +1,5 @@
+import { evaluateRetrievalEligibility } from '@omnia/knowledge-governance';
+
 import type { VectorSearchHit } from '../domain/types';
 import type { AclFilterPort, AclSubject } from '../ports';
 
@@ -45,6 +47,37 @@ export class DefaultAclFilter implements AclFilterPort {
 
     return hits.filter((hit) => {
       const r = hit.record;
+
+      // Epic 17 — scope/school/tenant/assessment gate BEFORE returning evidence.
+      if (
+        r.knowledgeScope != null ||
+        r.schoolKey != null ||
+        r.retrievalEligible != null ||
+        r.assessmentSecret === true
+      ) {
+        const gov = evaluateRetrievalEligibility(
+          {
+            knowledgeScope: r.knowledgeScope,
+            schoolKey: r.schoolKey,
+            tenantId: r.tenantId,
+            courseId: r.courseId,
+            retrievalEligible: r.retrievalEligible,
+            allowAiUse: r.allowAiUse,
+            assessmentSecret: r.assessmentSecret,
+            tags: r.tags,
+          },
+          {
+            role: subject.role,
+            tenantId: subject.tenantId,
+            schoolKey: subject.schoolKey,
+            enrolledCourseIds: subject.enrolledCourseIds,
+            agentKey: subject.agentKey,
+            channel: subject.channel,
+            activeCourseId: subject.activeCourseId,
+          },
+        );
+        if (!gov.allow) return false;
+      }
 
       if (r.allowAiUse === false) return false;
 

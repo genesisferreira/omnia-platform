@@ -184,6 +184,11 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
   let publicationStatus = 'published';
   let status = 'published';
   let visibility = 'enrolled';
+  let schoolKey: string | null = null;
+  let knowledgeScope: string | null = 'OMNIA_APPROVED';
+  let retrievalEligible: boolean | null = true;
+  let assessmentSecret = false;
+  let sourceVersion: string | null = chunk.version ?? null;
 
   if (documentId != null) {
     try {
@@ -198,6 +203,11 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
         status?: string | null;
         securityClassification?: string | null;
         allowedAgents?: string[] | null;
+        schoolKey?: string | null;
+        knowledgeScope?: string | null;
+        retrievalEligible?: boolean | null;
+        assessmentSecret?: boolean | null;
+        contentVersionHash?: string | null;
       };
       allowAiUse = doc.allowAiUse !== false;
       publicationStatus = doc.publicationStatus || publicationStatus;
@@ -207,12 +217,46 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
         allowAiUse = false;
         visibility = 'internal_restricted';
       }
+      schoolKey = doc.schoolKey ?? null;
+      knowledgeScope = doc.knowledgeScope ?? knowledgeScope;
+      retrievalEligible = doc.retrievalEligible !== false;
+      assessmentSecret = doc.assessmentSecret === true;
+      sourceVersion = doc.contentVersionHash ?? sourceVersion;
+      if (assessmentSecret || retrievalEligible === false) {
+        allowAiUse = false;
+      }
       for (const agent of doc.allowedAgents || []) {
         const tag = `agent:${agent}`;
         if (!tags.includes(tag)) tags.push(tag);
       }
     } catch {
       // Mantém defaults se o documento Hub não existir mais.
+    }
+  } else if (resourceId != null) {
+    try {
+      const lr = (await payload.findByID({
+        collection: 'learning-resources',
+        id: resourceId,
+        depth: 0,
+        overrideAccess: true,
+      })) as {
+        schoolKey?: string | null;
+        knowledgeScope?: string | null;
+        retrievalEligible?: boolean | null;
+        assessmentSecret?: boolean | null;
+        contentVersionHash?: string | null;
+      };
+      schoolKey = lr.schoolKey ?? null;
+      knowledgeScope = lr.knowledgeScope ?? 'COURSE_PRIVATE';
+      retrievalEligible = lr.retrievalEligible === true;
+      assessmentSecret = lr.assessmentSecret === true;
+      sourceVersion = lr.contentVersionHash ?? sourceVersion;
+      // LMS resources without approval stay non-retrievable in vector ACL.
+      if (retrievalEligible !== true || assessmentSecret) {
+        allowAiUse = false;
+      }
+    } catch {
+      // ignore
     }
   }
 
@@ -228,6 +272,11 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
     moduleId: relId(chunk.module),
     lessonId: relId(chunk.lesson),
     ownerCompanyId: relId(chunk.ownerCompany),
+    schoolKey,
+    knowledgeScope,
+    retrievalEligible,
+    assessmentSecret,
+    sourceVersion,
     language: chunk.language ?? null,
     version: chunk.version ?? null,
     category: chunk.category ?? null,

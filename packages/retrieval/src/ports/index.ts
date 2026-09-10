@@ -33,7 +33,11 @@ export type AclSubject = {
   tenantId?: string | null;
   companyIds?: Array<string | number>;
   agentKey?: string | null;
-  channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command';
+  channel?: 'portal_chat' | 'portal_public' | 'admin' | 'system' | 'command' | 'tutor';
+  /** Epic 17 governance subject fields */
+  schoolKey?: string | null;
+  enrolledCourseIds?: Array<string | number>;
+  activeCourseId?: string | number | null;
 };
 
 export interface AclFilterPort {

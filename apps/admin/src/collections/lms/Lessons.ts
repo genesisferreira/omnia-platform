@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload';
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 
 import {
   lmsContentCreateAccess,
@@ -6,6 +6,7 @@ import {
   lmsNestedReadAccess,
   lmsNestedWriteAccess,
 } from '../../access/lms-content';
+import { invalidateGovernanceOnLessonChange } from '../../services/knowledge/governance';
 import { LESSON_TYPES, optionsFrom } from './constants';
 
 const normalizeSlug: CollectionBeforeChangeHook = async ({ data }) => {
@@ -19,6 +20,24 @@ const normalizeSlug: CollectionBeforeChangeHook = async ({ data }) => {
       .replace(/^-|-$/g, '');
   }
   return data;
+};
+
+const lessonAfterChangeGovernance: CollectionAfterChangeHook = async ({
+  doc,
+  operation,
+  req,
+  context,
+}) => {
+  if (context && typeof context === 'object' && 'governancePipelineActive' in context) {
+    return doc;
+  }
+  if (operation !== 'update') return doc;
+  void invalidateGovernanceOnLessonChange({
+    payload: req.payload,
+    lessonId: Number(doc.id),
+    req,
+  });
+  return doc;
 };
 
 export const Lessons: CollectionConfig = {
@@ -43,6 +62,7 @@ export const Lessons: CollectionConfig = {
   },
   hooks: {
     beforeChange: [normalizeSlug],
+    afterChange: [lessonAfterChangeGovernance],
   },
   fields: [
     {

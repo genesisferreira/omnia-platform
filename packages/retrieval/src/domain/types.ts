@@ -36,6 +36,12 @@ export type VectorRecord = {
   lessonId?: string | null;
   ownerCompanyId?: string | null;
   tenantId?: string | null;
+  /** Epic 17 — school isolation for governed knowledge (distinct from Media visibility). */
+  schoolKey?: string | null;
+  knowledgeScope?: string | null;
+  retrievalEligible?: boolean | null;
+  assessmentSecret?: boolean | null;
+  sourceVersion?: string | null;
   language?: string | null;
   version?: string | null;
   tags?: string[];
@@ -62,6 +68,9 @@ export type VectorSearchFilters = {
   publicationStatus?: string | null;
   visibility?: string | null;
   status?: string | null;
+  schoolKey?: string | null;
+  knowledgeScope?: string | null;
+  retrievalEligible?: boolean | null;
 };
 
 export type VectorSearchHit = {

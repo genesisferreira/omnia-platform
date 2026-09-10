@@ -397,5 +397,57 @@ export const KnowledgeDocuments: CollectionConfig = {
       label: 'Atualizado por',
       admin: { readOnly: true, position: 'sidebar' },
     },
+    {
+      name: 'knowledgeScope',
+      type: 'select',
+      defaultValue: 'OMNIA_APPROVED',
+      index: true,
+      options: [
+        { label: 'Privado do curso', value: 'COURSE_PRIVATE' },
+        { label: 'Aprovado escola', value: 'SCHOOL_APPROVED' },
+        { label: 'Aprovado Omnia', value: 'OMNIA_APPROVED' },
+      ],
+      label: 'Escopo de conhecimento (Epic 17)',
+      admin: {
+        description:
+          'Documentos oficiais do Hub preservam OMNIA_APPROVED. Conteúdo LMS inicia COURSE_PRIVATE.',
+      },
+    },
+    {
+      name: 'schoolKey',
+      type: 'text',
+      index: true,
+      label: 'Escola (schoolKey)',
+    },
+    {
+      name: 'governanceState',
+      type: 'text',
+      index: true,
+      label: 'Estado de governança',
+    },
+    {
+      name: 'retrievalEligible',
+      type: 'checkbox',
+      defaultValue: true,
+      index: true,
+      label: 'Elegível para recuperação IA',
+      admin: {
+        description: 'Revogação define false sem destruir histórico.',
+      },
+    },
+    {
+      name: 'assessmentSecret',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      label: 'Segredo de avaliação',
+    },
+    {
+      name: 'contentVersionHash',
+      type: 'text',
+      index: true,
+      label: 'Hash da versão aprovada',
+      admin: { readOnly: true },
+    },
   ],
 };

@@ -1,5 +1,11 @@
 import type { Endpoint, PayloadRequest } from 'payload';
 
+import {
+  getGovernanceStatusForLesson,
+  invalidateGovernanceOnLessonChange,
+  reviewGovernanceSubmission,
+  submitLessonForKnowledgeReview,
+} from '../../services/knowledge/governance';
 import { requireLmsAuth, type LmsAuthContext } from '../../services/lms/auth-context';
 import {
   AcademicError,
@@ -62,6 +68,20 @@ function fail(err: unknown): Response {
     return json(err.status, { ok: false, error: { code: err.code, message: err.message } });
   }
   const message = err instanceof Error ? err.message : 'Erro acadêmico';
+  if (message === 'UNAUTHORIZED') {
+    return json(401, { ok: false, error: { code: 'UNAUTHORIZED', message } });
+  }
+  if (message === 'FORBIDDEN') {
+    return json(403, { ok: false, error: { code: 'FORBIDDEN', message } });
+  }
+  if (
+    message === 'REASON_REQUIRED' ||
+    message === 'ASSESSMENT_SECRET_NOT_SUBMISSIBLE' ||
+    message === 'LESSON_SCHOOL_KEY_REQUIRED' ||
+    message.startsWith('Invalid knowledge governance')
+  ) {
+    return json(400, { ok: false, error: { code: 'BAD_REQUEST', message } });
+  }
   return json(500, { ok: false, error: { code: 'INTERNAL_ERROR', message } });
 }
 
@@ -807,6 +827,105 @@ const teachingPublishEp: Endpoint = {
   },
 };
 
+const teachingKnowledgeSubmitEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons/:id/knowledge-submit',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      const body = (await req.json?.()) as { requestedScope?: 'SCHOOL_APPROVED' | 'OMNIA_APPROVED' };
+      const ctx = auth(req);
+      return ok(
+        await submitLessonForKnowledgeReview({
+          payload: req.payload,
+          lessonId: id,
+          user: req.user ?? { id: ctx.userId, role: ctx.role },
+          requestedScope: body?.requestedScope,
+          req,
+        }),
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingKnowledgeStatusEp: Endpoint = {
+  path: '/omnia/academic/teaching/lessons/:id/knowledge-status',
+  method: 'get',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      auth(req);
+      const status = await getGovernanceStatusForLesson({
+        payload: req.payload,
+        lessonId: id,
+        req,
+      });
+      return ok({
+        status: status
+          ? {
+              governanceState: status.governanceState,
+              statusLabel: status.statusLabel,
+              knowledgeScope: status.knowledgeScope,
+              reviewNote: status.reviewNote,
+              submittedAt: status.submittedAt,
+              retrievalEligible: status.retrievalEligible,
+            }
+          : {
+              governanceState: 'COURSE_PRIVATE',
+              statusLabel: 'Privado do curso',
+              knowledgeScope: 'COURSE_PRIVATE',
+              retrievalEligible: false,
+            },
+      });
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
+const teachingKnowledgeReviewEp: Endpoint = {
+  path: '/omnia/academic/teaching/knowledge-reviews/:id',
+  method: 'post',
+  handler: async (req) => {
+    try {
+      const id = num(req.routeParams?.id);
+      if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
+      if (!req.user) {
+        return json(401, { ok: false, error: { code: 'UNAUTHORIZED', message: 'UNAUTHORIZED' } });
+      }
+      const body = (await req.json?.()) as {
+        action?:
+          | 'approve_school'
+          | 'reject'
+          | 'promote_omnia'
+          | 'approve_omnia'
+          | 'revoke'
+          | 'request_correction';
+        reason?: string;
+      };
+      if (!body?.action) {
+        return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'action' } });
+      }
+      return ok(
+        await reviewGovernanceSubmission({
+          payload: req.payload,
+          submissionId: id,
+          user: req.user,
+          action: body.action,
+          reason: body.reason,
+          req,
+        }),
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  },
+};
+
 export const academicEndpoints: Endpoint[] = [
   studentDashboardEp,
   myCoursesEp,
@@ -846,4 +965,7 @@ export const academicEndpoints: Endpoint[] = [
   teachingAttemptsEp,
   teachingGradeEp,
   teachingPublishEp,
+  teachingKnowledgeSubmitEp,
+  teachingKnowledgeStatusEp,
+  teachingKnowledgeReviewEp,
 ];

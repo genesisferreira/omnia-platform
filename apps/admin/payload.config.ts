@@ -77,6 +77,7 @@ import { KnowledgeAgentAccess } from './src/collections/knowledge/KnowledgeAgent
 import { KnowledgeAuditEvents } from './src/collections/knowledge/KnowledgeAuditEvents';
 import { KnowledgeCategories } from './src/collections/knowledge/KnowledgeCategories';
 import { KnowledgeDocuments } from './src/collections/knowledge/KnowledgeDocuments';
+import { KnowledgeGovernanceSubmissions } from './src/collections/knowledge/KnowledgeGovernanceSubmissions';
 import { KnowledgeProcessingJobs } from './src/collections/knowledge/KnowledgeProcessingJobs';
 import { KnowledgeReviews } from './src/collections/knowledge/KnowledgeReviews';
 import { KnowledgeSources } from './src/collections/knowledge/KnowledgeSources';
@@ -220,6 +221,7 @@ export default buildConfig({
     AdaptiveDecisions,
     AdaptivePolicies,
     KnowledgeDocuments,
+    KnowledgeGovernanceSubmissions,
     KnowledgeCategories,
     KnowledgeSources,
     KnowledgeReviews,

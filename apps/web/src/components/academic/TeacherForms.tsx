@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@omnia/ui';
 
 export function CreateLessonForm({
@@ -748,5 +748,80 @@ export function EnrollForm({ courses }: { courses: Array<{ id: number; title: st
       </Button>
       {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
     </form>
+  );
+}
+
+/**
+ * Epic 17 — professor sees friendly knowledge status and can submit for review.
+ * No vector/embedding/RAG jargon.
+ */
+export function KnowledgeGovernancePanel({ lessonId }: { lessonId: number }) {
+  const [label, setLabel] = useState('Privado do curso');
+  const [note, setNote] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function refresh() {
+    const res = await fetch(`/api/academic/teaching/lessons/${lessonId}/knowledge-status`);
+    if (!res.ok) return;
+    const data = (await res.json()) as {
+      status?: { statusLabel?: string; reviewNote?: string | null };
+    };
+    setLabel(data.status?.statusLabel || 'Privado do curso');
+    setNote(data.status?.reviewNote ? String(data.status.reviewNote) : null);
+  }
+
+  useEffect(() => {
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId]);
+
+  async function submit() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(`/api/academic/teaching/lessons/${lessonId}/knowledge-submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestedScope: 'SCHOOL_APPROVED' }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: { message?: string };
+        } | null;
+        setMsg(body?.error?.message || 'Não foi possível enviar para revisão.');
+        return;
+      }
+      setMsg('Enviado para revisão da Base de Conhecimento.');
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3 rounded-md border border-border p-4">
+      <h2 className="text-sm font-semibold">Base de Conhecimento</h2>
+      <p className="text-xs text-muted-foreground">
+        O material fica disponível no curso imediatamente. Enviar para a base não publica na hora —
+        passa por revisão humana.
+      </p>
+      <dl className="grid gap-1 text-sm">
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted-foreground">Status</dt>
+          <dd className="font-medium">{label}</dd>
+        </div>
+        {note ? (
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Nota da revisão</dt>
+            <dd className="text-right">{note}</dd>
+          </div>
+        ) : null}
+      </dl>
+      <Button type="button" size="sm" disabled={busy} onClick={() => void submit()}>
+        Enviar para Base de Conhecimento
+      </Button>
+      {msg ? <p className="text-xs text-muted-foreground">{msg}</p> : null}
+    </div>
   );
 }

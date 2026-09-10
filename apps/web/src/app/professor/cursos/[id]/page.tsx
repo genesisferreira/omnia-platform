@@ -5,6 +5,7 @@ import {
   CreateLessonForm,
   CreateModuleForm,
   AttachAssetForm,
+  KnowledgeGovernancePanel,
 } from '@/components/academic/TeacherForms';
 import { fetchAcademic } from '@/lib/academic/client';
 import { requirePortalSession } from '@/lib/auth/require-session';
@@ -97,6 +98,7 @@ export default async function ProfessorCursoDetailPage({
                       </span>
                     </span>
                     <AttachAssetForm lessonId={lesson.id} />
+                    <KnowledgeGovernancePanel lessonId={lesson.id} />
                   </li>
                 ))}
                 {!mod.lessons?.length ? (

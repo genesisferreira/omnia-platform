@@ -24,6 +24,14 @@ function matchesFilters(record: VectorRecord, filters: VectorSearchFilters): boo
     return false;
   if (filters.visibility && record.visibility !== filters.visibility) return false;
   if (filters.status && record.status !== filters.status) return false;
+  if (filters.schoolKey && record.schoolKey && record.schoolKey !== filters.schoolKey) return false;
+  if (
+    filters.knowledgeScope &&
+    record.knowledgeScope &&
+    record.knowledgeScope !== filters.knowledgeScope
+  )
+    return false;
+  if (filters.retrievalEligible === true && record.retrievalEligible === false) return false;
   if (filters.tags?.length) {
     const tags = record.tags ?? [];
     if (!filters.tags.every((t) => tags.includes(t))) return false;

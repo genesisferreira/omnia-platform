@@ -62,7 +62,8 @@ export const lessonAssetAfterChangeForKi: CollectionAfterChangeHook = async ({
     payload: req.payload,
     lessonAssetId: doc.id,
     req,
-    process: true,
+    // Epic 17: mirror LMS resource only; Hub AI ingest requires human approval.
+    process: false,
   });
 
   return doc;
