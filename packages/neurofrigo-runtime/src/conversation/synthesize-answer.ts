@@ -21,7 +21,7 @@ export type PublicCourseFact = {
   providerHint?: string | null;
 };
 
-function sentencesFrom(text: string, max = 6): string[] {
+function sentencesFrom(text: string, max = 12): string[] {
   const cleaned = sanitizeEvidenceText(text);
   if (!cleaned) return [];
   return cleaned
@@ -123,8 +123,10 @@ export function synthesizeConversationalAnswer(input: {
   }
 
   const evidenceSentences = uniqueSentences(
-    input.evidence.flatMap((e) => sentencesFrom(e.text, 4)),
-    6,
+    // Rank across the full authorized lesson body — do not truncate to the
+    // first 4 sentences before relevance (Q3 first-step lived past sentence 4).
+    input.evidence.flatMap((e) => sentencesFrom(e.text, 16)),
+    12,
   );
 
   if (!evidenceSentences.length && courses.length === 0) {

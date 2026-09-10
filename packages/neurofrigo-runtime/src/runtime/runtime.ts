@@ -673,18 +673,18 @@ export class NeurofrigoRuntime {
       });
       answerText = naturalizeUserText(answerText);
 
-      const rejectedUnsupported =
-        isUnsupportedInventionQuestion(request.question) ||
-        /n[aã]o\s+vou\s+inventar|n[aã]o\s+est[aá]\s+presente\s+no\s+material\s+autorizado|suficientemente\s+relacionado/i.test(
+      const rejectedUnsupported = isUnsupportedInventionQuestion(request.question);
+      const weakGrounding =
+        /n[aã]o\s+encontrei.*suficientemente\s+relacionado|n[aã]o\s+vou\s+inventar|n[aã]o\s+est[aá]\s+presente\s+no\s+material\s+autorizado/i.test(
           answerText,
         );
       const answerStatus: 'ok' | 'not_found' =
-        rejectedUnsupported &&
-        /n[aã]o\s+(encontrei|vou\s+inventar)|suficientemente\s+relacionado|n[aã]o\s+est[aá]\s+presente/i.test(
-          answerText,
-        )
-          ? 'not_found'
-          : 'ok';
+        rejectedUnsupported || weakGrounding ? 'not_found' : 'ok';
+      const answerError = rejectedUnsupported
+        ? 'UNSUPPORTED_KNOWLEDGE'
+        : weakGrounding
+          ? 'NO_RELEVANT_PASSAGE'
+          : null;
 
       const confidence = normalizeConfidence(computeConfidence(guarded.chunks));
       const contextChars = guarded.chunks.reduce((s, c) => s + c.text.length, 0);
@@ -732,7 +732,7 @@ export class NeurofrigoRuntime {
           this.costPer1kTokens,
         ),
         status: answerStatus,
-        errorCode: answerStatus === 'not_found' ? 'UNSUPPORTED_KNOWLEDGE' : null,
+        errorCode: answerError,
         intent: prompt.intent,
         grounding,
         suggestedActions: buildSuggestedActions({

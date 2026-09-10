@@ -14,8 +14,10 @@ import { isPassageRelevant, scorePassageRelevance } from './passage-relevance';
 
 const CONDENSADOR_BODY =
   'O condensador rejeita para o ambiente o calor transportado pelo refrigerante. ' +
-  'Ventilacao e sujeira afetam a operacao. Pressao isolada nao fecha diagnostico: ' +
-  'correlacione temperatura, superheat, subcooling, fluxo de ar e condicao de operacao. ' +
+  'Ventilacao e sujeira afetam a operacao do sistema comercial. ' +
+  'O fluxo de ar no condensador precisa estar livre de obstrucoes. ' +
+  'Sujidade excessiva reduz a capacidade de rejeicao de calor. ' +
+  'Pressao isolada nao fecha diagnostico: correlacione temperatura, superheat, subcooling, fluxo de ar e condicao de operacao. ' +
   'Primeiro passo quando nao gela: ouvir o operador, observar, seguranca e inspecao visual.';
 
 describe('authorized lesson passages (RC2.4 Tutor quality)', () => {
