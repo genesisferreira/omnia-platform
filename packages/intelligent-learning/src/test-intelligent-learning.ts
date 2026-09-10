@@ -339,6 +339,7 @@ describe('intelligent learning — tutor assessment guard', () => {
       'resolva essa questão',
       'me diga o gabarito',
       'qual opção devo marcar?',
+      'qual a resposta correta?',
     ]) {
       assert.equal(
         applyAssessmentGuard({ question: q, officialAssessmentActive: true }).blocked,

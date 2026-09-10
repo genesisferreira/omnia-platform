@@ -2,7 +2,7 @@ import type { SchoolKey } from './schools';
 import { tutorAllowedContextKeys } from './student-360';
 
 const ANSWER_SEEKING =
-  /\b(gabarito|resposta certa|alternativa correta|alternativa\s+[a-e]\b|qual (é|e|é) a resposta|me (diz|diga|fale|passa) (a )?resposta|resolv\w*( (a|esta|essa))? quest|answer key|correct option|qual op[cç][aã]o|op[cç][aã]o (devo|certa)|devo marcar)\b/i;
+  /\b(gabarito|resposta certa|alternativa correta|alternativa\s+[a-e]\b|qual (é|e) a resposta|resposta correta|me (diz|diga|fale|passa) (a )?resposta|resolv\w*( (a|esta|essa))? quest|answer key|correct option|qual op[cç][aã]o|op[cç][aã]o (devo|certa)|devo marcar)\b/i;
 
 export type AssessmentGuardInput = {
   question: string;

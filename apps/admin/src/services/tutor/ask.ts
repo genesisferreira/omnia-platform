@@ -129,6 +129,79 @@ export async function runTutorAsk(
   } catch {
     /* ILS guard opcional — Tutor EPIC 16 permanece operacional. */
   }
+
+  // Assessment answer-seeking: never synthesize from lesson/session — return guard only.
+  if (guard.blocked) {
+    const text =
+      'Durante uma avaliação oficial não posso fornecer a resposta, o gabarito ou a alternativa correta. Posso ajudar com o conceito geral da disciplina, sem resolver o item.';
+    return {
+      answer: {
+        text,
+        formattedText: text,
+        sources: [],
+        confidence: 1,
+        tookMs: 0,
+        model: 'assessment-guard',
+        provider: 'tutor-guard',
+        promptTokens: 0,
+        completionTokens: Math.ceil(text.length / 4),
+        totalTokens: Math.ceil(text.length / 4),
+        estimatedCostUsd: 0,
+        status: 'not_found' as const,
+        intent: 'explanation' as const,
+        grounding: null,
+        explainability: {
+          sourceCount: 0,
+          avgScore: 0,
+          confidence: 1,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: 'explanation',
+          justification: 'Assessment Guard blocked answer-seeking during official assessment.',
+        },
+        dialogueIntent: 'assessment_guard',
+      },
+      sessionId: body.sessionId ?? `assessment-guard-${Date.now()}`,
+      level: 'beginner' as const,
+      levelLabel: 'Iniciante',
+      student: {
+        userId: userKey,
+        tenantId: body.tenantId ?? null,
+        enrolledCourseIds: [String(body.courseId)],
+        progressPercent: 0,
+        completedModuleIds: [],
+        completedLessonIds: [],
+        lastActivityAt: null,
+        studyTimeMinutes: 0,
+        language: body.language || 'pt-BR',
+        courseId: String(body.courseId),
+      },
+      learning: {
+        userId: userKey,
+        courseId: String(body.courseId),
+        level: 'beginner' as const,
+        masteredTopics: [],
+        pendingTopics: [],
+        reviewedTopics: [],
+        difficultyTopics: [],
+        aiUsageCount: 0,
+        avgGrounding: 0,
+        negativeFeedbackCount: 0,
+        repeatedQuestions: [],
+      },
+      recommendations: [],
+      studyPlan: null,
+      gaps: [],
+      encouragement: '',
+      personalizedHint: '',
+      assessmentGuard: {
+        blocked: true,
+        reason: guard.reason,
+      },
+    };
+  }
+
   if (userKey !== 'anonymous') {
     try {
       const ctx = await getSipAssistantContext(payload, {

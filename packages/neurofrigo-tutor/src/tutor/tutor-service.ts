@@ -38,6 +38,94 @@ export class TutorService {
     const userId = request.userId?.trim() || 'anonymous';
     const courseId = String(request.courseId);
 
+    // LMS navigation first — never wait on profiles/retrieval; ignore session topic bleed.
+    if (isLmsNextStepQuestion(request.question)) {
+      const studentEarly = await this.deps.students.getOrSync({
+        userId,
+        tenantId: request.tenantId ?? null,
+        courseId,
+        language: request.language ?? 'pt-BR',
+      });
+      const learningEarly = await this.deps.learning.getOrSync({
+        userId,
+        courseId,
+        student: studentEarly,
+      });
+      const catalogEarly = await this.deps.catalog.load(courseId);
+      const recommendationsEarly = catalogEarly
+        ? buildRecommendations({
+            catalog: catalogEarly,
+            student: studentEarly,
+            learning: learningEarly,
+            currentLessonId: request.lessonId,
+          })
+        : [];
+      const text = composeLmsNextStepAnswer({
+        courseTitle: request.courseTitle ?? catalogEarly?.courseTitle,
+        progressPercent: studentEarly.progressPercent,
+        currentLessonTitle: request.lessonTitle,
+        recommendations: recommendationsEarly,
+        student: studentEarly,
+      });
+      const answer: RuntimeAnswer = {
+        text,
+        formattedText: text,
+        sources: [],
+        confidence: 0.95,
+        tookMs: 0,
+        model: 'lms-next-step',
+        provider: 'tutor-lms',
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        estimatedCostUsd: 0,
+        status: 'ok',
+        intent: 'procedural',
+        grounding: {
+          score: 1,
+          sourceCount: 0,
+          avgSimilarity: 1,
+          coverage: 1,
+          contextChars: 0,
+          confidence: 0.95,
+        },
+        explainability: {
+          sourceCount: 0,
+          avgScore: 1,
+          confidence: 0.95,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: 'procedural',
+          justification: 'Answered from LMS progress/catalog, not retrieval dump.',
+        },
+        dialogueIntent: 'lms_next_step',
+      };
+
+      await this.deps.learning.recordUsage({
+        userId,
+        courseId,
+        question: request.question,
+        groundingScore: 1,
+        confidence: 0.95,
+        status: 'ok',
+      });
+
+      return {
+        answer,
+        sessionId: request.sessionId ?? `lms-next-${Date.now()}`,
+        level: learningEarly.level,
+        levelLabel: LEVEL_LABELS[learningEarly.level],
+        student: studentEarly,
+        learning: learningEarly,
+        recommendations: recommendationsEarly,
+        studyPlan: null,
+        gaps: catalogEarly ? detectGaps({ learning: learningEarly, catalog: catalogEarly }) : [],
+        encouragement: buildEncouragement(learningEarly.level, studentEarly, 0),
+        personalizedHint: buildPersonalizedHint(learningEarly.level),
+      };
+    }
+
     const student = await this.deps.students.getOrSync({
       userId,
       tenantId: request.tenantId ?? null,
@@ -87,73 +175,7 @@ export class TutorService {
     const gaps = catalog ? detectGaps({ learning, catalog }) : [];
     const encouragement = buildEncouragement(learning.level, student, gaps.length);
 
-    // LMS navigation — answer from progress/recommendations, not Knowledge dump.
-    if (isLmsNextStepQuestion(request.question)) {
-      const text = composeLmsNextStepAnswer({
-        courseTitle: request.courseTitle ?? catalog?.courseTitle,
-        progressPercent: student.progressPercent,
-        currentLessonTitle: request.lessonTitle,
-        recommendations,
-        student,
-      });
-      const answer: RuntimeAnswer = {
-        text,
-        formattedText: text,
-        sources: [],
-        confidence: 0.95,
-        tookMs: 0,
-        model: 'lms-next-step',
-        provider: 'tutor-lms',
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        estimatedCostUsd: 0,
-        status: 'ok',
-        intent: 'procedural',
-        grounding: {
-          score: 1,
-          sourceCount: 0,
-          avgSimilarity: 1,
-          coverage: 1,
-          contextChars: 0,
-          confidence: 0.95,
-        },
-        explainability: {
-          sourceCount: 0,
-          avgScore: 1,
-          confidence: 0.95,
-          documents: [],
-          retrievalTookMs: 0,
-          llmTookMs: 0,
-          intent: 'procedural',
-          justification: 'Answered from LMS progress/catalog, not retrieval dump.',
-        },
-        dialogueIntent: 'lms_next_step',
-      };
-
-      await this.deps.learning.recordUsage({
-        userId,
-        courseId,
-        question: request.question,
-        groundingScore: 1,
-        confidence: 0.95,
-        status: 'ok',
-      });
-
-      return {
-        answer,
-        sessionId: request.sessionId ?? `lms-next-${Date.now()}`,
-        level: learning.level,
-        levelLabel: LEVEL_LABELS[learning.level],
-        student,
-        learning,
-        recommendations,
-        studyPlan,
-        gaps,
-        encouragement,
-        personalizedHint,
-      };
-    }
+    // (LMS next-step already handled above)
 
     const runtimeRequest: RuntimeRequest = {
       question: request.question,

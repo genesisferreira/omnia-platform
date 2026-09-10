@@ -7,6 +7,7 @@ describe('LMS next-step intent (RC2.4)', () => {
   it('detects next-step questions', () => {
     assert.equal(isLmsNextStepQuestion('qual o proximo passo'), true);
     assert.equal(isLmsNextStepQuestion('Qual é meu próximo passo no curso?'), true);
+    assert.equal(isLmsNextStepQuestion('qual é meu próximo passo'), true);
     assert.equal(isLmsNextStepQuestion('o que estudo agora?'), true);
     assert.equal(isLmsNextStepQuestion('qual aula faço depois?'), true);
     assert.equal(isLmsNextStepQuestion('O que faz o condensador?'), false);

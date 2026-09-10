@@ -1,7 +1,7 @@
 import type { StudentProfile, StudyRecommendation } from '../domain/types';
 
 const NEXT_STEP_RE =
-  /pr[oó]ximo\s+passo|pr[oó]xima\s+aula|o\s+que\s+(eu\s+)?(estudo|fa[cç]o|devo\s+(estudar|fazer)|aprendo)\s+agora|o\s+que\s+estud(o|ar)\s+agora|qual\s+(aula|li[cç][aã]o)\s+(fa[cç]o|vem)\s+depois|para\s+onde\s+(eu\s+)?(vou|sigo)|seguinte\s+(aula|passo)|meu\s+pr[oó]ximo\s+passo|pr[oó]ximo\s+passo\s+no\s+curso/i;
+  /pr[oó]ximo\s+passo|pr[oó]xima\s+aula|o\s+que\s+(eu\s+)?(estudo|fa[cç]o|devo\s+(estudar|fazer)|aprendo)\s+agora|o\s+que\s+estud(o|ar)\s+agora|qual\s+(aula|li[cç][aã]o)\s+(fa[cç]o|vem)\s+depois|para\s+onde\s+(eu\s+)?(vou|sigo)|seguinte\s+(aula|passo)|meu\s+pr[oó]ximo\s+passo|pr[oó]ximo\s+passo\s+no\s+curso|qual\s+[eé]\s+meu\s+pr[oó]ximo\s+passo/i;
 
 export function isLmsNextStepQuestion(question: string): boolean {
   const q = question.trim();
