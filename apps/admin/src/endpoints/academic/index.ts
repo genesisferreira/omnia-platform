@@ -840,7 +840,7 @@ const teachingKnowledgeSubmitEp: Endpoint = {
         await submitLessonForKnowledgeReview({
           payload: req.payload,
           lessonId: id,
-          user: req.user ?? { id: ctx.userId, role: ctx.role },
+          user: req.user ?? { id: ctx.omniaUserId, role: ctx.role },
           requestedScope: body?.requestedScope,
           req,
         }),
