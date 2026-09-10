@@ -29,6 +29,10 @@ const RULES: Array<{ intent: QuestionIntent; patterns: RegExp[] }> = [
     patterns: [
       /\bcomo (fazer|proceder|instalar|ajustar|medir|calcular)\b/i,
       /\bpasso a passo\b/i,
+      /\bprimeiro\s+passo\b/i,
+      /\bqual\s+deve\s+ser\s+(o\s+|meu\s+)?primeiro\b/i,
+      /\bquando\s+(o\s+)?equipamento\b/i,
+      /\bn[aã]o\s+(est[aá]\s+)?gelando\b/i,
       /\bprocedimento\b/i,
       /\betapas?\b/i,
     ],

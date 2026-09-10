@@ -442,6 +442,7 @@ export function CreateClassForm({ courses }: { courses: Array<{ id: number; titl
 }
 
 export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; title: string }> }) {
+  const router = useRouter();
   const [prompt, setPrompt] = useState('');
   const [courseId, setCourseId] = useState(courses[0]?.id ? String(courses[0].id) : '');
   const [qType, setQType] = useState<'multiple_choice' | 'true_false' | 'short_answer' | 'essay'>(
@@ -450,6 +451,7 @@ export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; t
   const [correct, setCorrect] = useState('b');
   const [tfCorrect, setTfCorrect] = useState<'true' | 'false'>('true');
   const [msg, setMsg] = useState<string | null>(null);
+  const [lastId, setLastId] = useState<number | null>(null);
 
   async function submit() {
     const body: Record<string, unknown> = {
@@ -480,8 +482,19 @@ export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; t
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    const data = (await res.json().catch(() => null)) as { id?: number } | null;
-    setMsg(res.ok ? `Questão #${data?.id} criada.` : 'Falha ao criar questão.');
+    const data = (await res.json().catch(() => null)) as {
+      id?: number;
+      error?: { message?: string; code?: string };
+    } | null;
+    if (res.ok && data?.id != null) {
+      setLastId(Number(data.id));
+      setMsg(`Questão #${data.id} (${qType}) criada.`);
+      setPrompt('');
+      router.refresh();
+      return;
+    }
+    const detail = data?.error?.message || data?.error?.code || `HTTP ${res.status}`;
+    setMsg(`Falha ao criar questão: ${detail}`);
   }
 
   return (
@@ -560,6 +573,11 @@ export function CreateQuestionForm({ courses }: { courses: Array<{ id: number; t
       <Button type="submit" size="sm">
         Criar questão
       </Button>
+      {lastId != null ? (
+        <p className="text-xs text-muted-foreground">
+          Última criada: #{lastId}. Confira no banco abaixo (reabrir/listar).
+        </p>
+      ) : null}
       {msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
     </form>
   );

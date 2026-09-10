@@ -23,6 +23,10 @@ import { applyRepetitionControl, naturalizeUserText } from '../conversation/natu
 import { validateAndRewriteResponse } from '../conversation/response-validator';
 import { buildHandoffRequest } from '../conversation/action-router';
 import { mergeRetrievalWithAuthorizedPassages } from '../context/authorized-passages';
+import {
+  isUnsupportedInventionQuestion,
+  unsupportedKnowledgeRejection,
+} from '../conversation/unsupported-knowledge';
 import type { ConversationState } from '../conversation/dialogue-types';
 import type {
   ContextBuilderPort,
@@ -113,6 +117,62 @@ export class NeurofrigoRuntime {
         justification: 'Resposta de capacidades a partir do Assistant Registry (sem retrieval).',
         previousAnswers,
       });
+    }
+
+    // Unsupported invention (Tutor): never synthesize from lesson / session history.
+    if (
+      (assistantKey === 'tutor' || hasAuthorizedLessonContext) &&
+      isUnsupportedInventionQuestion(request.question)
+    ) {
+      const text = naturalizeUserText(unsupportedKnowledgeRejection());
+      return {
+        text,
+        formattedText: formatResponse({
+          text,
+          intent: intentHint,
+          status: 'not_found',
+        }),
+        sources: [],
+        confidence: 0,
+        tookMs: Date.now() - started,
+        model: meta.model,
+        provider: meta.name,
+        promptTokens: 0,
+        completionTokens: Math.ceil(text.length / 4),
+        totalTokens: Math.ceil(text.length / 4),
+        estimatedCostUsd: 0,
+        status: 'not_found',
+        errorCode: 'UNSUPPORTED_KNOWLEDGE',
+        intent: intentHint,
+        grounding: computeGroundingScore({
+          chunks: [],
+          confidence: 0,
+          contextChars: 0,
+        }),
+        suggestedActions: buildSuggestedActions({
+          assistantKey,
+          channel: request.channel,
+          question: request.question,
+          status: 'not_found',
+          intent: 'unknown',
+          hasSources: false,
+        }),
+        dialogueState: applyStatePatch(resolved.state, {
+          lastAssistantText: text,
+        }),
+        dialogueIntent: 'unknown',
+        explainability: {
+          sourceCount: 0,
+          avgScore: 0,
+          confidence: 0,
+          documents: [],
+          retrievalTookMs: 0,
+          llmTookMs: 0,
+          intent: intentHint,
+          justification:
+            'Pergunta fora do material autorizado — rejeição limitada sem síntese de passagens.',
+        },
+      };
     }
 
     // Dialogue-composed answers (clarification, catalog, recommendation, services map, contact, etc.)
@@ -410,22 +470,21 @@ export class NeurofrigoRuntime {
       );
       const retrievalTookMs = Date.now() - retrievalStarted;
 
+      // Relevance / guardrails MUST use the clean user question — session history in
+      // buildRetrievalQuery reordered Q3/Q5 rankings toward prior condensador dumps.
+      const relevanceQuestion = request.question;
+
       const merged = mergeRetrievalWithAuthorizedPassages(
-        this.buildRetrievalQuery(retrievalRequest, resolved.state),
+        relevanceQuestion,
         retrieval.results,
         authorizedPassages,
       );
 
-      const guarded = applyRetrievalGuardrails(
-        this.buildRetrievalQuery(retrievalRequest, resolved.state),
-        merged.chunks,
-        this.limits,
-        {
-          assistantKey,
-          channel: request.channel,
-          courseId: context.courseId,
-        },
-      );
+      const guarded = applyRetrievalGuardrails(relevanceQuestion, merged.chunks, this.limits, {
+        assistantKey,
+        channel: request.channel,
+        courseId: context.courseId,
+      });
 
       if (!guarded.ok) {
         // Institutional overview can still be composed without hits if dialogue says so
@@ -596,9 +655,9 @@ export class NeurofrigoRuntime {
       }));
 
       let answerText = completion.text;
-      if (looksLikeInternalLeak(answerText)) {
+      if (looksLikeInternalLeak(answerText) || assistantKey === 'tutor') {
         answerText = synthesizeConversationalAnswer({
-          question: retrievalQuestion,
+          question: relevanceQuestion,
           evidence: sources.map((s) => ({ id: s.chunkId, text: s.text })),
           intent: prompt.intent,
           assistantKey,
@@ -614,12 +673,25 @@ export class NeurofrigoRuntime {
       });
       answerText = naturalizeUserText(answerText);
 
+      const rejectedUnsupported =
+        isUnsupportedInventionQuestion(request.question) ||
+        /n[aã]o\s+vou\s+inventar|n[aã]o\s+est[aá]\s+presente\s+no\s+material\s+autorizado|suficientemente\s+relacionado/i.test(
+          answerText,
+        );
+      const answerStatus: 'ok' | 'not_found' =
+        rejectedUnsupported &&
+        /n[aã]o\s+(encontrei|vou\s+inventar)|suficientemente\s+relacionado|n[aã]o\s+est[aá]\s+presente/i.test(
+          answerText,
+        )
+          ? 'not_found'
+          : 'ok';
+
       const confidence = normalizeConfidence(computeConfidence(guarded.chunks));
       const contextChars = guarded.chunks.reduce((s, c) => s + c.text.length, 0);
       const grounding = computeGroundingScore({
-        chunks: guarded.chunks,
-        confidence: confidence ?? 0,
-        contextChars,
+        chunks: answerStatus === 'not_found' ? [] : guarded.chunks,
+        confidence: answerStatus === 'not_found' ? 0 : (confidence ?? 0),
+        contextChars: answerStatus === 'not_found' ? 0 : contextChars,
       });
 
       const pendingOffer =
@@ -643,10 +715,10 @@ export class NeurofrigoRuntime {
         formattedText: formatResponse({
           text: answerText,
           intent: prompt.intent,
-          status: 'ok',
+          status: answerStatus,
         }),
-        sources,
-        confidence,
+        sources: answerStatus === 'not_found' ? [] : sources,
+        confidence: answerStatus === 'not_found' ? 0 : confidence,
         tookMs: Date.now() - started,
         model: completion.model || meta.model,
         provider: completion.provider || meta.name,
@@ -659,43 +731,39 @@ export class NeurofrigoRuntime {
           completion.provider || meta.name,
           this.costPer1kTokens,
         ),
-        status: 'ok',
-        errorCode: null,
+        status: answerStatus,
+        errorCode: answerStatus === 'not_found' ? 'UNSUPPORTED_KNOWLEDGE' : null,
         intent: prompt.intent,
         grounding,
         suggestedActions: buildSuggestedActions({
           assistantKey,
           channel: request.channel,
           question: request.question,
-          status: 'ok',
+          status: answerStatus,
           intent: resolved.dialogueIntent,
-          hasSources: sources.length > 0,
-          conversationKind: resolved.dialogueIntent,
+          hasSources: answerStatus === 'ok' && sources.length > 0,
         }),
         dialogueState: state,
         dialogueIntent: resolved.dialogueIntent,
         explainability: {
-          sourceCount: sources.length,
-          avgScore: Number(
-            (sources.reduce((s, x) => s + x.score, 0) / Math.max(1, sources.length)).toFixed(3),
-          ),
-          confidence,
-          documents: sources.map((s) => ({
-            chunkId: s.chunkId,
-            knowledgeDocumentId: s.citation.knowledgeDocumentId,
-            learningResourceId: s.citation.learningResourceId,
-            page: s.citation.page,
-            score: s.score,
-            similarity: s.similarity,
-          })),
+          sourceCount: answerStatus === 'not_found' ? 0 : sources.length,
+          avgScore:
+            answerStatus === 'not_found'
+              ? 0
+              : sources.reduce((s, c) => s + (c.score || 0), 0) / Math.max(1, sources.length),
+          confidence: answerStatus === 'not_found' ? 0 : (confidence ?? 0),
+          documents: [],
           retrievalTookMs,
           llmTookMs,
           intent: prompt.intent,
-          justification: humanExplainability({
-            assistantKey,
-            channel: request.channel,
-            sourceCount: sources.length,
-          }),
+          justification:
+            answerStatus === 'not_found'
+              ? 'Pergunta fora do material autorizado — rejeição limitada sem síntese de passagens.'
+              : humanExplainability({
+                  assistantKey,
+                  channel: request.channel,
+                  sourceCount: sources.length,
+                }),
         },
         retrieval: {
           candidateCount: retrieval.candidateCount,

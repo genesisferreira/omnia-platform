@@ -741,7 +741,15 @@ export function resolveDialogueTurn(input: {
   }
 
   if (state.currentIntent && dialogueIntent === 'unknown') {
-    dialogueIntent = state.currentIntent;
+    // Do not inherit teaching/engineering for invented unsupported knowledge questions.
+    if (
+      input.assistantKey === 'tutor' &&
+      /formula\s+secreta|inexistente|xyz[-\s]?\d+|resetar\s+ecu/i.test(normalized)
+    ) {
+      dialogueIntent = 'unknown';
+    } else {
+      dialogueIntent = state.currentIntent;
+    }
   }
 
   const decision = decideAction({

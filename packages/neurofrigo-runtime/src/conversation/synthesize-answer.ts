@@ -1,5 +1,9 @@
 import { sanitizeEvidenceText } from './sanitize-evidence';
 import { PASSAGE_RELEVANCE_MIN, rankSentencesByRelevance } from '../context/passage-relevance';
+import {
+  isUnsupportedInventionQuestion,
+  unsupportedKnowledgeRejection,
+} from './unsupported-knowledge';
 
 export type EvidenceItem = {
   id?: string;
@@ -97,6 +101,11 @@ export function synthesizeConversationalAnswer(input: {
   const assistant = (input.assistantKey || '').toLowerCase();
   const isPublic = input.channel === 'portal_public' || assistant === 'concierge';
   const courses = input.publicCourses || [];
+
+  // Unsupported invention: never synthesize from lesson passages (session leak guard).
+  if (isUnsupportedInventionQuestion(question)) {
+    return unsupportedKnowledgeRejection();
+  }
 
   if (isCourseDiscovery(question) && courses.length > 0) {
     const lines = courses.slice(0, 8).map(formatCourseLine);
@@ -231,19 +240,27 @@ export function synthesizeConversationalAnswer(input: {
   }
 
   // Tutor pedagogical tone — grounded synthesis, not lead-sentence dump
-  if (assistant === 'tutor' || input.intent === 'explanation' || input.intent === 'definition') {
+  if (
+    assistant === 'tutor' ||
+    input.intent === 'explanation' ||
+    input.intent === 'definition' ||
+    input.intent === 'procedural' ||
+    input.intent === 'troubleshooting'
+  ) {
     const ranked = rankSentencesByRelevance(
       question,
       evidenceSentences,
       PASSAGE_RELEVANCE_MIN * 0.85,
     );
     if (!ranked.length) {
-      return 'Não encontrei no material autorizado desta aula um trecho suficientemente relacionado a essa pergunta. Reformule com o conceito da aula ou avance para o próximo passo no LMS.';
+      return isUnsupportedInventionQuestion(question)
+        ? unsupportedKnowledgeRejection()
+        : 'Não encontrei no material autorizado desta aula um trecho suficientemente relacionado a essa pergunta. Reformule com o conceito da aula ou avance para o próximo passo no LMS.';
     }
     const primary = ranked[0]!.text;
     const support = ranked.slice(1, 3).map((s) => s.text);
     const whyLead =
-      /por\s+que|porque|pra\s+que|para\s+que|qual\s+(deve\s+ser\s+)?(o\s+)?primeiro|o\s+que\s+faz/i.test(
+      /por\s+que|porque|pra\s+que|para\s+que|qual\s+(deve\s+ser\s+)?(o\s+|meu\s+)?primeiro|o\s+que\s+faz|quando\s+(o\s+)?equipamento/i.test(
         question,
       );
     const lines = [
@@ -253,7 +270,9 @@ export function synthesizeConversationalAnswer(input: {
       '',
       input.intent === 'troubleshooting'
         ? 'Próximo passo de estudo: confirme no equipamento os parâmetros que o material correlaciona (não use um único indicador isolado).'
-        : 'Se quiser, posso explicar de outro jeito, dar um exemplo ou indicar o próximo passo no curso.',
+        : input.intent === 'procedural'
+          ? 'Próximo passo de estudo: execute só o que o material autoriza como primeira verificação, sem pular etapas de segurança.'
+          : 'Se quiser, posso explicar de outro jeito, dar um exemplo ou indicar o próximo passo no curso.',
     ];
     return lines.filter((l, i, arr) => !(l === '' && arr[i - 1] === '')).join('\n');
   }

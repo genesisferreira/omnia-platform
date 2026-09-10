@@ -79,6 +79,16 @@ export function applyRepetitionControl(input: {
 }): string {
   const prev = input.previousAnswers.filter(Boolean).slice(-2);
   if (!prev.length) return input.candidate;
+
+  // Never collapse bounded rejections / not_found into the generic "aprofunde" CTA.
+  if (
+    /n[aã]o\s+encontrei|n[aã]o\s+vou\s+inventar|suficientemente\s+relacionado|n[aã]o\s+est[aá]\s+presente\s+no\s+material\s+autorizado/i.test(
+      input.candidate,
+    )
+  ) {
+    return input.candidate;
+  }
+
   // Short qualification / clarification questions may legitimately repeat the ask.
   if (
     input.candidate.length < 220 &&

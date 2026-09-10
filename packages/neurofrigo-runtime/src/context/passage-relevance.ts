@@ -28,8 +28,7 @@ const DOMAIN_GENERIC_TOKENS = new Set([
   'aula',
   'curso',
   'modulo',
-  'primeiro',
-  'passo',
+  // Keep "primeiro"/"passo" as relevance signals for procedural first-step questions.
   'proxima',
   'proximo',
 ]);
