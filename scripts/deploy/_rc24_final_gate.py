@@ -18,7 +18,7 @@ CREDS = Path("/root/fpa-human-creds.txt")
 CTX = ssl.create_default_context()
 COURSE_ID = 12
 LESSON_ID = 21
-EXP = "814f2d8887be3c674ed0e3865786e59d68c9f726"
+EXP = "393aabb42a933701ec93371b042ab1b9e55bad60"
 PROD_EXP = "20ea5315dea7734e5cd82a4e3c91917354a025ce"
 
 
