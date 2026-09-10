@@ -3,10 +3,11 @@
  * Used to short-circuit synthesis so session history cannot leak lesson dumps.
  */
 export function isUnsupportedInventionQuestion(question: string): boolean {
-  const q = question.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  if (
-    /formula\s+secreta|inexistente|xyz[-\s]?\d+|resetar\s+ecu|procedimento\s+secreto/.test(q)
-  ) {
+  const q = question
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  if (/formula\s+secreta|inexistente|xyz[-\s]?\d+|resetar\s+ecu|procedimento\s+secreto/.test(q)) {
     return true;
   }
   if (
@@ -27,7 +28,10 @@ export function unsupportedKnowledgeRejection(): string {
 }
 
 export function looksLikeBoundedRejection(text: string): boolean {
-  const t = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const t = text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
   return (
     /nao encontrei|nao vou inventar|suficientemente relacionado|nao esta presente no material autorizado/.test(
       t,

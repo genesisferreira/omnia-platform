@@ -150,7 +150,10 @@ describe('authorized lesson passages (RC2.4 Tutor quality)', () => {
     assert.match(a3.toLowerCase(), /primeiro\s+passo|ouvir|operador|inspec/);
     assert.notEqual(a1.slice(0, 80), a2.slice(0, 80));
     assert.notEqual(a2.slice(0, 80), a3.slice(0, 80));
-    assert.match(a5.toLowerCase(), /n[aã]o\s+(est[aá]\s+presente|vou\s+inventar)|material\s+autorizado/);
+    assert.match(
+      a5.toLowerCase(),
+      /n[aã]o\s+(est[aá]\s+presente|vou\s+inventar)|material\s+autorizado/,
+    );
     assert.doesNotMatch(a5.toLowerCase(), /condensador rejeita|quer que eu aprofunde/);
   });
 
