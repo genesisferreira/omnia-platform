@@ -834,7 +834,9 @@ const teachingKnowledgeSubmitEp: Endpoint = {
     try {
       const id = num(req.routeParams?.id);
       if (!id) return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'id' } });
-      const body = (await req.json?.()) as { requestedScope?: 'SCHOOL_APPROVED' | 'OMNIA_APPROVED' };
+      const body = (await req.json?.()) as {
+        requestedScope?: 'SCHOOL_APPROVED' | 'OMNIA_APPROVED';
+      };
       const ctx = auth(req);
       return ok(
         await submitLessonForKnowledgeReview({

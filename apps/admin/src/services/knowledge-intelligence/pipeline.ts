@@ -860,7 +860,7 @@ export async function ensureLearningResourceFromLessonAsset(args: {
     processingStatus: 'pending' as const,
     // Epic 17: LMS academic content stays COURSE_PRIVATE — no auto Hub AI ingest.
     autoProcess: false,
-    knowledgeScope: 'COURSE_PRIVATE',
+    knowledgeScope: 'COURSE_PRIVATE' as const,
     retrievalEligible: false,
     governanceState: 'COURSE_PRIVATE',
     schoolKey: schoolKey ?? undefined,
@@ -876,18 +876,17 @@ export async function ensureLearningResourceFromLessonAsset(args: {
       id: existing.docs[0].id,
       data: {
         ...data,
-        // só reprocessa se ainda não completed, ou se media mudou — forçamos pending
-        processingStatus: 'pending',
-      },
+        processingStatus: 'pending' as const,
+      } as never,
       overrideAccess: true,
       req,
       context: { kiPipelineActive: true },
     });
-    learningResourceId = updated.id;
+    learningResourceId = (updated as { id: string | number }).id;
   } else {
     const created = await payload.create({
       collection: 'learning-resources',
-      data,
+      data: data as never,
       overrideAccess: true,
       req,
       context: { kiPipelineActive: true },

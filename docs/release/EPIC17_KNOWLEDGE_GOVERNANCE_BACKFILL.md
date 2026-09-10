@@ -12,11 +12,11 @@
 
 ## Result (expected after migrate)
 
-| Population | Scope | Retrieval eligible |
-|------------|-------|--------------------|
-| LMS learning-resources (`origin=lms_lesson_asset`) | COURSE_PRIVATE | false |
-| Official Hub documents (AI/published) | OMNIA_APPROVED | true |
-| New professor submissions | COURSE_PRIVATE until review | false until SCHOOL/OMNIA approved |
+| Population                                         | Scope                       | Retrieval eligible                |
+| -------------------------------------------------- | --------------------------- | --------------------------------- |
+| LMS learning-resources (`origin=lms_lesson_asset`) | COURSE_PRIVATE              | false                             |
+| Official Hub documents (AI/published)              | OMNIA_APPROVED              | true                              |
+| New professor submissions                          | COURSE_PRIVATE until review | false until SCHOOL/OMNIA approved |
 
 ## Parallel RAG
 

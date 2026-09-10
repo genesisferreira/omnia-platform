@@ -24,8 +24,8 @@ import { toPayloadRelationId } from '../../lib/payload-relation-id';
 import { processLearningResource } from '../knowledge-intelligence/pipeline';
 import { writeKnowledgeAudit } from './audit';
 
-/** Until `payload generate:types` includes this collection. */
-const KG = 'knowledge-governance-submissions' as 'media';
+/** Runtime collection slug (typed after `payload generate:types` in CI). */
+const KG_SLUG = 'knowledge-governance-submissions';
 
 type Rel = string | number | { id: string | number } | null | undefined;
 
@@ -56,30 +56,80 @@ function statusLabelFor(state: GovernanceState, schoolKey: string | null): strin
   return GOVERNANCE_STATE_LABELS_PT[state];
 }
 
+async function kgFindByID(
+  payload: Payload,
+  id: string | number,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const doc = await payload.findByID({
+    collection: KG_SLUG as 'media',
+    id,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  return doc as unknown as Record<string, unknown>;
+}
+
+async function kgFind(
+  payload: Payload,
+  where: Record<string, unknown>,
+  req?: PayloadRequest,
+  limit = 1,
+): Promise<Record<string, unknown>[]> {
+  const found = await payload.find({
+    collection: KG_SLUG as 'media',
+    where: where as never,
+    limit,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  return found.docs as unknown as Record<string, unknown>[];
+}
+
+async function kgUpdate(
+  payload: Payload,
+  id: string | number,
+  data: Record<string, unknown>,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const updated = await payload.update({
+    collection: KG_SLUG as 'media',
+    id,
+    data: data as never,
+    overrideAccess: true,
+    req,
+    context: { governancePipelineActive: true },
+  });
+  return updated as unknown as Record<string, unknown>;
+}
+
+async function kgCreate(
+  payload: Payload,
+  data: Record<string, unknown>,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const created = await payload.create({
+    collection: KG_SLUG as 'media',
+    data: data as never,
+    overrideAccess: true,
+    req,
+    context: { governancePipelineActive: true },
+  });
+  return created as unknown as Record<string, unknown>;
+}
+
 async function appendDecision(
   payload: Payload,
   submissionId: string | number,
   entry: Record<string, unknown>,
   req?: PayloadRequest,
 ) {
-  const doc = (await payload.findByID({
-    collection: KG,
-    id: submissionId,
-    depth: 0,
-    overrideAccess: true,
-    req,
-  })) as unknown as { decisions?: unknown[] };
-
-  const decisions = Array.isArray(doc.decisions) ? [...doc.decisions] : [];
+  const doc = await kgFindByID(payload, submissionId, req);
+  const decisions = Array.isArray(doc.decisions) ? [...(doc.decisions as unknown[])] : [];
   decisions.push(entry);
-  await payload.update({
-    collection: KG,
-    id: submissionId,
-    data: { decisions } as never,
-    overrideAccess: true,
-    req,
-    context: { governancePipelineActive: true },
-  });
+  await kgUpdate(payload, submissionId, { decisions }, req);
 }
 
 async function resolveLessonContext(
@@ -158,22 +208,20 @@ export async function submitLessonForKnowledgeReview(args: {
     throw new Error('ASSESSMENT_SECRET_NOT_SUBMISSIBLE');
   }
 
-  const existing = await payload.find({
-    collection: KG,
-    where: {
+  const existingDocs = await kgFind(
+    payload,
+    {
       and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(lessonId) } }],
-    } as never,
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
+    },
     req,
-  });
+    1,
+  );
 
   const requestedScope = args.requestedScope ?? 'SCHOOL_APPROVED';
   const now = new Date().toISOString();
 
-  if (existing.docs[0]) {
-    const prev = existing.docs[0] as unknown as {
+  if (existingDocs[0]) {
+    const prev = existingDocs[0] as {
       id: string | number;
       governanceState?: string;
       contentVersionHash?: string;
@@ -181,7 +229,7 @@ export async function submitLessonForKnowledgeReview(args: {
     const state = (prev.governanceState || 'COURSE_PRIVATE') as GovernanceState;
     if (!canSubmitForSchoolReview(state) && state !== 'COURSE_PRIVATE') {
       if (state === 'PENDING_SCHOOL_REVIEW' || state === 'PENDING_OMNIA_REVIEW') {
-        return existing.docs[0] as unknown as Record<string, unknown>;
+        return existingDocs[0];
       }
     }
     const from = canSubmitForSchoolReview(state) ? state : 'COURSE_PRIVATE';
@@ -190,10 +238,10 @@ export async function submitLessonForKnowledgeReview(args: {
     }
     assertGovernanceTransition(from, 'PENDING_SCHOOL_REVIEW');
 
-    const updated = await payload.update({
-      collection: KG,
-      id: prev.id,
-      data: {
+    const updated = await kgUpdate(
+      payload,
+      prev.id,
+      {
         title: ctx.title,
         contentVersionHash: ctx.contentHash,
         requestedScope,
@@ -207,11 +255,9 @@ export async function submitLessonForKnowledgeReview(args: {
         lesson: lessonId,
         schoolKey: ctx.schoolKey,
         ownerCompany: ctx.ownerCompanyId ?? undefined,
-      } as never,
-      overrideAccess: true,
+      },
       req,
-      context: { governancePipelineActive: true },
-    });
+    );
 
     await appendDecision(
       payload,
@@ -240,12 +286,12 @@ export async function submitLessonForKnowledgeReview(args: {
       req,
     );
 
-    return updated as unknown as Record<string, unknown>;
+    return updated;
   }
 
-  const created = await payload.create({
-    collection: KG,
-    data: {
+  const created = await kgCreate(
+    payload,
+    {
       title: ctx.title,
       sourceType: 'lesson',
       sourceId: String(lessonId),
@@ -273,11 +319,9 @@ export async function submitLessonForKnowledgeReview(args: {
           versionHash: ctx.contentHash,
         },
       ],
-    } as never,
-    overrideAccess: true,
+    },
     req,
-    context: { governancePipelineActive: true },
-  });
+  );
 
   await writeKnowledgeAudit(
     payload,
@@ -291,7 +335,7 @@ export async function submitLessonForKnowledgeReview(args: {
     req,
   );
 
-  return created as unknown as Record<string, unknown>;
+  return created;
 }
 
 async function applyHubEligibility(args: {
@@ -379,13 +423,7 @@ export async function reviewGovernanceSubmission(args: {
   const actorId = userIdOf(user);
   if (actorId == null) throw new Error('UNAUTHORIZED');
 
-  const doc = (await payload.findByID({
-    collection: KG,
-    id: submissionId,
-    depth: 0,
-    overrideAccess: true,
-    req,
-  })) as unknown as Record<string, unknown>;
+  const doc = await kgFindByID(payload, submissionId, req);
 
   const from = (doc.governanceState || 'COURSE_PRIVATE') as GovernanceState;
   let to: GovernanceState;
@@ -434,10 +472,10 @@ export async function reviewGovernanceSubmission(args: {
   const now = new Date().toISOString();
   const eligible = isRetrievalEligibleState(to);
 
-  const updated = await payload.update({
-    collection: KG,
-    id: submissionId,
-    data: {
+  const updated = await kgUpdate(
+    payload,
+    submissionId,
+    {
       governanceState: to,
       knowledgeScope: scope,
       statusLabel: statusLabelFor(to, schoolKey),
@@ -446,11 +484,9 @@ export async function reviewGovernanceSubmission(args: {
       reviewNote: reason || doc.reviewNote,
       lastReviewer: actorId,
       reviewedAt: now,
-    } as never,
-    overrideAccess: true,
+    },
     req,
-    context: { governancePipelineActive: true },
-  });
+  );
 
   await appendDecision(
     payload,
@@ -470,7 +506,7 @@ export async function reviewGovernanceSubmission(args: {
 
   await applyHubEligibility({
     payload,
-    submission: { ...doc, ...(updated as unknown as Record<string, unknown>) },
+    submission: { ...doc, ...updated },
     state: to,
     scope,
     req,
@@ -490,7 +526,7 @@ export async function reviewGovernanceSubmission(args: {
     req,
   );
 
-  return updated as unknown as Record<string, unknown>;
+  return updated;
 }
 
 export async function invalidateGovernanceOnLessonChange(args: {
@@ -500,19 +536,17 @@ export async function invalidateGovernanceOnLessonChange(args: {
 }): Promise<void> {
   const { payload, lessonId, req } = args;
   const ctx = await resolveLessonContext(payload, lessonId, req);
-  const found = await payload.find({
-    collection: KG,
-    where: {
+  const foundDocs = await kgFind(
+    payload,
+    {
       and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(lessonId) } }],
-    } as never,
-    limit: 5,
-    depth: 0,
-    overrideAccess: true,
+    },
     req,
-  });
+    5,
+  );
 
-  for (const raw of found.docs) {
-    const doc = raw as unknown as {
+  for (const raw of foundDocs) {
+    const doc = raw as {
       id: string | number;
       governanceState?: string;
       contentVersionHash?: string;
@@ -524,21 +558,19 @@ export async function invalidateGovernanceOnLessonChange(args: {
     const from = (doc.governanceState || 'COURSE_PRIVATE') as GovernanceState;
     const to = stateAfterMaterialEdit(from);
     const now = new Date().toISOString();
-    await payload.update({
-      collection: KG,
-      id: doc.id,
-      data: {
+    await kgUpdate(
+      payload,
+      doc.id,
+      {
         title: ctx.title,
         contentVersionHash: ctx.contentHash,
         governanceState: to,
         knowledgeScope: 'COURSE_PRIVATE',
         statusLabel: statusLabelFor(to, doc.schoolKey ?? ctx.schoolKey),
         retrievalEligible: false,
-      } as never,
-      overrideAccess: true,
+      },
       req,
-      context: { governancePipelineActive: true },
-    });
+    );
 
     await appendDecision(
       payload,
@@ -580,18 +612,13 @@ export async function getGovernanceStatusForLesson(args: {
   lessonId: number;
   req?: PayloadRequest;
 }): Promise<Record<string, unknown> | null> {
-  const found = await args.payload.find({
-    collection: KG,
-    where: {
-      and: [
-        { sourceType: { equals: 'lesson' } },
-        { sourceId: { equals: String(args.lessonId) } },
-      ],
-    } as never,
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
-    req: args.req,
-  });
-  return (found.docs[0] as unknown as Record<string, unknown>) || null;
+  const found = await kgFind(
+    args.payload,
+    {
+      and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(args.lessonId) } }],
+    },
+    args.req,
+    1,
+  );
+  return found[0] || null;
 }
