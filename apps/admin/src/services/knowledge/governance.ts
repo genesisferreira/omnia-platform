@@ -508,7 +508,9 @@ async function applyHubEligibility(args: {
   let sourceBuffer: Buffer | undefined;
   let preText: string | undefined;
 
-  if (eligible && learningResourceId == null) {
+  // Always refresh lesson text/media on eligible approval/retry. Skipping when an LR already
+  // exists left stale media in place and re-ingested outdated content (no new markers).
+  if (eligible) {
     const ensured = await ensureLessonTextLearningResource({ payload, submission, req });
     if (ensured) {
       learningResourceId = ensured.learningResourceId;
