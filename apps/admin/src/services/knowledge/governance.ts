@@ -562,10 +562,11 @@ async function applyHubEligibility(args: {
       context: { governancePipelineActive: true },
     });
 
+    // Do NOT pass the HTTP/governance `req`: KI failures must not abort the approval
+    // transaction (Postgres 25P02 → subsequent LR updates look like "Not Found"/Failed query).
     const processed = await processLearningResource({
       payload,
       learningResourceId,
-      req,
       sourceBuffer,
       sourceMimeType: sourceBuffer ? 'text/plain' : undefined,
       sourceFilename: sourceBuffer ? `governance-lesson-${learningResourceId}.txt` : undefined,

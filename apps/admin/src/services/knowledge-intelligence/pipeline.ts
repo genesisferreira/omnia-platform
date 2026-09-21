@@ -479,18 +479,22 @@ export async function processLearningResource(args: {
 
     // Stale/orphan knowledgeDocument refs (e.g. pointing at non-existent ids) must not
     // drive updates — that produced knowledge_documents_tags FK failures (parent missing).
+    // Always read with draft:true so draft-only rows from prior failed runs resolve.
     let knowledgeDocumentId = relId(resource.knowledgeDocument as Rel);
+    let existingHub: { _status?: string | null; status?: string | null } | null = null;
     if (knowledgeDocumentId != null) {
       try {
-        await payload.findByID({
+        existingHub = (await payload.findByID({
           collection: 'knowledge-documents',
           id: knowledgeDocumentId,
           depth: 0,
           overrideAccess: true,
           req,
-        });
+          draft: true,
+        })) as { _status?: string | null; status?: string | null };
       } catch {
         knowledgeDocumentId = null;
+        existingHub = null;
       }
     }
 
@@ -503,14 +507,21 @@ export async function processLearningResource(args: {
         depth: 0,
         overrideAccess: true,
         req,
+        draft: true,
       });
       knowledgeDocumentId = relId(bySlug.docs[0]?.id as Rel);
+      if (knowledgeDocumentId != null) {
+        existingHub = (bySlug.docs[0] ?? null) as {
+          _status?: string | null;
+          status?: string | null;
+        } | null;
+      }
     }
 
     const publishForAi = hubOverrides?.allowAiUse === true;
-    // Epic 10/17: when publishing for AI, create already published — do NOT leave _status=draft
-    // then update with draft:false (Payload Not Found on draft-only docs).
-    const initialStatus = publishForAi ? ('published' as const) : ('draft' as const);
+    // Workflow machine blocks draft→published. Always write as draft first, then step
+    // draft → in_review → approved → published when publishing for AI.
+    // Never update draft-only docs with draft:false (Payload Not Found + aborts txn 25P02).
     const hubData = {
       title: publishForAi ? title : `[KI] ${title}`,
       slug: baseSlug,
@@ -530,17 +541,15 @@ export async function processLearningResource(args: {
       allowedAgents: pickAgentKeys(hubOverrides?.allowedAgents),
       tags: mergedTags.map((tag) => ({ tag })),
       authorName: (resource.author as string) || undefined,
-      status: initialStatus,
+      status: 'draft' as const,
       processingStatus: publishForAi ? ('succeeded' as const) : ('queued' as const),
-      publicationStatus: publishForAi
-        ? ('published' as const)
-        : hubOverrides?.publicationStatus || ('unpublished' as const),
+      publicationStatus: 'unpublished' as const,
       securityClassification: pickUnion(
         hubOverrides?.securityClassification,
         SECURITY_CLASSIFICATIONS,
         'INTERNAL_RESTRICTED',
       ),
-      allowAiUse: hubOverrides?.allowAiUse ?? false,
+      allowAiUse: false,
       allowWebPublication: hubOverrides?.allowWebPublication ?? false,
       allowDownload: false,
       requiresEnrollment: false,
@@ -557,30 +566,44 @@ export async function processLearningResource(args: {
         `Ingestão automática Knowledge Intelligence (correlation=${correlationId}). Sem embeddings.`,
     };
 
-    // Always write the live (non-draft) row for KI pipeline so subsequent updates resolve.
-    const useDraft = false;
-    const hubDataPayload = hubData as never;
+    const hubCtx = { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi };
+    const existingIsLive =
+      existingHub?._status === 'published' || existingHub?.status === 'published';
+
+    // Live published docs: update in place without demoting to draft (avoids workflow churn).
+    const hubDataForWrite = existingIsLive
+      ? ({
+          ...hubData,
+          status: publishForAi ? ('published' as const) : hubData.status,
+          allowAiUse: publishForAi,
+          publicationStatus: publishForAi
+            ? ('published' as const)
+            : hubData.publicationStatus,
+          humanReviewRequired: publishForAi ? false : hubData.humanReviewRequired,
+        } as never)
+      : (hubData as never);
 
     if (knowledgeDocumentId != null) {
       await payload.update({
         collection: 'knowledge-documents',
         id: knowledgeDocumentId,
-        data: hubDataPayload,
-        draft: useDraft,
+        data: hubDataForWrite,
+        // draft:false only when a live published row already exists.
+        draft: !existingIsLive,
         overrideAccess: true,
         req,
-        context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
+        context: hubCtx,
       });
     } else {
       // slug conflict → append hash
       try {
         const created = await payload.create({
           collection: 'knowledge-documents',
-          data: hubDataPayload,
-          draft: useDraft,
+          data: hubData as never,
+          draft: true,
           overrideAccess: true,
           req,
-          context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
+          context: hubCtx,
         });
         knowledgeDocumentId = toPayloadRelationId(created.id) ?? null;
       } catch (createErr) {
@@ -590,10 +613,10 @@ export async function processLearningResource(args: {
             ...hubData,
             slug: `${baseSlug}-${createHash('sha1').update(String(learningResourceId)).digest('hex').slice(0, 8)}`,
           } as never,
-          draft: useDraft,
+          draft: true,
           overrideAccess: true,
           req,
-          context: { kiPipelineActive: true, knowledgeOfficialLoad: publishForAi },
+          context: hubCtx,
         });
         knowledgeDocumentId = toPayloadRelationId(created.id) ?? null;
         if (knowledgeDocumentId == null) {
@@ -606,18 +629,8 @@ export async function processLearningResource(args: {
       throw new Error('KNOWLEDGE_DOCUMENT_ID_MISSING');
     }
 
-    // Confirm the live document resolves (guards draft-only / Not Found paths).
-    const liveDoc = (await payload.findByID({
-      collection: 'knowledge-documents',
-      id: knowledgeDocumentId,
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })) as { _status?: string; status?: string };
-
-    if (publishForAi && (liveDoc._status === 'draft' || liveDoc.status !== 'published')) {
-      // Publish via draft:true stepwise then draft:false — avoids Not Found on draft-only docs.
-      const ctx = { kiPipelineActive: true, knowledgeOfficialLoad: true };
+    if (publishForAi && !existingIsLive) {
+      // Canonical editorial transitions (draft → in_review → approved → published).
       for (const status of ['in_review', 'approved', 'published'] as const) {
         await payload.update({
           collection: 'knowledge-documents',
@@ -628,13 +641,25 @@ export async function processLearningResource(args: {
             publicationStatus: status === 'published' ? 'published' : 'unpublished',
             humanReviewRequired: false,
             processingStatus: 'succeeded',
-          },
+            _status: status === 'published' ? 'published' : 'draft',
+          } as never,
           draft: status !== 'published',
           overrideAccess: true,
           req,
-          context: ctx,
+          context: hubCtx,
         });
       }
+    }
+
+    // Confirm the live document resolves when publishing for AI.
+    if (publishForAi) {
+      await payload.findByID({
+        collection: 'knowledge-documents',
+        id: knowledgeDocumentId,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      });
     }
 
     await markStages({
