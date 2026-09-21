@@ -299,7 +299,7 @@ export async function submitLessonForKnowledgeReview(args: {
       lesson: lessonId,
       schoolKey: ctx.schoolKey,
       ownerCompany: ctx.ownerCompanyId ?? undefined,
-      author: String(authorId),
+      author: toPayloadRelationId(authorId) ?? authorId,
       submittedAt: now,
       contentVersionHash: ctx.contentHash,
       requestedScope,
@@ -426,6 +426,39 @@ async function ensureLessonTextLearningResource(args: {
       context: { governancePipelineActive: true, kiPipelineActive: true },
     });
     learningResourceId = relId(created.id);
+  } else {
+    // Idempotent retry / version change: refresh media + hash, reset processing.
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: `Governance lesson ${lessonId} v` },
+      file: {
+        data: sourceBuffer,
+        mimetype: 'text/plain',
+        name: `governance-lesson-${lessonId}-${Date.now()}.txt`,
+        size: sourceBuffer.length,
+      },
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    } as never);
+
+    await payload.update({
+      collection: 'learning-resources',
+      id: learningResourceId,
+      data: {
+        title,
+        media: media.id,
+        processingStatus: 'pending',
+        autoProcess: false,
+        retrievalEligible: false,
+        version: versionHash.slice(0, 12) || '1.0.0',
+        contentVersionHash: versionHash || undefined,
+        lastError: null,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    });
   }
 
   if (learningResourceId == null) return null;
@@ -511,6 +544,7 @@ async function applyHubEligibility(args: {
       req,
     );
 
+    // Governance approval ≠ retrieval-ready. Keep retrievalEligible=false until KI completes.
     await payload.update({
       collection: 'learning-resources',
       id: learningResourceId,
@@ -519,7 +553,7 @@ async function applyHubEligibility(args: {
         autoProcess: true,
         knowledgeScope: scope,
         schoolKey: submission.schoolKey,
-        retrievalEligible: true,
+        retrievalEligible: false,
         governanceState: state,
         contentVersionHash: versionHash ?? undefined,
       } as never,
@@ -541,6 +575,7 @@ async function applyHubEligibility(args: {
       hubOverrides: {
         allowAiUse: true,
         publicationStatus: 'published',
+        status: 'published',
         humanReviewRequired: false,
         securityClassification: 'STUDENT',
         ownerCompany: relId(submission.ownerCompany as Rel) ?? undefined,
@@ -556,20 +591,58 @@ async function applyHubEligibility(args: {
     });
 
     knowledgeDocumentId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
+    const ingestReady = processed.ok === true && knowledgeDocumentId != null;
 
-    if (knowledgeDocumentId != null) {
+    if (ingestReady && knowledgeDocumentId != null) {
       await payload.update({
         collection: 'knowledge-documents',
         id: knowledgeDocumentId,
         data: {
           allowAiUse: true,
           publicationStatus: 'published',
+          status: 'published',
           knowledgeScope: scope,
           schoolKey: submission.schoolKey,
           retrievalEligible: true,
           governanceState: state,
           contentVersionHash: versionHash ?? undefined,
           assessmentSecret: false,
+          processingStatus: 'succeeded',
+        } as never,
+        overrideAccess: true,
+        req,
+        context: { governancePipelineActive: true, kiPipelineActive: true, knowledgeOfficialLoad: true },
+      });
+
+      await payload.update({
+        collection: 'learning-resources',
+        id: learningResourceId,
+        data: {
+          knowledgeDocument: knowledgeDocumentId,
+          retrievalEligible: true,
+          processingStatus: 'completed',
+          knowledgeScope: scope,
+          governanceState: state,
+          schoolKey: submission.schoolKey,
+          contentVersionHash: versionHash ?? undefined,
+        } as never,
+        overrideAccess: true,
+        req,
+        context: { governancePipelineActive: true, kiPipelineActive: true },
+      });
+    } else {
+      // Keep approval, but mark processing failed / not retrievable.
+      await payload.update({
+        collection: 'learning-resources',
+        id: learningResourceId,
+        data: {
+          retrievalEligible: false,
+          processingStatus: 'failed',
+          knowledgeScope: scope,
+          governanceState: state,
+          schoolKey: submission.schoolKey,
+          contentVersionHash: versionHash ?? undefined,
+          lastError: 'GOVERNED_INGEST_NOT_READY',
         } as never,
         overrideAccess: true,
         req,
@@ -583,6 +656,8 @@ async function applyHubEligibility(args: {
       {
         learningResource: learningResourceId,
         knowledgeDocument: knowledgeDocumentId ?? undefined,
+        // Policy eligibility stays tied to governance state; live retrieval also requires ready processing.
+        retrievalEligible: ingestReady,
       },
       req,
     );
@@ -590,7 +665,7 @@ async function applyHubEligibility(args: {
     await writeKnowledgeAudit(
       payload,
       {
-        action: 'ingestion_completed',
+        action: ingestReady ? 'ingestion_completed' : 'ingestion_started',
         entityType: 'knowledge-governance-submissions',
         entityId: String(submissionId),
         actorId: String(actorId),
@@ -599,13 +674,13 @@ async function applyHubEligibility(args: {
           knowledgeDocumentId,
           ok: processed.ok,
           chunkCount: processed.chunkCount,
+          ingestReady,
         },
       },
       req,
     );
   }
 }
-
 export async function reviewGovernanceSubmission(args: {
   payload: Payload;
   submissionId: string | number;
@@ -673,6 +748,8 @@ export async function reviewGovernanceSubmission(args: {
   const schoolKey = typeof doc.schoolKey === 'string' ? doc.schoolKey : null;
   const now = new Date().toISOString();
   const eligible = isRetrievalEligibleState(to);
+  // Approval ≠ vector-ready. retrievalEligible becomes true only after KI ingest succeeds.
+  const initialRetrievalEligible = false;
 
   const updated = await kgUpdate(
     payload,
@@ -681,7 +758,7 @@ export async function reviewGovernanceSubmission(args: {
       governanceState: to,
       knowledgeScope: scope,
       statusLabel: statusLabelFor(to, schoolKey),
-      retrievalEligible: eligible,
+      retrievalEligible: eligible ? initialRetrievalEligible : false,
       approvedVersionHash: eligible ? doc.contentVersionHash : doc.approvedVersionHash,
       reviewNote: reason || doc.reviewNote,
       lastReviewer: actorId,

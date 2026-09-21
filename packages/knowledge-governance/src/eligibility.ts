@@ -9,6 +9,8 @@ export type GovernanceRetrievalRecord = {
   retrievalEligible?: boolean | null;
   allowAiUse?: boolean | null;
   assessmentSecret?: boolean | null;
+  /** Learning-resource / KD processing status — pending/failed are not retrievable. */
+  processingStatus?: string | null;
   tags?: string[] | null;
   title?: string | null;
 };
@@ -73,6 +75,21 @@ export function evaluateRetrievalEligibility(
 
   if (record.retrievalEligible === false) {
     return { allow: false, reason: 'Not retrieval-eligible', code: 'DENY_NOT_ELIGIBLE' };
+  }
+
+  const processing = (record.processingStatus || '').toLowerCase();
+  if (
+    processing &&
+    processing !== 'completed' &&
+    processing !== 'succeeded' &&
+    processing !== 'ready' &&
+    processing !== 'indexed'
+  ) {
+    return {
+      allow: false,
+      reason: `Processing not ready (${processing || 'unknown'})`,
+      code: 'DENY_NOT_ELIGIBLE',
+    };
   }
 
   if (subject.tenantId && record.tenantId && subject.tenantId !== record.tenantId) {

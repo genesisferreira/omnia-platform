@@ -196,6 +196,23 @@ describe('retrieval scope enforcement', () => {
     );
   });
 
+  it('approved but processing pending is not retrievable', () => {
+    const d = evaluateRetrievalEligibility(
+      { ...fredSchool, retrievalEligible: true, processingStatus: 'pending' },
+      { schoolKey: 'fred-do-frio', agentKey: 'tutor', channel: 'portal_chat' },
+    );
+    assert.equal(d.allow, false);
+    assert.equal(d.code, 'DENY_NOT_ELIGIBLE');
+  });
+
+  it('approved + completed processing ALLOW', () => {
+    const d = evaluateRetrievalEligibility(
+      { ...fredSchool, retrievalEligible: true, processingStatus: 'completed' },
+      { schoolKey: 'fred-do-frio', agentKey: 'tutor', channel: 'portal_chat' },
+    );
+    assert.equal(d.allow, true);
+  });
+
   it('assessment secret never retrievable', () => {
     const d = evaluateRetrievalEligibility(
       { ...fredSchool, assessmentSecret: true },

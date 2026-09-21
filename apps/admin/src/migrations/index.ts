@@ -36,6 +36,7 @@ import * as migration_20260813_200000_ils_schoolkey_backfill from './20260813_20
 import * as migration_20260814_120000_lms_live_class_fields from './20260814_120000_lms_live_class_fields';
 import * as migration_20260909_120000_media_visibility_acl from './20260909_120000_media_visibility_acl';
 import * as migration_20260910_160000_knowledge_governance from './20260910_160000_knowledge_governance';
+import * as migration_20260921_120000_knowledge_governance_schema_repair from './20260921_120000_knowledge_governance_schema_repair';
 
 export const migrations = [
   {
@@ -227,5 +228,10 @@ export const migrations = [
     up: migration_20260910_160000_knowledge_governance.up,
     down: migration_20260910_160000_knowledge_governance.down,
     name: '20260910_160000_knowledge_governance',
+  },
+  {
+    up: migration_20260921_120000_knowledge_governance_schema_repair.up,
+    down: migration_20260921_120000_knowledge_governance_schema_repair.down,
+    name: '20260921_120000_knowledge_governance_schema_repair',
   },
 ];

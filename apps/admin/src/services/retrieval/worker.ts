@@ -201,6 +201,7 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
         allowAiUse?: boolean | null;
         publicationStatus?: string | null;
         status?: string | null;
+        processingStatus?: string | null;
         securityClassification?: string | null;
         allowedAgents?: string[] | null;
         schoolKey?: string | null;
@@ -222,8 +223,12 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
       retrievalEligible = doc.retrievalEligible !== false;
       assessmentSecret = doc.assessmentSecret === true;
       sourceVersion = doc.contentVersionHash ?? sourceVersion;
-      if (assessmentSecret || retrievalEligible === false) {
+      const proc = (doc.processingStatus || '').toLowerCase();
+      const processingReady =
+        !proc || proc === 'succeeded' || proc === 'completed' || proc === 'ready' || proc === 'indexed';
+      if (assessmentSecret || retrievalEligible === false || !processingReady) {
         allowAiUse = false;
+        retrievalEligible = false;
       }
       for (const agent of doc.allowedAgents || []) {
         const tag = `agent:${agent}`;
@@ -245,15 +250,19 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
         retrievalEligible?: boolean | null;
         assessmentSecret?: boolean | null;
         contentVersionHash?: string | null;
+        processingStatus?: string | null;
       };
       schoolKey = lr.schoolKey ?? null;
       knowledgeScope = lr.knowledgeScope ?? 'COURSE_PRIVATE';
       retrievalEligible = lr.retrievalEligible === true;
       assessmentSecret = lr.assessmentSecret === true;
       sourceVersion = lr.contentVersionHash ?? sourceVersion;
-      // LMS resources without approval stay non-retrievable in vector ACL.
-      if (retrievalEligible !== true || assessmentSecret) {
+      const proc = (lr.processingStatus || '').toLowerCase();
+      const processingReady = proc === 'completed' || proc === 'succeeded' || proc === 'ready';
+      // LMS resources without approval or unfinished KI stay non-retrievable in vector ACL.
+      if (retrievalEligible !== true || assessmentSecret || !processingReady) {
         allowAiUse = false;
+        retrievalEligible = false;
       }
     } catch {
       // ignore

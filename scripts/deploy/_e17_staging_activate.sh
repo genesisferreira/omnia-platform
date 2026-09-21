@@ -48,8 +48,40 @@ echo "STAGING_GIT_SHA=$(git rev-parse HEAD)"
 export GIT_SHA="$RC_SHA"
 export APP_VERSION="$RC_SHA"
 
-docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap run --rm \
-  admin-migrate migrate 2>&1 | tee "$BACKUP_DIR/migrate.log" | tail -n 40
+# Stale-image guard: always rebuild bootstrap migrate image from exact SHA before migrate.
+echo "MIGRATION_IMAGE_BUILD_SHA=$RC_SHA"
+GIT_SHA="$RC_SHA" APP_VERSION="$RC_SHA" \
+  docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap \
+  build admin-migrate 2>&1 | tee "$BACKUP_DIR/migrate_build.log" | tail -n 20
+
+PRE_MIG_COUNT=$(docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap \
+  run --rm --entrypoint sh admin-migrate -c 'ls /app/apps/admin/src/migrations/*.ts 2>/dev/null | wc -l' | tr -d '[:space:]' || echo 0)
+echo "MIGRATION_FILES_IN_IMAGE=$PRE_MIG_COUNT"
+# Prove expected Epic17 migrations exist inside the image (not stale).
+GIT_SHA="$RC_SHA" APP_VERSION="$RC_SHA" \
+  docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap \
+  run --rm --entrypoint sh admin-migrate -c \
+  'test -f /app/apps/admin/src/migrations/20260910_160000_knowledge_governance.ts && \
+   test -f /app/apps/admin/src/migrations/20260921_120000_knowledge_governance_schema_repair.ts && \
+   echo MIGRATION_IMAGE_SHA_GUARD=PASS' \
+  | tee "$BACKUP_DIR/migrate_guard.log" | tail -n 5
+grep -q 'MIGRATION_IMAGE_SHA_GUARD=PASS' "$BACKUP_DIR/migrate_guard.log"
+
+GIT_SHA="$RC_SHA" APP_VERSION="$RC_SHA" \
+  docker compose -f docker/compose/staging.yml --env-file .env.staging --profile bootstrap \
+  run --rm --build admin-migrate migrate 2>&1 | tee "$BACKUP_DIR/migrate.log" | tail -n 40
+
+# Loud fail if pending Epic17 repair migration never applied (name absent from DB after migrate).
+DB_URL=$(grep -E '^DATABASE_URL=' .env.staging | head -n1 | cut -d= -f2- | tr -d '"' | tr -d "'")
+DB_NAME=$(echo "$DB_URL" | sed -E 's#.*/([^/?]+).*#\1#')
+DB_USER=$(echo "$DB_URL" | sed -E 's#^postgres(ql)?://([^:]+):.*#\2#')
+PASS_RAW=$(echo "$DB_URL" | sed -E 's#^postgres(ql)?://[^:]+:([^@]+)@.*#\2#')
+PASS=$(python3 -c 'import sys,urllib.parse; print(urllib.parse.unquote(sys.argv[1]))' "$PASS_RAW")
+MIG_OK=$(docker exec -e PGPASSWORD="$PASS" omnia-postgres psql -U "$DB_USER" -d "$DB_NAME" -At -c \
+  "SELECT count(*) FROM payload_migrations WHERE name ILIKE '%knowledge_governance%';")
+unset PASS
+echo "GOVERNANCE_MIGRATIONS_APPLIED=$MIG_OK"
+test "${MIG_OK}" -ge 2
 
 GIT_SHA="$RC_SHA" APP_VERSION="$RC_SHA" \
   docker compose -f docker/compose/staging.yml --env-file .env.staging \
