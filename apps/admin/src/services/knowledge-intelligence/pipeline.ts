@@ -503,7 +503,7 @@ export async function processLearningResource(args: {
       const bySlug = await payload.find({
         collection: 'knowledge-documents',
         where: { slug: { equals: baseSlug } },
-        limit: 1,
+        limit: 5,
         depth: 0,
         overrideAccess: true,
         req,
@@ -515,6 +515,46 @@ export async function processLearningResource(args: {
           _status?: string | null;
           status?: string | null;
         } | null;
+      }
+    }
+
+    // Purge orphan drafts that share the canonical slug (or hashed variants from prior
+    // failed creates). Publishing with draft:false fails with "slug must be unique" when
+    // another draft row still owns the same slug.
+    {
+      const orphans = await payload.find({
+        collection: 'knowledge-documents',
+        where: {
+          or: [{ slug: { equals: baseSlug } }, { slug: { like: `${baseSlug}-%` } }],
+        },
+        limit: 20,
+        depth: 0,
+        overrideAccess: true,
+        req,
+        draft: true,
+      });
+      for (const orphan of orphans.docs) {
+        const oid = relId(orphan.id as Rel);
+        if (oid == null) continue;
+        if (knowledgeDocumentId != null && oid === knowledgeDocumentId) continue;
+        // Prefer keeping a published live doc if we have not chosen one yet.
+        const oStatus = String((orphan as { _status?: string })._status || '');
+        if (knowledgeDocumentId == null && oStatus === 'published') {
+          knowledgeDocumentId = oid;
+          existingHub = orphan as { _status?: string | null; status?: string | null };
+          continue;
+        }
+        try {
+          await payload.delete({
+            collection: 'knowledge-documents',
+            id: oid,
+            overrideAccess: true,
+            req,
+            context: { kiPipelineActive: true },
+          });
+        } catch {
+          // best-effort cleanup; publish step will surface hard failures
+        }
       }
     }
 

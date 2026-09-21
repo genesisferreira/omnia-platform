@@ -545,12 +545,14 @@ async function applyHubEligibility(args: {
     );
 
     // Governance approval ≠ retrieval-ready. Keep retrievalEligible=false until KI completes.
+    // Keep autoProcess=false: explicit processLearningResource below. Setting autoProcess=true
+    // would race the LR afterChange hook (un-governed KI run → draft Hub + slug conflicts).
     await payload.update({
       collection: 'learning-resources',
       id: learningResourceId,
       data: {
         processingStatus: 'pending',
-        autoProcess: true,
+        autoProcess: false,
         knowledgeScope: scope,
         schoolKey: submission.schoolKey,
         retrievalEligible: false,
@@ -559,7 +561,7 @@ async function applyHubEligibility(args: {
       } as never,
       overrideAccess: true,
       req,
-      context: { governancePipelineActive: true },
+      context: { governancePipelineActive: true, kiPipelineActive: true },
     });
 
     // Do NOT pass the HTTP/governance `req`: KI failures must not abort the approval
@@ -595,6 +597,7 @@ async function applyHubEligibility(args: {
     const ingestReady = processed.ok === true && knowledgeDocumentId != null;
 
     if (ingestReady && knowledgeDocumentId != null) {
+      // Prefer draft:true when the Hub row may still be draft-only; then force publish.
       await payload.update({
         collection: 'knowledge-documents',
         id: knowledgeDocumentId,
@@ -609,7 +612,9 @@ async function applyHubEligibility(args: {
           contentVersionHash: versionHash ?? undefined,
           assessmentSecret: false,
           processingStatus: 'succeeded',
+          _status: 'published',
         } as never,
+        draft: false,
         overrideAccess: true,
         req,
         context: {

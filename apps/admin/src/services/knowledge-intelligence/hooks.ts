@@ -3,12 +3,12 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payl
 import { ensureLearningResourceFromLessonAsset, processLearningResource } from './pipeline';
 
 function isPipelineContext(context: unknown): boolean {
-  return Boolean(
-    context &&
-    typeof context === 'object' &&
-    'kiPipelineActive' in context &&
-    (context as { kiPipelineActive?: boolean }).kiPipelineActive,
-  );
+  if (!context || typeof context !== 'object') return false;
+  const ctx = context as {
+    kiPipelineActive?: boolean;
+    governancePipelineActive?: boolean;
+  };
+  return Boolean(ctx.kiPipelineActive || ctx.governancePipelineActive);
 }
 
 export const learningResourceBeforeChange: CollectionBeforeChangeHook = async ({ data }) => data;
