@@ -525,7 +525,7 @@ export async function processLearningResource(args: {
       const orphans = await payload.find({
         collection: 'knowledge-documents',
         where: {
-          or: [{ slug: { equals: baseSlug } }, { slug: { like: `${baseSlug}-%` } }],
+          or: [{ slug: { equals: baseSlug } }, { slug: { contains: baseSlug } }],
         },
         limit: 20,
         depth: 0,
