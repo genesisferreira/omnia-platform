@@ -20,7 +20,7 @@ import {
   type KnowledgeScope,
 } from '@omnia/knowledge-governance';
 
-import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
 import { processLearningResource } from '../knowledge-intelligence/pipeline';
 import { writeKnowledgeAudit } from './audit';
 
@@ -508,6 +508,140 @@ async function applyHubEligibility(args: {
   let sourceBuffer: Buffer | undefined;
   let preText: string | undefined;
 
+  // OMNIA upgrade of already-ready SCHOOL ingest: commit scope/agents without re-blocking HTTP on full KI.
+  if (
+    eligible &&
+    state === 'OMNIA_APPROVED' &&
+    learningResourceId != null &&
+    knowledgeDocumentId != null
+  ) {
+    try {
+      const lr = (await payload.findByID({
+        collection: 'learning-resources',
+        id: learningResourceId,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })) as {
+        processingStatus?: string | null;
+        contentVersionHash?: string | null;
+      };
+      const sameVersion =
+        versionHash != null &&
+        typeof lr.contentVersionHash === 'string' &&
+        lr.contentVersionHash === versionHash;
+      if (lr.processingStatus === 'completed' && sameVersion) {
+        const omniaAgents = ['tutor', 'engineering', 'concierge'] as const;
+        await payload.update({
+          collection: 'knowledge-documents',
+          id: knowledgeDocumentId,
+          data: {
+            allowAiUse: true,
+            publicationStatus: 'published',
+            status: 'published',
+            knowledgeScope: scope,
+            schoolKey: submission.schoolKey,
+            retrievalEligible: true,
+            governanceState: state,
+            contentVersionHash: versionHash,
+            assessmentSecret: false,
+            processingStatus: 'succeeded',
+            allowedAgents: [...omniaAgents],
+            _status: 'published',
+          } as never,
+          draft: false,
+          overrideAccess: true,
+          req,
+          context: {
+            governancePipelineActive: true,
+            kiPipelineActive: true,
+            knowledgeOfficialLoad: true,
+          },
+        });
+        await payload.update({
+          collection: 'learning-resources',
+          id: learningResourceId,
+          data: {
+            retrievalEligible: true,
+            processingStatus: 'completed',
+            knowledgeScope: scope,
+            governanceState: state,
+            schoolKey: submission.schoolKey,
+            contentVersionHash: versionHash,
+          } as never,
+          overrideAccess: true,
+          req,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        });
+        await kgUpdate(
+          payload,
+          submissionId,
+          {
+            learningResource: learningResourceId,
+            knowledgeDocument: knowledgeDocumentId,
+            retrievalEligible: true,
+          },
+          req,
+        );
+        await writeKnowledgeAudit(
+          payload,
+          {
+            action: 'ingestion_completed',
+            entityType: 'knowledge-governance-submissions',
+            entityId: String(submissionId),
+            actorId: String(actorId),
+            nextState: {
+              learningResourceId,
+              knowledgeDocumentId,
+              omniaUpgrade: true,
+              allowedAgents: omniaAgents,
+            },
+          },
+          req,
+        );
+        // Refresh vector agent tags asynchronously (reuse embedding queue).
+        void (async () => {
+          try {
+            const chunks = await payload.find({
+              collection: 'knowledge-chunks',
+              where: { knowledgeDocument: { equals: knowledgeDocumentId } },
+              limit: 200,
+              depth: 0,
+              overrideAccess: true,
+            });
+            for (const chunk of chunks.docs) {
+              await payload.create({
+                collection: 'embedding-queue',
+                data: {
+                  learningResource: learningResourceId,
+                  knowledgeDocument: knowledgeDocumentId,
+                  chunk: requirePayloadRelationId(chunk.id),
+                  status: 'pending',
+                  attempts: 0,
+                  provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',
+                  scheduledAt: new Date().toISOString(),
+                },
+                overrideAccess: true,
+                context: { kiPipelineActive: true },
+              });
+            }
+            const { processEmbeddingQueue } = await import('../retrieval/worker');
+            await processEmbeddingQueue(payload, { limit: 50 });
+          } catch (err) {
+            payload.logger.error({
+              msg: 'governed.omnia_upgrade.embed_refresh_failed',
+              knowledgeDocumentId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+        })();
+        return;
+      }
+    } catch {
+      // fall through to full async ingest
+    }
+  }
+
   // Always refresh lesson text/media on eligible approval/retry. Skipping when an LR already
   // exists left stale media in place and re-ingested outdated content (no new markers).
   if (eligible) {
@@ -590,131 +724,177 @@ async function applyHubEligibility(args: {
       context: { governancePipelineActive: true, kiPipelineActive: true },
     });
 
-    // Do NOT pass the HTTP/governance `req`: KI failures must not abort the approval
-    // transaction (Postgres 25P02 → subsequent LR updates look like "Not Found"/Failed query).
-    const processed = await processLearningResource({
-      payload,
-      learningResourceId,
-      sourceBuffer,
-      sourceMimeType: sourceBuffer ? 'text/plain' : undefined,
-      sourceFilename: sourceBuffer ? `governance-lesson-${learningResourceId}.txt` : undefined,
-      preExtracted: preText
-        ? { text: preText, meta: { language: 'pt-BR', encoding: 'utf-8' } }
-        : undefined,
-      hubOverrides: {
-        allowAiUse: true,
-        publicationStatus: 'published',
-        status: 'published',
-        humanReviewRequired: false,
-        securityClassification: 'STUDENT',
-        ownerCompany: relId(submission.ownerCompany as Rel) ?? undefined,
-        allowedAgents:
-          scope === 'OMNIA_APPROVED' ? ['tutor', 'engineering', 'concierge'] : ['tutor'],
-        tags: [
-          `scope:${scope}`,
-          `school:${String(submission.schoolKey || '')}`,
-          `governance:${state}`,
-        ],
-        revisionNotes: `Epic 17 governed ingest (${scope}/${state}).`,
-      },
-    });
-
-    knowledgeDocumentId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
-    const ingestReady = processed.ok === true && knowledgeDocumentId != null;
-
-    if (ingestReady && knowledgeDocumentId != null) {
-      // Prefer draft:true when the Hub row may still be draft-only; then force publish.
-      await payload.update({
-        collection: 'knowledge-documents',
-        id: knowledgeDocumentId,
-        data: {
-          allowAiUse: true,
-          publicationStatus: 'published',
-          status: 'published',
-          knowledgeScope: scope,
-          schoolKey: submission.schoolKey,
-          retrievalEligible: true,
-          governanceState: state,
-          contentVersionHash: versionHash ?? undefined,
-          assessmentSecret: false,
-          processingStatus: 'succeeded',
-          _status: 'published',
-        } as never,
-        draft: false,
-        overrideAccess: true,
-        req,
-        context: {
-          governancePipelineActive: true,
-          kiPipelineActive: true,
-          knowledgeOfficialLoad: true,
-        },
-      });
-
-      await payload.update({
-        collection: 'learning-resources',
-        id: learningResourceId,
-        data: {
-          knowledgeDocument: knowledgeDocumentId,
-          retrievalEligible: true,
-          processingStatus: 'completed',
-          knowledgeScope: scope,
-          governanceState: state,
-          schoolKey: submission.schoolKey,
-          contentVersionHash: versionHash ?? undefined,
-        } as never,
-        overrideAccess: true,
-        req,
-        context: { governancePipelineActive: true, kiPipelineActive: true },
-      });
-    } else {
-      // Keep approval, but mark processing failed / not retrievable.
-      await payload.update({
-        collection: 'learning-resources',
-        id: learningResourceId,
-        data: {
-          retrievalEligible: false,
-          processingStatus: 'failed',
-          knowledgeScope: scope,
-          governanceState: state,
-          schoolKey: submission.schoolKey,
-          contentVersionHash: versionHash ?? undefined,
-          lastError: 'GOVERNED_INGEST_NOT_READY',
-        } as never,
-        overrideAccess: true,
-        req,
-        context: { governancePipelineActive: true },
-      });
-    }
-
     await kgUpdate(
       payload,
       submissionId,
       {
         learningResource: learningResourceId,
         knowledgeDocument: knowledgeDocumentId ?? undefined,
-        // Policy eligibility stays tied to governance state; live retrieval also requires ready processing.
-        retrievalEligible: ingestReady,
+        retrievalEligible: false,
       },
       req,
     );
 
-    await writeKnowledgeAudit(
-      payload,
-      {
-        action: ingestReady ? 'ingestion_completed' : 'ingestion_started',
-        entityType: 'knowledge-governance-submissions',
-        entityId: String(submissionId),
-        actorId: String(actorId),
-        nextState: {
+    const schoolKey = typeof submission.schoolKey === 'string' ? submission.schoolKey : undefined;
+    const ownerCompany = relId(submission.ownerCompany as Rel) ?? undefined;
+    const hubOverrides = {
+      allowAiUse: true,
+      publicationStatus: 'published' as const,
+      status: 'published',
+      humanReviewRequired: false,
+      securityClassification: 'STUDENT',
+      ownerCompany,
+      allowedAgents:
+        scope === 'OMNIA_APPROVED'
+          ? (['tutor', 'engineering', 'concierge'] as string[])
+          : (['tutor'] as string[]),
+      tags: [
+        `scope:${scope}`,
+        `school:${String(submission.schoolKey || '')}`,
+        `governance:${state}`,
+      ],
+      revisionNotes: `Epic 17 governed ingest (${scope}/${state}).`,
+    };
+
+    // Epic 17.2: do NOT await KI/chunk/embed inside the HTTP approval request.
+    // Commit governance + queue processing, then finish ingest asynchronously.
+    const bufferCopy = sourceBuffer ? Buffer.from(sourceBuffer) : undefined;
+    const textCopy = preText;
+    void (async () => {
+      try {
+        const processed = await processLearningResource({
+          payload,
           learningResourceId,
-          knowledgeDocumentId,
-          ok: processed.ok,
-          chunkCount: processed.chunkCount,
-          ingestReady,
-        },
-      },
-      req,
-    );
+          sourceBuffer: bufferCopy,
+          sourceMimeType: bufferCopy ? 'text/plain' : undefined,
+          sourceFilename: bufferCopy ? `governance-lesson-${learningResourceId}.txt` : undefined,
+          preExtracted: textCopy
+            ? { text: textCopy, meta: { language: 'pt-BR', encoding: 'utf-8' } }
+            : undefined,
+          hubOverrides,
+        });
+
+        let kdId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
+        const ingestReady = processed.ok === true && kdId != null;
+
+        if (ingestReady && kdId != null) {
+          await payload.update({
+            collection: 'knowledge-documents',
+            id: kdId,
+            data: {
+              allowAiUse: true,
+              publicationStatus: 'published',
+              status: 'published',
+              knowledgeScope: scope,
+              schoolKey,
+              retrievalEligible: true,
+              governanceState: state,
+              contentVersionHash: versionHash ?? undefined,
+              assessmentSecret: false,
+              processingStatus: 'succeeded',
+              _status: 'published',
+              allowedAgents: hubOverrides.allowedAgents,
+            } as never,
+            draft: false,
+            overrideAccess: true,
+            context: {
+              governancePipelineActive: true,
+              kiPipelineActive: true,
+              knowledgeOfficialLoad: true,
+            },
+          });
+
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              knowledgeDocument: kdId,
+              retrievalEligible: true,
+              processingStatus: 'completed',
+              knowledgeScope: scope,
+              governanceState: state,
+              schoolKey,
+              contentVersionHash: versionHash ?? undefined,
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true, kiPipelineActive: true },
+          });
+
+          // Drain embedding queue so retrieval can become vector-ready without a separate HTTP wait.
+          try {
+            const { processEmbeddingQueue } = await import('../retrieval/worker');
+            await processEmbeddingQueue(payload, { limit: 50 });
+          } catch (embedErr) {
+            payload.logger.error({
+              msg: 'governed.ingest.embed_drain_failed',
+              learningResourceId,
+              error: embedErr instanceof Error ? embedErr.message : String(embedErr),
+            });
+          }
+        } else {
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              retrievalEligible: false,
+              processingStatus: 'failed',
+              knowledgeScope: scope,
+              governanceState: state,
+              schoolKey,
+              contentVersionHash: versionHash ?? undefined,
+              lastError: 'GOVERNED_INGEST_NOT_READY',
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true },
+          });
+          kdId = kdId ?? null;
+        }
+
+        await kgUpdate(payload, submissionId, {
+          learningResource: learningResourceId,
+          knowledgeDocument: kdId ?? undefined,
+          retrievalEligible: ingestReady,
+        });
+
+        await writeKnowledgeAudit(payload, {
+          action: ingestReady ? 'ingestion_completed' : 'ingestion_started',
+          entityType: 'knowledge-governance-submissions',
+          entityId: String(submissionId),
+          actorId: String(actorId),
+          nextState: {
+            learningResourceId,
+            knowledgeDocumentId: kdId,
+            ok: processed.ok,
+            chunkCount: processed.chunkCount,
+            ingestReady,
+            async: true,
+          },
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message.slice(0, 400) : String(err);
+        payload.logger.error({
+          msg: 'governed.ingest.async_failed',
+          submissionId,
+          learningResourceId,
+          error: message,
+        });
+        try {
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              retrievalEligible: false,
+              processingStatus: 'failed',
+              lastError: message,
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true },
+          });
+        } catch {
+          /* best-effort */
+        }
+      }
+    })();
   }
 }
 export async function reviewGovernanceSubmission(args: {
