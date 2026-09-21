@@ -576,9 +576,7 @@ export async function processLearningResource(args: {
           ...hubData,
           status: publishForAi ? ('published' as const) : hubData.status,
           allowAiUse: publishForAi,
-          publicationStatus: publishForAi
-            ? ('published' as const)
-            : hubData.publicationStatus,
+          publicationStatus: publishForAi ? ('published' as const) : hubData.publicationStatus,
           humanReviewRequired: publishForAi ? false : hubData.humanReviewRequired,
         } as never)
       : (hubData as never);
