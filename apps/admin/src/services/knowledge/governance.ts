@@ -356,7 +356,30 @@ async function ensureLessonTextLearningResource(args: {
   })) as unknown as Record<string, unknown>;
 
   const title = String(lesson.title || submission.title || `Aula ${lessonId}`);
-  const text = [title, String(lesson.summary || ''), String(lesson.content || '')]
+  const lexicalToPlain = (value: unknown): string => {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value !== 'object') return String(value);
+    const node = value as { text?: unknown; children?: unknown };
+    const parts: string[] = [];
+    if (typeof node.text === 'string' && node.text.trim()) parts.push(node.text);
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        const chunk = lexicalToPlain(child);
+        if (chunk) parts.push(chunk);
+      }
+    } else {
+      // Fallback: walk own enumerable values (Payload Lexical root wrappers).
+      for (const v of Object.values(node)) {
+        if (v && typeof v === 'object') {
+          const chunk = lexicalToPlain(v);
+          if (chunk) parts.push(chunk);
+        }
+      }
+    }
+    return parts.join(' ').replace(/\s+/g, ' ').trim();
+  };
+  const text = [title, String(lesson.summary || ''), lexicalToPlain(lesson.content)]
     .map((p) => p.trim())
     .filter(Boolean)
     .join('\n\n')
