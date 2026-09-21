@@ -501,7 +501,7 @@ async function applyHubEligibility(args: {
   const { payload, submission, submissionId, state, scope, actorId, req } = args;
   const eligible = isRetrievalEligibleState(state) && isHubIngestionEligible(state);
   let learningResourceId = relId(submission.learningResource as Rel);
-  let knowledgeDocumentId = relId(submission.knowledgeDocument as Rel);
+  const knowledgeDocumentId = relId(submission.knowledgeDocument as Rel);
   const versionHash =
     typeof submission.contentVersionHash === 'string' ? submission.contentVersionHash : null;
 
