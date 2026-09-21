@@ -611,7 +611,11 @@ async function applyHubEligibility(args: {
         } as never,
         overrideAccess: true,
         req,
-        context: { governancePipelineActive: true, kiPipelineActive: true, knowledgeOfficialLoad: true },
+        context: {
+          governancePipelineActive: true,
+          kiPipelineActive: true,
+          knowledgeOfficialLoad: true,
+        },
       });
 
       await payload.update({

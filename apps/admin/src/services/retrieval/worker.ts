@@ -225,7 +225,11 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
       sourceVersion = doc.contentVersionHash ?? sourceVersion;
       const proc = (doc.processingStatus || '').toLowerCase();
       const processingReady =
-        !proc || proc === 'succeeded' || proc === 'completed' || proc === 'ready' || proc === 'indexed';
+        !proc ||
+        proc === 'succeeded' ||
+        proc === 'completed' ||
+        proc === 'ready' ||
+        proc === 'indexed';
       if (assessmentSecret || retrievalEligible === false || !processingReady) {
         allowAiUse = false;
         retrievalEligible = false;
