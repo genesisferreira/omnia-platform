@@ -509,12 +509,8 @@ export async function processLearningResource(args: {
 
     const publishForAi = hubOverrides?.allowAiUse === true;
     // Epic 10/17: when publishing for AI, create already published — do NOT leave _status=draft
-    // then update with draft:false (Payload Not Found on draft-only docs). Honor hubOverrides.status.
-    const initialStatus = publishForAi
-      ? hubOverrides?.status === 'published' || !hubOverrides?.status
-        ? 'published'
-        : hubOverrides.status
-      : 'draft';
+    // then update with draft:false (Payload Not Found on draft-only docs).
+    const initialStatus = publishForAi ? ('published' as const) : ('draft' as const);
     const hubData = {
       title: publishForAi ? title : `[KI] ${title}`,
       slug: baseSlug,
@@ -563,12 +559,13 @@ export async function processLearningResource(args: {
 
     // Always write the live (non-draft) row for KI pipeline so subsequent updates resolve.
     const useDraft = false;
+    const hubDataPayload = hubData as never;
 
     if (knowledgeDocumentId != null) {
       await payload.update({
         collection: 'knowledge-documents',
         id: knowledgeDocumentId,
-        data: hubData,
+        data: hubDataPayload,
         draft: useDraft,
         overrideAccess: true,
         req,
@@ -579,7 +576,7 @@ export async function processLearningResource(args: {
       try {
         const created = await payload.create({
           collection: 'knowledge-documents',
-          data: hubData,
+          data: hubDataPayload,
           draft: useDraft,
           overrideAccess: true,
           req,
@@ -592,7 +589,7 @@ export async function processLearningResource(args: {
           data: {
             ...hubData,
             slug: `${baseSlug}-${createHash('sha1').update(String(learningResourceId)).digest('hex').slice(0, 8)}`,
-          },
+          } as never,
           draft: useDraft,
           overrideAccess: true,
           req,
