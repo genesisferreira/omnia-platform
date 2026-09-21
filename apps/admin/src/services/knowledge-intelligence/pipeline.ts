@@ -164,14 +164,26 @@ async function deleteChildrenForResource(
     overrideAccess: true,
     req,
   });
+
+  // embedding_records FK blocks chunk deletes — remove records (and queue) first.
   for (const chunk of chunks.docs) {
-    await payload.delete({
-      collection: 'knowledge-chunks',
-      id: chunk.id,
+    const records = await payload.find({
+      collection: 'embedding-records',
+      where: { chunk: { equals: chunk.id } },
+      limit: 100,
+      depth: 0,
       overrideAccess: true,
       req,
-      context: { kiPipelineActive: true },
     });
+    for (const record of records.docs) {
+      await payload.delete({
+        collection: 'embedding-records',
+        id: record.id,
+        overrideAccess: true,
+        req,
+        context: { kiPipelineActive: true },
+      });
+    }
   }
 
   const queue = await payload.find({
@@ -186,6 +198,16 @@ async function deleteChildrenForResource(
     await payload.delete({
       collection: 'embedding-queue',
       id: item.id,
+      overrideAccess: true,
+      req,
+      context: { kiPipelineActive: true },
+    });
+  }
+
+  for (const chunk of chunks.docs) {
+    await payload.delete({
+      collection: 'knowledge-chunks',
+      id: chunk.id,
       overrideAccess: true,
       req,
       context: { kiPipelineActive: true },
@@ -545,6 +567,41 @@ export async function processLearningResource(args: {
           continue;
         }
         try {
+          // Best-effort: clear chunks/embeddings tied to the orphan Hub doc before delete.
+          const orphanChunks = await payload.find({
+            collection: 'knowledge-chunks',
+            where: { knowledgeDocument: { equals: oid } },
+            limit: 200,
+            depth: 0,
+            overrideAccess: true,
+            req,
+          });
+          for (const chunk of orphanChunks.docs) {
+            const records = await payload.find({
+              collection: 'embedding-records',
+              where: { chunk: { equals: chunk.id } },
+              limit: 50,
+              depth: 0,
+              overrideAccess: true,
+              req,
+            });
+            for (const record of records.docs) {
+              await payload.delete({
+                collection: 'embedding-records',
+                id: record.id,
+                overrideAccess: true,
+                req,
+                context: { kiPipelineActive: true },
+              });
+            }
+            await payload.delete({
+              collection: 'knowledge-chunks',
+              id: chunk.id,
+              overrideAccess: true,
+              req,
+              context: { kiPipelineActive: true },
+            });
+          }
           await payload.delete({
             collection: 'knowledge-documents',
             id: oid,
@@ -552,8 +609,9 @@ export async function processLearningResource(args: {
             req,
             context: { kiPipelineActive: true },
           });
-        } catch {
-          // best-effort cleanup; publish step will surface hard failures
+        } catch (orphanErr) {
+          const msg = orphanErr instanceof Error ? orphanErr.message : String(orphanErr);
+          throw new Error(`ORPHAN_KD_PURGE_FAILED:${oid}:${msg.slice(0, 200)}`);
         }
       }
     }
