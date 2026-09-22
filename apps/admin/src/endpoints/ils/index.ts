@@ -17,6 +17,7 @@ import {
   saveGoals,
   savePcar,
   startOnboarding,
+  advanceOnboardingTurn,
   student360,
   validateExercise,
 } from '../../services/ils/engine';
@@ -88,6 +89,18 @@ export const ilsEndpoints: Endpoint[] = [
     handler: async (req) => {
       try {
         return ok({ onboarding: await startOnboarding(req.payload, requireLmsAuth(req)) });
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  },
+  {
+    path: '/omnia/academic/ils/onboarding/turn',
+    method: 'post',
+    handler: async (req) => {
+      try {
+        const b = await readBody(req);
+        return ok(await advanceOnboardingTurn(req.payload, requireLmsAuth(req), b));
       } catch (err) {
         return fail(err);
       }

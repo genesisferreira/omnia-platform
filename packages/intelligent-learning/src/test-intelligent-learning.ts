@@ -17,10 +17,21 @@ import {
   schoolsIsolated,
 } from './schools';
 import {
+  ONBOARDING_GENERIC_FALLBACK,
   academicAccessAllowed,
+  appendUniqueDiagnosticAnswer,
   applyOnboardingTransition,
+  assistantPromptForOnboardingStep,
+  coerceOnboardingStep,
+  hasGoalsProfile,
+  hasPcarProfile,
+  hasCompletedInitialAssessment,
   isAllowedWhileGated,
+  isOnboardingAffirmative,
   nextOnboardingStep,
+  onboardingWelcomePrompt,
+  pickOnboardingRecord,
+  planOnboardingTurn,
   requireOverrideReason,
 } from './onboarding';
 import { CAREER_GOALS, normalizePcarArea, sanitizeCareerGoals, sanitizePcar } from './pcar';
@@ -140,6 +151,72 @@ describe('intelligent learning — onboarding gate', () => {
       requireOverrideReason('Aluno já avaliado em turma presencial'),
       'Aluno já avaliado em turma presencial',
     );
+  });
+
+  it('advances welcome “sim” and never plans the generic fallback loop', () => {
+    for (const text of ['sim', 'Sim', 'SIM', 'Sim, vamos começar']) {
+      assert.equal(isOnboardingAffirmative(text), true);
+      const plan = planOnboardingTurn({
+        currentStep: 'explanation',
+        status: 'NOT_STARTED',
+        academicAllowed: false,
+        text,
+        hasAssessmentQuestion: false,
+      });
+      assert.equal(plan.action, 'start');
+      assert.notEqual(assistantPromptForOnboardingStep('consent'), ONBOARDING_GENERIC_FALLBACK);
+    }
+    const second = planOnboardingTurn({
+      currentStep: 'consent',
+      status: 'IN_PROGRESS',
+      academicAllowed: false,
+      text: 'sim',
+      hasAssessmentQuestion: false,
+    });
+    assert.equal(second.action, 'consent');
+    const stuck = planOnboardingTurn({
+      currentStep: 'result',
+      status: 'IN_PROGRESS',
+      academicAllowed: false,
+      text: 'sim',
+      hasAssessmentQuestion: false,
+    });
+    assert.equal(stuck.action, 'recover_complete');
+    const unknown = coerceOnboardingStep('NOT_STARTED', 'explanation');
+    assert.equal(unknown, 'explanation');
+    const welcome = onboardingWelcomePrompt('Fred do Frio');
+    assert.match(welcome, /Fred do Frio/);
+    assert.match(welcome, /Podemos começar\?/);
+    assert.equal(hasPcarProfile({}), false);
+    assert.equal(hasGoalsProfile({}), false);
+    assert.equal(hasPcarProfile({ experienceYears: 3, areas: ['comercial'] }), true);
+    assert.equal(hasCompletedInitialAssessment({ complete: true }), false);
+    assert.equal(
+      hasCompletedInitialAssessment({ complete: true, answers: [{ questionId: 'q1' }] }),
+      true,
+    );
+    const dup = appendUniqueDiagnosticAnswer([{ questionId: 'q1', correct: true }], {
+      questionId: 'q1',
+      correct: false,
+    });
+    assert.equal(dup.duplicate, true);
+    assert.equal(dup.answers.length, 1);
+    const fred = pickOnboardingRecord(
+      [
+        { id: 1, schoolKey: 'cte' },
+        { id: 2, schoolKey: 'fred-do-frio' },
+      ],
+      'fred-do-frio',
+    );
+    assert.equal(fred?.id, 2);
+    const cte = pickOnboardingRecord(
+      [
+        { id: 1, schoolKey: 'cte' },
+        { id: 2, schoolKey: 'fred-do-frio' },
+      ],
+      'cte',
+    );
+    assert.equal(cte?.id, 1);
   });
 });
 

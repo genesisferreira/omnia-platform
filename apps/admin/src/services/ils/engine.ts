@@ -4,23 +4,33 @@ import {
   SCHOOL_BRANDS,
   TECHNICAL_DOMAINS,
   academicAccessAllowed,
+  appendUniqueDiagnosticAnswer,
   applyAssessmentGuard,
   applyOnboardingTransition,
   applySipeEvent,
   assertSchoolAccess,
+  assistantPromptForOnboardingStep,
   attentionSignals,
   blueprintsEquivalent,
   buildDiagnosticBank,
   canUseInOfficialAssessment,
+  coerceOnboardingStep,
   computeImt,
   filterEntitiesBySchool,
   filterTutorContext,
+  goalsDraftFromUtterance,
   gradeDiagnosticAnswer,
+  hasCompletedInitialAssessment,
+  hasGoalsProfile,
+  hasPcarProfile,
   humanizeResult,
   isSchoolKey,
   nextAdaptiveQuestion,
   nextOnboardingStep,
   overallTechnicalLevel,
+  pcarDraftFromUtterance,
+  pickOnboardingRecord,
+  planOnboardingTurn,
   promoteExercise,
   requireOverrideReason,
   resolveSchoolKey,
@@ -189,8 +199,27 @@ async function getOrCreateOnboarding(
   studentId: number,
   schoolKey: SchoolKey | null,
 ) {
-  const existing = await findDocs(payload, ONBOARDING, { student: { equals: studentId } }, 0, 1);
-  if (existing[0]) return existing[0];
+  const existing = await findDocs(payload, ONBOARDING, { student: { equals: studentId } }, 0, 20);
+  const match = pickOnboardingRecord(existing, schoolKey);
+  if (match) {
+    if (schoolKey && match.schoolKey !== schoolKey) {
+      await payload.update({
+        collection: ONBOARDING,
+        id: Number(match.id),
+        data: { schoolKey } as never,
+        overrideAccess: true,
+      });
+      return rec(
+        await payload.findByID({
+          collection: ONBOARDING,
+          id: Number(match.id),
+          depth: 0,
+          overrideAccess: true,
+        }),
+      );
+    }
+    return match;
+  }
   const enrollments = await findDocs(
     payload,
     ENROLLMENTS,
@@ -241,15 +270,15 @@ export async function getOnboarding(payload: Payload, auth: LmsAuthContext) {
   const schoolKey = await resolveActorSchool(payload, auth);
   const row = await getOrCreateOnboarding(payload, userIdNum(auth), schoolKey);
   const status = (row.status as OnboardingStatus) || 'NOT_STARTED';
-  const pcar = row.pcar && typeof row.pcar === 'object' ? rec(row.pcar) : null;
-  const goals = row.goals && typeof row.goals === 'object' ? rec(row.goals) : null;
+  const pcar = hasPcarProfile(row.pcar) ? rec(row.pcar) : null;
+  const goals = hasGoalsProfile(row.goals) ? rec(row.goals) : null;
   const hasConsent = Boolean(row.consentId);
   const step = nextOnboardingStep({
     status,
     hasConsent,
     hasPcar: Boolean(pcar),
     hasGoals: Boolean(goals),
-    hasAssessment: rec(row.assessmentState).complete === true,
+    hasAssessment: hasCompletedInitialAssessment(row.assessmentState),
   });
   return {
     id: row.id,
@@ -284,10 +313,11 @@ function humanizeFromState(row: Rec) {
 export async function startOnboarding(payload: Payload, auth: LmsAuthContext) {
   const schoolKey = await resolveActorSchool(payload, auth);
   const row = await getOrCreateOnboarding(payload, userIdNum(auth), schoolKey);
-  const next = applyOnboardingTransition(
-    (row.status as OnboardingStatus) || 'NOT_STARTED',
-    'start',
-  );
+  const current = (row.status as OnboardingStatus) || 'NOT_STARTED';
+  if (current === 'IN_PROGRESS' || current === 'COMPLETED' || current === 'EXEMPTED') {
+    return getOnboarding(payload, auth);
+  }
+  const next = applyOnboardingTransition(current, 'start');
   await payload.update({
     collection: ONBOARDING,
     id: Number(row.id),
@@ -306,6 +336,8 @@ export async function startOnboarding(payload: Payload, auth: LmsAuthContext) {
 export async function recordConsent(payload: Payload, auth: LmsAuthContext) {
   const schoolKey = await resolveActorSchool(payload, auth);
   const studentId = userIdNum(auth);
+  const existingRow = await getOrCreateOnboarding(payload, studentId, schoolKey);
+  if (existingRow.consentId) return getOnboarding(payload, auth);
   const consent = rec(
     await payload.create({
       collection: CONSENTS,
@@ -375,6 +407,135 @@ export async function saveGoals(
   return getOnboarding(payload, auth);
 }
 
+async function persistCompletionIfReady(payload: Payload, auth: LmsAuthContext) {
+  const schoolKey = await resolveActorSchool(payload, auth);
+  const row = await getOrCreateOnboarding(payload, userIdNum(auth), schoolKey);
+  const status = (row.status as OnboardingStatus) || 'NOT_STARTED';
+  if (status === 'COMPLETED' || status === 'EXEMPTED') return getOnboarding(payload, auth);
+  const state = rec(row.assessmentState);
+  const answers = Array.isArray(state.answers)
+    ? (state.answers as Array<{ questionId: string; correct: boolean }>)
+    : [];
+  const nxt = nextAdaptiveQuestion(seedBank(), answers);
+  if (!nxt.complete) return getOnboarding(payload, auth);
+  const overall = overallTechnicalLevel(nxt.estimates);
+  await payload.update({
+    collection: ONBOARDING,
+    id: Number(row.id),
+    data: {
+      assessmentState: {
+        ...state,
+        answers,
+        estimates: nxt.estimates,
+        overall,
+        complete: true,
+      },
+      status: 'COMPLETED',
+      currentStep: 'result',
+      completedAt: row.completedAt || new Date().toISOString(),
+    } as never,
+    overrideAccess: true,
+  });
+  return getOnboarding(payload, auth);
+}
+
+function formatAssessmentAssistant(data: Awaited<ReturnType<typeof assessmentNext>>): string {
+  if (data.complete) return assistantPromptForOnboardingStep('result');
+  const q = data.question;
+  if (!q) return assistantPromptForOnboardingStep('assessment');
+  return assistantPromptForOnboardingStep('assessment', {
+    questionPrompt: q.prompt,
+    domainLabel: q.domainLabel,
+  });
+}
+
+export async function advanceOnboardingTurn(
+  payload: Payload,
+  auth: LmsAuthContext,
+  raw: { text?: unknown; questionId?: unknown },
+) {
+  const text = typeof raw.text === 'string' ? raw.text : '';
+  const questionId = typeof raw.questionId === 'string' ? raw.questionId : '';
+  let snapshot = await getOnboarding(payload, auth);
+  const plan = planOnboardingTurn({
+    currentStep: snapshot.currentStep,
+    status: snapshot.status,
+    academicAllowed: snapshot.academicAllowed,
+    text,
+    hasAssessmentQuestion: Boolean(questionId),
+  });
+
+  if (plan.action === 'validate') {
+    return {
+      onboarding: snapshot,
+      assistantMessage: plan.validationMessage,
+      question: null,
+      progressed: false,
+    };
+  }
+
+  if (plan.action === 'noop') {
+    return {
+      onboarding: snapshot,
+      assistantMessage: snapshot.result
+        ? `${snapshot.result.summary}\n\n${snapshot.result.nextAction}`
+        : assistantPromptForOnboardingStep('result'),
+      question: null,
+      progressed: false,
+    };
+  }
+
+  if (plan.action === 'start') snapshot = await startOnboarding(payload, auth);
+  if (plan.action === 'consent') snapshot = await recordConsent(payload, auth);
+  if (plan.action === 'pcar') {
+    snapshot = await savePcar(payload, auth, pcarDraftFromUtterance(text));
+  }
+  if (plan.action === 'goals') {
+    const draft = goalsDraftFromUtterance(text);
+    snapshot = await saveGoals(payload, auth, draft);
+  }
+
+  let question: Awaited<ReturnType<typeof assessmentNext>> | null = null;
+  if (plan.action === 'assessment_next' || plan.action === 'goals') {
+    question = await assessmentNext(payload, auth);
+    if (question.complete) snapshot = await persistCompletionIfReady(payload, auth);
+  }
+  if (plan.action === 'assessment_answer') {
+    const qid = questionId || String((await assessmentNext(payload, auth)).question?.id || '');
+    question = await assessmentAnswer(payload, auth, {
+      questionId: qid,
+      value: plan.answerValue ?? 'true',
+    });
+    snapshot = await getOnboarding(payload, auth);
+  }
+  if (plan.action === 'recover_complete') {
+    snapshot = await persistCompletionIfReady(payload, auth);
+    if (!snapshot.academicAllowed) {
+      question = await assessmentNext(payload, auth);
+      if (question.complete) snapshot = await persistCompletionIfReady(payload, auth);
+    }
+  }
+
+  snapshot = await getOnboarding(payload, auth);
+  const step = coerceOnboardingStep(snapshot.currentStep, 'explanation');
+  let assistantMessage = assistantPromptForOnboardingStep(step, { schoolName: snapshot.schoolName });
+  if (question) {
+    assistantMessage = formatAssessmentAssistant(question);
+  } else if (snapshot.academicAllowed && snapshot.result) {
+    assistantMessage = `${snapshot.result.summary}\n\n${snapshot.result.nextAction}`;
+  } else if (step === 'assessment') {
+    question = await assessmentNext(payload, auth);
+    assistantMessage = formatAssessmentAssistant(question);
+  }
+
+  return {
+    onboarding: snapshot,
+    assistantMessage,
+    question,
+    progressed: plan.action !== 'validate' && plan.action !== 'noop',
+  };
+}
+
 function seedBank(): DiagnosticQuestion[] {
   return buildDiagnosticBank();
 }
@@ -431,8 +592,9 @@ export async function assessmentAnswer(
   const q = bank.find((b) => b.id === input.questionId);
   if (!q) throw new AcademicError(400, 'BAD_REQUEST', 'Questão inválida');
   const correct = gradeDiagnosticAnswer(q, input.value);
-  answers.push({ questionId: q.id, correct });
-  const nxt = nextAdaptiveQuestion(bank, answers);
+  const unique = appendUniqueDiagnosticAnswer(answers, { questionId: q.id, correct });
+  if (unique.duplicate) return assessmentNext(payload, auth);
+  const nxt = nextAdaptiveQuestion(bank, unique.answers);
   const overall = overallTechnicalLevel(nxt.estimates);
   const complete = nxt.complete;
   await payload.update({
@@ -440,7 +602,7 @@ export async function assessmentAnswer(
     id: Number(row.id),
     data: {
       assessmentState: {
-        answers,
+        answers: unique.answers,
         estimates: nxt.estimates,
         overall,
         complete,
