@@ -22,6 +22,7 @@ describe('ils admin wiring', () => {
   it('registers academic ils endpoints', () => {
     const paths = ilsEndpoints.map((e) => `${e.method} ${e.path}`);
     assert.ok(paths.includes('get /omnia/academic/ils/onboarding'));
+    assert.ok(paths.includes('post /omnia/academic/ils/onboarding/turn'));
     assert.ok(paths.includes('get /omnia/academic/ils/student-360'));
     assert.ok(paths.includes('get /omnia/academic/ils/teaching/student/:id'));
     assert.ok(paths.includes('post /omnia/academic/ils/teaching/interventions'));
