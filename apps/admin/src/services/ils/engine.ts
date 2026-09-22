@@ -532,7 +532,7 @@ export async function advanceOnboardingTurn(
     onboarding: snapshot,
     assistantMessage,
     question,
-    progressed: plan.action !== 'validate' && plan.action !== 'noop',
+    progressed: true,
   };
 }
 
