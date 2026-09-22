@@ -130,7 +130,11 @@ export const ONBOARDING_GENERIC_FALLBACK =
 
 export function assistantPromptForOnboardingStep(
   step: OnboardingStep,
-  input: { schoolName?: string | null; questionPrompt?: string | null; domainLabel?: string | null } = {},
+  input: {
+    schoolName?: string | null;
+    questionPrompt?: string | null;
+    domainLabel?: string | null;
+  } = {},
 ): string {
   if (step === 'explanation') return onboardingWelcomePrompt(input.schoolName);
   if (step === 'consent') return ONBOARDING_CONSENT_PROMPT;
@@ -138,7 +142,9 @@ export function assistantPromptForOnboardingStep(
   if (step === 'goals') return ONBOARDING_GOALS_PROMPT;
   if (step === 'assessment') {
     if (input.questionPrompt) {
-      return `${input.domainLabel || 'Questão'}\n\n${input.questionPrompt}\n\nResponda Verdadeiro ou Falso.`;
+      return `${input.domainLabel || 'Questão'}\n\n${
+        input.questionPrompt
+      }\n\nResponda Verdadeiro ou Falso.`;
     }
     return ONBOARDING_ASSESSMENT_INTRO_PROMPT;
   }
@@ -231,7 +237,8 @@ export function planOnboardingTurn(input: {
     if (isOnboardingAffirmative(text)) return { action: 'consent' };
     return {
       action: 'validate',
-      validationMessage: 'Para continuar, preciso da sua concordância educacional. Responda “sim” ou “concordo”.',
+      validationMessage:
+        'Para continuar, preciso da sua concordância educacional. Responda “sim” ou “concordo”.',
     };
   }
 
@@ -257,7 +264,8 @@ export function planOnboardingTurn(input: {
   if (isOnboardingAffirmative(text)) return { action: 'start' };
   return {
     action: 'validate',
-    validationMessage: 'Não consegui usar essa resposta. Tente de novo com suas próprias palavras.',
+    validationMessage:
+      'Não consegui usar essa resposta. Tente de novo com suas próprias palavras.',
   };
 }
 

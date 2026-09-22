@@ -518,7 +518,9 @@ export async function advanceOnboardingTurn(
 
   snapshot = await getOnboarding(payload, auth);
   const step = coerceOnboardingStep(snapshot.currentStep, 'explanation');
-  let assistantMessage = assistantPromptForOnboardingStep(step, { schoolName: snapshot.schoolName });
+  let assistantMessage = assistantPromptForOnboardingStep(step, {
+    schoolName: snapshot.schoolName,
+  });
   if (question) {
     assistantMessage = formatAssessmentAssistant(question);
   } else if (snapshot.academicAllowed && snapshot.result) {
