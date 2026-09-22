@@ -264,8 +264,7 @@ export function planOnboardingTurn(input: {
   if (isOnboardingAffirmative(text)) return { action: 'start' };
   return {
     action: 'validate',
-    validationMessage:
-      'Não consegui usar essa resposta. Tente de novo com suas próprias palavras.',
+    validationMessage: 'Não consegui usar essa resposta. Tente de novo com suas próprias palavras.',
   };
 }
 
