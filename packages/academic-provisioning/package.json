@@ -1,0 +1,25 @@
+{
+  "name": "@omnia/academic-provisioning",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Omnia LMS Academic Provisioning — users, enrollments, queue, dry-run write",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/test-*.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "eslint": "catalog:",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -32,6 +32,7 @@ ARG NEXT_PUBLIC_APP_URL=https://dev.omniafrigo.com.br
 ARG NEXT_PUBLIC_ADMIN_URL=https://admin.dev.omniafrigo.com.br
 ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
 ARG PAYLOAD_SECRET=staging-build-secret-min-32-chars-long
+ARG GIT_SHA=unknown
 
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_ADMIN_URL=$NEXT_PUBLIC_ADMIN_URL
@@ -39,7 +40,10 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV PAYLOAD_SECRET=$PAYLOAD_SECRET
 ENV NODE_ENV=production
 ENV DOCKER_BUILD=true
+ENV OMNIA_SMTP_ALLOW_BUILD=1
 
+# Parity with CI: generated Payload types must exist before Next typecheck (R0.4).
+RUN pnpm --filter @omnia/admin generate:types
 RUN pnpm --filter @omnia/admin generate:importmap
 RUN pnpm turbo build --filter=@omnia/admin
 
@@ -49,6 +53,8 @@ RUN pnpm turbo build --filter=@omnia/admin
 FROM installer AS bootstrap
 WORKDIR /app
 
+RUN mkdir -p /app/apps/admin/src/seed/assets
+COPY --from=builder /app/apps/web/public/og-default.png /app/apps/admin/src/seed/assets/blog-featured.png
 COPY docker/scripts/admin-bootstrap.sh /usr/local/bin/omnia-admin-bootstrap.sh
 RUN chmod +x /usr/local/bin/omnia-admin-bootstrap.sh
 
@@ -63,6 +69,8 @@ CMD ["bootstrap"]
 FROM base AS runner
 WORKDIR /app
 
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0

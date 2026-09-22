@@ -30,8 +30,10 @@ COPY --from=builder /app/out/full/ .
 
 ARG NEXT_PUBLIC_APP_URL=https://dev.omniafrigo.com.br
 ARG NEXT_PUBLIC_ADMIN_URL=https://admin.dev.omniafrigo.com.br
+ARG GIT_SHA=unknown
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_ADMIN_URL=$NEXT_PUBLIC_ADMIN_URL
+ENV GIT_SHA=$GIT_SHA
 ENV NODE_ENV=production
 ENV DOCKER_BUILD=true
 
@@ -43,6 +45,8 @@ RUN pnpm turbo build --filter=@omnia/web
 FROM base AS runner
 WORKDIR /app
 
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0

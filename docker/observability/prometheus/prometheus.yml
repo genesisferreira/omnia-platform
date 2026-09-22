@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: omnia-admin-lms
+    metrics_path: /api/metrics
+    scrape_interval: 15s
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/metrics_token
+    static_configs:
+      - targets: ['omnia-platform-admin-dev:3000']
+        labels:
+          env: staging
+          service: omnia-admin
+
+  # Self-metrics do OTel Collector são opcionais no DEV (DNS overlay pode falhar).
+  # Tracing OTLP em :4318 permanece ativo independentemente deste scrape.

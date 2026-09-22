@@ -1,0 +1,26 @@
+{
+  "name": "@omnia/neurofrigo-orchestrator",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Neurofrigo Portal Orchestrator — Purpose/Security/Integrity + Agent Router (sem tools/autonomia)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/test-*.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@omnia/enterprise-ai": "workspace:*"
+  },
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

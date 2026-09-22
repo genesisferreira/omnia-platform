@@ -1,11 +1,19 @@
 import type { CollectionConfig } from 'payload';
 
+import { adminsOnly, staffOnly } from '../access/rbac';
+
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'status'],
     group: 'Multiempresa',
+  },
+  access: {
+    read: staffOnly,
+    create: adminsOnly,
+    update: adminsOnly,
+    delete: adminsOnly,
   },
   fields: [
     {

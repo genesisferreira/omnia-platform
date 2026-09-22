@@ -7,10 +7,12 @@ import type {
 } from 'payload';
 import { APIError } from 'payload';
 
+import { adminsOnly, staffOnly } from '../access/rbac';
 import { isValidHostname, normalizeHostname } from '../lib/branding/domain';
 import { SITE_ENVIRONMENTS } from '../types/site';
 
-const authenticated: Access = ({ req: { user } }) => Boolean(user);
+const authenticated: Access = staffOnly;
+const infrastructureWrite: Access = adminsOnly;
 
 const SITE_ENVIRONMENT_LABELS: Record<(typeof SITE_ENVIRONMENTS)[number], string> = {
   local: 'Local',
@@ -94,9 +96,9 @@ export const Domains: CollectionConfig = {
   },
   access: {
     read: authenticated,
-    create: authenticated,
-    update: authenticated,
-    delete: authenticated,
+    create: infrastructureWrite,
+    update: infrastructureWrite,
+    delete: infrastructureWrite,
   },
   fields: [
     {

@@ -1,0 +1,34 @@
+{
+  "uid": "omnia-lms-sessions",
+  "title": "Omnia LMS — Sessões",
+  "tags": ["omnia", "lms", "sessions"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active sessions (approx)",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "connector_active_sessions", "legendFormat": "active" }]
+    },
+    {
+      "type": "stat",
+      "title": "Students online",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [{ "expr": "lms_students_online", "legendFormat": "online" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Revocations",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "sum(rate(connector_revoked_sessions[5m]))", "legendFormat": "revoked/s" },
+        { "expr": "sum(rate(lms_session_revocations[5m]))", "legendFormat": "lms_revocations/s" },
+        { "expr": "sum(rate(lms_login_success[5m]))", "legendFormat": "login_ok/s" },
+        { "expr": "sum(rate(lms_login_failure[5m]))", "legendFormat": "login_fail/s" }
+      ]
+    }
+  ]
+}

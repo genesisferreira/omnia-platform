@@ -22,14 +22,17 @@ services:
       args:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
         NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+        GIT_SHA: ${GIT_SHA:-unknown}
     restart: unless-stopped
     env_file:
       - ../../.env.staging
     environment:
       NODE_ENV: production
       PORT: 3000
+      # Bind only. Never use HOSTNAME/PORT to build browser redirects.
       HOSTNAME: 0.0.0.0
       APP_VERSION: ${APP_VERSION}
+      GIT_SHA: ${GIT_SHA:-unknown}
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
@@ -73,6 +76,7 @@ services:
         NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
         DATABASE_URL: ${DATABASE_URL}
         PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+        GIT_SHA: ${GIT_SHA:-unknown}
     restart: unless-stopped
     env_file:
       - ../../.env.staging
@@ -80,7 +84,9 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+      APP_ENV: ${APP_ENV:-staging}
       APP_VERSION: ${APP_VERSION}
+      GIT_SHA: ${GIT_SHA:-unknown}
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       REDIS_URL: ${REDIS_URL}
@@ -93,7 +99,14 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      METRICS_SCRAPE_TOKEN: ${METRICS_SCRAPE_TOKEN:-}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-omnia-admin}
+      OTEL_LOG_SPANS: ${OTEL_LOG_SPANS:-false}
+      # Canonical media path — must match volume mount below (RC2.1).
+      PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
     volumes:
+      # Single canonical mount. Dual-mount not required once PAYLOAD_MEDIA_DIR is set.
       - omnia_platform_admin_media_dev:/app/media
     networks:
       - omnia_proxy
@@ -142,6 +155,9 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
+    volumes:
+      - omnia_platform_admin_media_dev:/app/media
     networks:
       - omnia_internal
     restart: 'no'
@@ -161,8 +177,12 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
     networks:
       - omnia_internal
+    volumes:
+      # Canonical path only (same volume as Admin runtime).
+      - omnia_platform_admin_media_dev:/app/media
     restart: 'no'
     command: ['migrate']
 
@@ -182,10 +202,123 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
       NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
       OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+      PAYLOAD_MEDIA_DIR: ${PAYLOAD_MEDIA_DIR:-/app/media}
+    volumes:
+      - omnia_platform_admin_media_dev:/app/media
     networks:
       - omnia_internal
     restart: 'no'
     command: ['seed']
+
+  # Upgrade institucional da Home (omnia-hub) — não executa seed geral nem migrations
+  admin-upgrade-holding-home:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-upgrade-holding-home
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['upgrade-holding-home']
+
+  # Seed exclusivo da Home (omnia-hub) — não executa seed geral
+  admin-seed-holding-home:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-home
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-home']
+
+  # Seed páginas institucionais (omnia-hub: sobre, empresas, contato) — não sobrescreve existentes
+  admin-seed-holding-institutional-pages:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-institutional-pages
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-institutional-pages']
+
+  # Seed Blog (omnia-hub: autor, categorias, tags e posts) — não sobrescreve existentes
+  admin-seed-holding-blog:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-blog
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-blog']
+
+  # Seed páginas estratégicas das empresas do hub
+  admin-seed-holding-strategic-companies:
+    profiles: [bootstrap]
+    container_name: omnia-platform-admin-seed-holding-strategic-companies
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      target: bootstrap
+    env_file:
+      - ../../.env.staging
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL}
+      OMNIA_INTERNAL_API_SECRET: ${OMNIA_INTERNAL_API_SECRET}
+    networks:
+      - omnia_internal
+    restart: 'no'
+    command: ['holding-strategic-companies']
 
 networks:
   omnia_proxy:

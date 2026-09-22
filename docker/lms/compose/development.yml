@@ -1,0 +1,209 @@
+# Omnia LMS — DEV (VPS homologação do engine Moodle)
+#
+# Isolado da Omnia Platform. Ingress: rede externa omnia_proxy (Traefik).
+# Domínio: moodle.dev.omniafrigo.com.br
+#
+# Uso (raiz do monorepo):
+#   docker compose -f docker/lms/compose/development.yml --env-file docker/lms/env/.env.dev up -d --build
+
+name: omnia-lms-dev
+
+x-logging: &lms-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: omnia-lms-mariadb-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MOODLE_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MOODLE_DB_NAME}
+      MYSQL_USER: ${MOODLE_DB_USER}
+      MYSQL_PASSWORD: ${MOODLE_DB_PASSWORD}
+      MARIADB_AUTO_UPGRADE: '1'
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - omnia_lms_mariadb_dev:/var/lib/mysql
+      - ../configs/mariadb/moodle.cnf:/etc/mysql/conf.d/moodle.cnf:ro
+    networks:
+      - omnia_lms_dev_internal
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
+    logging: *lms-logging
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: omnia-lms-redis-dev
+    restart: unless-stopped
+    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    volumes:
+      - omnia_lms_redis_dev:/data
+      - ../configs/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - omnia_lms_dev_internal
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    mem_limit: 384m
+    cpus: 0.50
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    logging: *lms-logging
+
+  moodle:
+    container_name: omnia-lms-moodle-dev
+    build:
+      context: ..
+      dockerfile: dockerfiles/moodle/Dockerfile
+      args:
+        MOODLE_REF: v4.5.12
+        MOODLE_SHA256: 4a280be626afaa2f4028a7b3ac1f52d47d56d72fc1951e22c8353758e3a96506
+        PHP_BASE_DIGEST: sha256:946c42935f491ae3726cbee40a8de1209affb4926748a1da54764660ce3cfc5c
+    image: omnia-lms-moodle:${MOODLE_IMAGE_TAG:-2.4.1-dev}
+    restart: unless-stopped
+    environment:
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT}
+      MOODLE_DATAROOT: ${MOODLE_DATAROOT:-/var/www/moodledata}
+      MOODLE_SALT: ${MOODLE_SALT}
+      MOODLE_AUTO_INSTALL: ${MOODLE_AUTO_INSTALL:-1}
+      MOODLE_SITE_FULLNAME: ${MOODLE_SITE_FULLNAME}
+      MOODLE_SITE_SHORTNAME: ${MOODLE_SITE_SHORTNAME}
+      MOODLE_ADMIN_USER: ${MOODLE_ADMIN_USER}
+      MOODLE_ADMIN_PASS: ${MOODLE_ADMIN_PASS}
+      MOODLE_ADMIN_EMAIL: ${MOODLE_ADMIN_EMAIL}
+      MOODLE_DB_HOST: ${MOODLE_DB_HOST:-mariadb}
+      MOODLE_DB_PORT: ${MOODLE_DB_PORT:-3306}
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      MOODLE_DB_PREFIX: ${MOODLE_DB_PREFIX:-mdl_}
+      MOODLE_REDIS_HOST: ${MOODLE_REDIS_HOST:-redis}
+      MOODLE_REDIS_PORT: ${MOODLE_REDIS_PORT:-6379}
+      MOODLE_REDIS_SESSION_DB: ${MOODLE_REDIS_SESSION_DB:-0}
+      MOODLE_REDIS_CACHE_DB: ${MOODLE_REDIS_CACHE_DB:-1}
+      MOODLE_REDIS_PREFIX: ${MOODLE_REDIS_PREFIX:-omnia_lms_dev_}
+      MOODLE_SMTP_HOST: ${MOODLE_SMTP_HOST}
+      MOODLE_SMTP_PORT: ${MOODLE_SMTP_PORT:-587}
+      MOODLE_SMTP_SECURE: ${MOODLE_SMTP_SECURE:-tls}
+      MOODLE_SMTP_USER: ${MOODLE_SMTP_USER}
+      MOODLE_SMTP_PASS: ${MOODLE_SMTP_PASS}
+      MOODLE_SMTP_FROM: ${MOODLE_SMTP_FROM}
+      MOODLE_LOG_DIR: /var/log/omnia-lms
+    volumes:
+      - omnia_lms_moodledata_dev:/var/www/moodledata
+      - omnia_lms_logs_dev:/var/log/omnia-lms
+    networks:
+      - omnia_lms_dev_internal
+      - omnia_proxy
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=omnia_proxy
+      - traefik.http.routers.omnia-lms-moodle-dev.rule=Host(`${MOODLE_HOSTNAME:-moodle.dev.omniafrigo.com.br}`)
+      - traefik.http.routers.omnia-lms-moodle-dev.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.omnia-lms-moodle-dev.tls=true
+      - traefik.http.routers.omnia-lms-moodle-dev.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      - traefik.http.routers.omnia-lms-moodle-dev.service=omnia-lms-moodle-dev
+      - traefik.http.services.omnia-lms-moodle-dev.loadbalancer.server.port=80
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 512
+    security_opt:
+      - no-new-privileges:true
+    logging: *lms-logging
+
+  cron:
+    container_name: omnia-lms-cron-dev
+    image: omnia-lms-moodle:${MOODLE_IMAGE_TAG:-2.4.1-dev}
+    pull_policy: never
+    restart: unless-stopped
+    command: ['cron']
+    environment:
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT}
+      MOODLE_DATAROOT: ${MOODLE_DATAROOT:-/var/www/moodledata}
+      MOODLE_SALT: ${MOODLE_SALT}
+      MOODLE_AUTO_INSTALL: '0'
+      MOODLE_DB_HOST: ${MOODLE_DB_HOST:-mariadb}
+      MOODLE_DB_PORT: ${MOODLE_DB_PORT:-3306}
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      MOODLE_DB_PREFIX: ${MOODLE_DB_PREFIX:-mdl_}
+      MOODLE_REDIS_HOST: ${MOODLE_REDIS_HOST:-redis}
+      MOODLE_REDIS_PORT: ${MOODLE_REDIS_PORT:-6379}
+      MOODLE_REDIS_SESSION_DB: ${MOODLE_REDIS_SESSION_DB:-0}
+      MOODLE_REDIS_CACHE_DB: ${MOODLE_REDIS_CACHE_DB:-1}
+      MOODLE_REDIS_PREFIX: ${MOODLE_REDIS_PREFIX:-omnia_lms_dev_}
+      MOODLE_SMTP_HOST: ${MOODLE_SMTP_HOST}
+      MOODLE_SMTP_PORT: ${MOODLE_SMTP_PORT:-587}
+      MOODLE_SMTP_SECURE: ${MOODLE_SMTP_SECURE:-tls}
+      MOODLE_SMTP_USER: ${MOODLE_SMTP_USER}
+      MOODLE_SMTP_PASS: ${MOODLE_SMTP_PASS}
+      MOODLE_SMTP_FROM: ${MOODLE_SMTP_FROM}
+      MOODLE_CRON_INTERVAL_SECONDS: ${MOODLE_CRON_INTERVAL_SECONDS:-60}
+      MOODLE_LOG_DIR: /var/log/omnia-lms
+    volumes:
+      - omnia_lms_moodledata_dev:/var/www/moodledata
+      - omnia_lms_logs_dev:/var/log/omnia-lms
+    networks:
+      - omnia_lms_dev_internal
+    depends_on:
+      moodle:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/omnia-lms-health-cron.sh']
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    mem_limit: 512m
+    cpus: 0.50
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    logging: *lms-logging
+
+networks:
+  omnia_proxy:
+    external: true
+  omnia_lms_dev_internal:
+    name: omnia_lms_dev_internal
+    driver: bridge
+    internal: true
+
+volumes:
+  omnia_lms_mariadb_dev:
+    name: omnia_lms_mariadb_dev
+  omnia_lms_redis_dev:
+    name: omnia_lms_redis_dev
+  omnia_lms_moodledata_dev:
+    name: omnia_lms_moodledata_dev
+  omnia_lms_logs_dev:
+    name: omnia_lms_logs_dev

@@ -1,0 +1,54 @@
+/* eslint-disable no-console -- test harness output */
+import assert from 'node:assert/strict';
+
+import { holdingCompaniesSeed } from '../seed/holding-companies';
+
+let passed = 0;
+
+const test = (name: string, fn: () => void): void => {
+  fn();
+  passed += 1;
+  console.log(`✓ ${name}`);
+};
+
+const bySlug = new Map(holdingCompaniesSeed.map((company) => [company.slug, company]));
+
+test('slugs do catálogo são únicos', () => {
+  const slugs = holdingCompaniesSeed.map((company) => company.slug);
+  assert.equal(slugs.length, new Set(slugs).size);
+});
+
+test('holding oficial permanece no seed', () => {
+  assert.ok(bySlug.has('omnia-frigo-holding'));
+});
+
+test('fred-do-frio-academy → Educação', () => {
+  const fred = bySlug.get('fred-do-frio-academy');
+  assert.ok(fred);
+  assert.equal(fred.ecosystemRole, 'Educação');
+  assert.equal(fred.externalSite, 'https://freddofrio.com.br');
+});
+
+test('cte → Formação Técnica', () => {
+  const cte = bySlug.get('cte');
+  assert.ok(cte);
+  assert.equal(cte.ecosystemRole, 'Formação Técnica');
+  assert.equal(cte.externalSite, 'https://escolacte.com.br');
+});
+
+test('renovacao → Engenharia', () => {
+  const renovacao = bySlug.get('renovacao-refrigeracao');
+  assert.ok(renovacao);
+  assert.equal(renovacao.ecosystemRole, 'Engenharia');
+});
+
+test('todas as empresas têm externalSite oficial', () => {
+  for (const company of holdingCompaniesSeed) {
+    assert.ok(
+      company.externalSite == null || company.externalSite.startsWith('https://'),
+      company.slug,
+    );
+  }
+});
+
+console.log(`\n${passed} testes passaram.`);
