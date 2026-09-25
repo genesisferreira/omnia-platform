@@ -171,3 +171,14 @@ migração — não feito nesta correção.
 3. Governança: aguarda `indexLearningResource`; `ingestion_completed` só com indexação comprovada,
    senão `indexing_failed` + `indexingError` + `retrievalEligible=false` na submission.
    Nenhuma mudança de ACL/filtros, sem promoção automática, sem migração.
+
+## Verificação (pós-diagnóstico)
+
+- Reprodução automatizada no código base (`test:epic17-governed-indexing` rodando contra `worker.ts` e
+  `governance.ts` originais, com Payload em memória e store fiel às colunas de `retrieval_vectors`):
+  o vetor `chunk:1` **existe** com `tenant_id='4'`, `allow_ai_use=true`, e a busca do aluno Fred
+  (`tenantId=5`, `ownerCompanyId=4`) retorna **0 candidatos**; `lastIndexedAt` indefinido. Mesmo
+  sintoma do DEV, confirmando a classe G como decisiva.
+- Com a correção: vetor com `tenant_id='5'`, marcador recuperável pelo Fred, CTE isolado,
+  `lastIndexedAt` preenchido somente após verificação, `indexing_failed` + `indexingError` quando o
+  provider falha, retries sem duplicar chunks/vetores, revogação remove vetores.
