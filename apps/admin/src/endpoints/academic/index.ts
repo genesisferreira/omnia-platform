@@ -6,6 +6,7 @@ import {
   reviewGovernanceSubmission,
   submitLessonForKnowledgeReview,
 } from '../../services/knowledge/governance';
+import { toGovernanceSubmissionResponse } from '../../services/knowledge/governance-response';
 import { requireLmsAuth, type LmsAuthContext } from '../../services/lms/auth-context';
 import {
   AcademicError,
@@ -838,15 +839,15 @@ const teachingKnowledgeSubmitEp: Endpoint = {
         requestedScope?: 'SCHOOL_APPROVED' | 'OMNIA_APPROVED';
       };
       const ctx = auth(req);
-      return ok(
-        await submitLessonForKnowledgeReview({
-          payload: req.payload,
-          lessonId: id,
-          user: req.user ?? { id: ctx.omniaUserId, role: ctx.role },
-          requestedScope: body?.requestedScope,
-          req,
-        }),
-      );
+      const submission = await submitLessonForKnowledgeReview({
+        payload: req.payload,
+        lessonId: id,
+        user: req.user ?? { id: ctx.omniaUserId, role: ctx.role },
+        requestedScope: body?.requestedScope,
+        req,
+      });
+      // EPIC17.3: explicit allowlist — never echo populated relations (course.instructor etc.).
+      return ok(toGovernanceSubmissionResponse(submission));
     } catch (err) {
       return fail(err);
     }
@@ -912,16 +913,16 @@ const teachingKnowledgeReviewEp: Endpoint = {
       if (!body?.action) {
         return json(400, { ok: false, error: { code: 'BAD_REQUEST', message: 'action' } });
       }
-      return ok(
-        await reviewGovernanceSubmission({
-          payload: req.payload,
-          submissionId: id,
-          user: req.user,
-          action: body.action,
-          reason: body.reason,
-          req,
-        }),
-      );
+      const submission = await reviewGovernanceSubmission({
+        payload: req.payload,
+        submissionId: id,
+        user: req.user,
+        action: body.action,
+        reason: body.reason,
+        req,
+      });
+      // EPIC17.3: explicit allowlist — never echo populated relations (course.instructor etc.).
+      return ok(toGovernanceSubmissionResponse(submission));
     } catch (err) {
       return fail(err);
     }
