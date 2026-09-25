@@ -162,8 +162,8 @@ migração — não feito nesta correção.
 
 ## Correção planejada (mínima, sem migração)
 
-1. Worker: `tenant_id` do vetor = `companies.tenant` da empresa dona (fail-closed com sentinela
-   não colidente quando a empresa não tem tenant).
+1. Worker: `tenant_id` do vetor = `companies.tenant` da empresa dona (fail-closed quando a empresa
+   ou o tenant não resolve — ver "Correção final" abaixo; a sentinela inicial foi removida).
 2. Worker: novo `indexLearningResource` (reusa `embedChunk`/`embedding-records`/estado da fila) escopado
    ao LR, idempotente (remove vetores antigos do LR antes de regravar), verifica
    `embedding-records ready` = nº de chunks e grava `KD.lastIndexedAt`/`indexingError`.
@@ -182,3 +182,28 @@ migração — não feito nesta correção.
 - Com a correção: vetor com `tenant_id='5'`, marcador recuperável pelo Fred, CTE isolado,
   `lastIndexedAt` preenchido somente após verificação, `indexing_failed` + `indexingError` quando o
   provider falha, retries sem duplicar chunks/vetores, revogação remove vetores.
+
+## Correção final (arquitetura aprovada)
+
+Modelo canônico (`TENANT_ARCHITECTURE.md`, ADR-005): Tenant ⊃ Company ⊃ User. Omnia = tenant 1;
+Fred = company 4 (tenant 1, `fred-do-frio`); CTE = company 5 (tenant 1, `cte`). `users.tenant` deve
+ser igual ao tenant da company do usuário. O `users.tenant=5` dos usuários E2E Fred/CTE no DEV é bug
+de fixture: `seed-ils-v11-fixtures.ts` usava `find({ collection: 'tenants', limit: 1 })` sem sort
+(Payload ordena por `-createdAt`, logo pegava o tenant mais recente, `e16-tenant-b`).
+
+- Worker (`services/retrieval/worker.ts`): sem sentinela. Empresa inexistente →
+  `INDEX_SCOPE_COMPANY_NOT_FOUND`; empresa sem tenant → `INDEX_SCOPE_TENANT_UNRESOLVED`; conteúdo
+  escolar sem `ownerCompany` → `INDEX_SCOPE_OWNER_COMPANY_REQUIRED`. O escopo de todos os chunks é
+  resolvido **antes** de qualquer escrita; qualquer falha remove os vetores do recurso, marca os
+  `embedding-records` como `failed`, grava `indexingError`, `lastIndexedAt=null`, e a governança
+  audita `indexing_failed` (nunca `ingestion_completed`).
+- Conteúdo escolar = `isSchoolKey(schoolKey)` **ou** `knowledgeScope === 'SCHOOL_APPROVED'`
+  (metadados do KD, ou do LR sem KD). Catálogo OMNIA/global sem dono mantém o comportamento anterior.
+- Isolamento Fred × CTE no mesmo tenant 1 = pré-filtro SQL `owner_company_id` (+ tenant); ACL
+  pós-query não checa company para `visibility=enrolled`. Colunas de governança em
+  `retrieval_vectors` continuam fora de escopo (exigem migração).
+- Seed ILS: tenant do usuário = `companies.tenant` da company (`seed/fixture-tenant.ts`), erro
+  explícito se a company não tiver tenant. Dados DEV existentes precisam de correção operacional
+  (usuários 27/28/29 e o professor CTE: tenant 5 → 1); isso é dado, não código.
+- Pendência anotada (não alterada): `seed-epic16-e2e-users.ts` atribui tenant A/B a usuários cuja
+  company é a holding (tenant 1) — mesma classe de divergência user.tenant ≠ company.tenant.
