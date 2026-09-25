@@ -46,6 +46,7 @@
     "test:knowledge-governance": "tsx --test ../../packages/knowledge-governance/src/**/test-*.ts",
     "test:epic17-governed-indexing": "tsx --test src/scripts/test-epic17-governed-indexing.ts",
     "test:seed-fixture-tenant": "tsx --test src/scripts/test-seed-fixture-tenant.ts",
+    "test:knowledge-governance-response-sanitization": "tsx --test src/scripts/test-knowledge-governance-response-sanitization.ts",
     "test:knowledge-hub": "tsx --test src/scripts/test-knowledge-hub.ts ../../packages/neurofrigo-knowledge/src/**/test-*.ts",
     "seed:knowledge-hub": "tsx src/scripts/seed-knowledge-hub.ts",
     "seed:knowledge-hub-load": "tsx src/scripts/seed-knowledge-hub-load.ts",
