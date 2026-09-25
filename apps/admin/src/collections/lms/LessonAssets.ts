@@ -1,10 +1,11 @@
 import type { CollectionConfig } from 'payload';
 
 import {
-  lmsContentCreateAccess,
+  lmsLessonAssetCreateAccess,
   lmsContentDeleteAccess,
   lmsLessonAssetReadAccess,
-  lmsNestedWriteAccess,
+  lmsLessonAssetUpdateAccess,
+  lmsLessonAssetWriteGuard,
 } from '../../access/lms-content';
 import { lessonAssetAfterChangeForKi } from '../../services/knowledge-intelligence/hooks';
 import { LESSON_ASSET_TYPES, optionsFrom } from './constants';
@@ -27,11 +28,12 @@ export const LessonAssets: CollectionConfig = {
   timestamps: true,
   access: {
     read: lmsLessonAssetReadAccess,
-    create: lmsContentCreateAccess,
-    update: lmsNestedWriteAccess,
+    create: lmsLessonAssetCreateAccess,
+    update: lmsLessonAssetUpdateAccess,
     delete: lmsContentDeleteAccess,
   },
   hooks: {
+    beforeChange: [lmsLessonAssetWriteGuard],
     afterChange: [lessonAssetAfterChangeForKi],
   },
   fields: [

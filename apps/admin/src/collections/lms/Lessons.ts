@@ -5,10 +5,11 @@ import type {
 } from 'payload';
 
 import {
-  lmsContentCreateAccess,
+  lmsLessonCreateAccess,
   lmsContentDeleteAccess,
   lmsLessonReadAccess,
-  lmsNestedWriteAccess,
+  lmsLessonUpdateAccess,
+  lmsLessonWriteGuard,
 } from '../../access/lms-content';
 import { invalidateGovernanceOnLessonChange } from '../../services/knowledge/governance';
 import { LESSON_TYPES, optionsFrom } from './constants';
@@ -60,12 +61,12 @@ export const Lessons: CollectionConfig = {
   timestamps: true,
   access: {
     read: lmsLessonReadAccess,
-    create: lmsContentCreateAccess,
-    update: lmsNestedWriteAccess,
+    create: lmsLessonCreateAccess,
+    update: lmsLessonUpdateAccess,
     delete: lmsContentDeleteAccess,
   },
   hooks: {
-    beforeChange: [normalizeSlug],
+    beforeChange: [lmsLessonWriteGuard, normalizeSlug],
     afterChange: [lessonAfterChangeGovernance],
   },
   fields: [

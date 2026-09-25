@@ -1,10 +1,11 @@
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 
 import {
-  lmsContentCreateAccess,
+  lmsModuleCreateAccess,
   lmsContentDeleteAccess,
   lmsModuleReadAccess,
-  lmsNestedWriteAccess,
+  lmsModuleUpdateAccess,
+  lmsModuleWriteGuard,
 } from '../../access/lms-content';
 
 const normalizeSlug: CollectionBeforeChangeHook = async ({ data }) => {
@@ -35,12 +36,12 @@ export const CourseModules: CollectionConfig = {
   timestamps: true,
   access: {
     read: lmsModuleReadAccess,
-    create: lmsContentCreateAccess,
-    update: lmsNestedWriteAccess,
+    create: lmsModuleCreateAccess,
+    update: lmsModuleUpdateAccess,
     delete: lmsContentDeleteAccess,
   },
   hooks: {
-    beforeChange: [normalizeSlug],
+    beforeChange: [lmsModuleWriteGuard, normalizeSlug],
   },
   fields: [
     {
