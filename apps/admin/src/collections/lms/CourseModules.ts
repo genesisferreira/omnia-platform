@@ -3,7 +3,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 import {
   lmsContentCreateAccess,
   lmsContentDeleteAccess,
-  lmsNestedReadAccess,
+  lmsModuleReadAccess,
   lmsNestedWriteAccess,
 } from '../../access/lms-content';
 
@@ -34,7 +34,7 @@ export const CourseModules: CollectionConfig = {
   },
   timestamps: true,
   access: {
-    read: lmsNestedReadAccess,
+    read: lmsModuleReadAccess,
     create: lmsContentCreateAccess,
     update: lmsNestedWriteAccess,
     delete: lmsContentDeleteAccess,

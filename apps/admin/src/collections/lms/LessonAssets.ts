@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload';
 import {
   lmsContentCreateAccess,
   lmsContentDeleteAccess,
-  lmsNestedReadAccess,
+  lmsLessonAssetReadAccess,
   lmsNestedWriteAccess,
 } from '../../access/lms-content';
 import { lessonAssetAfterChangeForKi } from '../../services/knowledge-intelligence/hooks';
@@ -26,7 +26,7 @@ export const LessonAssets: CollectionConfig = {
   },
   timestamps: true,
   access: {
-    read: lmsNestedReadAccess,
+    read: lmsLessonAssetReadAccess,
     create: lmsContentCreateAccess,
     update: lmsNestedWriteAccess,
     delete: lmsContentDeleteAccess,

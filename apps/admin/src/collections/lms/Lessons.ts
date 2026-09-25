@@ -7,7 +7,7 @@ import type {
 import {
   lmsContentCreateAccess,
   lmsContentDeleteAccess,
-  lmsNestedReadAccess,
+  lmsLessonReadAccess,
   lmsNestedWriteAccess,
 } from '../../access/lms-content';
 import { invalidateGovernanceOnLessonChange } from '../../services/knowledge/governance';
@@ -59,7 +59,7 @@ export const Lessons: CollectionConfig = {
   },
   timestamps: true,
   access: {
-    read: lmsNestedReadAccess,
+    read: lmsLessonReadAccess,
     create: lmsContentCreateAccess,
     update: lmsNestedWriteAccess,
     delete: lmsContentDeleteAccess,
