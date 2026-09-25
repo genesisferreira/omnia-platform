@@ -20,7 +20,7 @@ import {
   type KnowledgeScope,
 } from '@omnia/knowledge-governance';
 
-import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
 import { processLearningResource } from '../knowledge-intelligence/pipeline';
 import { writeKnowledgeAudit } from './audit';
 
@@ -154,6 +154,89 @@ async function appendDecision(
   const decisions = Array.isArray(doc.decisions) ? [...(doc.decisions as unknown[])] : [];
   decisions.push(entry);
   await kgUpdate(payload, submissionId, { decisions }, req);
+}
+
+type IndexOutcome = {
+  ok: boolean;
+  chunkCount: number;
+  indexedCount: number;
+  lastIndexedAt: string | null;
+  error: string | null;
+};
+
+/**
+ * Epic 17.3: run the retrieval indexing port for the approved resource (no direct vector-store
+ * coupling here). Never throws — failures come back as `ok:false` with the recorded error.
+ */
+async function indexGovernedResource(
+  payload: Payload,
+  learningResourceId: number,
+  knowledgeDocumentId: number | null,
+): Promise<IndexOutcome> {
+  try {
+    const { indexLearningResource } = await import('../retrieval/worker');
+    const result = await indexLearningResource(payload, {
+      learningResourceId,
+      knowledgeDocumentId,
+    });
+    return {
+      ok: result.ok,
+      chunkCount: result.chunkCount,
+      indexedCount: result.indexedCount,
+      lastIndexedAt: result.lastIndexedAt,
+      error: result.error,
+    };
+  } catch (err) {
+    const error = err instanceof Error ? err.message.slice(0, 400) : String(err);
+    payload.logger.error({
+      msg: 'governed.ingest.index_failed',
+      learningResourceId,
+      knowledgeDocumentId,
+      error,
+    });
+    if (knowledgeDocumentId != null) {
+      await payload
+        .update({
+          collection: 'knowledge-documents',
+          id: knowledgeDocumentId,
+          data: { lastIndexedAt: null, indexingError: error } as never,
+          overrideAccess: true,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        })
+        .catch(() => undefined);
+    }
+    return { ok: false, chunkCount: 0, indexedCount: 0, lastIndexedAt: null, error };
+  }
+}
+
+/** Epic 17.3: pull vectors when governance makes content non-retrievable (revoke/version/etc.). */
+async function deindexGovernedResource(
+  payload: Payload,
+  args: {
+    learningResourceId: number | null;
+    knowledgeDocumentId: number | null;
+    reason: string;
+  },
+): Promise<void> {
+  if (args.learningResourceId == null && args.knowledgeDocumentId == null) return;
+  try {
+    const { deindexLearningResource } = await import('../retrieval/worker');
+    await deindexLearningResource(payload, args);
+  } catch (err) {
+    const error = err instanceof Error ? err.message.slice(0, 400) : String(err);
+    payload.logger.error({ msg: 'governed.deindex_failed', ...args, error });
+    if (args.knowledgeDocumentId != null) {
+      await payload
+        .update({
+          collection: 'knowledge-documents',
+          id: args.knowledgeDocumentId,
+          data: { indexingError: `DEINDEX_FAILED:${error}`.slice(0, 800) } as never,
+          overrideAccess: true,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        })
+        .catch(() => undefined);
+    }
+  }
 }
 
 async function resolveLessonContext(
@@ -579,61 +662,43 @@ async function applyHubEligibility(args: {
           {
             learningResource: learningResourceId,
             knowledgeDocument: knowledgeDocumentId,
-            retrievalEligible: true,
+            retrievalEligible: false,
           },
           req,
         );
-        await writeKnowledgeAudit(
-          payload,
-          {
-            action: 'ingestion_completed',
+        // Epic 17.3: refresh vectors (agent tags/scope) through the indexing port, then record the
+        // real outcome. ingestion_completed only after indexing is verified.
+        const lrForIndex = learningResourceId;
+        const kdForIndex = knowledgeDocumentId;
+        void (async () => {
+          const index = await indexGovernedResource(payload, lrForIndex, kdForIndex);
+          try {
+            await kgUpdate(payload, submissionId, { retrievalEligible: index.ok });
+          } catch (err) {
+            payload.logger.error({
+              msg: 'governed.omnia_upgrade.submission_update_failed',
+              submissionId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+          await writeKnowledgeAudit(payload, {
+            action: index.ok ? 'ingestion_completed' : 'indexing_failed',
             entityType: 'knowledge-governance-submissions',
             entityId: String(submissionId),
             actorId: String(actorId),
             nextState: {
-              learningResourceId,
-              knowledgeDocumentId,
+              learningResourceId: lrForIndex,
+              knowledgeDocumentId: kdForIndex,
               omniaUpgrade: true,
               allowedAgents: omniaAgents,
+              chunkCount: index.chunkCount,
+              indexedCount: index.indexedCount,
+              indexed: index.ok,
+              lastIndexedAt: index.lastIndexedAt,
+              indexingError: index.error,
+              async: true,
             },
-          },
-          req,
-        );
-        // Refresh vector agent tags asynchronously (reuse embedding queue).
-        void (async () => {
-          try {
-            const chunks = await payload.find({
-              collection: 'knowledge-chunks',
-              where: { knowledgeDocument: { equals: knowledgeDocumentId } },
-              limit: 200,
-              depth: 0,
-              overrideAccess: true,
-            });
-            for (const chunk of chunks.docs) {
-              await payload.create({
-                collection: 'embedding-queue',
-                data: {
-                  learningResource: learningResourceId,
-                  knowledgeDocument: knowledgeDocumentId,
-                  chunk: requirePayloadRelationId(chunk.id),
-                  status: 'pending',
-                  attempts: 0,
-                  provider: process.env.RETRIEVAL_EMBEDDING_PROVIDER || 'deterministic',
-                  scheduledAt: new Date().toISOString(),
-                },
-                overrideAccess: true,
-                context: { kiPipelineActive: true },
-              });
-            }
-            const { processEmbeddingQueue } = await import('../retrieval/worker');
-            await processEmbeddingQueue(payload, { limit: 50 });
-          } catch (err) {
-            payload.logger.error({
-              msg: 'governed.omnia_upgrade.embed_refresh_failed',
-              knowledgeDocumentId,
-              error: err instanceof Error ? err.message : String(err),
-            });
-          }
+          });
         })();
         return;
       }
@@ -688,6 +753,15 @@ async function applyHubEligibility(args: {
       overrideAccess: true,
       req,
       context: { governancePipelineActive: true },
+    });
+  }
+
+  if (!eligible) {
+    // Epic 17.3: governance says not retrievable → remove vectors (revocation preserved).
+    await deindexGovernedResource(payload, {
+      learningResourceId,
+      knowledgeDocumentId,
+      reason: `governance:${state}`,
     });
   }
 
@@ -776,6 +850,7 @@ async function applyHubEligibility(args: {
 
         let kdId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
         const ingestReady = processed.ok === true && kdId != null;
+        let index: IndexOutcome | null = null;
 
         if (ingestReady && kdId != null) {
           await payload.update({
@@ -820,17 +895,9 @@ async function applyHubEligibility(args: {
             context: { governancePipelineActive: true, kiPipelineActive: true },
           });
 
-          // Drain embedding queue so retrieval can become vector-ready without a separate HTTP wait.
-          try {
-            const { processEmbeddingQueue } = await import('../retrieval/worker');
-            await processEmbeddingQueue(payload, { limit: 50 });
-          } catch (embedErr) {
-            payload.logger.error({
-              msg: 'governed.ingest.embed_drain_failed',
-              learningResourceId,
-              error: embedErr instanceof Error ? embedErr.message : String(embedErr),
-            });
-          }
+          // Epic 17.3: index THIS resource through the indexing port (not a global FIFO drain),
+          // and wait for a verified result before declaring the ingest complete.
+          index = await indexGovernedResource(payload, learningResourceId, kdId);
         } else {
           await payload.update({
             collection: 'learning-resources',
@@ -850,14 +917,20 @@ async function applyHubEligibility(args: {
           kdId = kdId ?? null;
         }
 
+        const indexed = ingestReady && index?.ok === true;
+
         await kgUpdate(payload, submissionId, {
           learningResource: learningResourceId,
           knowledgeDocument: kdId ?? undefined,
-          retrievalEligible: ingestReady,
+          retrievalEligible: indexed,
         });
 
         await writeKnowledgeAudit(payload, {
-          action: ingestReady ? 'ingestion_completed' : 'ingestion_started',
+          action: indexed
+            ? 'ingestion_completed'
+            : ingestReady
+              ? 'indexing_failed'
+              : 'ingestion_started',
           entityType: 'knowledge-governance-submissions',
           entityId: String(submissionId),
           actorId: String(actorId),
@@ -867,6 +940,10 @@ async function applyHubEligibility(args: {
             ok: processed.ok,
             chunkCount: processed.chunkCount,
             ingestReady,
+            indexed,
+            indexedCount: index?.indexedCount ?? 0,
+            lastIndexedAt: index?.lastIndexedAt ?? null,
+            indexingError: index?.error ?? null,
             async: true,
           },
         });
@@ -1050,6 +1127,7 @@ export async function invalidateGovernanceOnLessonChange(args: {
       approvedVersionHash?: string;
       schoolKey?: string;
       knowledgeDocument?: Rel;
+      learningResource?: Rel;
     };
     if (versionsMatch(doc.contentVersionHash, ctx.contentHash)) continue;
     const from = (doc.governanceState || 'COURSE_PRIVATE') as GovernanceState;
@@ -1101,6 +1179,13 @@ export async function invalidateGovernanceOnLessonChange(args: {
         context: { governancePipelineActive: true },
       });
     }
+
+    // Epic 17.3: prior approval is not inherited → remove stale vectors of the old version.
+    await deindexGovernedResource(payload, {
+      learningResourceId: relId(doc.learningResource),
+      knowledgeDocumentId: kd,
+      reason: 'version_changed',
+    });
   }
 }
 

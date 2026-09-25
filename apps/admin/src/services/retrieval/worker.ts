@@ -37,6 +37,43 @@ function mapSecurityClassificationToVisibility(classification: string | null | u
   }
 }
 
+/**
+ * Sentinel written to `tenant_id` when a chunk has an owner company without a resolvable tenant.
+ * Never equals a real `tenants.id`, so tenant-scoped searches fail closed instead of colliding
+ * with an unrelated tenant whose id happens to equal the company id.
+ */
+export const UNRESOLVED_TENANT_PREFIX = 'unresolved-company:';
+
+/**
+ * Epic 17.3: vectors must carry the owner company's **tenant** id (`companies.tenant`), the same id
+ * space used by every search subject (`users.tenant` → `tenants`). Writing the company id here made
+ * governed chunks invisible to tenant-scoped searches (company 4 ≠ tenant 5).
+ */
+export async function resolveVectorTenantId(
+  payload: Payload,
+  ownerCompanyId: string | null,
+  cache?: Map<string, string | null>,
+): Promise<string | null> {
+  if (!ownerCompanyId) return null;
+  if (cache?.has(ownerCompanyId)) return cache.get(ownerCompanyId) ?? null;
+  let tenantId: string | null;
+  try {
+    const company = (await payload.findByID({
+      collection: 'companies',
+      id: ownerCompanyId,
+      depth: 0,
+      overrideAccess: true,
+    })) as { tenant?: unknown } | null;
+    tenantId = relId(company?.tenant) ?? `${UNRESOLVED_TENANT_PREFIX}${ownerCompanyId}`;
+  } catch (err) {
+    const status = (err as { status?: number } | null)?.status;
+    if (status !== 404) throw err;
+    tenantId = `${UNRESOLVED_TENANT_PREFIX}${ownerCompanyId}`;
+  }
+  cache?.set(ownerCompanyId, tenantId);
+  return tenantId;
+}
+
 type QueueDoc = {
   id: string | number;
   status?: string;
@@ -152,7 +189,12 @@ async function upsertEmbeddingRecord(
   return created.id;
 }
 
-async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc): Promise<void> {
+async function embedChunk(
+  payload: Payload,
+  chunk: ChunkDoc,
+  queueItem: QueueDoc,
+  tenantCache?: Map<string, string | null>,
+): Promise<void> {
   const provider = getEmbeddingProvider();
   const meta = provider.metadata();
   const store = await getVectorStore();
@@ -274,6 +316,7 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
   }
 
   const ownerCompanyId = relId(chunk.ownerCompany);
+  const tenantId = await resolveVectorTenantId(payload, ownerCompanyId, tenantCache);
   const record: VectorRecord = {
     id: vectorId,
     chunkId: String(chunk.id),
@@ -286,8 +329,8 @@ async function embedChunk(payload: Payload, chunk: ChunkDoc, queueItem: QueueDoc
     moduleId: relId(chunk.module),
     lessonId: relId(chunk.lesson),
     ownerCompanyId,
-    // Epic 17: company tenant isolation on vectors (ACL + governance gate).
-    tenantId: ownerCompanyId,
+    // Epic 17: tenant isolation on vectors (ACL + governance gate) — tenant id space, not company.
+    tenantId,
     schoolKey,
     knowledgeScope,
     retrievalEligible,
@@ -350,6 +393,7 @@ export async function processEmbeddingQueue(
   });
 
   const result: WorkerResult = { processed: 0, completed: 0, failed: 0, skipped: 0 };
+  const tenantCache = new Map<string, string | null>();
 
   for (const raw of pending.docs) {
     const item = raw as QueueDoc;
@@ -376,7 +420,7 @@ export async function processEmbeddingQueue(
       }
 
       for (const chunk of chunks) {
-        await embedChunk(payload, chunk, item);
+        await embedChunk(payload, chunk, item, tenantCache);
       }
 
       await payload.update({
@@ -414,4 +458,271 @@ export async function processEmbeddingQueue(
 
   await refreshRetrievalDashboard(payload).catch(() => undefined);
   return result;
+}
+
+export type IndexLearningResourceResult = {
+  ok: boolean;
+  learningResourceId: string;
+  knowledgeDocumentId: string | null;
+  chunkCount: number;
+  indexedCount: number;
+  removedVectors: number;
+  provider: string | null;
+  model: string | null;
+  lastIndexedAt: string | null;
+  error: string | null;
+};
+
+async function settleQueueItemsForResource(
+  payload: Payload,
+  learningResourceId: string,
+  outcome: { ok: true } | { ok: false; error: string } | { deindexed: string },
+): Promise<void> {
+  const maxAttempts = getMaxEmbeddingAttempts();
+  const items = await payload.find({
+    collection: 'embedding-queue',
+    where: {
+      and: [
+        { learningResource: { equals: requirePayloadRelationId(learningResourceId) } },
+        { status: { in: ['pending', 'processing'] } },
+      ],
+    },
+    limit: 5000,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const now = new Date().toISOString();
+  for (const raw of items.docs) {
+    const item = raw as QueueDoc;
+    let data: Record<string, unknown>;
+    if ('deindexed' in outcome) {
+      data = { status: 'failed', lastError: `DEINDEXED:${outcome.deindexed}`.slice(0, 500) };
+    } else if (outcome.ok) {
+      data = { status: 'completed', completedAt: now, lastError: null };
+    } else {
+      const attempts = Number(item.attempts || 0) + 1;
+      const status = attempts >= maxAttempts ? 'failed' : 'pending';
+      data = {
+        status,
+        attempts,
+        lastError: outcome.error.slice(0, 500),
+        scheduledAt: status === 'pending' ? new Date(Date.now() + 30_000).toISOString() : null,
+      };
+    }
+    await payload.update({
+      collection: 'embedding-queue',
+      id: item.id,
+      data: data as never,
+      overrideAccess: true,
+      context: { retrievalPipelineActive: true },
+    });
+  }
+}
+
+/**
+ * Epic 17.3 — indexing port for one Learning Resource (used by governed ingest).
+ *
+ * Reuses the existing indexer (`embedChunk` → VectorStorePort → embedding-records), scoped to the
+ * resource instead of the global FIFO queue drain. Idempotent: vectors of the resource are purged
+ * first (stale chunk generations from retries), then every current chunk is upserted under the
+ * stable id `chunk:<id>`. Success is verified against `embedding-records` (status=ready for every
+ * chunk with the active provider/model) and only then `knowledge-documents.lastIndexedAt` is set.
+ * Failures are recorded in `knowledge-documents.indexingError` (never thrown).
+ */
+export async function indexLearningResource(
+  payload: Payload,
+  args: { learningResourceId: string | number; knowledgeDocumentId?: string | number | null },
+): Promise<IndexLearningResourceResult> {
+  const learningResourceId = String(args.learningResourceId);
+  const knowledgeDocumentId =
+    args.knowledgeDocumentId != null ? String(args.knowledgeDocumentId) : null;
+  const errors: string[] = [];
+  let chunkCount = 0;
+  let indexedCount = 0;
+  let removedVectors = 0;
+  let providerName: string | null = null;
+  let modelName: string | null = null;
+
+  try {
+    const meta = getEmbeddingProvider().metadata();
+    providerName = meta.name;
+    modelName = meta.model;
+    const store = await getVectorStore();
+    const chunks = await loadChunksForQueueItem(payload, {
+      id: `index:${learningResourceId}`,
+      learningResource: learningResourceId,
+    });
+    chunkCount = chunks.length;
+    if (!chunkCount) throw new Error('INDEX_NO_CHUNKS');
+
+    removedVectors = await store.deleteResource(learningResourceId);
+
+    const tenantCache = new Map<string, string | null>();
+    for (const chunk of chunks) {
+      try {
+        await embedChunk(
+          payload,
+          chunk,
+          {
+            id: `index:${learningResourceId}`,
+            learningResource: learningResourceId,
+            knowledgeDocument: knowledgeDocumentId,
+          },
+          tenantCache,
+        );
+      } catch (err) {
+        errors.push(`chunk ${chunk.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    const chunkIds = chunks.map((c) => requirePayloadRelationId(c.id));
+    const ready = await payload.find({
+      collection: 'embedding-records',
+      where: {
+        and: [
+          { chunk: { in: chunkIds } },
+          { status: { equals: 'ready' } },
+          { provider: { equals: meta.name } },
+          { model: { equals: meta.model } },
+        ],
+      },
+      limit: chunkIds.length + 50,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const readyChunks = new Set(
+      (ready.docs as Array<{ chunk?: unknown }>).map((d) => relId(d.chunk)).filter(Boolean),
+    );
+    indexedCount = chunks.filter((c) => readyChunks.has(String(c.id))).length;
+    if (indexedCount !== chunkCount && errors.length === 0) {
+      errors.push(`INDEX_INCOMPLETE:${indexedCount}/${chunkCount}`);
+    }
+  } catch (err) {
+    errors.push(err instanceof Error ? err.message : String(err));
+  }
+
+  const ok = errors.length === 0;
+  const error = ok ? null : errors.join(' | ').slice(0, 800);
+  const lastIndexedAt = ok ? new Date().toISOString() : null;
+
+  try {
+    await settleQueueItemsForResource(
+      payload,
+      learningResourceId,
+      ok ? { ok: true } : { ok: false, error: error ?? 'INDEX_FAILED' },
+    );
+  } catch (err) {
+    payload.logger.warn({
+      msg: 'retrieval.index.queue_settle_failed',
+      learningResourceId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  if (knowledgeDocumentId != null) {
+    try {
+      await payload.update({
+        collection: 'knowledge-documents',
+        id: knowledgeDocumentId,
+        data: { lastIndexedAt, indexingError: error } as never,
+        overrideAccess: true,
+        context: {
+          retrievalPipelineActive: true,
+          kiPipelineActive: true,
+          governancePipelineActive: true,
+        },
+      });
+    } catch (err) {
+      payload.logger.error({
+        msg: 'retrieval.index.kd_status_write_failed',
+        knowledgeDocumentId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  await refreshRetrievalDashboard(payload).catch(() => undefined);
+
+  return {
+    ok,
+    learningResourceId,
+    knowledgeDocumentId,
+    chunkCount,
+    indexedCount,
+    removedVectors,
+    provider: providerName,
+    model: modelName,
+    lastIndexedAt,
+    error,
+  };
+}
+
+/**
+ * Epic 17.3 — remove a resource/document from the vector index (revocation, version change,
+ * non-eligible governance states). Marks embedding-records stale, cancels pending queue items and
+ * clears `lastIndexedAt` so the KD never claims to be indexed after removal.
+ */
+export async function deindexLearningResource(
+  payload: Payload,
+  args: {
+    learningResourceId?: string | number | null;
+    knowledgeDocumentId?: string | number | null;
+    reason: string;
+  },
+): Promise<{ removedVectors: number }> {
+  const learningResourceId =
+    args.learningResourceId != null ? String(args.learningResourceId) : null;
+  const knowledgeDocumentId =
+    args.knowledgeDocumentId != null ? String(args.knowledgeDocumentId) : null;
+  const store = await getVectorStore();
+  let removedVectors = 0;
+  if (learningResourceId) removedVectors += await store.deleteResource(learningResourceId);
+  if (knowledgeDocumentId) removedVectors += await store.deleteDocument(knowledgeDocumentId);
+
+  const or: Record<string, unknown>[] = [];
+  if (learningResourceId) {
+    or.push({ learningResource: { equals: requirePayloadRelationId(learningResourceId) } });
+  }
+  if (knowledgeDocumentId) {
+    or.push({ knowledgeDocument: { equals: requirePayloadRelationId(knowledgeDocumentId) } });
+  }
+  if (or.length) {
+    const records = await payload.find({
+      collection: 'embedding-records',
+      where: { and: [{ or }, { status: { in: ['ready', 'processing', 'pending'] } }] } as never,
+      limit: 5000,
+      depth: 0,
+      overrideAccess: true,
+    });
+    for (const record of records.docs) {
+      await payload.update({
+        collection: 'embedding-records',
+        id: record.id,
+        data: { status: 'stale', lastError: `DEINDEXED:${args.reason}`.slice(0, 500) },
+        overrideAccess: true,
+        context: { retrievalPipelineActive: true },
+      });
+    }
+  }
+
+  if (learningResourceId) {
+    await settleQueueItemsForResource(payload, learningResourceId, { deindexed: args.reason });
+  }
+
+  if (knowledgeDocumentId) {
+    await payload.update({
+      collection: 'knowledge-documents',
+      id: knowledgeDocumentId,
+      data: { lastIndexedAt: null, indexingError: null } as never,
+      overrideAccess: true,
+      context: {
+        retrievalPipelineActive: true,
+        kiPipelineActive: true,
+        governancePipelineActive: true,
+      },
+    });
+  }
+
+  await refreshRetrievalDashboard(payload).catch(() => undefined);
+  return { removedVectors };
 }

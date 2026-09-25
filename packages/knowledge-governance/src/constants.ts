@@ -33,6 +33,8 @@ export const GOVERNANCE_AUDIT_ACTIONS = [
   'version_changed',
   'ingestion_started',
   'ingestion_completed',
+  /** Epic 17.3: KI ingest finished but vector indexing failed (see KD.indexingError). */
+  'indexing_failed',
   'retrieval_eligibility_changed',
   'correction_requested',
   'archived',

@@ -12,6 +12,26 @@ let vectorStore: VectorStorePort | null = null;
 let embeddingProvider: EmbeddingProviderPort | null = null;
 let schemaReady = false;
 
+/**
+ * Test/composition seam (Ports & Adapters): lets callers inject alternative adapters
+ * (e.g. InMemoryVectorStore) without touching Postgres. `null` restores defaults.
+ */
+export function overrideRetrievalRuntime(
+  deps: { vectorStore?: VectorStorePort; embeddingProvider?: EmbeddingProviderPort } | null,
+): void {
+  if (!deps) {
+    vectorStore = null;
+    embeddingProvider = null;
+    schemaReady = false;
+    return;
+  }
+  if (deps.embeddingProvider) embeddingProvider = deps.embeddingProvider;
+  if (deps.vectorStore) {
+    vectorStore = deps.vectorStore;
+    schemaReady = true;
+  }
+}
+
 function getDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is required for retrieval vector store');
