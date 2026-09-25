@@ -1,4 +1,5 @@
 import type { Payload } from 'payload';
+import { isSchoolKey } from '@omnia/intelligent-learning';
 import { chunkChecksum, type VectorRecord } from '@omnia/retrieval';
 
 import { requirePayloadRelationId, toPayloadRelationId } from '../../lib/payload-relation-id';
@@ -37,41 +38,102 @@ function mapSecurityClassificationToVisibility(classification: string | null | u
   }
 }
 
-/**
- * Sentinel written to `tenant_id` when a chunk has an owner company without a resolvable tenant.
- * Never equals a real `tenants.id`, so tenant-scoped searches fail closed instead of colliding
- * with an unrelated tenant whose id happens to equal the company id.
- */
-export const UNRESOLVED_TENANT_PREFIX = 'unresolved-company:';
+export type IndexScopeErrorCode =
+  | 'INDEX_SCOPE_OWNER_COMPANY_REQUIRED'
+  | 'INDEX_SCOPE_COMPANY_NOT_FOUND'
+  | 'INDEX_SCOPE_TENANT_UNRESOLVED';
 
 /**
- * Epic 17.3: vectors must carry the owner company's **tenant** id (`companies.tenant`), the same id
- * space used by every search subject (`users.tenant` → `tenants`). Writing the company id here made
- * governed chunks invisible to tenant-scoped searches (company 4 ≠ tenant 5).
+ * Epic 17.3 — the vector's isolation scope (owner company → tenant) could not be resolved.
+ * Indexing fails closed: no NULL/wildcard/sentinel scope is ever written to `retrieval_vectors`
+ * (the PG pre-filter treats NULL as "visible to every tenant/company").
+ */
+export class IndexScopeError extends Error {
+  constructor(
+    readonly code: IndexScopeErrorCode,
+    readonly detail: string,
+  ) {
+    super(`${code}:${detail}`);
+    this.name = 'IndexScopeError';
+  }
+}
+
+/**
+ * School content = Knowledge governed for a school (Fred do Frio / CTE). Identified by the
+ * governance metadata the vector is built from (KD, or LR when there is no KD):
+ * - a valid `schoolKey` (`@omnia/intelligent-learning` SCHOOL_KEYS — set by governed ingest from
+ *   the course's school), or
+ * - `knowledgeScope === 'SCHOOL_APPROVED'` (school-scoped by definition, even if schoolKey is lost).
+ * OMNIA/global catalog content (no schoolKey, scope OMNIA_APPROVED / legacy default) keeps the
+ * existing behaviour (ownerCompany optional).
+ */
+export function isSchoolScopedContent(meta: {
+  schoolKey?: string | null;
+  knowledgeScope?: string | null;
+}): boolean {
+  return isSchoolKey(meta.schoolKey) || meta.knowledgeScope === 'SCHOOL_APPROVED';
+}
+
+/**
+ * Epic 17.3: vectors carry the owner company's **tenant** id (`companies.tenant`), the canonical
+ * Tenant ⊃ Company model (TENANT_ARCHITECTURE.md; Omnia tenant 1 ⊃ Fred 4 / CTE 5). Writing the
+ * company id here made governed chunks invisible to tenant-scoped searches.
+ *
+ * Returns `null` only when there is no owner company. A missing company or a company without tenant
+ * throws {@link IndexScopeError} (fail closed) — never a guessed/sentinel tenant.
  */
 export async function resolveVectorTenantId(
   payload: Payload,
   ownerCompanyId: string | null,
-  cache?: Map<string, string | null>,
+  cache?: Map<string, string>,
 ): Promise<string | null> {
   if (!ownerCompanyId) return null;
-  if (cache?.has(ownerCompanyId)) return cache.get(ownerCompanyId) ?? null;
-  let tenantId: string | null;
+  const cached = cache?.get(ownerCompanyId);
+  if (cached) return cached;
+  let company: { tenant?: unknown } | null;
   try {
-    const company = (await payload.findByID({
+    company = (await payload.findByID({
       collection: 'companies',
       id: ownerCompanyId,
       depth: 0,
       overrideAccess: true,
     })) as { tenant?: unknown } | null;
-    tenantId = relId(company?.tenant) ?? `${UNRESOLVED_TENANT_PREFIX}${ownerCompanyId}`;
   } catch (err) {
     const status = (err as { status?: number } | null)?.status;
     if (status !== 404) throw err;
-    tenantId = `${UNRESOLVED_TENANT_PREFIX}${ownerCompanyId}`;
+    company = null;
   }
+  if (!company) throw new IndexScopeError('INDEX_SCOPE_COMPANY_NOT_FOUND', ownerCompanyId);
+  const tenantId = relId(company.tenant);
+  if (!tenantId) throw new IndexScopeError('INDEX_SCOPE_TENANT_UNRESOLVED', ownerCompanyId);
   cache?.set(ownerCompanyId, tenantId);
   return tenantId;
+}
+
+/**
+ * Resolve `{ ownerCompanyId, tenantId }` for a chunk vector, or throw {@link IndexScopeError}.
+ * School content requires an owner company (and therefore a tenant).
+ */
+export async function resolveChunkIndexScope(
+  payload: Payload,
+  args: {
+    ownerCompanyId: string | null;
+    schoolKey?: string | null;
+    knowledgeScope?: string | null;
+  },
+  cache?: Map<string, string>,
+): Promise<{ ownerCompanyId: string | null; tenantId: string | null }> {
+  if (!args.ownerCompanyId) {
+    if (isSchoolScopedContent(args)) {
+      throw new IndexScopeError(
+        'INDEX_SCOPE_OWNER_COMPANY_REQUIRED',
+        `school=${args.schoolKey ?? 'none'} scope=${args.knowledgeScope ?? 'none'}`,
+      );
+    }
+    return { ownerCompanyId: null, tenantId: null };
+  }
+  const tenantId = await resolveVectorTenantId(payload, args.ownerCompanyId, cache);
+  return { ownerCompanyId: args.ownerCompanyId, tenantId };
 }
 
 type QueueDoc = {
@@ -189,48 +251,53 @@ async function upsertEmbeddingRecord(
   return created.id;
 }
 
-async function embedChunk(
+type ChunkGovernance = {
+  allowAiUse: boolean;
+  publicationStatus: string;
+  status: string;
+  visibility: string;
+  schoolKey: string | null;
+  knowledgeScope: string | null;
+  retrievalEligible: boolean | null;
+  assessmentSecret: boolean;
+  sourceVersion: string | null;
+  agentTags: string[];
+};
+
+/** Per-run caches (tenant per owner company; governance per KD/LR). */
+type IndexRunContext = {
+  tenantCache: Map<string, string>;
+  governanceCache: Map<string, ChunkGovernance>;
+};
+
+function newIndexRunContext(): IndexRunContext {
+  return { tenantCache: new Map(), governanceCache: new Map() };
+}
+
+/** Governance/ACL metadata for a chunk vector, from its Knowledge Document (or LR fallback). */
+async function loadChunkGovernance(
   payload: Payload,
-  chunk: ChunkDoc,
-  queueItem: QueueDoc,
-  tenantCache?: Map<string, string | null>,
-): Promise<void> {
-  const provider = getEmbeddingProvider();
-  const meta = provider.metadata();
-  const store = await getVectorStore();
-  const text = String(chunk.chunkText || '');
-  if (!text.trim()) throw new Error('Chunk sem texto');
+  documentId: string | null,
+  resourceId: string | null,
+  fallbackVersion: string | null,
+  ctx?: IndexRunContext,
+): Promise<ChunkGovernance> {
+  const cacheKey = `${documentId ?? ''}|${resourceId ?? ''}|${fallbackVersion ?? ''}`;
+  const cached = ctx?.governanceCache.get(cacheKey);
+  if (cached) return { ...cached, agentTags: [...cached.agentTags] };
 
-  const checksum = chunkChecksum(text);
-  const vectorId = `chunk:${chunk.id}`;
-  const resourceId = relId(chunk.learningResource) || relId(queueItem.learningResource);
-  const documentId = relId(chunk.knowledgeDocument) || relId(queueItem.knowledgeDocument);
-
-  await upsertEmbeddingRecord(payload, {
-    chunkId: String(chunk.id),
-    resourceId,
-    documentId,
-    provider: meta.name,
-    model: meta.model,
-    dimensions: meta.dimensions,
-    checksum,
-    status: 'processing',
-    vectorId,
-    version: String(chunk.version || '1'),
-  });
-
-  const embedding = await provider.generate(text);
-  const tags = (chunk.tags || []).map((t) => t.tag).filter(Boolean) as string[];
-
-  let allowAiUse = true;
-  let publicationStatus = 'published';
-  let status = 'published';
-  let visibility = 'enrolled';
-  let schoolKey: string | null = null;
-  let knowledgeScope: string | null = 'OMNIA_APPROVED';
-  let retrievalEligible: boolean | null = true;
-  let assessmentSecret = false;
-  let sourceVersion: string | null = chunk.version ?? null;
+  const g: ChunkGovernance = {
+    allowAiUse: true,
+    publicationStatus: 'published',
+    status: 'published',
+    visibility: 'enrolled',
+    schoolKey: null,
+    knowledgeScope: 'OMNIA_APPROVED',
+    retrievalEligible: true,
+    assessmentSecret: false,
+    sourceVersion: fallbackVersion,
+    agentTags: [],
+  };
 
   if (documentId != null) {
     try {
@@ -252,19 +319,19 @@ async function embedChunk(
         assessmentSecret?: boolean | null;
         contentVersionHash?: string | null;
       };
-      allowAiUse = doc.allowAiUse !== false;
-      publicationStatus = doc.publicationStatus || publicationStatus;
-      status = doc.status || status;
-      visibility = mapSecurityClassificationToVisibility(doc.securityClassification);
+      g.allowAiUse = doc.allowAiUse !== false;
+      g.publicationStatus = doc.publicationStatus || g.publicationStatus;
+      g.status = doc.status || g.status;
+      g.visibility = mapSecurityClassificationToVisibility(doc.securityClassification);
       if (doc.securityClassification === 'INTERNAL_RESTRICTED') {
-        allowAiUse = false;
-        visibility = 'internal_restricted';
+        g.allowAiUse = false;
+        g.visibility = 'internal_restricted';
       }
-      schoolKey = doc.schoolKey ?? null;
-      knowledgeScope = doc.knowledgeScope ?? knowledgeScope;
-      retrievalEligible = doc.retrievalEligible !== false;
-      assessmentSecret = doc.assessmentSecret === true;
-      sourceVersion = doc.contentVersionHash ?? sourceVersion;
+      g.schoolKey = doc.schoolKey ?? null;
+      g.knowledgeScope = doc.knowledgeScope ?? g.knowledgeScope;
+      g.retrievalEligible = doc.retrievalEligible !== false;
+      g.assessmentSecret = doc.assessmentSecret === true;
+      g.sourceVersion = doc.contentVersionHash ?? g.sourceVersion;
       const proc = (doc.processingStatus || '').toLowerCase();
       const processingReady =
         !proc ||
@@ -272,14 +339,11 @@ async function embedChunk(
         proc === 'completed' ||
         proc === 'ready' ||
         proc === 'indexed';
-      if (assessmentSecret || retrievalEligible === false || !processingReady) {
-        allowAiUse = false;
-        retrievalEligible = false;
+      if (g.assessmentSecret || g.retrievalEligible === false || !processingReady) {
+        g.allowAiUse = false;
+        g.retrievalEligible = false;
       }
-      for (const agent of doc.allowedAgents || []) {
-        const tag = `agent:${agent}`;
-        if (!tags.includes(tag)) tags.push(tag);
-      }
+      for (const agent of doc.allowedAgents || []) g.agentTags.push(`agent:${agent}`);
     } catch {
       // Mantém defaults se o documento Hub não existir mais.
     }
@@ -298,25 +362,102 @@ async function embedChunk(
         contentVersionHash?: string | null;
         processingStatus?: string | null;
       };
-      schoolKey = lr.schoolKey ?? null;
-      knowledgeScope = lr.knowledgeScope ?? 'COURSE_PRIVATE';
-      retrievalEligible = lr.retrievalEligible === true;
-      assessmentSecret = lr.assessmentSecret === true;
-      sourceVersion = lr.contentVersionHash ?? sourceVersion;
+      g.schoolKey = lr.schoolKey ?? null;
+      g.knowledgeScope = lr.knowledgeScope ?? 'COURSE_PRIVATE';
+      g.retrievalEligible = lr.retrievalEligible === true;
+      g.assessmentSecret = lr.assessmentSecret === true;
+      g.sourceVersion = lr.contentVersionHash ?? g.sourceVersion;
       const proc = (lr.processingStatus || '').toLowerCase();
       const processingReady = proc === 'completed' || proc === 'succeeded' || proc === 'ready';
       // LMS resources without approval or unfinished KI stay non-retrievable in vector ACL.
-      if (retrievalEligible !== true || assessmentSecret || !processingReady) {
-        allowAiUse = false;
-        retrievalEligible = false;
+      if (g.retrievalEligible !== true || g.assessmentSecret || !processingReady) {
+        g.allowAiUse = false;
+        g.retrievalEligible = false;
       }
     } catch {
       // ignore
     }
   }
 
-  const ownerCompanyId = relId(chunk.ownerCompany);
-  const tenantId = await resolveVectorTenantId(payload, ownerCompanyId, tenantCache);
+  ctx?.governanceCache.set(cacheKey, { ...g, agentTags: [...g.agentTags] });
+  return g;
+}
+
+type PreparedChunk = {
+  chunk: ChunkDoc;
+  resourceId: string | null;
+  documentId: string | null;
+  governance: ChunkGovernance;
+  scope: { ownerCompanyId: string | null; tenantId: string | null };
+};
+
+/**
+ * Resolve everything a chunk vector needs **before** any write (embedding-records / vector store).
+ * Throws {@link IndexScopeError} when the isolation scope is unresolvable (fail closed).
+ */
+async function prepareChunk(
+  payload: Payload,
+  chunk: ChunkDoc,
+  queueItem: QueueDoc,
+  ctx: IndexRunContext,
+): Promise<PreparedChunk> {
+  const resourceId = relId(chunk.learningResource) || relId(queueItem.learningResource);
+  const documentId = relId(chunk.knowledgeDocument) || relId(queueItem.knowledgeDocument);
+  const governance = await loadChunkGovernance(
+    payload,
+    documentId,
+    resourceId,
+    chunk.version ?? null,
+    ctx,
+  );
+  const scope = await resolveChunkIndexScope(
+    payload,
+    {
+      ownerCompanyId: relId(chunk.ownerCompany),
+      schoolKey: governance.schoolKey,
+      knowledgeScope: governance.knowledgeScope,
+    },
+    ctx.tenantCache,
+  );
+  return { chunk, resourceId, documentId, governance, scope };
+}
+
+async function embedChunk(
+  payload: Payload,
+  chunk: ChunkDoc,
+  queueItem: QueueDoc,
+  ctx: IndexRunContext = newIndexRunContext(),
+  prepared?: PreparedChunk,
+): Promise<void> {
+  const text = String(chunk.chunkText || '');
+  if (!text.trim()) throw new Error('Chunk sem texto');
+  // Scope first: an unresolvable tenant/owner aborts before anything is written.
+  const p = prepared ?? (await prepareChunk(payload, chunk, queueItem, ctx));
+  const { resourceId, documentId, governance: g, scope } = p;
+
+  const provider = getEmbeddingProvider();
+  const meta = provider.metadata();
+  const store = await getVectorStore();
+  const checksum = chunkChecksum(text);
+  const vectorId = `chunk:${chunk.id}`;
+
+  await upsertEmbeddingRecord(payload, {
+    chunkId: String(chunk.id),
+    resourceId,
+    documentId,
+    provider: meta.name,
+    model: meta.model,
+    dimensions: meta.dimensions,
+    checksum,
+    status: 'processing',
+    vectorId,
+    version: String(chunk.version || '1'),
+  });
+
+  const embedding = await provider.generate(text);
+  const tags = (chunk.tags || []).map((t) => t.tag).filter(Boolean) as string[];
+  for (const tag of g.agentTags) if (!tags.includes(tag)) tags.push(tag);
+
   const record: VectorRecord = {
     id: vectorId,
     chunkId: String(chunk.id),
@@ -328,22 +469,22 @@ async function embedChunk(
     courseId: relId(chunk.course),
     moduleId: relId(chunk.module),
     lessonId: relId(chunk.lesson),
-    ownerCompanyId,
+    ownerCompanyId: scope.ownerCompanyId,
     // Epic 17: tenant isolation on vectors (ACL + governance gate) — tenant id space, not company.
-    tenantId,
-    schoolKey,
-    knowledgeScope,
-    retrievalEligible,
-    assessmentSecret,
-    sourceVersion,
+    tenantId: scope.tenantId,
+    schoolKey: g.schoolKey,
+    knowledgeScope: g.knowledgeScope,
+    retrievalEligible: g.retrievalEligible,
+    assessmentSecret: g.assessmentSecret,
+    sourceVersion: g.sourceVersion,
     language: chunk.language ?? null,
     version: chunk.version ?? null,
     category: chunk.category ?? null,
     tags,
-    allowAiUse,
-    publicationStatus,
-    visibility,
-    status,
+    allowAiUse: g.allowAiUse,
+    publicationStatus: g.publicationStatus,
+    visibility: g.visibility,
+    status: g.status,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };
@@ -393,7 +534,7 @@ export async function processEmbeddingQueue(
   });
 
   const result: WorkerResult = { processed: 0, completed: 0, failed: 0, skipped: 0 };
-  const tenantCache = new Map<string, string | null>();
+  const ctx = newIndexRunContext();
 
   for (const raw of pending.docs) {
     const item = raw as QueueDoc;
@@ -419,8 +560,11 @@ export async function processEmbeddingQueue(
         throw new Error('Nenhum chunk encontrado para o item da fila');
       }
 
-      for (const chunk of chunks) {
-        await embedChunk(payload, chunk, item, tenantCache);
+      // Resolve every chunk's scope first: an unresolvable tenant/owner writes nothing.
+      const prepared: PreparedChunk[] = [];
+      for (const chunk of chunks) prepared.push(await prepareChunk(payload, chunk, item, ctx));
+      for (const p of prepared) {
+        await embedChunk(payload, p.chunk, item, ctx, p);
       }
 
       await payload.update({
@@ -519,6 +663,36 @@ async function settleQueueItemsForResource(
   }
 }
 
+/** Move a resource's live embedding records (ready/processing/pending) to a terminal status. */
+async function markResourceEmbeddingRecords(
+  payload: Payload,
+  learningResourceId: string,
+  status: 'failed' | 'stale',
+  reason: string | null,
+): Promise<void> {
+  const records = await payload.find({
+    collection: 'embedding-records',
+    where: {
+      and: [
+        { learningResource: { equals: requirePayloadRelationId(learningResourceId) } },
+        { status: { in: ['ready', 'processing', 'pending'] } },
+      ],
+    },
+    limit: 5000,
+    depth: 0,
+    overrideAccess: true,
+  });
+  for (const record of records.docs) {
+    await payload.update({
+      collection: 'embedding-records',
+      id: record.id,
+      data: { status, lastError: (reason ?? status).slice(0, 500) },
+      overrideAccess: true,
+      context: { retrievalPipelineActive: true },
+    });
+  }
+}
+
 /**
  * Epic 17.3 — indexing port for one Learning Resource (used by governed ingest).
  *
@@ -527,7 +701,8 @@ async function settleQueueItemsForResource(
  * first (stale chunk generations from retries), then every current chunk is upserted under the
  * stable id `chunk:<id>`. Success is verified against `embedding-records` (status=ready for every
  * chunk with the active provider/model) and only then `knowledge-documents.lastIndexedAt` is set.
- * Failures are recorded in `knowledge-documents.indexingError` (never thrown).
+ * Failures are recorded in `knowledge-documents.indexingError` (never thrown). Scope is resolved for
+ * every chunk before any write; on any failure the resource's vectors are removed (fail closed).
  */
 export async function indexLearningResource(
   payload: Payload,
@@ -555,23 +730,24 @@ export async function indexLearningResource(
     chunkCount = chunks.length;
     if (!chunkCount) throw new Error('INDEX_NO_CHUNKS');
 
+    const queueItem: QueueDoc = {
+      id: `index:${learningResourceId}`,
+      learningResource: learningResourceId,
+      knowledgeDocument: knowledgeDocumentId,
+    };
+    const ctx = newIndexRunContext();
+    // Fail closed BEFORE touching the index: every chunk must have a resolvable isolation scope
+    // (owner company → companies.tenant; owner company mandatory for school content).
+    const prepared: PreparedChunk[] = [];
+    for (const chunk of chunks) prepared.push(await prepareChunk(payload, chunk, queueItem, ctx));
+
     removedVectors = await store.deleteResource(learningResourceId);
 
-    const tenantCache = new Map<string, string | null>();
-    for (const chunk of chunks) {
+    for (const p of prepared) {
       try {
-        await embedChunk(
-          payload,
-          chunk,
-          {
-            id: `index:${learningResourceId}`,
-            learningResource: learningResourceId,
-            knowledgeDocument: knowledgeDocumentId,
-          },
-          tenantCache,
-        );
+        await embedChunk(payload, p.chunk, queueItem, ctx, p);
       } catch (err) {
-        errors.push(`chunk ${chunk.id}: ${err instanceof Error ? err.message : String(err)}`);
+        errors.push(`chunk ${p.chunk.id}: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
 
@@ -604,6 +780,21 @@ export async function indexLearningResource(
   const ok = errors.length === 0;
   const error = ok ? null : errors.join(' | ').slice(0, 800);
   const lastIndexedAt = ok ? new Date().toISOString() : null;
+
+  if (!ok) {
+    // Fail closed: a resource that did not fully index keeps no vectors (no partial leftovers, no
+    // stale generation) and its embedding records stop claiming `ready`.
+    try {
+      removedVectors += await (await getVectorStore()).deleteResource(learningResourceId);
+      await markResourceEmbeddingRecords(payload, learningResourceId, 'failed', error);
+    } catch (err) {
+      payload.logger.error({
+        msg: 'retrieval.index.rollback_failed',
+        learningResourceId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
 
   try {
     await settleQueueItemsForResource(

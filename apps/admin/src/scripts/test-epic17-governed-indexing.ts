@@ -336,7 +336,8 @@ describe('EPIC17.3 governed retrieval indexing', { concurrency: false }, () => {
     seed('tenants', { id: 1, name: 'Holding' });
     seed('tenants', { id: 5, name: 'Fred do Frio' });
     seed('tenants', { id: 7, name: 'CTE' });
-    // DEV shape: Fred company 4 → tenant 5; CTE company 5 → tenant 7 (company id 5 == Fred tenant id).
+    // Synthetic id-space fixture (NOT the product model — see the canonical suite below): company
+    // ids ≠ tenant ids so a company-id-as-tenant regression is caught (company 5 == tenant id 5).
     seed('companies', { id: 4, name: 'Fred do Frio', tenant: 5 });
     seed('companies', { id: 5, name: 'CTE', tenant: 7 });
     seed('companies', { id: 9, name: 'Sem tenant' });
@@ -674,12 +675,20 @@ describe('EPIC17.3 governed retrieval indexing', { concurrency: false }, () => {
     assert.equal(kd.indexingError, null);
   });
 
-  it('owner company without tenant fails closed (never collides with a real tenant id)', async () => {
-    const tenant = await worker.resolveVectorTenantId(payload, '9');
-    assert.equal(tenant, `${worker.UNRESOLVED_TENANT_PREFIX}9`);
+  it('owner company without tenant / missing company fails closed (no sentinel tenant)', async () => {
+    await assert.rejects(worker.resolveVectorTenantId(payload, '9'), (err: unknown) => {
+      assert.ok(err instanceof worker.IndexScopeError);
+      assert.equal(err.code, 'INDEX_SCOPE_TENANT_UNRESOLVED');
+      return true;
+    });
+    await assert.rejects(worker.resolveVectorTenantId(payload, '404'), (err: unknown) => {
+      assert.ok(err instanceof worker.IndexScopeError);
+      assert.equal(err.code, 'INDEX_SCOPE_COMPANY_NOT_FOUND');
+      return true;
+    });
     assert.equal(await worker.resolveVectorTenantId(payload, '4'), '5');
-    assert.equal(await worker.resolveVectorTenantId(payload, '404'), 'unresolved-company:404');
     assert.equal(await worker.resolveVectorTenantId(payload, null), null);
+    assert.ok(![...vectors.rows.values()].some((v) => String(v.tenantId).startsWith('unresolved')));
   });
 
   it('Assessment Guard still works (ASSESSMENT_GUARD_TEST)', async () => {
