@@ -729,3 +729,338 @@ describe('EPIC17.3 governed retrieval indexing', { concurrency: false }, () => {
     assert.ok(!result.results.some((r) => r.text.includes('zeta compressor')));
   });
 });
+
+/**
+ * EPIC17.3 final — canonical tenant model (TENANT_ARCHITECTURE.md / approved architecture):
+ * Omnia tenant 1 ⊃ Fred company 4 (fred-do-frio) + CTE company 5 (cte). users.tenant ==
+ * company.tenant. Distractor tenants 4/5 exist (same ids as the Fred/CTE companies, like DEV
+ * e16-tenant-a/b) so writing the company id as tenant (base bug) or picking another tenant fails.
+ */
+describe(
+  'EPIC17.3 canonical tenant model (Omnia 1 ⊃ Fred 4 / CTE 5)',
+  { concurrency: false },
+  () => {
+    const { payload, seed, all } = createFakePayload();
+    const provider = createEmbeddingProvider({ RETRIEVAL_EMBEDDING_PROVIDER: 'deterministic' });
+    const vectors = new TeeVectorStore();
+
+    let governance: typeof GovernanceModule;
+    let worker: typeof WorkerModule;
+    let search: typeof SearchModule;
+    let runtime: typeof RuntimeModule;
+    let pipeline: typeof PipelineModule;
+
+    const admin = { id: 35, role: 'admin' };
+    const instructor = { id: 28, role: 'instructor' };
+    const fredUser = { id: 27, role: 'student', tenant: 1, company: 4 };
+    const cteUser = { id: 29, role: 'student', tenant: 1, company: 5 };
+
+    const FRED_MARKER = 'Marcador FRED canonico kappa condensadora fredfrio tenantomnia isolamento';
+    const CTE_MARKER = 'Marcador CTE canonico sigma evaporadora ctescola tenantomnia isolamento';
+    const NULL_OWNER_MARKER = 'Marcador escola sem dono lambda valvula donoausente';
+    const NO_TENANT_MARKER = 'Marcador empresa sem tenant theta termostato tenantausente';
+
+    const lesson = { fred: 40, cte: 41, nullOwner: 42, noTenant: 43 };
+    const outcomes = new Map<number, { submissionId: number; lrId: number; kdId: number }>();
+
+    const asyncEvents = (subId: number) =>
+      all('knowledge-audit-events').filter(
+        (e) =>
+          String(e.entityId) === String(subId) &&
+          (e.nextState as { async?: boolean } | null)?.async === true,
+      );
+
+    async function approveLesson(lessonId: number) {
+      const sub = await governance.submitLessonForKnowledgeReview({
+        payload,
+        lessonId,
+        user: instructor,
+      });
+      const submissionId = sub.id as number;
+      const before = asyncEvents(submissionId).length;
+      const approved = await governance.reviewGovernanceSubmission({
+        payload,
+        submissionId,
+        user: admin,
+        action: 'approve_school',
+      });
+      assert.equal(approved.governanceState, 'SCHOOL_APPROVED');
+      for (let i = 0; i < 400; i += 1) {
+        const events = asyncEvents(submissionId);
+        if (events.length > before) {
+          const stored = all('knowledge-governance-submissions').find(
+            (d) => d.id === submissionId,
+          )!;
+          const lrId = Number(stored.learningResource);
+          const kdId = Number(stored.knowledgeDocument);
+          outcomes.set(lessonId, { submissionId, lrId, kdId });
+          return { outcome: events[events.length - 1]!, submissionId, lrId, kdId };
+        }
+        await new Promise((r) => setTimeout(r, 5));
+      }
+      throw new Error(`timeout waiting for governed ingest of lesson ${lessonId}`);
+    }
+
+    const lrVectors = (lrId: number) =>
+      [...vectors.rows.values()].filter((v) => v.learningResourceId === String(lrId));
+    const lrChunkIds = (lrId: number) =>
+      new Set(
+        all('knowledge-chunks')
+          .filter((c) => Number(c.learningResource) === lrId)
+          .map((c) => String(c.id)),
+      );
+
+    /** Same query/subject shape as POST /api/retrieval/search for a non-staff session. */
+    async function portalSearch(
+      text: string,
+      user: { id: number; role: string; tenant: number; company: number },
+    ) {
+      return search.runSemanticSearch(
+        payload,
+        {
+          text,
+          tenantId: String(user.tenant),
+          userId: String(user.id),
+          ownerCompanyId: String(user.company),
+          topK: 20,
+        },
+        {
+          channel: 'portal_chat',
+          role: user.role,
+          userId: String(user.id),
+          tenantId: String(user.tenant),
+          companyIds: [String(user.company)],
+        },
+      );
+    }
+
+    function assertFailedClosed(lrId: number, kdId: number, submissionId: number, code: RegExp) {
+      assert.equal(lrVectors(lrId).length, 0, 'no vectors for a resource that failed scope');
+      const kd = all('knowledge-documents').find((d) => d.id === kdId)!;
+      assert.equal(kd.lastIndexedAt, null);
+      assert.match(String(kd.indexingError), code);
+      const sub = all('knowledge-governance-submissions').find((d) => d.id === submissionId)!;
+      assert.equal(sub.retrievalEligible, false);
+      assert.ok(
+        !all('knowledge-audit-events').some(
+          (e) => String(e.entityId) === String(submissionId) && e.action === 'ingestion_completed',
+        ),
+        'no ingestion_completed for a failed index',
+      );
+      const chunkIds = lrChunkIds(lrId);
+      assert.ok(chunkIds.size >= 1);
+      assert.ok(
+        !all('embedding-records').some(
+          (r) => chunkIds.has(String(r.chunk)) && r.status === 'ready',
+        ),
+        'no ready embedding records',
+      );
+      // Never a NULL/wildcard/sentinel scope on school content anywhere in the index.
+      for (const v of vectors.rows.values()) {
+        assert.ok(v.ownerCompanyId, `vector ${v.id} has owner company`);
+        assert.ok(v.tenantId && /^\d+$/.test(v.tenantId), `vector ${v.id} has a real tenant id`);
+      }
+    }
+
+    before(async () => {
+      runtime = await import('../services/retrieval/runtime');
+      runtime.overrideRetrievalRuntime({ vectorStore: vectors, embeddingProvider: provider });
+      governance = await import('../services/knowledge/governance');
+      worker = await import('../services/retrieval/worker');
+      search = await import('../services/retrieval/search');
+      pipeline = await import('../services/knowledge-intelligence/pipeline');
+
+      seed('tenants', { id: 1, name: 'Omnia Frigo Holding', slug: 'omnia-holding' });
+      seed('tenants', { id: 4, name: 'E2E Staging Tenant A', slug: 'e16-tenant-a' });
+      seed('tenants', { id: 5, name: 'E2E Staging Tenant B', slug: 'e16-tenant-b' });
+      seed('companies', { id: 1, name: 'Omnia Frigo Holding', tenant: 1 });
+      seed('companies', { id: 4, name: 'Fred do Frio', tenant: 1, schoolKey: 'fred-do-frio' });
+      seed('companies', { id: 5, name: 'CTE', tenant: 1, schoolKey: 'cte' });
+      seed('companies', { id: 12, name: 'Escola sem tenant', schoolKey: 'fred-do-frio' });
+      seed('courses', { id: 20, title: 'Curso Fred', schoolKey: 'fred-do-frio', ownerCompany: 4 });
+      seed('courses', { id: 21, title: 'Curso CTE', schoolKey: 'cte', ownerCompany: 5 });
+      seed('courses', { id: 22, title: 'Curso Fred sem dono', schoolKey: 'fred-do-frio' });
+      seed('courses', {
+        id: 23,
+        title: 'Curso empresa sem tenant',
+        schoolKey: 'fred-do-frio',
+        ownerCompany: 12,
+      });
+      const modules: Array<[number, number]> = [
+        [200, 20],
+        [201, 21],
+        [202, 22],
+        [203, 23],
+      ];
+      for (const [id, course] of modules) seed('course-modules', { id, course });
+      const lessons: Array<[number, number, string]> = [
+        [lesson.fred, 200, FRED_MARKER],
+        [lesson.cte, 201, CTE_MARKER],
+        [lesson.nullOwner, 202, NULL_OWNER_MARKER],
+        [lesson.noTenant, 203, NO_TENANT_MARKER],
+      ];
+      for (const [id, module, text] of lessons) {
+        seed('lessons', {
+          id,
+          module,
+          title: `Aula ${id}`,
+          summary: '',
+          content: lexical(text),
+          updatedAt: '2026-09-20T00:00:00.000Z',
+        });
+      }
+    });
+
+    after(() => {
+      runtime.overrideRetrievalRuntime(null);
+    });
+
+    it('Fred content → vector tenant_id=1 owner_company_id=4 (FRED_VECTOR_TEST)', async () => {
+      const { outcome, lrId } = await approveLesson(lesson.fred);
+      assert.equal(outcome.action, 'ingestion_completed', JSON.stringify(outcome.nextState));
+      const rows = lrVectors(lrId);
+      assert.ok(rows.length >= 1);
+      for (const row of rows) {
+        assert.equal(row.tenantId, '1', 'companies.tenant, not company id 4 nor tenant 4/5');
+        assert.equal(row.ownerCompanyId, '4');
+      }
+    });
+
+    it('CTE content → vector tenant_id=1 owner_company_id=5 (CTE_VECTOR_TEST)', async () => {
+      const { outcome, lrId } = await approveLesson(lesson.cte);
+      assert.equal(outcome.action, 'ingestion_completed', JSON.stringify(outcome.nextState));
+      const rows = lrVectors(lrId);
+      assert.ok(rows.length >= 1);
+      for (const row of rows) {
+        assert.equal(row.tenantId, '1', 'companies.tenant, not company id 5 nor tenant 5');
+        assert.equal(row.ownerCompanyId, '5');
+      }
+    });
+
+    it('Fred user (tenant 1, company 4): Fred PASS, CTE DENY (FRED_TO_CTE_ISOLATION_TEST)', async () => {
+      const fredChunks = lrChunkIds(outcomes.get(lesson.fred)!.lrId);
+      const cteChunks = lrChunkIds(outcomes.get(lesson.cte)!.lrId);
+      const own = await portalSearch(FRED_MARKER, fredUser);
+      assert.ok(
+        own.results.some((r) => fredChunks.has(String(r.chunkId))),
+        'Fred marker PASS',
+      );
+      const cross = await portalSearch(CTE_MARKER, fredUser);
+      assert.ok(!cross.results.some((r) => cteChunks.has(String(r.chunkId))), 'CTE marker DENY');
+      assert.ok(!own.results.some((r) => cteChunks.has(String(r.chunkId))));
+    });
+
+    it('CTE user (tenant 1, company 5): CTE PASS, Fred DENY (CTE_TO_FRED_ISOLATION_TEST)', async () => {
+      const fredChunks = lrChunkIds(outcomes.get(lesson.fred)!.lrId);
+      const cteChunks = lrChunkIds(outcomes.get(lesson.cte)!.lrId);
+      const own = await portalSearch(CTE_MARKER, cteUser);
+      assert.ok(
+        own.results.some((r) => cteChunks.has(String(r.chunkId))),
+        'CTE marker PASS',
+      );
+      const cross = await portalSearch(FRED_MARKER, cteUser);
+      assert.ok(!cross.results.some((r) => fredChunks.has(String(r.chunkId))), 'Fred marker DENY');
+      assert.ok(!own.results.some((r) => fredChunks.has(String(r.chunkId))));
+    });
+
+    it('fixture-bug user (tenant 5 ≠ company tenant 1) does not retrieve — data issue, not code', async () => {
+      const fredChunks = lrChunkIds(outcomes.get(lesson.fred)!.lrId);
+      const buggy = await portalSearch(FRED_MARKER, { ...fredUser, tenant: 5 });
+      assert.ok(!buggy.results.some((r) => fredChunks.has(String(r.chunkId))));
+    });
+
+    it('school content with ownerCompany NULL → indexing_failed, no vectors (NULL_OWNER_TEST)', async () => {
+      const { outcome, lrId, kdId, submissionId } = await approveLesson(lesson.nullOwner);
+      assert.equal(outcome.action, 'indexing_failed', JSON.stringify(outcome.nextState));
+      const state = outcome.nextState as Record<string, unknown>;
+      assert.equal(state.indexed, false);
+      assert.equal(state.lastIndexedAt, null);
+      assert.match(String(state.indexingError), /INDEX_SCOPE_OWNER_COMPANY_REQUIRED/);
+      assertFailedClosed(lrId, kdId, submissionId, /INDEX_SCOPE_OWNER_COMPANY_REQUIRED/);
+      // Global queue drain must not sneak NULL-scope vectors in either.
+      await worker.processEmbeddingQueue(payload, { limit: 500 });
+      assertFailedClosed(lrId, kdId, submissionId, /INDEX_SCOPE_OWNER_COMPANY_REQUIRED/);
+      const r = await portalSearch(NULL_OWNER_MARKER, cteUser);
+      assert.ok(!r.results.some((x) => x.text.includes('lambda valvula')));
+    });
+
+    it('company tenant unresolved → indexing_failed, no vectors (UNRESOLVED_TENANT_TEST)', async () => {
+      const { outcome, lrId, kdId, submissionId } = await approveLesson(lesson.noTenant);
+      assert.equal(outcome.action, 'indexing_failed', JSON.stringify(outcome.nextState));
+      const state = outcome.nextState as Record<string, unknown>;
+      assert.equal(state.indexed, false);
+      assert.match(String(state.indexingError), /INDEX_SCOPE_TENANT_UNRESOLVED:12/);
+      assertFailedClosed(lrId, kdId, submissionId, /INDEX_SCOPE_TENANT_UNRESOLVED/);
+      await worker.processEmbeddingQueue(payload, { limit: 500 });
+      assertFailedClosed(lrId, kdId, submissionId, /INDEX_SCOPE_TENANT_UNRESOLVED/);
+    });
+
+    it('non-school catalog content without owner keeps legacy NULL scope (unchanged)', async () => {
+      const text = 'Catalogo Omnia global mu compressor catalogoglobal sem escola';
+      const media = await payload.create({
+        collection: 'media',
+        data: { alt: 'catalog' },
+        file: { data: Buffer.from(text), name: 'c.txt', size: 1, mimetype: 'text/plain' },
+      } as never);
+      const lr = await payload.create({
+        collection: 'learning-resources',
+        data: {
+          title: 'Catálogo Omnia',
+          media: media.id,
+          resourceType: 'txt',
+          origin: 'knowledge_hub',
+          processingStatus: 'pending',
+          knowledgeScope: 'OMNIA_APPROVED',
+          retrievalEligible: true,
+        },
+      } as never);
+      const processed = await pipeline.processLearningResource({
+        payload,
+        learningResourceId: lr.id,
+        sourceBuffer: Buffer.from(text),
+        sourceMimeType: 'text/plain',
+        preExtracted: { text, meta: {} },
+      });
+      assert.equal(processed.ok, true);
+      const res = await worker.indexLearningResource(payload, { learningResourceId: lr.id });
+      assert.equal(res.ok, true, String(res.error));
+      const rows = lrVectors(lr.id as number);
+      assert.ok(rows.length >= 1);
+      assert.ok(rows.every((v) => v.ownerCompanyId == null && v.tenantId == null));
+      // Remove so the global "no NULL school vectors" invariant stays about school content.
+      await worker.deindexLearningResource(payload, { learningResourceId: lr.id, reason: 'test' });
+    });
+
+    it('re-index after company loses its tenant removes existing vectors (no leftovers)', async () => {
+      const { lrId, kdId } = outcomes.get(lesson.fred)!;
+      assert.ok(lrVectors(lrId).length >= 1);
+      await payload.update({ collection: 'companies', id: 4, data: { tenant: null } });
+      try {
+        const res = await worker.indexLearningResource(payload, {
+          learningResourceId: lrId,
+          knowledgeDocumentId: kdId,
+        });
+        assert.equal(res.ok, false);
+        assert.match(String(res.error), /INDEX_SCOPE_TENANT_UNRESOLVED:4/);
+        assert.equal(res.lastIndexedAt, null);
+        assert.equal(lrVectors(lrId).length, 0);
+        const kd = all('knowledge-documents').find((d) => d.id === kdId)!;
+        assert.equal(kd.lastIndexedAt, null);
+        const chunkIds = lrChunkIds(lrId);
+        assert.ok(
+          !all('embedding-records').some(
+            (r) => chunkIds.has(String(r.chunk)) && r.status === 'ready',
+          ),
+        );
+      } finally {
+        await payload.update({ collection: 'companies', id: 4, data: { tenant: 1 } });
+      }
+      const recovered = await worker.indexLearningResource(payload, {
+        learningResourceId: lrId,
+        knowledgeDocumentId: kdId,
+      });
+      assert.equal(recovered.ok, true);
+      assert.ok(lrVectors(lrId).every((v) => v.tenantId === '1' && v.ownerCompanyId === '4'));
+    });
+  },
+);
