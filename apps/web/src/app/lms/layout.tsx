@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 
 import { LmsAppShell } from '@/components/lms/LmsAppShell';
+import { requireAuthorizedDevice } from '@/lib/auth/device';
 import { requirePortalSession } from '@/lib/auth/require-session';
+import { getSessionToken } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
   title: 'Omnia LMS',
@@ -30,6 +32,7 @@ function mapRole(role: string | null | undefined): string {
 
 export default async function LmsLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePortalSession('/lms');
+  await requireAuthorizedDevice(user, await getSessionToken(), '/lms');
   return (
     <LmsAppShell omniaUserId={user.id} userName={displayName(user)} actorRole={mapRole(user.role)}>
       {children}

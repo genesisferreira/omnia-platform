@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { checkRateLimit, clientIpFromHeaders } from '@omnia/shared/rate-limit';
 
+import { establishStudentDevice } from '@/lib/auth/device-login';
 import { loginUser } from '@/lib/auth/payload-client';
 import { getSessionToken, setSessionCookie } from '@/lib/auth/session';
 
@@ -57,8 +58,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const response = NextResponse.json({ user: result.data.user });
+  const device = await establishStudentDevice(
+    result.data.user.role,
+    result.data.token,
+    request.headers.get('user-agent'),
+    '/aluno',
+  );
+  const response = NextResponse.json({
+    user: result.data.user,
+    ...(device.state ? { deviceState: device.state, deviceRedirect: device.redirectTo } : {}),
+  });
   setSessionCookie(response, result.data.token);
+  device.apply(response);
   return response;
 }
 

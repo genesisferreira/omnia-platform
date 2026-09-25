@@ -130,6 +130,10 @@ import { tutorEndpoints } from './src/endpoints/neurofrigo-tutor';
 import { sipEndpoints } from './src/endpoints/student-intelligence';
 import { adaptiveEndpoints } from './src/endpoints/adaptive-learning';
 import { enterpriseEndpoints } from './src/endpoints/enterprise-ai';
+import { deviceEndpoints } from './src/endpoints/devices';
+import { StudentDevices } from './src/collections/devices/StudentDevices';
+import { DeviceAccessRequests } from './src/collections/devices/DeviceAccessRequests';
+import { DeviceAccessSettings } from './src/globals/DeviceAccessSettings';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -228,6 +232,8 @@ export default buildConfig({
     KnowledgeProcessingJobs,
     KnowledgeAuditEvents,
     KnowledgeAgentAccess,
+    StudentDevices,
+    DeviceAccessRequests,
   ],
   globals: [
     GlobalSettings,
@@ -244,6 +250,7 @@ export default buildConfig({
     EngineeringAiDashboard,
     SipDashboard,
     AdaptiveLearningDashboard,
+    DeviceAccessSettings,
   ],
   endpoints: [
     resolveSiteEndpoint,
@@ -274,6 +281,7 @@ export default buildConfig({
     ...sipEndpoints,
     ...adaptiveEndpoints,
     ...enterpriseEndpoints,
+    ...deviceEndpoints,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'development-secret-change-in-production',

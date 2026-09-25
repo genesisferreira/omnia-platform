@@ -1,6 +1,7 @@
 import { resolveEstablishDestination } from '@omnia/shared';
 
 import { browserRedirect } from '@/lib/auth/browser-redirect';
+import { establishStudentDevice } from '@/lib/auth/device-login';
 import { fetchMe } from '@/lib/auth/payload-client';
 import { setSessionCookie } from '@/lib/auth/session';
 
@@ -47,7 +48,15 @@ export async function POST(request: Request) {
   }
 
   const nextPath = resolveEstablishDestination(me.data.role, requestedNext);
-  const response = browserRedirect(nextPath, 303, '/ia');
+  // Device Access Control: registra/reconhece o navegador do aluno (OFF ⇒ no-op).
+  const device = await establishStudentDevice(
+    me.data.role,
+    token,
+    request.headers.get('user-agent'),
+    nextPath,
+  );
+  const response = browserRedirect(device.redirectTo ?? nextPath, 303, '/ia');
   setSessionCookie(response, token);
+  device.apply(response);
   return response;
 }

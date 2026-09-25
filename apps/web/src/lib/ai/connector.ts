@@ -1,6 +1,7 @@
 import { getInternalApiConfig } from '@omnia/config';
 
 import { getAdminBaseUrl } from '@/lib/auth/admin-url';
+import { deviceHeaders } from '@/lib/auth/device';
 import { fetchMe } from '@/lib/auth/payload-client';
 import { getSessionToken } from '@/lib/auth/session';
 import type { PortalUser } from '@/lib/auth/types';
@@ -76,6 +77,7 @@ async function buildInternalHeaders(
       'x-omnia-internal-key': secret,
       'x-omnia-user-id': user.id,
       'x-omnia-lms-role': mapRole(user.role),
+      ...(await deviceHeaders()),
     },
   };
 }
