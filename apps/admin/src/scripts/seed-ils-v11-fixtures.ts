@@ -9,8 +9,11 @@
  *   E2E_CTE_STUDENT_NEW_PASSWORD=... E2E_CTE_PROFESSOR_PASSWORD=... \
  *   E2E_ADMIN_A_PASSWORD=... \
  *   pnpm --filter @omnia/admin seed:ils-v11-fixtures
+ *
+ * Tenant (EPIC17.3): users.tenant = tenant da company do usuário (users.company → companies.tenant).
+ * Nunca um `find tenants limit:1` global (sem sort = tenant mais recente, ex.: e16-tenant-b).
  */
-export {};
+import { resolveUserTenantFromCompany, tenantIdFromCompany } from '../seed/fixture-tenant';
 
 type PlatformRole = 'student' | 'instructor' | 'admin';
 
@@ -138,25 +141,23 @@ async function main() {
       });
       return { id: existing.id, slug };
     }
-    const tenantFound = await payload.find({
-      collection: 'tenants',
-      limit: 1,
-      overrideAccess: true,
-    });
-    const tenantId = tenantFound.docs[0]?.id;
+    // New school companies live in the Omnia holding tenant (Tenant ⊃ Company); fail loudly if the
+    // holding (or its tenant) is missing instead of guessing a tenant.
+    const holdingForTenant =
+      (await findCompany('omnia-frigo-holding')) || (await findCompany('omnia-frigo'));
+    if (!holdingForTenant) {
+      throw new Error(`ILS_V11_REQUIRES_HOLDING_COMPANY_TENANT: cannot create ${slug}`);
+    }
+    const tenantId = tenantIdFromCompany(holdingForTenant);
     const created = await payload.create({
       collection: 'companies',
-      data: { ...data, tenant: tenantId ?? undefined, status: 'active' },
+      data: { ...data, tenant: tenantId, status: 'active' },
       overrideAccess: true,
     });
     return { id: created.id, slug };
   }
 
-  async function ensureUser(
-    spec: SeedUserSpec,
-    tenantId: string | number | null,
-    companyId: string | number,
-  ) {
+  async function ensureUser(spec: SeedUserSpec, tenantId: number, companyId: string | number) {
     const password = requirePassword(spec.passwordEnv);
     const policy = validatePasswordPolicy(password);
     if (!policy.ok) {
@@ -173,7 +174,7 @@ async function main() {
       password,
       role: spec.role,
       accountStatus: 'active' as const,
-      tenant: tenantId ? Number(tenantId) : undefined,
+      tenant: tenantId,
       company: Number(companyId),
       firstName: spec.firstName,
       lastName: spec.lastName,
@@ -500,14 +501,10 @@ async function main() {
   const holding =
     (await findCompany('omnia-frigo-holding')) || (await findCompany('omnia-frigo')) || fredCompany;
 
-  const tenantFound = await payload.find({
-    collection: 'tenants',
-    limit: 1,
-    overrideAccess: true,
-  });
-  const tenantId = tenantFound.docs[0]?.id ?? null;
-
-  const createdUsers: Record<string, { id: string | number; email: string; created: boolean }> = {};
+  const createdUsers: Record<
+    string,
+    { id: string | number; email: string; created: boolean; tenant: number }
+  > = {};
   for (const spec of USERS) {
     const companyId =
       spec.school === 'fred-do-frio'
@@ -515,8 +512,15 @@ async function main() {
         : spec.school === 'cte'
           ? cteCompany.id
           : holding.id;
+    // users.tenant = companies.tenant of the user's company (throws if unresolved).
+    const tenantId = await resolveUserTenantFromCompany(payload, companyId);
     const user = await ensureUser(spec, tenantId, companyId);
-    createdUsers[spec.key] = { id: user.id, email: spec.email, created: user.created };
+    createdUsers[spec.key] = {
+      id: user.id,
+      email: spec.email,
+      created: user.created,
+      tenant: tenantId,
+    };
   }
 
   const mustUser = (key: string) => {
