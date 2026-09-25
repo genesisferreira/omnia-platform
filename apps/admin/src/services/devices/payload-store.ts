@@ -109,10 +109,11 @@ export function createPayloadDeviceStore(
     },
     async getStudent(id) {
       try {
-        const u = (await payload.findByID({ collection: 'users', id, ...base })) as Record<
-          string,
-          unknown
-        >;
+        const u = (await payload.findByID({
+          collection: 'users',
+          id,
+          ...base,
+        })) as unknown as Record<string, unknown>;
         if (!u) return null;
         const ref: StudentRef = {
           id: String(u.id),

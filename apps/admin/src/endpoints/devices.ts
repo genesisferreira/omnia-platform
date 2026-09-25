@@ -154,7 +154,7 @@ export const deviceEndpoints: Endpoint[] = [
           overrideAccess: true,
           depth: 0,
           req,
-        })) as Record<string, unknown>;
+        })) as unknown as Record<string, unknown>;
         return json({
           ok: true,
           settings: {
@@ -195,7 +195,7 @@ export const deviceEndpoints: Endpoint[] = [
           overrideAccess: false,
           depth: 0,
           req,
-        })) as Record<string, unknown>;
+        })) as unknown as Record<string, unknown>;
         return json({
           ok: true,
           settings: { enabled: doc.enabled === true, defaultMaxDevices: doc.defaultMaxDevices },
