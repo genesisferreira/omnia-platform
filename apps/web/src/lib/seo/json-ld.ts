@@ -1,4 +1,9 @@
-import { SEO_FALLBACK_DESCRIPTION, SEO_FALLBACK_TITLE, SEO_SITE_NAME } from './constants';
+import {
+  SEO_FALLBACK_DESCRIPTION,
+  SEO_FALLBACK_TITLE,
+  SEO_SITE_NAME,
+  SEO_TAGLINE,
+} from './constants';
 import { getPublicSiteOrigin, resolveCanonicalUrl } from './site-url';
 
 export type JsonLdRecord = Record<string, unknown>;
@@ -10,10 +15,11 @@ export function buildOrganizationJsonLd(args?: { hostname?: string | null }): Js
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${url}#organization`,
     name: SEO_SITE_NAME,
     url,
     description: SEO_FALLBACK_DESCRIPTION,
-    slogan: SEO_FALLBACK_DESCRIPTION,
+    slogan: SEO_TAGLINE,
   };
 }
 
@@ -24,12 +30,14 @@ export function buildWebSiteJsonLd(args?: { hostname?: string | null }): JsonLdR
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${url}#website`,
     name: SEO_SITE_NAME,
     url,
     description: SEO_FALLBACK_DESCRIPTION,
     inLanguage: 'pt-BR',
     publisher: {
       '@type': 'Organization',
+      '@id': `${url}#organization`,
       name: SEO_SITE_NAME,
     },
   };
@@ -40,6 +48,7 @@ export function buildWebPageJsonLd(args: {
   title?: string | null;
   description?: string | null;
   hostname?: string | null;
+  type?: 'WebPage' | 'AboutPage';
 }): JsonLdRecord {
   const url =
     resolveCanonicalUrl({
@@ -49,7 +58,8 @@ export function buildWebPageJsonLd(args: {
 
   return {
     '@context': 'https://schema.org',
-    '@type': 'WebPage',
+    '@type': args.type ?? 'WebPage',
+    '@id': `${url}#webpage`,
     name: args.title ?? SEO_FALLBACK_TITLE,
     description: args.description ?? SEO_FALLBACK_DESCRIPTION,
     url,
@@ -94,6 +104,8 @@ export function buildArticleJsonLd(args: {
     inLanguage: 'pt-BR',
     publisher: {
       '@type': 'Organization',
+      '@id':
+        `${resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin()}#organization`,
       name: SEO_SITE_NAME,
     },
   };
@@ -138,6 +150,7 @@ export function buildCompanyOrganizationJsonLd(args: {
     url: args.url ?? pageUrl,
     parentOrganization: {
       '@type': 'Organization',
+      '@id': `${resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin()}#organization`,
       name: SEO_SITE_NAME,
       url: resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin(),
     },

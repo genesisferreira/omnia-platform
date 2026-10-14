@@ -99,7 +99,7 @@ export function CompanyCards({
 
         {companies.length === 0 ? (
           <p className="mt-12 text-center text-omnia-graphite-light">
-            Nenhuma empresa cadastrada ainda. Execute o seed no admin ou cadastre via Payload CMS.
+            Nenhuma empresa pública está disponível neste momento.
           </p>
         ) : (
           <div className={gridClass}>

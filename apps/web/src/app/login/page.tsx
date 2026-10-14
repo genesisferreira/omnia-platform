@@ -1,8 +1,13 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { parseSchoolKeyParam } from '@omnia/intelligent-learning';
 
 import { getAdminLoginUrl } from '@/lib/auth/admin-url';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type LoginPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

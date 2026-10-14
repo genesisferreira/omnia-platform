@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -5,6 +6,10 @@ import { parseSchoolKeyParam, SCHOOL_BRANDS } from '@omnia/intelligent-learning'
 import { Button } from '@omnia/ui';
 
 import { getAdminLoginUrl } from '@/lib/auth/admin-url';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type PageProps = {
   params: Promise<{ schoolKey: string }>;

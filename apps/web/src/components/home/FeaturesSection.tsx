@@ -2,6 +2,7 @@ import type { FeaturesIconKey, PublicFeaturesBlockDto } from '@omnia/shared';
 import { Container, SectionTitle } from '@omnia/ui';
 
 import { FeatureIcon } from '@/components/home/FeatureIcon';
+import { sanitizePublicCopy } from '@/lib/seo/public-copy';
 
 type FallbackItem = {
   title: string;
@@ -12,17 +13,17 @@ type FallbackItem = {
 const FALLBACK_ITEMS: readonly FallbackItem[] = [
   {
     title: 'Multiempresa',
-    description: 'Estrutura de tenants e empresas preparada para escalar.',
+    description: 'Várias frentes de atuação reunidas no mesmo ecossistema, cada uma com a sua identidade.',
     iconKey: 'multiempresa',
   },
   {
-    title: 'CMS centralizado',
-    description: 'Conteúdo gerenciado via Payload CMS no painel admin.',
+    title: 'Informação centralizada',
+    description: 'Informações da holding e das empresas reunidas para quem visita o site.',
     iconKey: 'cms',
   },
   {
     title: 'Design unificado',
-    description: 'Identidade visual Omnia aplicada em portal e admin.',
+    description: 'A mesma identidade visual nas páginas públicas da holding.',
     iconKey: 'design',
   },
 ] as const;
@@ -74,10 +75,10 @@ export function FeaturesSection({ block }: FeaturesSectionProps = {}) {
                 </div>
 
                 <h3 className="font-heading text-lg font-semibold tracking-tight text-omnia-deep-blue">
-                  {item.title}
+                  {sanitizePublicCopy(item.title)}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-omnia-graphite-light">
-                  {item.description}
+                  {sanitizePublicCopy(item.description)}
                 </p>
 
                 <div

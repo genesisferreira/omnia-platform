@@ -15,6 +15,7 @@ type Args = {
 
 export const metadata: Metadata = {
   title: 'Omnia Admin — Payload CMS',
+  robots: { index: false, follow: false },
 };
 
 const serverFunction: ServerFunctionClient = async (args) => {

@@ -10,6 +10,7 @@ import {
   buildNotFoundMetadata,
   buildPageMetadata,
   buildWebPageJsonLd,
+  resolveInstitutionalDescription,
   SEO_FALLBACK_DESCRIPTION,
   SEO_FALLBACK_TITLE,
 } from '@/lib/seo';
@@ -51,8 +52,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return buildPageMetadata({
     pathname: `/${slug}`,
     title: page.title,
-    description: SEO_FALLBACK_DESCRIPTION,
-    seo: page.seo,
+    description: resolveInstitutionalDescription(page.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION),
+    seo: {
+      ...page.seo,
+      metaDescription: resolveInstitutionalDescription(page.seo.metaDescription),
+    },
     hostname,
   });
 }
@@ -81,8 +85,9 @@ export default async function InstitutionalPage({ params }: PageProps) {
         data={buildWebPageJsonLd({
           pathname: `/${slug}`,
           title: page.seo.metaTitle ?? page.title ?? SEO_FALLBACK_TITLE,
-          description: page.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION,
+          description: resolveInstitutionalDescription(page.seo.metaDescription),
           hostname,
+          type: slug === 'sobre' ? 'AboutPage' : 'WebPage',
         })}
       />
       <BlockRenderer blocks={page.blocks} />

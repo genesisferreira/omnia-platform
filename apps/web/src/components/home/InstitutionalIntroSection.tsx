@@ -1,11 +1,21 @@
+import Link from 'next/link';
+
 import type { PublicInstitutionalIntroBlockDto } from '@omnia/shared';
 import { Container } from '@omnia/ui';
+
+import {
+  isProvisionalContactCopy,
+  PUBLIC_CONTACT_BODY,
+  sanitizePublicCopy,
+} from '@/lib/seo/public-copy';
 
 type InstitutionalIntroSectionProps = {
   block: PublicInstitutionalIntroBlockDto;
 };
 
 export function InstitutionalIntroSection({ block }: InstitutionalIntroSectionProps) {
+  const body = sanitizePublicCopy(block.body);
+  const showInterestLink = isProvisionalContactCopy(block.body) || body === PUBLIC_CONTACT_BODY;
   return (
     <section
       id="institucional"
@@ -34,8 +44,18 @@ export function InstitutionalIntroSection({ block }: InstitutionalIntroSectionPr
           />
 
           <p className="mt-6 text-base leading-relaxed text-omnia-graphite-light md:text-lg md:leading-relaxed">
-            {block.body}
+            {body}
           </p>
+          {showInterestLink ? (
+            <p className="mt-6">
+              <Link
+                href="/interesse"
+                className="inline-flex rounded-md bg-omnia-deep-blue px-5 py-3 text-sm font-semibold text-white hover:bg-omnia-deep-blue/90"
+              >
+                Fale com a Omnia
+              </Link>
+            </p>
+          ) : null}
 
           {block.highlights.length > 0 ? (
             <ul className="mt-10 flex flex-wrap justify-center gap-3">

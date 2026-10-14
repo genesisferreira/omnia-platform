@@ -94,6 +94,7 @@ export const buildPublicPostsWhere = (args: {
   const and: Where[] = [
     { site: { equals: args.siteId } },
     { _status: { equals: 'published' } },
+    { 'seo.noIndex': { not_equals: true } },
     {
       or: [{ publishAt: { exists: false } }, { publishAt: { less_than_equal: now } }],
     },

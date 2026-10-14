@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { AcademicShell } from '@/components/academic/AcademicShell';
@@ -5,6 +6,10 @@ import { fetchAcademic } from '@/lib/academic/client';
 import { requirePortalSession } from '@/lib/auth/require-session';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function ProfessorLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePortalSession('/professor');

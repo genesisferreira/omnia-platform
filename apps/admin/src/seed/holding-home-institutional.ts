@@ -29,18 +29,19 @@ export const holdingHomeBaselineLayout = [
     columns: '3' as const,
     items: [
       {
-        title: 'Multiempresa',
-        description: 'Estrutura de tenants e empresas preparada para escalar.',
+        title: 'Ecossistema',
+        description:
+          'Várias frentes de atuação reunidas no mesmo ecossistema, cada uma com a sua identidade.',
         iconKey: 'multiempresa' as const,
       },
       {
-        title: 'CMS centralizado',
-        description: 'Conteúdo gerenciado via Payload CMS no painel admin.',
+        title: 'Informação centralizada',
+        description: 'Informações da holding e das empresas reunidas para quem visita o site.',
         iconKey: 'cms' as const,
       },
       {
         title: 'Design unificado',
-        description: 'Identidade visual Omnia aplicada em portal e admin.',
+        description: 'A mesma identidade visual nas páginas públicas da holding.',
         iconKey: 'design' as const,
       },
     ],
