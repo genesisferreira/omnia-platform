@@ -2,7 +2,8 @@ import type { MetadataRoute } from 'next';
 
 import { canonicalPublicOrigin, isPrivatePath } from './indexing';
 
-export const SITEMAP_PAGE_SIZE = 100;
+/** Igual ao máximo aceito por /api/omnia/public-posts. Acima disso a API recusa a página. */
+export const SITEMAP_PAGE_SIZE = 20;
 export const SITEMAP_MAX_PAGES = 50;
 
 export class SitemapSourceError extends Error {
