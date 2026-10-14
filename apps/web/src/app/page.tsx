@@ -12,6 +12,7 @@ import {
   buildFallbackMetadata,
   buildPageMetadata,
   buildWebPageJsonLd,
+  resolveInstitutionalDescription,
   SEO_FALLBACK_DESCRIPTION,
   SEO_FALLBACK_TITLE,
 } from '@/lib/seo';
@@ -40,8 +41,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     pathname: '/',
     title: page.title,
-    description: SEO_FALLBACK_DESCRIPTION,
-    seo: page.seo,
+    description: resolveInstitutionalDescription(page.seo.metaDescription),
+    seo: {
+      ...page.seo,
+      metaDescription: resolveInstitutionalDescription(page.seo.metaDescription),
+    },
     hostname,
   });
 }

@@ -1,126 +1,94 @@
 import type { MetadataRoute } from 'next';
 
+import { getConfig } from '@omnia/config';
+
 import { fetchPublicPage } from '@/lib/cms';
 import { fetchPublicPostCategories, fetchPublicPosts, fetchPublicPostTags } from '@/lib/cms-blog';
 import { fetchPublicCompanies } from '@/lib/cms-companies';
+import { getPublicSiteOrigin, SEO_PUBLIC_PAGE_CANDIDATES } from '@/lib/seo';
 import {
-  getPublicSiteOrigin,
-  resolveCanonicalUrl,
-  resolveSeoHostname,
-  SEO_PUBLIC_PAGE_CANDIDATES,
-} from '@/lib/seo';
-import { getSiteContext } from '@/lib/site-context';
+  assertSitemapPagination,
+  assembleSitemapEntries,
+  SITEMAP_PAGE_SIZE,
+  SitemapSourceError,
+  type SitemapPostInput,
+} from '@/lib/seo/sitemap-entries';
+
+export const dynamic = 'force-dynamic';
+
+const PUBLIC_SITE_SLUG = 'omnia-hub';
+
+async function assertCmsReachable(adminUrl: string): Promise<void> {
+  try {
+    const response = await fetch(`${adminUrl}/api/health`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new SitemapSourceError('cms_unavailable');
+    }
+  } catch (error) {
+    if (error instanceof SitemapSourceError) throw error;
+    throw new SitemapSourceError('cms_unavailable');
+  }
+}
+
+async function collectPosts(siteSlug: string): Promise<SitemapPostInput[]> {
+  const first = await fetchPublicPosts({
+    siteSlug,
+    page: 1,
+    pageSize: SITEMAP_PAGE_SIZE,
+  });
+  assertSitemapPagination(first.totalPages);
+  const items = [...first.items];
+  for (let page = 2; page <= first.totalPages; page += 1) {
+    const next = await fetchPublicPosts({
+      siteSlug,
+      page,
+      pageSize: SITEMAP_PAGE_SIZE,
+    });
+    items.push(...next.items);
+  }
+  return items.map((post) => ({
+    slug: post.slug,
+    publishedAt: post.publishedAt,
+  }));
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let hostname = resolveSeoHostname(null);
-  let siteSlug = 'omnia-hub';
+  const origin = getPublicSiteOrigin();
+  await assertCmsReachable(getConfig().app.adminUrl);
 
-  try {
-    const siteContext = await getSiteContext();
-    hostname = resolveSeoHostname(siteContext.hostname || null);
-    if (siteContext.resolution.ok) {
-      siteSlug = siteContext.resolution.context.site.slug;
-    }
-  } catch {
-    // Build/runtime sem request headers — usa origem pública.
-  }
-
-  const entries: MetadataRoute.Sitemap = [];
-
+  const pages = [];
   for (const candidate of SEO_PUBLIC_PAGE_CANDIDATES) {
-    const page = await fetchPublicPage(siteSlug, candidate.slug);
-    if (!page || page.seo.noIndex) {
-      continue;
-    }
-
-    if (candidate.slug !== 'home' && page.pageType === 'home') {
-      continue;
-    }
-
-    const url =
-      resolveCanonicalUrl({
-        pathname: candidate.pathname,
-        editorialCanonical: page.seo.canonicalUrl,
-        hostname,
-      }) ?? `${getPublicSiteOrigin()}${candidate.pathname === '/' ? '' : candidate.pathname}`;
-
-    entries.push({
-      url,
-      changeFrequency: candidate.pathname === '/' ? 'weekly' : 'monthly',
+    const page = await fetchPublicPage(PUBLIC_SITE_SLUG, candidate.slug);
+    if (!page || page.seo.noIndex) continue;
+    if (candidate.slug !== 'home' && page.pageType === 'home') continue;
+    pages.push({
+      pathname: candidate.pathname,
+      noIndex: false,
+      changeFrequency:
+        candidate.pathname === '/' ? ('weekly' as const) : ('monthly' as const),
       priority: candidate.pathname === '/' ? 1 : 0.8,
     });
   }
 
-  const companies = await fetchPublicCompanies();
-  for (const company of companies) {
-    const url =
-      resolveCanonicalUrl({ pathname: `/empresas/${company.portalSlug}`, hostname }) ??
-      `${getPublicSiteOrigin()}/empresas/${company.portalSlug}`;
-    entries.push({
-      url,
-      changeFrequency: 'monthly',
-      priority: 0.75,
-    });
-  }
+  pages.push(
+    { pathname: '/blog', changeFrequency: 'daily' as const, priority: 0.7 },
+    { pathname: '/interesse', changeFrequency: 'monthly' as const, priority: 0.7 },
+    { pathname: '/cursos', changeFrequency: 'weekly' as const, priority: 0.6 },
+  );
 
-  const blogUrl =
-    resolveCanonicalUrl({ pathname: '/blog', hostname }) ?? `${getPublicSiteOrigin()}/blog`;
-  entries.push({
-    url: blogUrl,
-    changeFrequency: 'daily',
-    priority: 0.7,
-  });
-
-  const [posts, categories, tags] = await Promise.all([
-    fetchPublicPosts({ siteSlug, page: 1, pageSize: 20 }),
-    fetchPublicPostCategories(siteSlug),
-    fetchPublicPostTags(siteSlug),
+  const [companies, posts, categories, tags] = await Promise.all([
+    fetchPublicCompanies(),
+    collectPosts(PUBLIC_SITE_SLUG),
+    fetchPublicPostCategories(PUBLIC_SITE_SLUG),
+    fetchPublicPostTags(PUBLIC_SITE_SLUG),
   ]);
 
-  for (const post of posts.items) {
-    const url =
-      resolveCanonicalUrl({ pathname: `/blog/${post.slug}`, hostname }) ??
-      `${getPublicSiteOrigin()}/blog/${post.slug}`;
-    entries.push({
-      url,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-      ...(post.publishedAt ? { lastModified: new Date(post.publishedAt) } : {}),
-    });
-  }
-
-  for (const category of categories) {
-    const url =
-      resolveCanonicalUrl({ pathname: `/blog/categoria/${category.slug}`, hostname }) ??
-      `${getPublicSiteOrigin()}/blog/categoria/${category.slug}`;
-    entries.push({
-      url,
-      changeFrequency: 'weekly',
-      priority: 0.5,
-    });
-  }
-
-  for (const tag of tags) {
-    const url =
-      resolveCanonicalUrl({ pathname: `/blog/tag/${tag.slug}`, hostname }) ??
-      `${getPublicSiteOrigin()}/blog/tag/${tag.slug}`;
-    entries.push({
-      url,
-      changeFrequency: 'weekly',
-      priority: 0.4,
-    });
-  }
-
-  if (entries.length === 0) {
-    const fallback = resolveCanonicalUrl({ pathname: '/', hostname }) ?? getPublicSiteOrigin();
-    return [
-      {
-        url: fallback,
-        changeFrequency: 'weekly',
-        priority: 1,
-      },
-    ];
-  }
-
-  return entries;
+  return assembleSitemapEntries({
+    origin,
+    pages,
+    companySlugs: companies.map((company) => company.portalSlug),
+    posts,
+    categorySlugs: categories.map((category) => category.slug),
+    tagSlugs: tags.map((tag) => tag.slug),
+  });
 }

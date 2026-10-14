@@ -9,6 +9,7 @@ import { ProfileForm } from './ProfileForm';
 export const metadata = {
   title: 'Meu perfil',
   description: 'Edite seus dados pessoais na Omnia.',
+  robots: { index: false, follow: false },
 };
 
 export default async function MeuPerfilPage() {

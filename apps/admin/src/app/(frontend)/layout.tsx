@@ -5,6 +5,7 @@ import '@omnia/ui/globals.css';
 export const metadata: Metadata = {
   title: 'Omnia Platform — Admin',
   description: 'Painel administrativo da Omnia Platform',
+  robots: { index: false, follow: false },
 };
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {

@@ -31,6 +31,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(getPublicSiteOrigin()),
   title: SEO_FALLBACK_TITLE,
   description: SEO_FALLBACK_DESCRIPTION,
+  icons: { icon: '/favicon.svg' },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

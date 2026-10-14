@@ -4,6 +4,8 @@ export {
   SEO_LOCALE,
   SEO_PUBLIC_PAGE_CANDIDATES,
   SEO_SITE_NAME,
+  SEO_TAGLINE,
+  resolveInstitutionalDescription,
 } from './constants';
 export {
   buildFallbackMetadata,

@@ -142,7 +142,7 @@ export const holdingInstitutionalPagesSeed = [
         blockType: 'institutionalIntro' as const,
         eyebrow: 'Atendimento',
         title: 'Estamos à disposição',
-        body: 'Para assuntos institucionais da Holding, utilize o canal administrativo do portal ou o e-mail de contato configurado nas preferências globais do CMS. Em breve, formulário e canais dedicados estarão disponíveis nesta página.',
+        body: 'Para assuntos institucionais da Omnia Frigo Holding, use o formulário de interesse. Telefone, endereço e CNPJ só serão publicados quando estiverem formalmente autorizados.',
         highlights: [
           { text: 'Holding institucional' },
           { text: 'Ecossistema multiempresa' },
