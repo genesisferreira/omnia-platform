@@ -37,6 +37,7 @@ import * as migration_20260814_120000_lms_live_class_fields from './20260814_120
 import * as migration_20260909_120000_media_visibility_acl from './20260909_120000_media_visibility_acl';
 import * as migration_20260910_160000_knowledge_governance from './20260910_160000_knowledge_governance';
 import * as migration_20260921_120000_knowledge_governance_schema_repair from './20260921_120000_knowledge_governance_schema_repair';
+import * as migration_20260925_150000_device_access_control from './20260925_150000_device_access_control';
 
 export const migrations = [
   {
@@ -233,5 +234,10 @@ export const migrations = [
     up: migration_20260921_120000_knowledge_governance_schema_repair.up,
     down: migration_20260921_120000_knowledge_governance_schema_repair.down,
     name: '20260921_120000_knowledge_governance_schema_repair',
+  },
+  {
+    up: migration_20260925_150000_device_access_control.up,
+    down: migration_20260925_150000_device_access_control.down,
+    name: '20260925_150000_device_access_control',
   },
 ];

@@ -4,7 +4,9 @@ import { notFound } from 'next/navigation';
 import { Container } from '@omnia/ui';
 
 import { SipProfilePanel } from '@/components/sip/SipProfilePanel';
+import { requireAuthorizedDevice } from '@/lib/auth/device';
 import { requirePortalSession } from '@/lib/auth/require-session';
+import { getSessionToken } from '@/lib/auth/session';
 import { fetchPublicCourses } from '@/lib/cms-lms-core';
 
 export const metadata = {
@@ -17,7 +19,8 @@ type PageProps = {
 };
 
 export default async function MeuPerfilInteligentePage({ searchParams }: PageProps) {
-  await requirePortalSession('/meu-perfil-inteligente');
+  const sessionUser = await requirePortalSession('/meu-perfil-inteligente');
+  await requireAuthorizedDevice(sessionUser, await getSessionToken(), '/meu-perfil-inteligente');
   const sp = await searchParams;
 
   const courses = await fetchPublicCourses();

@@ -1,5 +1,7 @@
 import type { Access, CollectionBeforeChangeHook, CollectionConfig, FieldAccess } from 'payload';
 import { APIError } from 'payload';
+import { auditMaxDevicesOverrideChange } from '../services/devices/audit-hooks';
+import { canManageDevices, isValidMaxDevices } from '../services/devices/policy';
 
 import {
   ACCOUNT_STATUS_LABELS,
@@ -355,6 +357,27 @@ export const Users: CollectionConfig = {
       },
       admin: {
         position: 'sidebar',
+      },
+    },
+    {
+      name: 'maxDevicesOverride',
+      type: 'number',
+      label: 'Máx. dispositivos (override do aluno)',
+      min: 1,
+      max: 100,
+      validate: (value: unknown) =>
+        value == null || isValidMaxDevices(value) || 'Inteiro entre 1 e 100 ou vazio.',
+      access: {
+        read: ({ req: { user } }) => canManageDevices(user),
+        create: ({ req: { user } }) => canManageDevices(user),
+        update: ({ req: { user } }) => canManageDevices(user),
+      },
+      hooks: {
+        afterChange: [auditMaxDevicesOverrideChange],
+      },
+      admin: {
+        position: 'sidebar',
+        description: 'Device Access Control (só role student). Vazio = usa o limite global.',
       },
     },
     {

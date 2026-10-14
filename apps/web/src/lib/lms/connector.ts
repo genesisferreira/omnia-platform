@@ -1,6 +1,7 @@
 import { getInternalApiConfig } from '@omnia/config';
 
 import { getAdminBaseUrl } from '@/lib/auth/admin-url';
+import { deviceHeaders } from '@/lib/auth/device';
 import { fetchMe } from '@/lib/auth/payload-client';
 import { getSessionToken } from '@/lib/auth/session';
 import type { PortalUser } from '@/lib/auth/types';
@@ -68,6 +69,7 @@ export async function fetchLmsConnector<T = unknown>(
       'x-omnia-internal-key': secret,
       'x-omnia-user-id': user.id,
       'x-omnia-lms-role': mapRole(user.role),
+      ...(await deviceHeaders()),
       ...(options.headers ?? {}),
     },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
