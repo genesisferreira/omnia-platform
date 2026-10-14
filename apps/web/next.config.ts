@@ -11,22 +11,6 @@ const nextConfig: NextConfig = {
   ],
   reactStrictMode: true,
   eslint: { ignoreDuringBuilds: true },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        has: [{ type: 'host', value: 'www.omniafrigo.com.br' }],
-        destination: 'https://omniafrigo.com.br/',
-        permanent: true,
-      },
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.omniafrigo.com.br' }],
-        destination: 'https://omniafrigo.com.br/:path*',
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
