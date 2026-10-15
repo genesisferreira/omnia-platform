@@ -5,6 +5,15 @@ import { mapPublicPage, type PublicPageDto } from '@omnia/shared';
 import { getConfig } from '@omnia/config';
 
 import { resolvePublicImageAlt } from '@/lib/seo';
+import {
+  shouldPresentAsTecmova,
+  TECMOVA_LOGO_PATH,
+  TECMOVA_NAME,
+  TECMOVA_PUBLIC_SLUG,
+  TECMOVA_SIGNATURE,
+  TECMOVA_SITE,
+  TECMOVA_SLOGAN,
+} from '@/lib/tecmova-public';
 
 export type CmsCompany = {
   id: string;
@@ -95,9 +104,16 @@ const fetchCompaniesCached = cache(async (): Promise<CmsCompany[]> => {
           ? (company as { portalSlug: string }).portalSlug
           : company.slug;
 
+      const presented = shouldPresentAsTecmova({ slug: company.slug, portalSlug });
       const nextCompany: CmsCompany = {
         ...company,
-        portalSlug,
+        name: presented ? TECMOVA_NAME : company.name,
+        shortDescription: presented ? TECMOVA_SLOGAN : company.shortDescription,
+        positioning: presented ? TECMOVA_SLOGAN : company.positioning,
+        ecosystemRole: presented ? TECMOVA_SIGNATURE : company.ecosystemRole,
+        externalSite: presented ? TECMOVA_SITE : company.externalSite,
+        logo: presented ? { url: TECMOVA_LOGO_PATH, alt: TECMOVA_NAME } : company.logo,
+        portalSlug: presented ? TECMOVA_PUBLIC_SLUG : portalSlug,
       };
 
       if (!nextCompany.logo) {

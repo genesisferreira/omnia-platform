@@ -241,7 +241,7 @@ SugestÃ£o seed hub: `omnia-hub`.
 | ------------------ | ------------ | --------------------------------- |
 | RR oficial         | RenovaÃ§Ã£o  | renovacaorefrigeracao.com.br      |
 | FDFA oficial       | Fred do Frio | freddofrio.com.br                 |
-| CTE oficial        | CTE          | escolacte.com.br                  |
+| TECMOVA oficial    | slug `cte`   | tecmova.com.br                    |
 | Sapientia oficial  | CES          | centroeducacionalsapientia.com.br |
 | Neurofrigo oficial | Neurofrigo   | neurofrigo.com.br                 |
 

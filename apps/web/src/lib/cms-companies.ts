@@ -3,6 +3,8 @@ import { cache } from 'react';
 import type { PublicCompanyDto, PublicCompanyListItemDto } from '@omnia/shared';
 import { getConfig } from '@omnia/config';
 
+import { presentTecmovaListItem } from '@/lib/tecmova-public';
+
 function getAdminApiUrl(): string {
   return getConfig().app.adminUrl;
 }
@@ -20,13 +22,13 @@ function resolveMediaUrl(url: string): string {
 }
 
 function normalizeListItem(company: PublicCompanyListItemDto): PublicCompanyListItemDto {
-  return {
+  return presentTecmovaListItem({
     ...company,
     logo: company.logo ? { ...company.logo, url: resolveMediaUrl(company.logo.url) } : null,
     coverImage: company.coverImage
       ? { ...company.coverImage, url: resolveMediaUrl(company.coverImage.url) }
       : null,
-  };
+  });
 }
 
 function normalizeCompany(company: PublicCompanyDto): PublicCompanyDto {

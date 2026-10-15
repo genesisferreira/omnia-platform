@@ -84,7 +84,8 @@ export function assembleSitemapEntries(args: {
   for (const slug of args.companySlugs) {
     const normalized = slug.trim().toLowerCase();
     if (!SLUG_PATTERN.test(normalized)) continue;
-    push(`/empresas/${normalized}`, { changeFrequency: 'monthly', priority: 0.75 });
+    const publicSlug = normalized === 'cte' ? 'tecmova' : normalized;
+    push(`/empresas/${publicSlug}`, { changeFrequency: 'monthly', priority: 0.75 });
   }
 
   for (const post of args.posts) {

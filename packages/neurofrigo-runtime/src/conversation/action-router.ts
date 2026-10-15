@@ -129,7 +129,7 @@ export function buildHandoffRequest(input: {
     input.state.selectedCompany ||
     'Omnia — área responsável';
   const dept =
-    /fred|cte|forma[cç]|educa/i.test(target) || input.state.contactTarget === 'education'
+    /fred|cte|tecmova|forma[cç]|educa/i.test(target) || input.state.contactTarget === 'education'
       ? 'education'
       : /renova|engenharia|t[eé]cnic/i.test(target) || input.state.contactTarget === 'technical'
         ? 'technical_services'

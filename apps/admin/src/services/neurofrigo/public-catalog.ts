@@ -47,7 +47,7 @@ export async function loadPublicCourseCatalog(
         d.estimatedHours != null && Number.isFinite(Number(d.estimatedHours))
           ? Number(d.estimatedHours)
           : null,
-      providerHint: 'Fred do Frio / CTE (ecossistema Omnia)',
+      providerHint: 'Fred do Frio / TECMOVA (ecossistema Omnia)',
     };
   });
 }

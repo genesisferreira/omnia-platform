@@ -65,7 +65,7 @@
 | ---------------------------- | ------------------------------------------ |
 | Fred do Frio Academy         | https://freddofrio.com.br/                 |
 | Renovação Refrigeração       | https://renovacaorefrigeracao.com.br/      |
-| CTE                          | https://escolacte.com.br/                  |
+| TECMOVA (slug interno `cte`) | https://tecmova.com.br/                    |
 | Centro Educacional Sapientia | https://centroeducacionalsapientia.com.br/ |
 | Neurofrigo Command IA        | https://neurofrigo.com.br/                 |
 | Neurofrigo Carga (produto)   | https://www.neurofrigocarga.com.br/        |
@@ -143,14 +143,14 @@ erDiagram
 
 ### 1.6 Empresas oficiais do ecossistema
 
-| #   | Company                      | Slug                           | Brand            | Site oficial externo              | Papel           |
-| --- | ---------------------------- | ------------------------------ | ---------------- | --------------------------------- | --------------- |
-| —   | Omnia Frigo Holding          | `omnia-frigo-holding`          | Omnia            | (hub) `omniafrigo.com.br`         | Holding / hub   |
-| 1   | Renovação Refrigeração       | `renovacao-refrigeracao`       | Renovação        | renovacaorefrigeracao.com.br      | Serviços        |
-| 2   | Fred do Frio Academy         | `fred-do-frio-academy`         | Fred do Frio     | freddofrio.com.br                 | Educação        |
-| 3   | CTE                          | `cte`                          | CTE / Escola CTE | escolacte.com.br                  | Engenharia      |
-| 4   | Centro Educacional Sapientia | `centro-educacional-sapientia` | Sapientia        | centroeducacionalsapientia.com.br | Educação formal |
-| 5   | Neurofrigo Command IA        | `neurofrigo`                   | Neurofrigo       | neurofrigo.com.br                 | Tecnologia/IA   |
+| #   | Company                      | Slug                           | Brand        | Site oficial externo              | Papel                 |
+| --- | ---------------------------- | ------------------------------ | ------------ | --------------------------------- | --------------------- |
+| —   | Omnia Frigo Holding          | `omnia-frigo-holding`          | Omnia        | (hub) `omniafrigo.com.br`         | Holding / hub         |
+| 1   | Renovação Refrigeração       | `renovacao-refrigeracao`       | Renovação    | renovacaorefrigeracao.com.br      | Serviços              |
+| 2   | Fred do Frio Academy         | `fred-do-frio-academy`         | Fred do Frio | freddofrio.com.br                 | Educação              |
+| 3   | TECMOVA                      | `cte`                          | TECMOVA      | tecmova.com.br                    | Educação e tecnologia |
+| 4   | Centro Educacional Sapientia | `centro-educacional-sapientia` | Sapientia    | centroeducacionalsapientia.com.br | Educação formal       |
+| 5   | Neurofrigo Command IA        | `neurofrigo`                   | Neurofrigo   | neurofrigo.com.br                 | Tecnologia/IA         |
 
 ---
 
@@ -170,21 +170,21 @@ erDiagram
 
 ### 2.2 Sites previstos (inventário conceitual)
 
-| Site                           | Tipo        | Company    | Domínio(s)                                | Status fase 1     |
-| ------------------------------ | ----------- | ---------- | ----------------------------------------- | ----------------- |
-| Omnia Hub                      | hub         | Holding    | dev.omniafrigo.com.br, omniafrigo.com.br  | Ativo staging     |
-| RR Institucional Omnia         | company     | RR         | `/empresas/renovacao-refrigeracao` no hub | Sprint 3.3B       |
-| FDFA Institucional Omnia       | company     | FDFA       | path no hub                               | Sprint 3.3B       |
-| CTE Institucional Omnia        | company     | CTE        | path no hub                               | Sprint 3.3B       |
-| CES Institucional Omnia        | company     | CES        | path no hub                               | Sprint 3.3B       |
-| Neurofrigo Institucional Omnia | company     | Neurofrigo | path no hub                               | Sprint 3.3B       |
-| RR Site próprio                | external    | RR         | renovacaorefrigeracao.com.br              | Externo integrado |
-| FDFA Site próprio              | external    | FDFA       | freddofrio.com.br                         | Externo integrado |
-| CTE Site próprio               | external    | CTE        | escolacte.com.br                          | Externo integrado |
-| CES Site próprio               | external    | CES        | centroeducacionalsapientia.com.br         | Externo integrado |
-| Neurofrigo Site próprio        | external    | Neurofrigo | neurofrigo.com.br                         | Externo integrado |
-| Neurofrigo Carga App           | application | Neurofrigo | neurofrigocarga.com.br                    | Externo; Product  |
-| Admin                          | internal    | Holding    | admin.dev.omniafrigo.com.br               | `apps/admin`      |
+| Site                           | Tipo        | Company     | Domínio(s)                                | Status fase 1     |
+| ------------------------------ | ----------- | ----------- | ----------------------------------------- | ----------------- |
+| Omnia Hub                      | hub         | Holding     | dev.omniafrigo.com.br, omniafrigo.com.br  | Ativo staging     |
+| RR Institucional Omnia         | company     | RR          | `/empresas/renovacao-refrigeracao` no hub | Sprint 3.3B       |
+| FDFA Institucional Omnia       | company     | FDFA        | path no hub                               | Sprint 3.3B       |
+| TECMOVA Institucional Omnia    | company     | CTE (`cte`) | `/empresas/tecmova` no hub                | Público           |
+| CES Institucional Omnia        | company     | CES         | path no hub                               | Sprint 3.3B       |
+| Neurofrigo Institucional Omnia | company     | Neurofrigo  | path no hub                               | Sprint 3.3B       |
+| RR Site próprio                | external    | RR          | renovacaorefrigeracao.com.br              | Externo integrado |
+| FDFA Site próprio              | external    | FDFA        | freddofrio.com.br                         | Externo integrado |
+| TECMOVA Site próprio           | external    | CTE (`cte`) | tecmova.com.br                            | Externo           |
+| CES Site próprio               | external    | CES         | centroeducacionalsapientia.com.br         | Externo integrado |
+| Neurofrigo Site próprio        | external    | Neurofrigo  | neurofrigo.com.br                         | Externo integrado |
+| Neurofrigo Carga App           | application | Neurofrigo  | neurofrigocarga.com.br                    | Externo; Product  |
+| Admin                          | internal    | Holding     | admin.dev.omniafrigo.com.br               | `apps/admin`      |
 
 ### 2.3 Entidade Site — atributos obrigatórios
 
@@ -298,14 +298,14 @@ Layer 3: Site overrides         → limitados (accent, hero bg)
 
 ### 3.6 Brand themes por empresa (inventário inicial)
 
-| Company                | Primary sugerido            | Notas                             |
-| ---------------------- | --------------------------- | --------------------------------- |
-| Omnia Holding          | #0A5A47 (emerald)           | Tema base já em `@omnia/ui`       |
-| Renovação Refrigeração | A definir com brand book RR | Site externo como referência      |
-| Fred do Frio Academy   | A definir                   | freddofrio.com.br                 |
-| CTE                    | A definir                   | escolacte.com.br                  |
-| Sapientia              | A definir                   | centroeducacionalsapientia.com.br |
-| Neurofrigo             | A definir                   | neurofrigo.com.br — tech/IA       |
+| Company                | Primary sugerido            | Notas                              |
+| ---------------------- | --------------------------- | ---------------------------------- |
+| Omnia Holding          | #0A5A47 (emerald)           | Tema base já em `@omnia/ui`        |
+| Renovação Refrigeração | A definir com brand book RR | Site externo como referência       |
+| Fred do Frio Academy   | A definir                   | freddofrio.com.br                  |
+| TECMOVA                | Aguardar logotipo oficial   | tecmova.com.br; slug interno `cte` |
+| Sapientia              | A definir                   | centroeducacionalsapientia.com.br  |
+| Neurofrigo             | A definir                   | neurofrigo.com.br — tech/IA        |
 
 > **Ação Sprint 3.3B:** Auditoria visual dos 5 sites externos; extrair tokens para seed `brand-themes`.
 

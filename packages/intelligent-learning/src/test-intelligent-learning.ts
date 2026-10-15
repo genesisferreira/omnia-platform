@@ -435,7 +435,8 @@ describe('intelligent learning — tutor assessment guard', () => {
       officialAssessmentActive: false,
     });
     assert.equal(idle.blocked, false);
-    assert.ok(schoolAiContext('cte').includes('CTE'));
+    assert.ok(schoolAiContext('cte').includes('SCHOOL_CONTEXT=cte'));
+    assert.ok(schoolAiContext('cte').includes('TECMOVA'));
     assert.ok(schoolAiContext('fred-do-frio').includes('FRED'));
     const slim = filterTutorContext({
       school: 'fred-do-frio',
@@ -449,7 +450,7 @@ describe('intelligent learning — tutor assessment guard', () => {
     assert.ok(fredId?.text.includes('Fred do Frio'));
     assert.equal(fredId?.source, 'brand-context');
     const cteId = answerSchoolIdentityQuestion('qual é a minha escola', 'cte');
-    assert.ok(cteId?.text.startsWith('Você está no ambiente CTE'));
+    assert.ok(cteId?.text.startsWith('Você está no ambiente TECMOVA'));
     assert.ok(!cteId?.text.startsWith('Você está no ambiente Fred'));
     assert.equal(answerSchoolIdentityQuestion('o que é superquecimento?', 'cte'), null);
   });
@@ -474,7 +475,13 @@ describe('intelligent learning — admin school filter + brand', () => {
       filterEntitiesBySchool(rows, null).map((r) => r.id),
       [1, 2],
     );
-    assert.equal(SCHOOL_BRANDS.cte.placeholder, true);
+    assert.equal(SCHOOL_BRANDS.cte.name, 'TECMOVA');
+    assert.equal(SCHOOL_BRANDS.cte.entryPath, '/escola/cte/login');
+    assert.equal(resolveSchoolKey({ portalSlug: 'tecmova' }), 'cte');
+    assert.equal(resolveSchoolKey({ schoolKey: 'cte' }), 'cte');
+    assert.ok((SCHOOL_KEYS as readonly string[]).includes('cte'));
+    assert.equal((SCHOOL_KEYS as readonly string[]).includes('tecmova'), false);
+    assert.equal(SCHOOL_BRANDS.cte.placeholder, false);
     assert.equal(SCHOOL_BRANDS['fred-do-frio'].placeholder, false);
     assert.notEqual(SCHOOL_BRANDS.cte.entryPath, SCHOOL_BRANDS['fred-do-frio'].entryPath);
     assert.notEqual(

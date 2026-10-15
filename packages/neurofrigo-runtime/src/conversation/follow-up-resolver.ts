@@ -327,11 +327,11 @@ export function resolveDialogueTurn(input: {
       currentIntent: 'company_routing',
       activeEntity: 'education',
       currentEntity: 'education',
-      selectedCompany: 'Fred do Frio / CTE',
-      responsibleCompany: 'Fred do Frio / CTE',
+      selectedCompany: 'Fred do Frio / TECMOVA',
+      responsibleCompany: 'Fred do Frio / TECMOVA',
       contactTarget: 'education',
       pendingOffer: null,
-      resolvedReferences: { ela: 'Fred do Frio / CTE', eles: 'Fred do Frio / CTE' },
+      resolvedReferences: { ela: 'Fred do Frio / TECMOVA', eles: 'Fred do Frio / TECMOVA' },
     });
     return {
       originalQuestion,
@@ -366,8 +366,8 @@ export function resolveDialogueTurn(input: {
           ? 'technical'
           : 'education');
     const label =
-      target === 'education' || /fred|cte/i.test(String(target))
-        ? 'Fred do Frio / CTE'
+      target === 'education' || /fred|cte|tecmova/i.test(String(target))
+        ? 'Fred do Frio / TECMOVA'
         : target === 'technical' || /renova/i.test(String(target))
           ? 'Renovação Refrigeração'
           : String(target);
@@ -375,7 +375,7 @@ export function resolveDialogueTurn(input: {
       previousIntent: state.currentIntent,
       currentIntent: /falar|contato/i.test(normalized) ? 'contact_handoff' : 'company_routing',
       responsibleCompany: label,
-      contactTarget: /fred|cte|educa/i.test(label) ? 'education' : 'technical',
+      contactTarget: /fred|cte|tecmova|educa/i.test(label) ? 'education' : 'technical',
       selectedCompany: label,
       activeEntity: 'company',
       resolvedReferences: { ela: label, eles: label, 'empresa responsável': label },
@@ -501,7 +501,7 @@ export function resolveDialogueTurn(input: {
       } else if (educationContext) {
         state = applyStatePatch(state, {
           contactTarget: 'education',
-          responsibleCompany: 'Fred do Frio / CTE',
+          responsibleCompany: 'Fred do Frio / TECMOVA',
         });
       }
     }
@@ -679,13 +679,13 @@ export function resolveDialogueTurn(input: {
 
   if (dialogueIntent === 'company_routing') {
     const aboutCourses =
-      /curso|forma[cç]|educa|fred|cte|disso/i.test(normalized) ||
+      /curso|forma[cç]|educa|fred|cte|tecmova|disso/i.test(normalized) ||
       state.currentIntent === 'course_recommendation' ||
       state.currentIntent === 'course_catalog' ||
       !!state.selectedCourse ||
       !!state.userGoal ||
       !!state.technicalArea;
-    const company = aboutCourses ? 'Fred do Frio / CTE' : 'Renovação Refrigeração';
+    const company = aboutCourses ? 'Fred do Frio / TECMOVA' : 'Renovação Refrigeração';
     state = applyStatePatch(state, {
       previousIntent: state.currentIntent,
       currentIntent: 'company_routing',

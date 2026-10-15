@@ -24,9 +24,10 @@ export const organizationsSeed = [
     active: true,
   },
   {
-    name: 'CTE',
+    name: 'TECMOVA',
     slug: 'cte',
-    description: 'Formação técnica e normativa.',
+    description:
+      'Educação, inteligência artificial, tecnologia, treinamentos, consultoria empresarial, transformação digital, automações e desenvolvimento de soluções tecnológicas.',
     type: 'education' as const,
     active: true,
   },

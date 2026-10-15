@@ -50,7 +50,7 @@ As empresas que fazem parte da Omnia Frigo Holding incluem:
 1. Renovação Refrigeração — engenharia, projetos, instalação, manutenção e
    soluções técnicas para refrigeração industrial e comercial.
 2. Fred do Frio — educação moderna e especialização profissional em refrigeração.
-3. CTE — base histórica de formação técnica, normativa e industrial do grupo.
+3. TECMOVA — educação, inteligência artificial, tecnologia, treinamentos, consultoria empresarial, transformação digital, automações e desenvolvimento de soluções tecnológicas.
 4. Neurofrigo Command IA — tecnologia, automação, dados e inteligência artificial
    aplicada à refrigeração.
 5. Neurofrigo Carga — produto digital do ecossistema para gestão de carga refrigerada.
@@ -80,11 +80,11 @@ como parte das ofertas integradas da Holding.
 ## Cursos e treinamentos
 
 Os cursos e treinamentos do ecossistema Omnia são oferecidos principalmente pelo
-Fred do Frio e pelo CTE, com apoio de conteúdos digitais da plataforma Omnia.
+Fred do Frio e pela TECMOVA, com apoio de conteúdos digitais da plataforma Omnia.
 Há formação em fundamentos de refrigeração industrial, práticas de segurança,
 sistemas com CO2, comando elétrico e temas correlatos de HVAC-R. Quem deseja
 fazer um curso de refrigeração deve procurar o Fred do Frio (educação moderna)
-ou o CTE (formação técnica e normativa), conforme o objetivo de aprendizagem.
+ou a TECMOVA (educação e tecnologia), conforme o objetivo de aprendizagem.
 
 ## Neurofrigo Command IA e produtos
 
@@ -96,14 +96,14 @@ cursos, serviços de engenharia da Renovação e soluções digitais Neurofrigo.
 ## Ofertas integradas e orientação ao visitante
 
 Visitantes podem:
-- Conhecer cursos e treinamentos (Fred do Frio / CTE)
+- Conhecer cursos e treinamentos (Fred do Frio / TECMOVA)
 - Conhecer serviços de engenharia e projetos (Renovação Refrigeração)
 - Conhecer o Neurofrigo e IA aplicada (Neurofrigo Command IA)
 - Encontrar a empresa certa do ecossistema conforme a necessidade
 - Obter informações institucionais sobre a Omnia Frigo Holding
 
 Para engenharia e projetos de refrigeração industrial: Renovação Refrigeração.
-Para educação e cursos: Fred do Frio ou CTE.
+Para educação e cursos: Fred do Frio ou TECMOVA.
 Para tecnologia e IA aplicada: Neurofrigo Command IA.
 
 Este conteúdo é institucional, público e autorizado para o Concierge do Portal.

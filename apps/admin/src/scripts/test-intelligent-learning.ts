@@ -51,7 +51,7 @@ describe('ils admin wiring', () => {
         'Fred do Frio',
       ),
     );
-    assert.equal(SCHOOL_BRANDS.cte.placeholder, true);
+    assert.equal(SCHOOL_BRANDS.cte.placeholder, false);
   });
 
   it('keeps fred/cte isolation and certificate issuers distinct', () => {

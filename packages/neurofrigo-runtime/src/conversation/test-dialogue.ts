@@ -231,7 +231,7 @@ describe('EPIC 16 R5 dialogue benches C1-C10', () => {
       state: t1.state,
     });
     assert.equal(t2.answer.dialogueIntent, 'company_routing');
-    assert.match(t2.answer.text, /Fred do Frio|CTE/i);
+    assert.match(t2.answer.text, /Fred do Frio|TECMOVA/i);
   });
 
   it('C6 — commercial multi-turn remembers 3 stores', async () => {

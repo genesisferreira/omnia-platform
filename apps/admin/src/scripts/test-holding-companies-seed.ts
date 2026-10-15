@@ -29,11 +29,15 @@ test('fred-do-frio-academy → Educação', () => {
   assert.equal(fred.externalSite, 'https://freddofrio.com.br');
 });
 
-test('cte → Formação Técnica', () => {
+test('cte permanece o slug interno e a marca pública é TECMOVA', () => {
   const cte = bySlug.get('cte');
   assert.ok(cte);
-  assert.equal(cte.ecosystemRole, 'Formação Técnica');
-  assert.equal(cte.externalSite, 'https://escolacte.com.br');
+  assert.equal(cte.slug, 'cte');
+  assert.equal(cte.portalSlug, 'cte');
+  assert.equal(cte.name, 'TECMOVA');
+  assert.equal(cte.ecosystemRole, 'Educação, tecnologia e inteligência artificial');
+  assert.equal(cte.externalSite, 'https://tecmova.com.br');
+  assert.equal(cte.brandTheme, 'cte');
 });
 
 test('renovacao → Engenharia', () => {

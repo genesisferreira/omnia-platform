@@ -24,7 +24,11 @@ await test('seed define as empresas estratégicas com papéis corretos', () => {
   const cte = strategicCompaniesSeed.find((item) => item.portalSlug === 'cte');
   const carga = strategicCompaniesSeed.find((item) => item.portalSlug === 'neurofrigo-carga');
   assert.equal(fred?.ecosystemRole, 'Educação');
-  assert.equal(cte?.ecosystemRole, 'Formação Técnica');
+  assert.equal(cte?.name, 'TECMOVA');
+  assert.equal(cte?.slug, 'cte');
+  assert.equal(cte?.ecosystemRole, 'Educação, tecnologia e inteligência artificial');
+  assert.equal(cte?.externalSite, 'https://tecmova.com.br');
+  assert.equal(cte?.authorityStats.length, 0);
   assert.equal(fred?.brandTheme, 'fred');
   assert.equal(cte?.brandTheme, 'cte');
   assert.equal(carga?.ecosystemRole, 'Produto');

@@ -66,20 +66,20 @@ export function answerSchoolIdentityQuestion(
   }
   if (schoolKey === 'fred-do-frio') {
     return {
-      text: 'Você está no ambiente Fred do Frio. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo CTE.',
+      text: 'Você está no ambiente Fred do Frio. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo TECMOVA.',
       schoolKey,
       source: 'brand-context',
     };
   }
   if (schoolKey === 'cte') {
     return {
-      text: 'Você está no ambiente CTE. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo Fred do Frio.',
+      text: 'Você está no ambiente TECMOVA. Este tutor responde apenas no contexto autorizado desta escola e não mistura cursos ou catálogo Fred do Frio.',
       schoolKey,
       source: 'brand-context',
     };
   }
   return {
-    text: 'Não há escola educacional autenticada neste contexto. Não posso atribuir Fred do Frio ou CTE sem evidência.',
+    text: 'Não há escola educacional autenticada neste contexto. Não posso atribuir Fred do Frio ou TECMOVA sem evidência.',
     schoolKey: null,
     source: 'brand-context',
   };
@@ -87,10 +87,10 @@ export function answerSchoolIdentityQuestion(
 
 export function schoolAiContext(schoolKey: SchoolKey | null): string {
   if (schoolKey === 'cte') {
-    return 'SCHOOL_CONTEXT=CTE. Responda no contexto da escola CTE. Não atribua cursos ou catálogo Fred do Frio.';
+    return 'SCHOOL_CONTEXT=cte. Responda no contexto da escola TECMOVA. Não atribua cursos ou catálogo Fred do Frio.';
   }
   if (schoolKey === 'fred-do-frio') {
-    return 'SCHOOL_CONTEXT=FRED_DO_FRIO. Responda no contexto Fred do Frio. Não atribua cursos ou catálogo CTE.';
+    return 'SCHOOL_CONTEXT=FRED_DO_FRIO. Responda no contexto Fred do Frio. Não atribua cursos ou catálogo TECMOVA.';
   }
   return 'SCHOOL_CONTEXT=OMNIA_LMS';
 }

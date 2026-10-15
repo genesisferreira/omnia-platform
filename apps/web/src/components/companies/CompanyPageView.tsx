@@ -44,6 +44,13 @@ export function CompanyPageView({ company }: CompanyPageViewProps) {
             >
               {company.ecosystemRole}
             </span>
+            {company.logo ? (
+              <img
+                src={company.logo.url}
+                alt={company.logo.alt ?? company.name}
+                className="h-28 w-auto max-w-full rounded-xl bg-white object-contain p-3"
+              />
+            ) : null}
             <h1 className="font-heading text-4xl font-bold tracking-tight md:text-5xl">
               {company.name}
             </h1>

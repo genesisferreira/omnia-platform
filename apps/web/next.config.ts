@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
   ],
   reactStrictMode: true,
   eslint: { ignoreDuringBuilds: true },
+  async redirects() {
+    return [
+      {
+        source: '/empresas/cte',
+        destination: '/empresas/tecmova',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

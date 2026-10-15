@@ -129,7 +129,7 @@ export function applyRepetitionControl(input: {
   if (input.dialogueIntent === 'services') {
     return [
       'No lado técnico, a referência é a Renovação Refrigeração (projeto, instalação, manutenção e retrofit).',
-      'Formação fica com Fred do Frio / CTE; tecnologia e IA com Neurofrigo Command IA.',
+      'Formação fica com Fred do Frio / TECMOVA; tecnologia e IA com Neurofrigo Command IA.',
       '',
       'Qual dessas frentes combina mais com o que você precisa agora?',
     ].join('\n');

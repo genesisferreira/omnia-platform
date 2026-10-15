@@ -244,7 +244,7 @@ export function CreateCourseForm() {
     >
       <h2 className="text-sm font-semibold">Novo curso (rascunho)</h2>
       <p className="text-xs text-muted-foreground">
-        O curso fica vinculado automaticamente à sua escola (Fred ≠ CTE).
+        O curso fica vinculado automaticamente à sua escola (Fred ≠ TECMOVA).
       </p>
       <input
         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"

@@ -38,15 +38,15 @@ export const SCHOOL_BRANDS: Record<SchoolKey, SchoolBrand> = {
     },
   },
   cte: {
-    name: 'CTE',
-    shortName: 'CTE',
+    name: 'TECMOVA',
+    shortName: 'TECMOVA',
     theme: 'cte',
-    certificateIssuer: 'CTE — Formação Técnica',
-    placeholder: true,
+    certificateIssuer: 'TECMOVA',
+    placeholder: false,
     notes:
-      'CTE STAGING BRAND PLACEHOLDER. Sem assets oficiais no repositório. Logo slot, cores, nome, login/dashboard context e issuer configuráveis — identidade definitiva NÃO homologada.',
+      'Identidade pública TECMOVA. schoolKey interno permanece cte. Logotipo: Conceito 02 — Pessoas e Conhecimento, extraído da página 10 do PDF institucional.',
     entryPath: '/escola/cte/login',
-    logoLabel: 'CTE',
+    logoLabel: 'TECMOVA',
     colors: {
       sidebar: 'bg-slate-900',
       accent: 'text-sky-300',
@@ -61,6 +61,7 @@ const SLUG_ALIASES: Record<string, SchoolKey> = {
   'fred-do-frio-academy': 'fred-do-frio',
   fred: 'fred-do-frio',
   cte: 'cte',
+  tecmova: 'cte',
 };
 
 export function isSchoolKey(value: unknown): value is SchoolKey {

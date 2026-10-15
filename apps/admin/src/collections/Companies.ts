@@ -203,7 +203,7 @@ export const Companies: CollectionConfig = {
                 { label: 'Omnia (institucional)', value: 'omnia' },
                 { label: 'Renovação (engenharia)', value: 'renovacao' },
                 { label: 'Fred do Frio (educação)', value: 'fred' },
-                { label: 'CTE (formação técnica)', value: 'cte' },
+                { label: 'TECMOVA', value: 'cte' },
                 { label: 'Neurofrigo (tech/IA)', value: 'neurofrigo' },
               ],
               label: 'Tema visual',
@@ -214,11 +214,11 @@ export const Companies: CollectionConfig = {
               index: true,
               label: 'Escola educacional',
               admin: {
-                description: 'Fred do Frio ou CTE. Vazio = empresa não-escolar.',
+                description: 'Fred do Frio ou TECMOVA. Vazio = empresa não-escolar.',
               },
               options: [
                 { label: 'Fred do Frio', value: 'fred-do-frio' },
-                { label: 'CTE', value: 'cte' },
+                { label: 'TECMOVA', value: 'cte' },
               ],
             },
             {
