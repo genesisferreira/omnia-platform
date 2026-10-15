@@ -105,7 +105,7 @@ function composeCourseCatalog(
 ): { text: string; pendingOffer: PendingOffer | null; topic: string } {
   if (!courses.length) {
     return {
-      text: 'No momento não encontrei cursos públicos publicados no catálogo. Posso orientar pelas áreas de formação do ecossistema (Fred do Frio / CTE) ou pelos serviços técnicos.',
+      text: 'No momento não encontrei cursos públicos publicados no catálogo. Posso orientar pelas áreas de formação do ecossistema (Fred do Frio / TECMOVA) ou pelos serviços técnicos.',
       pendingOffer: pendingOfferFromOptions(['services', 'company_recommendation'], 'choice'),
       topic: 'course_catalog',
     };
@@ -127,7 +127,7 @@ function composeCourseCatalog(
       '',
       ...lines,
       '',
-      'A formação no ecossistema é conduzida principalmente pelo Fred do Frio e pelo CTE.',
+      'A formação no ecossistema é conduzida principalmente pelo Fred do Frio e pela TECMOVA.',
       '',
       onlyOne
         ? 'Se quiser, indico se esse curso combina com o seu momento (iniciante, quem já atua ou especialização).'
@@ -185,7 +185,7 @@ function composeCourseRecommendation(
   if (!pick) {
     return {
       text: naturalizeUserText(
-        'Ainda não há um curso público publicado que eu possa recomendar com segurança para esse objetivo. O ecossistema tem capacidade de formação via Fred do Frio / CTE — quer que eu prepare o encaminhamento para a área de educação?',
+        'Ainda não há um curso público publicado que eu possa recomendar com segurança para esse objetivo. O ecossistema tem capacidade de formação via Fred do Frio / TECMOVA — quer que eu prepare o encaminhamento para a área de educação?',
       ),
       pendingOffer: pendingOfferFromOptions(
         ['contact_handoff', 'company_recommendation'],
@@ -227,7 +227,7 @@ function composeCourseRecommendation(
       pick.shortDescription?.trim() ||
         'Ele consolida a base técnica necessária antes de avançar para temas mais específicos.',
       '',
-      'Se quiser, detalho o conteúdo ou preparo o contato com Fred do Frio / CTE.',
+      'Se quiser, detalho o conteúdo ou preparo o contato com Fred do Frio / TECMOVA.',
     ].join('\n');
   }
 
@@ -262,7 +262,7 @@ function composeContact(state: ConversationState): {
   const target =
     state.contactTarget ||
     state.responsibleCompany ||
-    (/curso|forma[cç]|educa|fred|cte/i.test(
+    (/curso|forma[cç]|educa|fred|cte|tecmova/i.test(
       `${state.currentIntent} ${state.activeEntity} ${state.selectedCourse}`,
     )
       ? 'education'
@@ -273,8 +273,8 @@ function composeContact(state: ConversationState): {
           : 'general');
 
   const label =
-    target === 'education' || /fred|cte|educa/i.test(String(target))
-      ? 'Fred do Frio / CTE (formação)'
+    target === 'education' || /fred|cte|tecmova|educa/i.test(String(target))
+      ? 'Fred do Frio / TECMOVA (formação)'
       : target === 'technical' || /renova/i.test(String(target))
         ? 'Renovação Refrigeração (serviços técnicos)'
         : target === 'commercial'
@@ -323,7 +323,7 @@ function composeHandoffConfirm(state: ConversationState): {
       [
         'Perfeito — registrei sua confirmação.',
         '',
-        `Destino: **${target === 'education' ? 'Fred do Frio / CTE' : target === 'technical' ? 'Renovação Refrigeração' : target}**.`,
+        `Destino: **${target === 'education' ? 'Fred do Frio / TECMOVA' : target === 'technical' ? 'Renovação Refrigeração' : target}**.`,
         state.knownUserFacts?.length
           ? `Contexto levado: ${state.knownUserFacts.slice(-6).join('; ')}.`
           : null,
@@ -349,7 +349,7 @@ function composeServices(evidence: string[]): {
       'A Omnia reúne diferentes empresas, então os serviços são distribuídos por especialidade.',
       '',
       '- **Renovação Refrigeração** — engenharia, projetos, instalação, comissionamento, manutenção e retrofit.',
-      '- **Fred do Frio / CTE** — formação e especialização profissional.',
+      '- **Fred do Frio / TECMOVA** — formação e especialização profissional.',
       '- **Neurofrigo Command IA** — monitoramento, automação e IA aplicada à refrigeração.',
       '',
       'Se você tiver um projeto (por exemplo uma câmara), posso indicar a empresa certa ou preparar um contato.',
@@ -370,11 +370,14 @@ function composeCompanyRouting(state: ConversationState): {
   pendingOffer: PendingOffer | null;
   topic: string;
 } {
-  if (state.activeEntity === 'education' || /fred|cte|curso/i.test(state.selectedCompany || '')) {
+  if (
+    state.activeEntity === 'education' ||
+    /fred|cte|tecmova|curso/i.test(state.selectedCompany || '')
+  ) {
     return {
       text: naturalizeUserText(
         [
-          'Para cursos e formação, as empresas do ecossistema são o **Fred do Frio** (educação moderna) e o **CTE** (base técnica e normativa).',
+          'Para cursos e formação, as empresas do ecossistema são o **Fred do Frio** (educação moderna) e a **TECMOVA** (educação e tecnologia).',
           '',
           'Para execução de campo (projeto/instalação/manutenção), aí sim a referência é a **Renovação Refrigeração**.',
           '',
@@ -390,7 +393,7 @@ function composeCompanyRouting(state: ConversationState): {
       [
         'Para serviços técnicos — projeto, instalação, manutenção ou câmara frigorífica — a empresa a procurar é a **Renovação Refrigeração**.',
         '',
-        'Para formação: Fred do Frio / CTE. Para tecnologia e IA: Neurofrigo Command IA.',
+        'Para formação: Fred do Frio / TECMOVA. Para tecnologia e IA: Neurofrigo Command IA.',
         '',
         'Se quiser, descrevo o próximo passo típico para o seu cenário.',
       ].join('\n'),
@@ -408,7 +411,7 @@ function composeInstitutional(evidence: string[]): {
   const text = [
     'A Omnia Frigo Holding integra as diferentes frentes do ecossistema Omnia na refrigeração. Ela conecta educação técnica, engenharia e serviços, tecnologia e inteligência artificial para atender profissionais e empresas em diferentes necessidades.',
     '',
-    'Entre as frentes do grupo estão Renovação Refrigeração, Fred do Frio, CTE e Neurofrigo.',
+    'Entre as frentes do grupo estão Renovação Refrigeração, Fred do Frio, TECMOVA e Neurofrigo.',
     '',
     'Se você me disser o que procura — formação, serviço técnico ou tecnologia — posso te direcionar.',
   ].join('\n');

@@ -15,7 +15,7 @@ const BENEFITS = [
   'Atuação nacional em refrigeração, HVAC-R e eficiência energética',
   'Tecnologia aplicada: Neurofrigo Command IA e Neurofrigo Carga',
   'Educação técnica e especialização profissional com Sapientia',
-  'Ecossistema integrado: Holding, Renovação, Fred do Frio e CTE',
+  'Ecossistema integrado: Holding, Renovação, Fred do Frio e TECMOVA',
 ];
 
 const INTEREST_PILLARS = [
@@ -199,7 +199,8 @@ export default async function InteressePage({ searchParams }: PageProps) {
               </p>
               <p>
                 <strong className="text-omnia-deep-blue">Ecossistema:</strong> Omnia Frigo Holding,
-                Renovação Refrigeração, Fred do Frio, CTE, Neurofrigo, Neurofrigo Carga e Sapientia.
+                Renovação Refrigeração, Fred do Frio, TECMOVA, Neurofrigo, Neurofrigo Carga e
+                Sapientia.
               </p>
             </div>
           </div>

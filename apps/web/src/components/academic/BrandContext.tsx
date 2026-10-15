@@ -50,8 +50,8 @@ export function BrandBanner(props: { schoolKey?: string | null; area: string }) 
       </p>
       {brand.placeholder ? (
         <p className="mt-1 text-xs text-white/80">
-          CTE STAGING BRAND PLACEHOLDER — identidade visual temporária, distinta do Fred do Frio.
-          placeholder=true
+          Logotipo oficial TECMOVA ainda não homologado neste ambiente. Identidade distinta do Fred
+          do Frio.
         </p>
       ) : null}
     </div>

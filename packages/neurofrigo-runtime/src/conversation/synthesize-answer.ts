@@ -110,7 +110,7 @@ export function synthesizeConversationalAnswer(input: {
   if (isCourseDiscovery(question) && courses.length > 0) {
     const lines = courses.slice(0, 8).map(formatCourseLine);
     const providerNote =
-      'No ecossistema Omnia, a formação é conduzida principalmente pelo Fred do Frio e pelo CTE, com apoio da plataforma digital.';
+      'No ecossistema Omnia, a formação é conduzida principalmente pelo Fred do Frio e pela TECMOVA, com apoio da plataforma digital.';
     return [
       'Hoje estes são os cursos públicos publicados na plataforma Omnia:',
       '',
@@ -155,23 +155,23 @@ export function synthesizeConversationalAnswer(input: {
           beginner.shortDescription?.trim() ||
             'Ele apresenta fundamentos e serve como porta de entrada antes de temas mais avançados.',
           '',
-          'A formação no ecossistema costuma ser conduzida pelo Fred do Frio (educação moderna) ou pelo CTE (base técnica), conforme o objetivo.',
+          'A formação no ecossistema costuma ser conduzida pelo Fred do Frio (educação moderna) ou pela TECMOVA (educação e tecnologia), conforme o objetivo.',
           '',
           'Quer que eu explique o conteúdo desse curso ou compare com outra opção?',
         ].join('\n');
       }
-      const courseHint = evidenceSentences.find((s) => /curso|fred|cte|forma[cç]/i.test(s));
+      const courseHint = evidenceSentences.find((s) => /curso|fred|cte|tecmova|forma[cç]/i.test(s));
       return [
         'Para iniciantes, o ecossistema Omnia recomenda começar pela formação em fundamentos de refrigeração.',
         courseHint ||
-          'Os cursos e treinamentos são oferecidos principalmente pelo Fred do Frio e pelo CTE.',
+          'Os cursos e treinamentos são oferecidos principalmente pelo Fred do Frio e pela TECMOVA.',
         '',
         'Posso detalhar o curso publicado mais adequado ao seu objetivo.',
       ].join('\n');
     }
     if (/quem\s+oferece|e\s+quem/i.test(question)) {
       return [
-        'No ecossistema Omnia, os cursos e treinamentos são oferecidos principalmente pelo **Fred do Frio** (educação moderna e especialização) e pelo **CTE** (formação técnica e normativa).',
+        'No ecossistema Omnia, os cursos e treinamentos são oferecidos principalmente pelo **Fred do Frio** (educação moderna e especialização) e pela **TECMOVA** (educação e tecnologia).',
         '',
         'Se quiser, indico qual caminho combina melhor com o seu objetivo.',
       ].join('\n');
@@ -190,7 +190,7 @@ export function synthesizeConversationalAnswer(input: {
         'A Omnia Frigo Holding é o hub integrador do ecossistema de refrigeração que une tradição, educação e inteligência artificial aplicada.',
       '',
       companies ||
-        'Fazem parte do ecossistema a Renovação Refrigeração, Fred do Frio, CTE, Neurofrigo Command IA e Neurofrigo Carga.',
+        'Fazem parte do ecossistema a Renovação Refrigeração, Fred do Frio, TECMOVA, Neurofrigo Command IA e Neurofrigo Carga.',
       '',
       'Posso detalhar cursos, serviços ou indicar a empresa mais adequada ao que você precisa.',
     ]
@@ -208,7 +208,7 @@ export function synthesizeConversationalAnswer(input: {
       '',
       ...body.map((s) => `- ${s}`),
       '',
-      'Para educação, o caminho é Fred do Frio / CTE; para tecnologia e IA aplicada, Neurofrigo Command IA.',
+      'Para educação, o caminho é Fred do Frio / TECMOVA; para tecnologia e IA aplicada, Neurofrigo Command IA.',
       '',
       'Quer que eu indique a empresa certa para o seu caso?',
     ].join('\n');
@@ -217,7 +217,7 @@ export function synthesizeConversationalAnswer(input: {
   if (isCompanyRouting(question)) {
     if (/curso|estud|forma[cç]|especializ/i.test(question)) {
       return [
-        'Para cursos e especialização, procure o **Fred do Frio** (educação moderna) ou o **CTE** (formação técnica e normativa).',
+        'Para cursos e especialização, procure o **Fred do Frio** (educação moderna) ou a **TECMOVA** (educação e tecnologia).',
         '',
         'Se o foco for execução de projeto ou instalação, a empresa adequada é a **Renovação Refrigeração**.',
         '',

@@ -49,8 +49,8 @@ export default async function SchoolLoginPage({ params, searchParams }: PageProp
           </p>
           {brand.placeholder ? (
             <p className="mt-3 rounded-md bg-white/10 px-3 py-2 text-xs">
-              CTE STAGING BRAND PLACEHOLDER · placeholder=true · assets oficiais ainda não
-              homologados.
+              Logotipo oficial TECMOVA ainda não homologado neste ambiente. A entrada continua nesta
+              rota.
             </p>
           ) : null}
         </div>
@@ -71,7 +71,7 @@ export default async function SchoolLoginPage({ params, searchParams }: PageProp
             </Link>
             {' · '}
             <Link href="/escola/cte/login" className="underline">
-              CTE
+              TECMOVA
             </Link>
           </p>
         </div>

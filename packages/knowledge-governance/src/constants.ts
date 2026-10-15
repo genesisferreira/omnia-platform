@@ -67,7 +67,7 @@ export const GOVERNANCE_STATE_LABELS_PT: Record<GovernanceState, string> = {
 
 export function schoolApprovedLabel(schoolKey: string | null | undefined): string {
   if (schoolKey === 'fred-do-frio') return 'Aprovado para Fred';
-  if (schoolKey === 'cte') return 'Aprovado para CTE';
+  if (schoolKey === 'cte') return 'Aprovado para TECMOVA';
   return GOVERNANCE_STATE_LABELS_PT.SCHOOL_APPROVED;
 }
 

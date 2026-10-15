@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 
 import { JsonLd } from '@/components/seo/JsonLd';
 import { CompanyPageView } from '@/components/companies/CompanyPageView';
 import { fetchPublicCompany } from '@/lib/cms-companies';
+import {
+  presentTecmovaCompany,
+  TECMOVA_INTERNAL_SLUG,
+  TECMOVA_PUBLIC_SLUG,
+  tecmovaFallbackCompany,
+} from '@/lib/tecmova-public';
 import {
   buildBreadcrumbJsonLd,
   buildCompanyOrganizationJsonLd,
@@ -18,6 +24,13 @@ type CompanyPageProps = {
 
 async function loadCompany(slug: string) {
   const siteContext = await getSiteContext();
+  if (slug === TECMOVA_PUBLIC_SLUG) {
+    const stored = await fetchPublicCompany(TECMOVA_INTERNAL_SLUG);
+    return {
+      company: stored ? presentTecmovaCompany(stored) : tecmovaFallbackCompany(),
+      hostname: siteContext.hostname,
+    };
+  }
   const company = await fetchPublicCompany(slug);
   return { company, hostname: siteContext.hostname };
 }
@@ -25,6 +38,9 @@ async function loadCompany(slug: string) {
 export async function generateMetadata({ params }: CompanyPageProps): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = rawSlug.trim().toLowerCase();
+  if (slug === TECMOVA_INTERNAL_SLUG) {
+    permanentRedirect(`/empresas/${TECMOVA_PUBLIC_SLUG}`);
+  }
   if (!slug) {
     return buildNotFoundMetadata();
   }
@@ -52,6 +68,9 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyStrategicPage({ params }: CompanyPageProps) {
   const { slug: rawSlug } = await params;
   const slug = rawSlug.trim().toLowerCase();
+  if (slug === TECMOVA_INTERNAL_SLUG) {
+    permanentRedirect(`/empresas/${TECMOVA_PUBLIC_SLUG}`);
+  }
   if (!slug) {
     notFound();
   }

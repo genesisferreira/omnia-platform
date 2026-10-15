@@ -214,12 +214,12 @@ describe('EPIC 16 R6 conversational intelligence', () => {
       history: t6.history,
       state: t6.state,
     });
-    assert.match(t7.answer.text, /Fred do Frio|CTE/i);
+    assert.match(t7.answer.text, /Fred do Frio|TECMOVA/i);
     assert.ok(
       t7.state?.responsibleCompany ||
         t7.state?.contactTarget ||
         t7.state?.selectedCompany ||
-        /Fred do Frio|CTE/i.test(t7.answer.text),
+        /Fred do Frio|TECMOVA/i.test(t7.answer.text),
     );
 
     const t8 = await turn(runtime, 'quero falar com ela', {
@@ -264,7 +264,7 @@ describe('EPIC 16 R6 conversational intelligence', () => {
     });
     assert.equal(t4.answer.dialogueIntent, 'contact_handoff');
     assert.ok(/Renovação|t[eé]cnic|equipe/i.test(t4.answer.text));
-    assert.ok(!/Fred do Frio|CTE \(forma/i.test(t4.answer.text));
+    assert.ok(!/Fred do Frio|TECMOVA \(forma/i.test(t4.answer.text));
     const t5 = await turn(runtime, 'quero um contato', {
       history: t4.history,
       state: t4.state,
@@ -291,7 +291,7 @@ describe('EPIC 16 R6 conversational intelligence', () => {
     assert.ok(/commercial/i.test(String(last.state?.technicalArea || '')));
     assert.ok(/industrial/i.test(String(last.state?.userGoal || '')));
     assert.ok(
-      last.state?.contactTarget === 'education' || /Fred|CTE|forma/i.test(last.answer.text),
+      last.state?.contactTarget === 'education' || /Fred|TECMOVA|forma/i.test(last.answer.text),
     );
   });
 
@@ -373,7 +373,7 @@ describe('EPIC 16 R6 conversational intelligence', () => {
     });
     assert.equal(t4.answer.dialogueIntent, 'contact_handoff');
     assert.ok(/comercial|Renovação|equipe/i.test(t4.answer.text));
-    assert.ok(!/Fred do Frio \/ CTE \(forma/i.test(t4.answer.text));
+    assert.ok(!/Fred do Frio \/ TECMOVA \(forma/i.test(t4.answer.text));
   });
 
   it('Engineering multi-turn keeps measurements and e depois', async () => {

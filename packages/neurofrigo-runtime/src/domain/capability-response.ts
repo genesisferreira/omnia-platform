@@ -88,7 +88,7 @@ function capabilityPresentation(
       intro: 'Posso ajudar você a:',
       bullets: [
         'conhecer cursos e treinamentos do catálogo público',
-        'entender serviços das empresas do grupo (Renovação, Fred do Frio, CTE, Neurofrigo)',
+        'entender serviços das empresas do grupo (Renovação, Fred do Frio, TECMOVA, Neurofrigo)',
         'encontrar a empresa ou formação mais adequada ao seu objetivo',
         'obter informações institucionais sobre a Omnia Frigo Holding',
       ],

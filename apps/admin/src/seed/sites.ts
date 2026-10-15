@@ -53,7 +53,7 @@ export const sitesSeed = [
   },
   {
     companySlug: 'cte',
-    name: 'CTE',
+    name: 'TECMOVA',
     internalName: 'Site Oficial',
     slug: 'cte',
     type: 'education',
@@ -62,7 +62,7 @@ export const sitesSeed = [
     locale: 'pt-BR',
     timezone: 'America/Sao_Paulo',
     isExternal: true,
-    externalUrl: 'https://escolacte.com.br/',
+    externalUrl: 'https://tecmova.com.br/',
     isPrimaryForCompany: true,
     visibilityScope: 'company',
     editorialStatus: 'approved',

@@ -290,6 +290,6 @@ describe('labels', () => {
   it('exposes Portuguese labels without jargon', () => {
     assert.equal(GOVERNANCE_STATE_LABELS_PT.COURSE_PRIVATE, 'Privado do curso');
     assert.equal(schoolApprovedLabel('fred-do-frio'), 'Aprovado para Fred');
-    assert.equal(schoolApprovedLabel('cte'), 'Aprovado para CTE');
+    assert.equal(schoolApprovedLabel('cte'), 'Aprovado para TECMOVA');
   });
 });
