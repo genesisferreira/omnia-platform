@@ -481,7 +481,7 @@ describe('intelligent learning — admin school filter + brand', () => {
     assert.equal(resolveSchoolKey({ schoolKey: 'cte' }), 'cte');
     assert.ok((SCHOOL_KEYS as readonly string[]).includes('cte'));
     assert.equal((SCHOOL_KEYS as readonly string[]).includes('tecmova'), false);
-    assert.equal(SCHOOL_BRANDS.cte.placeholder, true);
+    assert.equal(SCHOOL_BRANDS.cte.placeholder, false);
     assert.equal(SCHOOL_BRANDS['fred-do-frio'].placeholder, false);
     assert.notEqual(SCHOOL_BRANDS.cte.entryPath, SCHOOL_BRANDS['fred-do-frio'].entryPath);
     assert.notEqual(

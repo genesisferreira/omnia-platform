@@ -211,14 +211,16 @@ export const strategicCompaniesSeed: readonly StrategicCompanySeed[] = [
     name: 'TECMOVA',
     shortDescription: 'Conhecimento que transforma. Tecnologia que impulsiona.',
     positioning: 'Conhecimento que transforma. Tecnologia que impulsiona.',
-    ecosystemRole: 'Educação e tecnologia',
+    ecosystemRole: 'Educação, tecnologia e inteligência artificial',
     brandTheme: 'cte',
     displayOrder: 3,
     externalSite: 'https://tecmova.com.br',
     institutionalText:
-      'A TECMOVA atua em educação, inteligência artificial, tecnologia, treinamentos, consultoria empresarial, transformação digital, automações e desenvolvimento de soluções tecnológicas. Conhecimento que transforma. Tecnologia que impulsiona.',
-    mission: '',
-    vision: '',
+      'A TECMOVA é uma empresa de educação, tecnologia e inteligência artificial. Oferecemos cursos, treinamentos corporativos, consultoria e desenvolvimento de soluções digitais para ajudar pessoas e empresas a aprender, inovar e transformar conhecimento em resultados. Conhecimento que transforma. Tecnologia que impulsiona.',
+    mission:
+      'Capacitar pessoas e apoiar empresas na aplicação prática de tecnologia e inteligência artificial, oferecendo educação de qualidade, consultoria responsável e soluções digitais que gerem valor real.',
+    vision:
+      'Ser reconhecida como referência em formação tecnológica aplicada e transformação digital acessível, conectando conhecimento, pessoas e empresas em diferentes setores do mercado brasileiro.',
     values: [],
     differentiators: [],
     authorityStats: [],

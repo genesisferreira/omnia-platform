@@ -35,7 +35,7 @@ test('cte permanece o slug interno e a marca pública é TECMOVA', () => {
   assert.equal(cte.slug, 'cte');
   assert.equal(cte.portalSlug, 'cte');
   assert.equal(cte.name, 'TECMOVA');
-  assert.equal(cte.ecosystemRole, 'Educação e tecnologia');
+  assert.equal(cte.ecosystemRole, 'Educação, tecnologia e inteligência artificial');
   assert.equal(cte.externalSite, 'https://tecmova.com.br');
   assert.equal(cte.brandTheme, 'cte');
 });

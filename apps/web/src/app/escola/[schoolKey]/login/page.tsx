@@ -39,9 +39,17 @@ export default async function SchoolLoginPage({ params, searchParams }: PageProp
           className={`px-6 py-8 text-white ${brand.theme === 'fred' ? 'bg-emerald-800' : 'bg-slate-900'}`}
         >
           <p className="text-xs uppercase tracking-[0.2em] text-white/70">Entrada escolar</p>
-          <div className="mt-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/15 text-lg font-bold">
-            {brand.logoLabel}
-          </div>
+          {key === 'cte' ? (
+            <img
+              src="/brand/tecmova-conceito-02.jpg"
+              alt="TECMOVA"
+              className="mt-4 h-24 w-auto rounded-xl bg-white object-contain p-2"
+            />
+          ) : (
+            <div className="mt-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white/15 text-lg font-bold">
+              {brand.logoLabel}
+            </div>
+          )}
           <h1 className="mt-4 font-heading text-3xl font-bold">{brand.name}</h1>
           <p className="mt-2 text-sm text-white/80">
             Você está entrando no ambiente {brand.name}. O LMS Core é compartilhado; a identidade
@@ -49,8 +57,7 @@ export default async function SchoolLoginPage({ params, searchParams }: PageProp
           </p>
           {brand.placeholder ? (
             <p className="mt-3 rounded-md bg-white/10 px-3 py-2 text-xs">
-              Logotipo oficial TECMOVA ainda não homologado neste ambiente. A entrada continua nesta
-              rota.
+              Identidade visual ainda não homologada neste ambiente.
             </p>
           ) : null}
         </div>

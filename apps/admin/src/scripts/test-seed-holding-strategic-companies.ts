@@ -26,7 +26,7 @@ await test('seed define as empresas estratégicas com papéis corretos', () => {
   assert.equal(fred?.ecosystemRole, 'Educação');
   assert.equal(cte?.name, 'TECMOVA');
   assert.equal(cte?.slug, 'cte');
-  assert.equal(cte?.ecosystemRole, 'Educação e tecnologia');
+  assert.equal(cte?.ecosystemRole, 'Educação, tecnologia e inteligência artificial');
   assert.equal(cte?.externalSite, 'https://tecmova.com.br');
   assert.equal(cte?.authorityStats.length, 0);
   assert.equal(fred?.brandTheme, 'fred');

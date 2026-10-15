@@ -42,9 +42,9 @@ export const SCHOOL_BRANDS: Record<SchoolKey, SchoolBrand> = {
     shortName: 'TECMOVA',
     theme: 'cte',
     certificateIssuer: 'TECMOVA',
-    placeholder: true,
+    placeholder: false,
     notes:
-      'Identidade pública TECMOVA. schoolKey interno permanece cte. Logotipo oficial (Conceito 02 — Pessoas e Conhecimento, página 10 do PDF institucional) ainda não está no repositório.',
+      'Identidade pública TECMOVA. schoolKey interno permanece cte. Logotipo: Conceito 02 — Pessoas e Conhecimento, extraído da página 10 do PDF institucional.',
     entryPath: '/escola/cte/login',
     logoLabel: 'TECMOVA',
     colors: {

@@ -10,7 +10,12 @@ import {
   SitemapSourceError,
   toPublicSitemapUrl,
 } from '../lib/seo/sitemap-entries';
-import { presentTecmovaCompany, tecmovaFallbackCompany, TECMOVA_SITE } from '../lib/tecmova-public';
+import {
+  presentTecmovaCompany,
+  tecmovaFallbackCompany,
+  TECMOVA_LOGO_PATH,
+  TECMOVA_SITE,
+} from '../lib/tecmova-public';
 import nextConfig from '../../next.config';
 
 describe('sitemap', () => {
@@ -95,11 +100,13 @@ describe('TECMOVA pública', () => {
     assert.equal(page.name, 'TECMOVA');
     assert.equal(page.externalSite, TECMOVA_SITE);
     assert.equal(page.applicationUrl, '/escola/cte/login');
-    assert.equal(page.logo, null);
+    assert.equal(page.logo?.url, TECMOVA_LOGO_PATH);
     assert.equal(page.authorityStats.length, 0);
     assert.equal(page.institutionalText?.includes('2000'), false);
     assert.equal(page.institutionalText?.includes('+7.000'), false);
-    assert.match(page.institutionalText ?? '', /Conhecimento que transforma/);
+    assert.equal(page.institutionalText?.includes('cinco anos'), false);
+    assert.match(page.institutionalText ?? '', /educação, tecnologia e inteligência artificial/);
+    assert.equal(page.mission?.includes('Capacitar pessoas'), true);
   });
 
   it('redireciona só a URL pública /empresas/cte', async () => {

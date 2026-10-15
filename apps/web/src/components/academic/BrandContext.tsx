@@ -12,15 +12,20 @@ export function BrandMark(props: {
   }
   return (
     <span className={cn('inline-flex items-center gap-2', props.className)}>
-      <span
-        className={cn(
-          'inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-xs font-bold uppercase tracking-wide text-white',
-          brand.theme === 'fred' ? 'bg-emerald-600' : 'bg-sky-700',
-        )}
-        aria-hidden
-      >
-        {brand.logoLabel}
-      </span>
+      {brand.theme === 'cte' ? (
+        <img
+          src="/brand/tecmova-conceito-02.jpg"
+          alt=""
+          className="h-9 w-auto rounded-md bg-white object-contain"
+        />
+      ) : (
+        <span
+          className="inline-flex h-9 min-w-9 items-center justify-center rounded-md bg-emerald-600 px-2 text-xs font-bold uppercase tracking-wide text-white"
+          aria-hidden
+        >
+          {brand.logoLabel}
+        </span>
+      )}
       <span className="min-w-0">
         <span className="block font-heading text-sm font-bold leading-tight">{brand.name}</span>
         {brand.placeholder && !props.compact ? (

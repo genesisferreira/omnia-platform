@@ -58,7 +58,7 @@ export const holdingCompaniesSeed = [
     slug: 'cte',
     portalSlug: 'cte',
     shortDescription: 'Conhecimento que transforma. Tecnologia que impulsiona.',
-    ecosystemRole: 'Educação e tecnologia',
+    ecosystemRole: 'Educação, tecnologia e inteligência artificial',
     displayOrder: 5,
     externalSite: 'https://tecmova.com.br',
     status: 'active' as const,
