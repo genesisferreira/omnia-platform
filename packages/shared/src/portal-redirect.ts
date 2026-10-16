@@ -31,6 +31,8 @@ export function isPortalDestination(path: string): boolean {
     p.startsWith('/meu-perfil') ||
     p.startsWith('/empresas') ||
     p.startsWith('/blog') ||
+    p === '/parceiro' ||
+    p.startsWith('/parceiro/') ||
     p.startsWith('/parceiros') ||
     p.startsWith('/ecossistema') ||
     p === '/'
@@ -55,7 +57,21 @@ export function resolveEstablishDestination(
     if (safe.startsWith('/professor')) return safe;
     return '/professor';
   }
-  if (role === 'client' || role === 'partner') {
+  if (role === 'partner') {
+    if (
+      safe &&
+      safe !== '/' &&
+      isPortalDestination(safe) &&
+      safe !== '/ia' &&
+      !safe.startsWith('/ia/') &&
+      !safe.startsWith('/aluno') &&
+      !safe.startsWith('/professor')
+    ) {
+      return safe;
+    }
+    return '/parceiro';
+  }
+  if (role === 'client') {
     if (
       safe &&
       safe !== '/' &&

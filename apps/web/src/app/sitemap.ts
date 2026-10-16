@@ -5,6 +5,7 @@ import { getConfig } from '@omnia/config';
 import { fetchPublicPage } from '@/lib/cms';
 import { fetchPublicPostCategories, fetchPublicPosts, fetchPublicPostTags } from '@/lib/cms-blog';
 import { fetchPublicCompanies } from '@/lib/cms-companies';
+import { fetchAllPublicMarketplaceListings } from '@/lib/marketplace/client';
 import { getPublicSiteOrigin, SEO_PUBLIC_PAGE_CANDIDATES } from '@/lib/seo';
 import {
   assertSitemapPagination,
@@ -74,14 +75,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { pathname: '/blog', changeFrequency: 'daily' as const, priority: 0.7 },
     { pathname: '/interesse', changeFrequency: 'monthly' as const, priority: 0.7 },
     { pathname: '/cursos', changeFrequency: 'weekly' as const, priority: 0.6 },
+    { pathname: '/marketplace', changeFrequency: 'weekly' as const, priority: 0.7 },
+    { pathname: '/marketplace/produtos', changeFrequency: 'daily' as const, priority: 0.65 },
+    { pathname: '/marketplace/servicos', changeFrequency: 'daily' as const, priority: 0.65 },
+    { pathname: '/marketplace/projeto', changeFrequency: 'monthly' as const, priority: 0.55 },
   );
 
-  const [companies, posts, categories, tags] = await Promise.all([
+  const [companies, posts, categories, tags, products, services] = await Promise.all([
     fetchPublicCompanies(),
     collectPosts(PUBLIC_SITE_SLUG),
     fetchPublicPostCategories(PUBLIC_SITE_SLUG),
     fetchPublicPostTags(PUBLIC_SITE_SLUG),
+    fetchAllPublicMarketplaceListings('product'),
+    fetchAllPublicMarketplaceListings('service'),
   ]);
+
+  for (const item of products ?? []) {
+    pages.push({
+      pathname: `/marketplace/produtos/${item.publicSlug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.55,
+    });
+  }
+  for (const item of services ?? []) {
+    pages.push({
+      pathname: `/marketplace/servicos/${item.publicSlug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.55,
+    });
+  }
 
   return assembleSitemapEntries({
     origin,

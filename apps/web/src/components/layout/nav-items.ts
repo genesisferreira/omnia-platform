@@ -22,6 +22,16 @@ export const INSTITUTIONAL_NAV_ITEMS: readonly NavItem[] = [
       { href: '/parceiros/cadastro', label: 'Seja um parceiro' },
     ],
   },
+  {
+    href: '/marketplace',
+    label: 'Marketplace',
+    children: [
+      { href: '/marketplace', label: 'Visão geral' },
+      { href: '/marketplace/produtos', label: 'Produtos' },
+      { href: '/marketplace/servicos', label: 'Serviços' },
+      { href: '/marketplace/projeto', label: 'Tenho um projeto' },
+    ],
+  },
   { href: '/blog', label: 'Blog' },
   { href: '/contato', label: 'Contato' },
 ] as const;

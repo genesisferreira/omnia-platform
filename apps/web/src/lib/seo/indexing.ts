@@ -8,6 +8,7 @@ export const PRIVATE_PATH_PREFIXES = [
   '/admin',
   '/aluno',
   '/professor',
+  '/parceiro',
   '/lms',
   '/meu-perfil',
   '/ia',
