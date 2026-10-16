@@ -96,6 +96,7 @@ import { partnerDashboardEndpoint } from './src/endpoints/marketplace-partner-da
 import { marketplaceProposalSendEndpoint } from './src/endpoints/marketplace-proposal-send';
 import { publicMarketplaceEndpoints } from './src/endpoints/marketplace-public';
 import { marketplaceQuoteRequestEndpoint } from './src/endpoints/marketplace-quote-request';
+import { marketplaceQuoteRespondEndpoint } from './src/endpoints/marketplace-quote-respond';
 import {
   publicCourseEndpoint,
   publicCoursesEndpoint,
@@ -289,6 +290,7 @@ export default buildConfig({
     partnerRegisterEndpoint,
     ...publicMarketplaceEndpoints,
     marketplaceQuoteRequestEndpoint,
+    marketplaceQuoteRespondEndpoint,
     marketplaceProposalSendEndpoint,
     partnerDashboardEndpoint,
     publicCoursesEndpoint,
@@ -314,6 +316,9 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Homologação/seeds e runtime DEV/prod: nunca schema push interativo.
+    // Schema só via migrations explícitas.
+    push: false,
     prodMigrations: migrations,
   }),
   cors: getAllowedCorsOrigins(),

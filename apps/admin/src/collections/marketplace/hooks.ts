@@ -13,6 +13,7 @@ import {
   isQuoteStatus,
   normalizePartnerSlug,
   type ListingStatus,
+  type QuoteStatus,
 } from '@omnia/shared';
 
 import { getActiveMemberships } from '../../access/marketplace';
@@ -221,8 +222,17 @@ export const quoteRequestBeforeChange: CollectionBeforeChangeHook = async ({
     if (!isQuoteStatus(data.status) || !canTransitionQuote(originalDoc.status, data.status)) {
       throw new APIError(`Transição de status inválida: ${originalDoc.status} → ${data.status}.`, 400);
     }
-    if (!staff && data.status === 'accepted') {
-      throw new APIError('A aceitação é uma decisão do comprador.', 403);
+    if (!staff) {
+      const buyerId = getRelationId(originalDoc.buyerUser);
+      const isBuyer = user != null && buyerId != null && String(user.id) === String(buyerId);
+      const buyerStatuses: QuoteStatus[] = ['accepted', 'declined', 'negotiating'];
+      if (buyerStatuses.includes(data.status as QuoteStatus)) {
+        if (!isBuyer) {
+          throw new APIError('Somente o comprador pode aceitar, recusar ou renegociar.', 403);
+        }
+      } else if (isBuyer) {
+        throw new APIError('O comprador não pode aplicar este status.', 403);
+      }
     }
     data.statusChangedAt = new Date().toISOString();
   }

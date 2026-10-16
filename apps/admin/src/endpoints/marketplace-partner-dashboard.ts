@@ -105,6 +105,10 @@ export const partnerDashboardEndpoint: Endpoint = {
       const roleByPartner = new Map<string, MembershipRole>();
       for (const ref of refs) roleByPartner.set(String(ref.partnerId), ref.role);
 
+      if (!staff && refs.length === 0) {
+        return error(403, 'FORBIDDEN', 'Nenhuma empresa vinculada ao seu usuário parceiro.');
+      }
+
       if (requested && !staff && !roleByPartner.has(requested)) {
         return error(403, 'FORBIDDEN', 'Você não tem acesso a este parceiro.');
       }
