@@ -35,8 +35,13 @@ export const PARTNER_REGISTER_BLOCKED_KEYS = [
   'longitude',
 ] as const;
 
+export const MARKETPLACE_INTENTS = ['none', 'products', 'services', 'both'] as const;
+export type MarketplaceIntent = (typeof MARKETPLACE_INTENTS)[number];
+
 export type PartnerRegisterInput = {
   companyName: string;
+  contactName?: string;
+  marketplaceIntent?: MarketplaceIntent;
   tradeName?: string;
   partnerType: 'company' | 'professional';
   document: string;
@@ -70,6 +75,8 @@ export type PartnerRegisterInput = {
 
 export type NormalizedPartnerRegister = {
   companyName: string;
+  contactName: string | null;
+  marketplaceIntent: MarketplaceIntent;
   tradeName: string | null;
   partnerType: 'company' | 'professional';
   document: string;
@@ -128,6 +135,23 @@ export function isPartnerRegisterHoneypotTriggered(body: unknown): boolean {
   }
   const hp = rec.companyWebsite ?? rec.website_hp;
   return typeof hp === 'string' && hp.trim() !== '';
+}
+
+const RESERVED_EMAIL_DOMAIN_RE = /(^|\.)(example\.(com|net|org)|invalid|test|example|localhost)$/i;
+
+/** Domínios reservados (RFC 2606/6761): nunca enviar e-mail real para eles (homologação). */
+export function isReservedEmailDomain(email: string): boolean {
+  const domain = email.split('@')[1]?.trim().toLowerCase() ?? '';
+  return !domain || RESERVED_EMAIL_DOMAIN_RE.test(domain);
+}
+
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export function isTrustedPartnerOrigin(origin: string | null): boolean {
@@ -271,6 +295,15 @@ export function validatePartnerRegisterBody(body: unknown): ValidatePartnerRegis
 
   const tradeName = cleanText(raw.tradeName, 200);
   const partnerType = raw.partnerType === 'professional' ? 'professional' : 'company';
+  const marketplaceIntent: MarketplaceIntent = (MARKETPLACE_INTENTS as readonly string[]).includes(
+    String(raw.marketplaceIntent),
+  )
+    ? (raw.marketplaceIntent as MarketplaceIntent)
+    : 'none';
+  const contactName = cleanText(raw.contactName, 160);
+  if (marketplaceIntent !== 'none' && (!contactName || contactName.length < 3)) {
+    return { ok: false, message: 'Informe o nome do responsável pelo cadastro.' };
+  }
 
   const doc = validateBrazilianDocument(raw.document);
   if (!doc.ok) {
@@ -341,6 +374,8 @@ export function validatePartnerRegisterBody(body: unknown): ValidatePartnerRegis
     ok: true,
     data: {
       companyName,
+      contactName,
+      marketplaceIntent,
       tradeName,
       partnerType,
       document: doc.digits,

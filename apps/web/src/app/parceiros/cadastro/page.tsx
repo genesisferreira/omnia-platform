@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { Container } from '@omnia/ui';
 
@@ -40,6 +41,16 @@ export default async function PartnerRegisterPage() {
           <p className="text-base text-omnia-graphite-light">
             Envie seu cadastro para análise. A publicação na rede ocorre somente após aprovação da
             equipe Omnia.
+          </p>
+          <p className="text-sm text-omnia-graphite">
+            Também quer vender produtos ou serviços?{' '}
+            <Link
+              href="/marketplace/seja-um-fornecedor"
+              className="font-medium text-omnia-emerald underline"
+            >
+              Quero vender no Marketplace
+            </Link>{' '}
+            explica como funciona; o cadastro é o mesmo.
           </p>
         </header>
         <PartnerRegisterForm categories={categories} specialties={specialties} />

@@ -7,7 +7,9 @@ import {
 
 import {
   clientIpFromHeaders,
+  escapeHtml,
   formatRetryAfterMinutes,
+  isReservedEmailDomain,
   isPartnerRegisterBodyTooLarge,
   isPartnerRegisterHoneypotTriggered,
   isTrustedPartnerOrigin,
@@ -210,6 +212,8 @@ export const partnerRegisterEndpoint: Endpoint = {
 
       const createData = {
         companyName: d.companyName,
+        contactName: d.contactName ?? undefined,
+        marketplaceIntent: d.marketplaceIntent,
         tradeName: d.tradeName ?? undefined,
         slug: d.slug,
         partnerType: d.partnerType,
@@ -260,13 +264,14 @@ export const partnerRegisterEndpoint: Endpoint = {
       await recordPartnerRegisterSuccess({ ip, email: d.email });
 
       // E-mail best-effort com timeout curto; nunca desfaz o cadastro.
-      if (req.payload.sendEmail) {
+      // Domínios reservados (.invalid, example.com…) nunca recebem e-mail real.
+      if (req.payload.sendEmail && !isReservedEmailDomain(d.email)) {
         void withTimeout(
           req.payload.sendEmail({
             to: d.email,
             subject: 'Cadastro recebido — Rede de Parceiros Omnia Frigo',
             html: `<p>Olá,</p>
-<p>Recebemos o cadastro de <strong>${d.tradeName || d.companyName}</strong> na Rede de Parceiros Omnia Frigo.</p>
+<p>Recebemos o cadastro de <strong>${escapeHtml(d.tradeName || d.companyName)}</strong> na Rede de Parceiros Omnia Frigo.</p>
 <p>Nossa equipe analisará as informações antes da publicação.</p>
 <p>Atenciosamente,<br/>Omnia Frigo</p>`,
           }),

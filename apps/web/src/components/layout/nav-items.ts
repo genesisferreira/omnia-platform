@@ -2,7 +2,7 @@
  * Navegação institucional compartilhada (Header + Footer).
  * Âncoras da Home usam prefixo `/` para funcionar a partir de qualquer rota.
  */
-export type NavChild = { href: string; label: string };
+export type NavChild = { href: string; label: string; highlight?: boolean };
 
 export type NavItem = {
   href: string;
@@ -30,6 +30,11 @@ export const INSTITUTIONAL_NAV_ITEMS: readonly NavItem[] = [
       { href: '/marketplace/produtos', label: 'Produtos' },
       { href: '/marketplace/servicos', label: 'Serviços' },
       { href: '/marketplace/projeto', label: 'Tenho um projeto' },
+      {
+        href: '/marketplace/seja-um-fornecedor',
+        label: 'Quero vender no Marketplace',
+        highlight: true,
+      },
     ],
   },
   { href: '/blog', label: 'Blog' },

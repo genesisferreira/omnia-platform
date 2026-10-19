@@ -78,6 +78,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { pathname: '/marketplace/produtos', changeFrequency: 'daily' as const, priority: 0.65 },
     { pathname: '/marketplace/servicos', changeFrequency: 'daily' as const, priority: 0.65 },
     { pathname: '/marketplace/projeto', changeFrequency: 'monthly' as const, priority: 0.55 },
+    {
+      pathname: '/marketplace/seja-um-fornecedor',
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
   );
 
   const [companies, posts, categories, tags, products, services] = await Promise.all([

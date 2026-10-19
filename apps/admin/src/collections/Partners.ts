@@ -163,9 +163,30 @@ export const Partners: CollectionConfig = {
           label: 'Contato',
           fields: [
             {
+              name: 'contactName',
+              type: 'text',
+              label: 'Responsável pelo cadastro',
+              admin: {
+                description:
+                  'Nome informado no cadastro. Não concede acesso: o vínculo com usuário é feito só por convite.',
+              },
+            },
+            {
               name: 'email',
               type: 'email',
               label: 'E-mail',
+            },
+            {
+              name: 'marketplaceIntent',
+              type: 'select',
+              label: 'Interesse no Marketplace',
+              defaultValue: 'none',
+              options: [
+                { label: 'Somente Rede de Parceiros', value: 'none' },
+                { label: 'Vender produtos', value: 'products' },
+                { label: 'Oferecer serviços', value: 'services' },
+                { label: 'Produtos e serviços', value: 'both' },
+              ],
             },
             {
               name: 'phone',

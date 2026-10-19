@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Container } from '@omnia/ui';
 
+import { ListingCard } from '@/components/marketplace/ListingCard';
 import { fetchPublicMarketplaceListings } from '@/lib/marketplace/client';
 import { buildPageMetadata } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
@@ -61,19 +62,26 @@ export default async function MarketplaceServicosPage({ searchParams }: PageProp
           </button>
         </form>
       </header>
-      {!data || data.items.length === 0 ? (
-        <p className="text-sm text-omnia-graphite-light">Nenhum serviço encontrado.</p>
+      {!data ? (
+        <p className="text-sm text-omnia-graphite-light">
+          Catálogo temporariamente indisponível. Tente novamente em instantes.
+        </p>
+      ) : data.items.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-omnia-deep-blue/20 p-6 text-sm text-omnia-graphite">
+          <p className="font-medium text-omnia-deep-blue">Nenhum serviço encontrado.</p>
+          <p className="mt-1">
+            Ajuste os filtros ou{' '}
+            <Link href="/marketplace/projeto" className="underline">
+              descreva o projeto
+            </Link>{' '}
+            para receber propostas.
+          </p>
+        </div>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((item) => (
-            <li key={item.id} className="rounded-lg border border-omnia-deep-blue/10 p-4">
-              <Link
-                href={`/marketplace/servicos/${item.publicSlug}`}
-                className="font-medium text-omnia-deep-blue hover:underline"
-              >
-                {item.title}
-              </Link>
-              <p className="mt-1 text-xs text-omnia-graphite-light">{item.partner.displayName}</p>
+            <li key={item.id} className="relative">
+              <ListingCard item={item} />
             </li>
           ))}
         </ul>
