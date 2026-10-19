@@ -40,6 +40,7 @@ import * as migration_20260921_120000_knowledge_governance_schema_repair from '.
 import * as migration_20260925_150000_device_access_control from './20260925_150000_device_access_control';
 import * as migration_20261016_140000_marketplace_b2b_phase_a from './20261016_140000_marketplace_b2b_phase_a';
 import * as migration_20261019_120000_marketplace_listing_media from './20261019_120000_marketplace_listing_media';
+import * as migration_20261019_180000_marketplace_invites_revisions from './20261019_180000_marketplace_invites_revisions';
 
 export const migrations = [
   {
@@ -251,5 +252,10 @@ export const migrations = [
     up: migration_20261019_120000_marketplace_listing_media.up,
     down: migration_20261019_120000_marketplace_listing_media.down,
     name: '20261019_120000_marketplace_listing_media',
+  },
+  {
+    up: migration_20261019_180000_marketplace_invites_revisions.up,
+    down: migration_20261019_180000_marketplace_invites_revisions.down,
+    name: '20261019_180000_marketplace_invites_revisions',
   },
 ];

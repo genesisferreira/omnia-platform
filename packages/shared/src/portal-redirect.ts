@@ -29,6 +29,8 @@ export function isPortalDestination(path: string): boolean {
     p.startsWith('/certificados') ||
     p.startsWith('/minha-conta') ||
     p.startsWith('/minhas-cotacoes') ||
+    p === '/convite' ||
+    p.startsWith('/convite?') ||
     p.startsWith('/meu-perfil') ||
     p.startsWith('/empresas') ||
     p.startsWith('/blog') ||

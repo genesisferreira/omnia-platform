@@ -107,6 +107,17 @@ const preventSelfRoleEscalation: CollectionBeforeChangeHook = ({
     return data;
   }
 
+  // Aceite de convite do Marketplace (contexto só definível no servidor): único caminho
+  // client → partner; nenhuma outra transição de papel é liberada aqui.
+  if (
+    operation === 'update' &&
+    req.context?.marketplaceInvitationAccept === true &&
+    currentRole === 'client' &&
+    nextRole === 'partner'
+  ) {
+    return data;
+  }
+
   if (!req.user) {
     data.role = 'client';
     return data;

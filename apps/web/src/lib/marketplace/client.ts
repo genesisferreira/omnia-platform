@@ -420,6 +420,76 @@ export function sendProposal(body: Record<string, unknown>) {
   }>('/api/omnia/marketplace-proposal-send', { method: 'POST', body });
 }
 
+/* Equipe e convites */
+
+export type TeamMember = {
+  id: RelationId;
+  userId: RelationId | null;
+  name: string | null;
+  email: string | null;
+  role: string;
+  status: string;
+  isSelf: boolean;
+};
+
+export type TeamInvitation = {
+  id: RelationId;
+  email: string;
+  role: string;
+  status: 'pending' | 'accepted' | 'revoked' | 'expired';
+  expiresAt: string;
+  createdAt: string;
+};
+
+export function fetchPartnerTeam(partnerId: string) {
+  return authedFetch<{
+    ok: true;
+    actorRole: string;
+    members: TeamMember[];
+    invitations: TeamInvitation[];
+  }>(`/api/omnia/partner-team${buildPayloadQuery({ partnerId })}`);
+}
+
+export function createPartnerInvitation(body: { partnerId: string; email: string; role: string }) {
+  return authedFetch<{
+    ok: true;
+    message: string;
+    token: string;
+    invitation: { id: RelationId; email: string; role: string; expiresAt: string };
+  }>('/api/omnia/partner-invitations', { method: 'POST', body });
+}
+
+export function revokePartnerInvitation(invitationId: string) {
+  return authedFetch<{ ok: true; message: string }>('/api/omnia/partner-invitations/revoke', {
+    method: 'POST',
+    body: { invitationId },
+  });
+}
+
+export function previewPartnerInvitation(token: string) {
+  return authedFetch<{
+    ok: true;
+    invitation: {
+      status: TeamInvitation['status'];
+      role: string;
+      partnerName: string;
+      emailMatches: boolean;
+      expiresAt: string;
+    };
+  }>('/api/omnia/partner-invitations/preview', { method: 'POST', body: { token } });
+}
+
+export function acceptPartnerInvitation(token: string) {
+  return authedFetch<{ ok: true; message: string }>('/api/omnia/partner-invitations/accept', {
+    method: 'POST',
+    body: { token },
+  });
+}
+
+export function updateMembership(id: RelationId, data: { role?: string; status?: string }) {
+  return update<MembershipDoc>('partner-memberships', id, data);
+}
+
 /* Comprador */
 
 /** Cotações do próprio comprador (a ACL do Admin já restringe; o filtro evita misturar com as do parceiro). */

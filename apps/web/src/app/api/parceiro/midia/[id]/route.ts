@@ -40,7 +40,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         'Content-Type': mimeType,
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
-        'Content-Disposition': mimeType === 'application/pdf' ? 'inline; filename="ficha-tecnica.pdf"' : 'inline',
+        'Content-Security-Policy': "sandbox; default-src 'none'; img-src 'self'",
+        'Content-Disposition':
+          mimeType === 'application/pdf' ? 'attachment; filename="ficha-tecnica.pdf"' : 'inline',
       },
     });
   } catch {

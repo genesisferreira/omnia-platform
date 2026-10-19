@@ -1,18 +1,14 @@
 import type { Access, CollectionConfig, Where } from 'payload';
 
-import {
-  getActivePartnerIds,
-  partnerMembershipCreateAccess,
-  partnerMembershipScopedAccess,
-} from '../../access/marketplace';
-import { hasStaffAccess } from '../../access/rbac';
+import { getActivePartnerIds, partnerMembershipScopedAccess } from '../../access/marketplace';
+import { hasStaffAccess, staffOnly } from '../../access/rbac';
 import {
   GROUP,
   MEMBERSHIP_ROLE_OPTIONS,
   MEMBERSHIP_STATUS_OPTIONS,
   staffFieldAccess,
 } from './fields';
-import { membershipBeforeChange } from './hooks';
+import { membershipAfterChange, membershipBeforeChange } from './hooks';
 
 /** Staff: tudo; usuário: a própria associação e as dos parceiros em que está ativo. */
 const membershipRead: Access = async ({ req: { user, payload } }) => {
@@ -36,13 +32,16 @@ export const PartnerMemberships: CollectionConfig = {
   timestamps: true,
   access: {
     read: membershipRead,
-    create: partnerMembershipCreateAccess('manage'),
+    // Entrada na equipe só por convite aceito (endpoint) ou pela equipe Omnia.
+    create: staffOnly,
     update: partnerMembershipScopedAccess('manage'),
-    delete: partnerMembershipScopedAccess('manage'),
+    // Remoção apaga o histórico; revogar (status) preserva a trilha.
+    delete: staffOnly,
   },
   indexes: [{ fields: ['user', 'partner'], unique: true }],
   hooks: {
     beforeChange: [membershipBeforeChange],
+    afterChange: [membershipAfterChange],
   },
   fields: [
     {

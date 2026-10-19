@@ -22,6 +22,8 @@ import { Pages } from './src/collections/Pages';
 import { PartnerCategories } from './src/collections/PartnerCategories';
 import { Partners } from './src/collections/Partners';
 import { PartnerSpecialties } from './src/collections/PartnerSpecialties';
+import { MarketplaceAuditEvents } from './src/collections/marketplace/MarketplaceAuditEvents';
+import { PartnerInvitations } from './src/collections/marketplace/PartnerInvitations';
 import { PartnerListingMedia } from './src/collections/marketplace/PartnerListingMedia';
 import { PartnerMemberships } from './src/collections/marketplace/PartnerMemberships';
 import { PartnerProductListings } from './src/collections/marketplace/PartnerProductListings';
@@ -98,6 +100,7 @@ import { marketplaceProposalSendEndpoint } from './src/endpoints/marketplace-pro
 import { publicMarketplaceEndpoints } from './src/endpoints/marketplace-public';
 import { marketplaceQuoteRequestEndpoint } from './src/endpoints/marketplace-quote-request';
 import { marketplaceQuoteRespondEndpoint } from './src/endpoints/marketplace-quote-respond';
+import { partnerInvitationEndpoints } from './src/endpoints/marketplace-invitations';
 import { marketplaceListingMediaEndpoint } from './src/endpoints/marketplace-listing-media';
 import {
   publicCourseEndpoint,
@@ -197,6 +200,8 @@ export default buildConfig({
     PartnerProductListings,
     PartnerServiceListings,
     PartnerListingMedia,
+    PartnerInvitations,
+    MarketplaceAuditEvents,
     QuoteRequests,
     QuoteProposals,
     QuoteProposalVersions,
@@ -295,6 +300,7 @@ export default buildConfig({
     marketplaceQuoteRequestEndpoint,
     marketplaceQuoteRespondEndpoint,
     marketplaceListingMediaEndpoint,
+    ...partnerInvitationEndpoints,
     marketplaceProposalSendEndpoint,
     partnerDashboardEndpoint,
     publicCoursesEndpoint,

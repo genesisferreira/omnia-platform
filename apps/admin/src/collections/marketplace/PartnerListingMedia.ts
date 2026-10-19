@@ -17,6 +17,7 @@ import {
   partnerMembershipScopedAccess,
 } from '../../access/marketplace';
 import { getRelationId, hasStaffAccess } from '../../access/rbac';
+import { PDF_SCAN_MESSAGES, scanPdfForActiveContent } from '../../lib/marketplace-pdf-scan';
 import { resolveMediaStaticDir } from '../Media';
 import { GROUP, staffFieldAccess } from './fields';
 
@@ -73,6 +74,10 @@ const validateListingUpload: CollectionBeforeOperationHook = async ({ args, oper
   if (buffer.length > max) {
     throw new APIError(`Arquivo acima do limite de ${Math.round(max / (1024 * 1024))} MB.`, 413);
   }
+  if (detected.kind === 'pdf') {
+    const scan = scanPdfForActiveContent(buffer);
+    if (!scan.ok) throw new APIError(PDF_SCAN_MESSAGES[scan.reason], 400);
+  }
 
   file.name = `mk-${randomUUID()}.${detected.ext}`;
   file.mimetype = detected.mime;
@@ -94,6 +99,19 @@ export const PartnerListingMedia: CollectionConfig = {
   upload: {
     staticDir: path.join(resolveMediaStaticDir(), 'marketplace'),
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+    // Download sem execução ativa no navegador; PDF sempre como anexo. `no-cache` força
+    // revalidação, então arquivo que volta a ser privado deixa de ser servido do cache.
+    modifyResponseHeaders: ({ headers }) => {
+      const next = new Headers(headers);
+      next.set('X-Content-Type-Options', 'nosniff');
+      next.set('Content-Security-Policy', "sandbox; default-src 'none'; img-src 'self'");
+      next.set('Cache-Control', 'no-cache');
+      next.set('Cross-Origin-Resource-Policy', 'same-site');
+      if ((next.get('Content-Type') ?? '').includes('application/pdf')) {
+        next.set('Content-Disposition', 'attachment; filename="ficha-tecnica.pdf"');
+      }
+      return next;
+    },
   },
   access: {
     read: listingMediaRead,

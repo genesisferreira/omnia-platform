@@ -6,11 +6,13 @@ import { Alert } from '@omnia/ui';
 import { removeListingFileAction, saveListingAction } from '@/app/parceiro/actions';
 import { ListingFiles } from '@/components/partner/ListingFiles';
 import { ListingForm } from '@/components/partner/ListingForm';
+import { RevisionNotice } from '@/components/partner/RevisionNotice';
 import { LoadError, NoPartnerNotice, PageHeader, StatusBadge } from '@/components/partner/ui';
 import { getListing, relationId } from '@/lib/marketplace/client';
 import { labelOf, LISTING_STATUS_LABELS } from '@/lib/marketplace/labels';
 import { availableStatusIntents } from '@/lib/marketplace/listing-status';
 import { requirePartnerContext } from '@/lib/marketplace/require-partner';
+import { withPendingRevision } from '@/lib/marketplace/revision';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +46,7 @@ export default async function EditarServicoPage({ params, searchParams }: PagePr
   const canEdit = ctx.selected.canEdit;
   const intents = canEdit ? availableStatusIntents(result.data.status) : [];
   const action = saveListingAction.bind(null, 'service', id);
+  const editing = withPendingRevision('service', result.data);
 
   return (
     <>
@@ -75,9 +78,10 @@ export default async function EditarServicoPage({ params, searchParams }: PagePr
           Alterações registradas.
         </Alert>
       ) : null}
+      <RevisionNotice listing={result.data} />
       <ListingForm
         kind="service"
-        listing={result.data}
+        listing={editing}
         action={action}
         intents={intents}
         readOnly={!canEdit}
@@ -86,11 +90,11 @@ export default async function EditarServicoPage({ params, searchParams }: PagePr
       <ListingFiles
         kind="service"
         listingId={id}
-        images={(result.data.images ?? []).flatMap((row) => {
+        images={(editing.images ?? []).flatMap((row) => {
           const mediaId = relationId(row.image);
           return mediaId ? [{ mediaId, alt: row.alt ?? null }] : [];
         })}
-        datasheetId={relationId(result.data.datasheet)}
+        datasheetId={relationId(editing.datasheet)}
         canEdit={canEdit}
         removeAction={removeListingFileAction.bind(null, 'service', id)}
       />

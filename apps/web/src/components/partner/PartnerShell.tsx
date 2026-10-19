@@ -11,6 +11,7 @@ import { selectPartnerAction } from '@/app/parceiro/actions';
 export const PARTNER_NAV = [
   { href: '/parceiro', label: 'Dashboard', exact: true },
   { href: '/parceiro/empresa', label: 'Empresa' },
+  { href: '/parceiro/equipe', label: 'Equipe' },
   { href: '/parceiro/produtos', label: 'Produtos' },
   { href: '/parceiro/servicos', label: 'Serviços' },
   { href: '/parceiro/solicitacoes', label: 'Solicitações' },

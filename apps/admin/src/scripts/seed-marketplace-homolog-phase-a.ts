@@ -18,6 +18,8 @@ type UserSpec = {
   firstName: string;
   lastName: string;
   passwordEnv: string;
+  /** Padrão `active`; `pending` simula conta ainda não validada pela equipe. */
+  accountStatus?: 'active' | 'pending';
 };
 
 const USERS: UserSpec[] = [
@@ -76,6 +78,31 @@ const USERS: UserSpec[] = [
     firstName: 'Homolog',
     lastName: 'Admin Marketplace',
     passwordEnv: 'HOMOLOG_MK_ADMIN_PASSWORD',
+  },
+  {
+    key: 'invitee_active',
+    email: 'homolog.mk.invitee.active@example.invalid',
+    role: 'client',
+    firstName: 'Homolog',
+    lastName: 'Convidado Ativo',
+    passwordEnv: 'HOMOLOG_MK_INVITEE_ACTIVE_PASSWORD',
+  },
+  {
+    key: 'invitee_pending',
+    email: 'homolog.mk.invitee.pending@example.invalid',
+    role: 'client',
+    firstName: 'Homolog',
+    lastName: 'Convidado Pendente',
+    passwordEnv: 'HOMOLOG_MK_INVITEE_PENDING_PASSWORD',
+    accountStatus: 'pending',
+  },
+  {
+    key: 'ratelimit_buyer',
+    email: 'homolog.mk.ratelimit@example.invalid',
+    role: 'client',
+    firstName: 'Homolog',
+    lastName: 'Comprador Rate Limit',
+    passwordEnv: 'HOMOLOG_MK_RATELIMIT_PASSWORD',
   },
 ];
 
@@ -144,7 +171,7 @@ async function main() {
       email: spec.email,
       password,
       role: spec.role,
-      accountStatus: 'active' as const,
+      accountStatus: spec.accountStatus ?? 'active',
       firstName: spec.firstName,
       lastName: spec.lastName,
       name: `${spec.firstName} ${spec.lastName}`,

@@ -21,6 +21,7 @@ import {
   type ListingIntent,
 } from '@/lib/marketplace/listing-status';
 import { requirePartnerContext } from '@/lib/marketplace/require-partner';
+import { withPendingRevision } from '@/lib/marketplace/revision';
 import { PARTNER_COOKIE } from '@/lib/marketplace/selected-partner';
 import type { MarketplaceListingKind, PartnerContext } from '@/lib/marketplace/types';
 
@@ -184,7 +185,8 @@ export async function removeListingFileAction(
   if (target === 'datasheet') {
     patch = { datasheet: null };
   } else if (target === 'image' && /^\d{1,12}$/.test(mediaId)) {
-    const images = (current.data.images ?? []).filter((row) => relationId(row.image) !== mediaId);
+    const editing = withPendingRevision(kind, current.data);
+    const images = (editing.images ?? []).filter((row) => relationId(row.image) !== mediaId);
     patch = {
       images: images.map((row) => ({ image: relationId(row.image), alt: row.alt ?? undefined })),
     };

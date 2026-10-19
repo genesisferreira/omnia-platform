@@ -241,6 +241,49 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
       admin: { position: 'sidebar' },
     },
     {
+      name: 'revisionStatus',
+      type: 'select',
+      defaultValue: 'none',
+      index: true,
+      label: 'Revisão de conteúdo',
+      options: [
+        { label: 'Sem revisão pendente', value: 'none' },
+        { label: 'Aguardando moderação', value: 'pending' },
+        { label: 'Aprovar revisão (aplica as alterações)', value: 'approved' },
+        { label: 'Rejeitar revisão', value: 'rejected' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'Edições do parceiro em anúncio publicado/suspenso ficam pendentes. Para decidir, escolha Aprovar ou Rejeitar (com motivo) e salve.',
+      },
+    },
+    {
+      name: 'revisionNotes',
+      type: 'textarea',
+      label: 'Motivo / observações da revisão',
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'pendingRevision',
+      type: 'json',
+      label: 'Alterações pendentes (de → para)',
+      admin: { readOnly: true },
+    },
+    {
+      name: 'revisionSubmittedAt',
+      type: 'date',
+      label: 'Revisão enviada em',
+      admin: { position: 'sidebar', readOnly: true, ...dateTimeAdmin },
+    },
+    {
+      name: 'revisionSubmittedBy',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Revisão enviada por',
+      admin: { position: 'sidebar', readOnly: true },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       label: 'Publicado em',

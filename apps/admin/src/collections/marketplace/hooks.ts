@@ -9,16 +9,25 @@ import type {
 import { APIError } from 'payload';
 
 import {
+  canChangeMembershipRole,
   canTransitionListing,
   canTransitionQuote,
+  diffListingRevision,
   isQuoteStatus,
   normalizePartnerSlug,
+  requiresRevision,
+  revisionFieldsFor,
+  revisionPatchFrom,
+  type ListingKind,
   type ListingStatus,
+  type MembershipRole,
   type QuoteStatus,
+  type RevisionChanges,
 } from '@omnia/shared';
 
 import { getActiveMemberships } from '../../access/marketplace';
 import { getRelationId, hasStaffAccess } from '../../access/rbac';
+import { recordMarketplaceAudit } from './MarketplaceAuditEvents';
 
 const PARTNER_LISTING_STATUSES: readonly ListingStatus[] = ['draft', 'pending', 'archived'];
 
@@ -95,8 +104,164 @@ export const listingBeforeChange: CollectionBeforeChangeHook = async ({
   }
 
   await assertListingFilesBelongToPartner(req, partnerId, data, originalDoc);
+  await applyListingRevisionRules({
+    data,
+    operation,
+    originalDoc,
+    req,
+    kind: collection.slug === 'partner-product-listings' ? 'product' : 'service',
+    partnerId,
+  });
   return data;
 };
+
+const REVISION_META_FIELDS = [
+  'revisionStatus',
+  'pendingRevision',
+  'revisionSubmittedAt',
+  'revisionSubmittedBy',
+  'revisionNotes',
+] as const;
+
+type PendingRevision = {
+  changes: RevisionChanges;
+  submittedAt: string;
+  submittedBy: string | number | null;
+};
+
+function pendingOf(doc: Record<string, unknown> | undefined): PendingRevision | null {
+  const value = doc?.pendingRevision;
+  if (!value || typeof value !== 'object') return null;
+  const changes = (value as { changes?: unknown }).changes;
+  if (!changes || typeof changes !== 'object' || Object.keys(changes).length === 0) return null;
+  return value as PendingRevision;
+}
+
+/** Ids de relação vindos do JSON da revisão voltam a número (ids seriais do Postgres). */
+function relationValue(value: unknown): unknown {
+  if (typeof value === 'string' && /^\d+$/.test(value)) return Number(value);
+  if (Array.isArray(value)) {
+    return value.map((row) =>
+      row && typeof row === 'object'
+        ? {
+            ...(row as Record<string, unknown>),
+            image: relationValue((row as Record<string, unknown>).image),
+          }
+        : row,
+    );
+  }
+  return value;
+}
+
+function applyPendingInto(data: Record<string, unknown>, pending: PendingRevision): void {
+  const patch = revisionPatchFrom(pending.changes);
+  for (const [field, value] of Object.entries(patch)) {
+    data[field] = field === 'images' || field === 'datasheet' ? relationValue(value) : value;
+  }
+}
+
+/**
+ * Anúncio publicado/suspenso: edições do parceiro vão para `pendingRevision` (o conteúdo público
+ * não muda). Staff aprova (`revisionStatus = approved`) ou rejeita (`rejected` + notas).
+ */
+async function applyListingRevisionRules(args: {
+  data: Record<string, unknown>;
+  operation: string;
+  originalDoc: Record<string, unknown> | undefined;
+  req: Parameters<CollectionBeforeChangeHook>[0]['req'];
+  kind: ListingKind;
+  partnerId: string | number | null;
+}): Promise<void> {
+  const { data, operation, originalDoc, req, kind, partnerId } = args;
+  const staff = hasStaffAccess(req.user);
+  const collectionSlug =
+    kind === 'product' ? 'partner-product-listings' : 'partner-service-listings';
+
+  if (!staff) {
+    for (const field of REVISION_META_FIELDS) delete data[field];
+  }
+  if (operation !== 'update' || !originalDoc) return;
+  const pending = pendingOf(originalDoc);
+  const now = new Date().toISOString();
+
+  if (staff) {
+    const decision = data.revisionStatus;
+    if (decision === 'approved') {
+      if (!pending) throw new APIError('Não há revisão pendente para aprovar.', 400);
+      applyPendingInto(data, pending);
+      await assertListingFilesBelongToPartner(req, partnerId, data, originalDoc);
+      data.pendingRevision = null;
+      data.revisionStatus = 'none';
+      await recordMarketplaceAudit(req, {
+        type: 'listing_revision_approved',
+        partner: partnerId,
+        subjectUser: pending.submittedBy,
+        targetCollection: collectionSlug,
+        targetId: originalDoc.id,
+        data: { changes: pending.changes, notes: data.revisionNotes ?? null },
+      });
+    } else if (decision === 'rejected' && originalDoc.revisionStatus === 'pending') {
+      const notes = typeof data.revisionNotes === 'string' ? data.revisionNotes.trim() : '';
+      if (notes.length < 5) throw new APIError('Informe o motivo da rejeição da revisão.', 400);
+      data.pendingRevision = null;
+      await recordMarketplaceAudit(req, {
+        type: 'listing_revision_rejected',
+        partner: partnerId,
+        subjectUser: pending?.submittedBy ?? null,
+        targetCollection: collectionSlug,
+        targetId: originalDoc.id,
+        data: { changes: pending?.changes ?? {}, notes },
+      });
+    }
+    return;
+  }
+
+  const nextStatus = (data.status ?? originalDoc.status) as ListingStatus;
+  // Saiu do ar por decisão do parceiro (rascunho/moderação/arquivado): a revisão vira o conteúdo
+  // e passa pela moderação normal na próxima publicação.
+  if (!requiresRevision(nextStatus)) {
+    if (pending) {
+      const incoming = { ...data };
+      applyPendingInto(data, pending);
+      Object.assign(data, incoming);
+      data.pendingRevision = null;
+      data.revisionStatus = 'none';
+    }
+    return;
+  }
+  if (!requiresRevision(originalDoc.status)) return;
+
+  const changes = diffListingRevision(kind, originalDoc, data);
+  const merged: RevisionChanges = { ...(pending?.changes ?? {}) };
+  for (const field of revisionFieldsFor(kind)) {
+    if (!(field in data)) continue;
+    if (changes[field]) merged[field] = changes[field];
+    else delete merged[field];
+    delete data[field];
+  }
+  const touched = Object.keys(changes).length > 0;
+  if (Object.keys(merged).length === 0) {
+    if (pending) {
+      data.pendingRevision = null;
+      data.revisionStatus = 'none';
+    }
+    return;
+  }
+  if (!touched && pending) return;
+  data.pendingRevision = { changes: merged, submittedAt: now, submittedBy: req.user?.id ?? null };
+  data.revisionStatus = 'pending';
+  data.revisionSubmittedAt = now;
+  data.revisionSubmittedBy = req.user?.id ?? null;
+  data.revisionNotes = null;
+  await recordMarketplaceAudit(req, {
+    type: 'listing_revision_submitted',
+    partner: partnerId,
+    subjectUser: req.user?.id,
+    targetCollection: collectionSlug,
+    targetId: originalDoc.id,
+    data: { changes },
+  });
+}
 
 const LISTING_MEDIA = 'partner-listing-media' as CollectionSlug;
 
@@ -215,25 +380,45 @@ export const membershipBeforeChange: CollectionBeforeChangeHook = async ({
   req,
 }) => {
   if (!data) return data;
+  // Aceite de convite validado no endpoint (token, e-mail, conta ativa): o próprio convidado
+  // cria/reativa sua associação. Contexto só definível no servidor.
+  if (req.context?.marketplaceInvitationAccept === true) return data;
   const user = req.user;
   if (operation === 'create' && user && !data.invitedBy) data.invitedBy = user.id;
   if (!user || hasStaffAccess(user)) return data;
+
+  // Entrada na equipe só por convite aceito; nunca associação direta sem consentimento.
+  if (operation === 'create') {
+    throw new APIError('Use um convite para adicionar pessoas à equipe.', 403);
+  }
 
   const targetUserId = getRelationId(data.user ?? originalDoc?.user);
   if (targetUserId != null && String(targetUserId) === String(user.id)) {
     throw new APIError('Não é possível alterar a própria associação.', 403);
   }
 
-  const touchesOwner = data.role === 'owner' || originalDoc?.role === 'owner';
-  if (touchesOwner) {
-    const partnerId = getRelationId(data.partner ?? originalDoc?.partner);
-    const refs = await getActiveMemberships(req.payload, user.id);
-    const isOwner = refs.some(
-      (ref) => String(ref.partnerId) === String(partnerId) && ref.role === 'owner',
-    );
-    if (!isOwner) {
-      throw new APIError('Somente um proprietário pode atribuir ou alterar proprietários.', 403);
-    }
+  const partnerId = getRelationId(data.partner ?? originalDoc?.partner);
+  const refs = await getActiveMemberships(req.payload, user.id);
+  const actorRole = refs.find((ref) => String(ref.partnerId) === String(partnerId))?.role;
+  if (actorRole !== 'owner' && actorRole !== 'manager') {
+    throw new APIError('Sem permissão para gerenciar a equipe desta empresa.', 403);
+  }
+
+  if (
+    data.status !== undefined &&
+    data.status !== originalDoc?.status &&
+    data.status !== 'revoked'
+  ) {
+    throw new APIError('Para reativar alguém, envie um novo convite.', 403);
+  }
+
+  const currentRole = originalDoc?.role as MembershipRole | undefined;
+  const nextRole = (data.role ?? currentRole) as MembershipRole | undefined;
+  if (currentRole && nextRole && !canChangeMembershipRole(actorRole, currentRole, nextRole)) {
+    throw new APIError('Somente um proprietário pode atribuir ou alterar proprietários.', 403);
+  }
+  if (currentRole === 'owner' && actorRole !== 'owner') {
+    throw new APIError('Somente um proprietário pode atribuir ou alterar proprietários.', 403);
   }
 
   if (operation === 'update' && originalDoc?.partner && data.partner) {
@@ -242,6 +427,39 @@ export const membershipBeforeChange: CollectionBeforeChangeHook = async ({
     }
   }
   return data;
+};
+
+/** Auditoria de mudanças de papel/status de membros (o aceite de convite registra o próprio evento). */
+export const membershipAfterChange: CollectionAfterChangeHook = async ({
+  doc,
+  previousDoc,
+  operation,
+  req,
+}) => {
+  if (operation !== 'update' || req.context?.marketplaceInvitationAccept === true) return doc;
+  const before = previousDoc as Record<string, unknown> | undefined;
+  const after = doc as Record<string, unknown>;
+  const base = {
+    partner: after.partner,
+    subjectUser: after.user,
+    targetCollection: 'partner-memberships',
+    targetId: after.id,
+  };
+  if (before?.role !== after.role) {
+    await recordMarketplaceAudit(req, {
+      type: 'membership_role_changed',
+      ...base,
+      data: { from: before?.role ?? null, to: after.role },
+    });
+  }
+  if (before?.status !== after.status) {
+    await recordMarketplaceAudit(req, {
+      type: 'membership_status_changed',
+      ...base,
+      data: { from: before?.status ?? null, to: after.status },
+    });
+  }
+  return doc;
 };
 
 /** Decisões exclusivas do comprador; `declined` também pode vir do parceiro (recusar a solicitação). */

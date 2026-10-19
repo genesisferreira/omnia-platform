@@ -11,6 +11,7 @@ import {
   MARKETPLACE_MEDIA_RATE_LIMIT_MAX,
   MARKETPLACE_RATE_LIMIT_WINDOW_MS,
   MARKETPLACE_UPLOAD_MAX_BODY_BYTES,
+  effectiveRevisionValue,
 } from '@omnia/shared';
 
 import { hasPartnerCapability } from '../access/marketplace';
@@ -114,9 +115,9 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
           (await hasPartnerCapability(req.payload, user.id, partnerId, 'edit')));
       if (!allowed) throw new UploadError(404, 'NOT_FOUND', 'Anúncio não encontrado.');
 
-      const images = Array.isArray(listing.images)
-        ? (listing.images as Array<Record<string, unknown>>)
-        : [];
+      // Em anúncio publicado com revisão pendente, acumula sobre a galeria da revisão.
+      const effective = effectiveRevisionValue(listing, 'images');
+      const images = Array.isArray(effective) ? (effective as Array<Record<string, unknown>>) : [];
       if (slot === 'image' && images.length >= MARKETPLACE_LISTING_MAX_IMAGES) {
         throw new UploadError(
           409,
@@ -146,10 +147,13 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
         slot === 'image'
           ? {
               images: [
-                ...images.map((row) => ({
-                  image: getRelationId(row.image),
-                  alt: row.alt ?? undefined,
-                })),
+                ...images.map((row) => {
+                  const id = getRelationId(row.image);
+                  return {
+                    image: typeof id === 'string' && /^\d+$/.test(id) ? Number(id) : id,
+                    alt: row.alt ?? undefined,
+                  };
+                }),
                 { image: mediaId, alt: alt || undefined },
               ],
             }

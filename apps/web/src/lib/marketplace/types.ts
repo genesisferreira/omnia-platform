@@ -124,6 +124,10 @@ export type ListingDoc = {
     alt?: string | null;
   }> | null;
   datasheet?: RelationId | { id: RelationId } | null;
+  revisionStatus?: 'none' | 'pending' | 'approved' | 'rejected' | null;
+  revisionNotes?: string | null;
+  revisionSubmittedAt?: string | null;
+  pendingRevision?: { changes?: Record<string, { from?: unknown; to?: unknown }> } | null;
   createdAt?: string;
   updatedAt?: string;
 };

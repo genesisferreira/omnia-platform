@@ -145,6 +145,8 @@ describe('public origin / browser redirect', () => {
       '/minhas-cotacoes/12',
     );
     assert.equal(resolveEstablishDestination('student', '/minhas-cotacoes'), '/aluno');
+    assert.equal(resolveEstablishDestination('client', '/convite?token=abc'), '/convite?token=abc');
+    assert.equal(resolveEstablishDestination('student', '/convite?token=abc'), '/aluno');
     assert.equal(urlLeaksInternalHost(resolveEstablishDestination('student', '/aluno')), false);
   });
 
