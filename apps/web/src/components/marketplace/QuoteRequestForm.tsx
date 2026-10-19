@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { Alert, Button, Input, Textarea } from '@omnia/ui';
@@ -39,7 +40,10 @@ export function QuoteRequestForm(props: Props) {
       {state.message ? (
         <Alert variant="success" title="Enviado">
           {state.message}
-          {state.publicId ? ` Código: ${state.publicId}.` : ''}
+          {state.publicId ? ` Código: ${state.publicId}.` : ''}{' '}
+          <Link href="/minhas-cotacoes" className="underline">
+            Acompanhar em Minhas cotações
+          </Link>
         </Alert>
       ) : null}
       <div>

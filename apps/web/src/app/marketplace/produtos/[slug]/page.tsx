@@ -5,12 +5,14 @@ import { notFound } from 'next/navigation';
 import { formatPriceCents } from '@omnia/shared';
 import { Container } from '@omnia/ui';
 
+import { ListingMedia } from '@/components/marketplace/ListingMedia';
 import { QuoteRequestForm } from '@/components/marketplace/QuoteRequestForm';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getAdminLoginUrl } from '@/lib/auth/admin-url';
 import { getSessionToken } from '@/lib/auth/session';
 import { fetchPublicMarketplaceListing } from '@/lib/marketplace/client';
 import { PRICE_MODE_LABELS } from '@/lib/marketplace/labels';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildPageMetadata, type JsonLdRecord } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -56,6 +58,7 @@ export default async function MarketplaceProdutoDetailPage({ params }: PageProps
     name: item.title,
     description: item.description || undefined,
     brand: item.brand || undefined,
+    image: item.images.length > 0 ? item.images.map((image) => image.url) : undefined,
     offers: {
       '@type': 'Offer',
       availability: 'https://schema.org/InStock',
@@ -66,7 +69,7 @@ export default async function MarketplaceProdutoDetailPage({ params }: PageProps
 
   return (
     <Container className="py-10 md:py-14">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd as JsonLdRecord} />
       <p className="mb-4 text-sm text-omnia-emerald">
         <Link href="/marketplace/produtos" className="underline">
           Produtos
@@ -82,6 +85,7 @@ export default async function MarketplaceProdutoDetailPage({ params }: PageProps
             </Link>
           </p>
           <p className="text-lg font-medium text-omnia-deep-blue">{priceLabel}</p>
+          <ListingMedia item={item} />
           {item.description ? (
             <div className="whitespace-pre-wrap text-omnia-graphite">{item.description}</div>
           ) : null}

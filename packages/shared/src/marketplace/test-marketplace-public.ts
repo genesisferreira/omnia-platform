@@ -86,6 +86,36 @@ describe('visibilidade pública do marketplace', () => {
     }
   });
 
+  it('arquivos com public:false nunca saem; ficha técnica só PDF liberado', () => {
+    const dto = mapPublicMarketplaceListing(
+      'product',
+      listing({
+        images: [
+          { image: { id: 1, url: '/f/a.jpg', alt: 'ok', public: true } },
+          { image: { id: 2, url: '/f/b.jpg', alt: 'rascunho', public: false } },
+        ],
+        datasheet: { id: 9, url: '/f/ficha.pdf', mimeType: 'application/pdf', alt: 'Ficha', public: true },
+      }),
+    );
+    assert.ok(dto);
+    assert.deepEqual(
+      dto.images.map((image) => image.id),
+      ['1'],
+    );
+    assert.equal(dto.datasheet?.url, '/f/ficha.pdf');
+
+    const hidden = mapPublicMarketplaceListing(
+      'product',
+      listing({ datasheet: { id: 9, url: '/f/ficha.pdf', mimeType: 'application/pdf', public: false } }),
+    );
+    assert.equal(hidden?.datasheet, null);
+    const notPdf = mapPublicMarketplaceListing(
+      'product',
+      listing({ datasheet: { id: 9, url: '/f/x.png', mimeType: 'image/png', public: true } }),
+    );
+    assert.equal(notPdf?.datasheet, null);
+  });
+
   it('retorna null para listing/parceiro invisível ou parceiro não populado', () => {
     assert.equal(mapPublicMarketplaceListing('product', listing({ status: 'draft' })), null);
     assert.equal(mapPublicMarketplaceListing('product', listing({ partner: 7 })), null);

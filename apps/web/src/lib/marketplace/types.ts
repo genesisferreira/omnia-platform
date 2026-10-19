@@ -118,6 +118,8 @@ export type ListingDoc = {
   status: ListingStatus;
   moderationNotes?: string | null;
   publishedAt?: string | null;
+  images?: Array<{ id?: string; image: RelationId | { id: RelationId }; alt?: string | null }> | null;
+  datasheet?: RelationId | { id: RelationId } | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -125,7 +127,7 @@ export type ListingDoc = {
 export type QuoteRequestDoc = {
   id: RelationId;
   publicId: string;
-  partner: RelationId | { id: RelationId };
+  partner: RelationId | { id: RelationId; tradeName?: string | null; companyName?: string | null; slug?: string | null };
   buyerUser?: RelationId | { id: RelationId };
   sourceType: QuoteSourceType;
   productListing?: RelationId | { id: RelationId; title?: string } | null;
@@ -165,6 +167,7 @@ export type QuoteProposalDoc = {
   currentVersionNumber?: number | null;
   validUntil?: string | null;
   sentAt?: string | null;
+  respondedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };

@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { buildListingPublicSlug } from '@omnia/shared';
 import { Alert } from '@omnia/ui';
 
-import { saveListingAction } from '@/app/parceiro/actions';
+import { removeListingFileAction, saveListingAction } from '@/app/parceiro/actions';
+import { ListingFiles } from '@/components/partner/ListingFiles';
 import { ListingForm } from '@/components/partner/ListingForm';
 import { LoadError, NoPartnerNotice, PageHeader, StatusBadge } from '@/components/partner/ui';
 import { getListing, relationId } from '@/lib/marketplace/client';
@@ -81,6 +82,17 @@ export default async function EditarProdutoPage({ params, searchParams }: PagePr
         intents={intents}
         readOnly={!canEdit}
         readOnlyReason={!canEdit ? 'Seu papel nesta empresa é somente leitura.' : undefined}
+      />
+      <ListingFiles
+        kind="product"
+        listingId={id}
+        images={(result.data.images ?? []).flatMap((row) => {
+          const mediaId = relationId(row.image);
+          return mediaId ? [{ mediaId, alt: row.alt ?? null }] : [];
+        })}
+        datasheetId={relationId(result.data.datasheet)}
+        canEdit={canEdit}
+        removeAction={removeListingFileAction.bind(null, 'product', id)}
       />
     </>
   );

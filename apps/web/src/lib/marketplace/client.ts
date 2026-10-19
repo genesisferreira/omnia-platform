@@ -41,6 +41,9 @@ function absolutizeListing(item: PublicMarketplaceListingDto): PublicMarketplace
   return {
     ...item,
     images: item.images.map((image) => ({ ...image, url: resolveMediaUrl(image.url) ?? image.url })),
+    datasheet: item.datasheet
+      ? { ...item.datasheet, url: resolveMediaUrl(item.datasheet.url) ?? item.datasheet.url }
+      : null,
     partner: {
       ...item.partner,
       logo: item.partner.logo
@@ -370,6 +373,40 @@ export function sendProposal(body: Record<string, unknown>) {
     proposal: { id: RelationId; versionNumber: number; totalCents: number };
     quote: { id: RelationId; status: string };
   }>('/api/omnia/marketplace-proposal-send', { method: 'POST', body });
+}
+
+/* Comprador */
+
+/** Cotações do próprio comprador (a ACL do Admin já restringe; o filtro evita misturar com as do parceiro). */
+export function listBuyerQuoteRequests(options: {
+  buyerId: string;
+  page?: number;
+  limit?: number;
+}): Promise<PayloadResult<PaginatedDocs<QuoteRequestDoc>>> {
+  return find<QuoteRequestDoc>('quote-requests', {
+    page: options.page,
+    limit: options.limit ?? 20,
+    sort: '-createdAt',
+    depth: 1,
+    where: { 'where[buyerUser][equals]': options.buyerId },
+  });
+}
+
+/** Propostas visíveis ao comprador (rascunhos ficam ocultos pela ACL). */
+export function listBuyerProposals(quoteId: RelationId): Promise<PayloadResult<PaginatedDocs<QuoteProposalDoc>>> {
+  return find<QuoteProposalDoc>('quote-proposals', {
+    limit: 20,
+    sort: '-createdAt',
+    where: { 'where[quoteRequest][equals]': String(quoteId) },
+  });
+}
+
+export function respondToQuote(body: { quoteId: string; action: 'accept' | 'decline' | 'negotiate'; message?: string }) {
+  return authedFetch<{
+    ok: true;
+    message: string;
+    quote: { id: RelationId; publicId: string | null; status: string };
+  }>('/api/omnia/marketplace-quote-respond', { method: 'POST', body });
 }
 
 /** Cotação criada pelo comprador autenticado (valida e aplica rate limit no Admin). */

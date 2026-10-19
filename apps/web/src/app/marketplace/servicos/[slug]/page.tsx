@@ -4,11 +4,13 @@ import { notFound } from 'next/navigation';
 
 import { Container } from '@omnia/ui';
 
+import { ListingMedia } from '@/components/marketplace/ListingMedia';
 import { QuoteRequestForm } from '@/components/marketplace/QuoteRequestForm';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getAdminLoginUrl } from '@/lib/auth/admin-url';
 import { getSessionToken } from '@/lib/auth/session';
 import { fetchPublicMarketplaceListing } from '@/lib/marketplace/client';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildPageMetadata, type JsonLdRecord } from '@/lib/seo';
 import { getSiteContext } from '@/lib/site-context';
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -54,7 +56,7 @@ export default async function MarketplaceServicoDetailPage({ params }: PageProps
 
   return (
     <Container className="py-10 md:py-14">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd as JsonLdRecord} />
       <p className="mb-4 text-sm text-omnia-emerald">
         <Link href="/marketplace/servicos" className="underline">
           Serviços
@@ -69,6 +71,7 @@ export default async function MarketplaceServicoDetailPage({ params }: PageProps
               {item.partner.displayName}
             </Link>
           </p>
+          <ListingMedia item={item} />
           {item.description ? (
             <div className="whitespace-pre-wrap text-omnia-graphite">{item.description}</div>
           ) : null}

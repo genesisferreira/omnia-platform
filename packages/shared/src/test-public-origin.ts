@@ -137,6 +137,8 @@ describe('public origin / browser redirect', () => {
     assert.equal(resolveEstablishDestination('partner', '/parceiro/cotacoes'), '/parceiro/cotacoes');
     assert.equal(resolveEstablishDestination('partner', '/aluno'), '/parceiro');
     assert.equal(resolveEstablishDestination('partner', '/professor'), '/parceiro');
+    assert.equal(resolveEstablishDestination('client', '/minhas-cotacoes/12'), '/minhas-cotacoes/12');
+    assert.equal(resolveEstablishDestination('student', '/minhas-cotacoes'), '/aluno');
     assert.equal(urlLeaksInternalHost(resolveEstablishDestination('student', '/aluno')), false);
   });
 

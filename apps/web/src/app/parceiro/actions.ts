@@ -161,6 +161,38 @@ export async function saveListingAction(
   redirect(`${ROUTE[kind]}/${savedId}?salvo=1`);
 }
 
+/** Remove uma imagem da galeria ou a ficha técnica. O Admin torna o arquivo privado de novo. */
+export async function removeListingFileAction(
+  kind: MarketplaceListingKind,
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const gate = await requireEditor();
+  if (!gate.ok) return { error: gate.error };
+  const target = field(formData, 'target', 20);
+  const mediaId = field(formData, 'mediaId', 20);
+
+  const current = await getListing(kind, id);
+  if (!current.ok) return { error: current.error };
+  if (relationId(current.data.partner) !== gate.partnerId) {
+    return { error: 'Item não pertence à empresa selecionada.' };
+  }
+
+  let patch: Record<string, unknown>;
+  if (target === 'datasheet') {
+    patch = { datasheet: null };
+  } else if (target === 'image' && /^\d{1,12}$/.test(mediaId)) {
+    const images = (current.data.images ?? []).filter((row) => relationId(row.image) !== mediaId);
+    patch = { images: images.map((row) => ({ image: relationId(row.image), alt: row.alt ?? undefined })) };
+  } else {
+    return { error: 'Arquivo inválido.' };
+  }
+  const updated = await updateListing(kind, id, patch);
+  if (!updated.ok) return { error: updated.error };
+  redirect(`${ROUTE[kind]}/${id}?arquivo=removido`);
+}
+
 /* ------------------------------ Solicitações ------------------------------ */
 
 async function loadOwnQuote(quoteId: string, partnerId: string) {

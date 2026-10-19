@@ -19,6 +19,11 @@ export const MARKETPLACE_QUOTE_RATE_LIMIT_MAX = 10;
 export const MARKETPLACE_QUOTE_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 export const MARKETPLACE_QUOTE_MAX_BODY_BYTES = 16 * 1024;
 
+export const MARKETPLACE_PROPOSAL_RATE_LIMIT_MAX = 30;
+export const MARKETPLACE_RESPOND_RATE_LIMIT_MAX = 30;
+export const MARKETPLACE_MEDIA_RATE_LIMIT_MAX = 60;
+export const MARKETPLACE_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+
 export const MARKETPLACE_QUOTE_DESCRIPTION_MIN = 10;
 export const MARKETPLACE_QUOTE_DESCRIPTION_MAX = 4000;
 
@@ -93,6 +98,8 @@ export type PublicMarketplaceListingDto = {
   priceCents: number | null;
   currency: string;
   images: Array<{ id: string; url: string; alt: string | null }>;
+  /** Ficha técnica em PDF, somente quando liberada junto com o anúncio publicado. */
+  datasheet: { id: string; url: string; title: string | null } | null;
   seoTitle: string | null;
   seoDescription: string | null;
   publishedAt: string | null;
@@ -128,6 +135,12 @@ function mapListingPartner(raw: unknown): PublicMarketplacePartnerDto | null {
   };
 }
 
+/** Arquivo do anúncio liberado para o público. `public: false` explícito nunca sai na API. */
+function isPublicListingFile(value: unknown): boolean {
+  const doc = asRecord(value);
+  return Boolean(doc) && doc!.public !== false;
+}
+
 function isPriceMode(value: unknown): value is PriceMode {
   return typeof value === 'string' && (PRICE_MODE_VALUES as readonly string[]).includes(value);
 }
@@ -158,12 +171,19 @@ export function mapPublicMarketplaceListing(
   if (Array.isArray(doc.images)) {
     for (const item of doc.images) {
       const row = asRecord(item);
-      if (!row) continue;
+      if (!row || !isPublicListingFile(row.image)) continue;
       const media = mapPublicPartnerMedia(row.image);
       if (!media) continue;
       images.push({ id: media.id, url: media.url, alt: asString(row.alt) ?? media.alt });
     }
   }
+
+  const datasheetDoc = asRecord(doc.datasheet);
+  const datasheetUrl = isPublicListingFile(datasheetDoc) ? asString(datasheetDoc?.url) : null;
+  const datasheet =
+    datasheetDoc && datasheetUrl && datasheetDoc.mimeType === 'application/pdf'
+      ? { id: asId(datasheetDoc.id) ?? '', url: datasheetUrl, title: asString(datasheetDoc.alt) }
+      : null;
 
   const seo = asRecord(doc.seo);
   const isProduct = kind === 'product';
@@ -182,6 +202,7 @@ export function mapPublicMarketplaceListing(
     priceCents,
     currency: MARKETPLACE_CURRENCY,
     images,
+    datasheet,
     seoTitle: isProduct ? asString(seo?.title) : null,
     seoDescription: isProduct ? asString(seo?.description) : null,
     publishedAt: asDateString(doc.publishedAt),

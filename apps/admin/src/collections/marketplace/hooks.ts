@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import type {
+  CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionBeforeValidateHook,
   CollectionSlug,
@@ -93,7 +94,110 @@ export const listingBeforeChange: CollectionBeforeChangeHook = async ({
     }
   }
 
+  await assertListingFilesBelongToPartner(req, partnerId, data, originalDoc);
   return data;
+};
+
+const LISTING_MEDIA = 'partner-listing-media' as CollectionSlug;
+
+type ListingFileRefs = { images: Array<string | number>; datasheet: string | number | null };
+
+function listingFileRefs(doc: Record<string, unknown> | null | undefined): ListingFileRefs {
+  const images: Array<string | number> = [];
+  if (Array.isArray(doc?.images)) {
+    for (const row of doc.images as Array<Record<string, unknown> | null>) {
+      const id = getRelationId(row?.image);
+      if (id != null) images.push(id);
+    }
+  }
+  return { images, datasheet: getRelationId(doc?.datasheet) };
+}
+
+/**
+ * Anexos só do próprio parceiro e do tipo certo. Sem isso, um parceiro poderia referenciar o
+ * arquivo privado de outra empresa e torná-lo público ao publicar o anúncio.
+ */
+async function assertListingFilesBelongToPartner(
+  req: Parameters<CollectionBeforeChangeHook>[0]['req'],
+  partnerId: string | number | null,
+  data: Record<string, unknown>,
+  originalDoc: Record<string, unknown> | undefined,
+): Promise<void> {
+  const touchesImages = 'images' in data;
+  const touchesDatasheet = 'datasheet' in data;
+  if (!touchesImages && !touchesDatasheet) return;
+
+  const refs = listingFileRefs({
+    images: touchesImages ? data.images : originalDoc?.images,
+    datasheet: touchesDatasheet ? data.datasheet : originalDoc?.datasheet,
+  });
+  const ids = [...new Set([...refs.images, ...(refs.datasheet != null ? [refs.datasheet] : [])].map(String))];
+  if (ids.length === 0) return;
+  if (partnerId == null) throw new APIError('Parceiro obrigatório para anexar arquivos.', 400);
+
+  const found = await req.payload.find({
+    collection: LISTING_MEDIA,
+    where: { id: { in: ids } },
+    limit: ids.length,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  const byId = new Map(
+    (found.docs as unknown as Array<Record<string, unknown>>).map((doc) => [String(doc.id), doc]),
+  );
+  const check = (id: string | number, kind: 'image' | 'datasheet') => {
+    const doc = byId.get(String(id));
+    if (!doc || String(getRelationId(doc.partner)) !== String(partnerId)) {
+      throw new APIError('Arquivo inválido para este parceiro.', 403);
+    }
+    if (doc.kind !== kind) {
+      throw new APIError(kind === 'image' ? 'Use uma imagem na galeria.' : 'A ficha técnica deve ser um PDF.', 400);
+    }
+  };
+  refs.images.forEach((id) => check(id, 'image'));
+  if (refs.datasheet != null) check(refs.datasheet, 'datasheet');
+}
+
+/**
+ * Mantém `public` dos anexos alinhado ao status do anúncio: só publicado expõe arquivos;
+ * anexos removidos voltam a ser privados.
+ */
+export const listingAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+  const current = listingFileRefs(doc as Record<string, unknown>);
+  const previous = listingFileRefs(previousDoc as Record<string, unknown> | undefined);
+  const attached = [...current.images, ...(current.datasheet != null ? [current.datasheet] : [])].map(String);
+  const detached = [...previous.images, ...(previous.datasheet != null ? [previous.datasheet] : [])]
+    .map(String)
+    .filter((id) => !attached.includes(id));
+  const visible = (doc as Record<string, unknown>).status === 'published';
+
+  // Sem isso, um arquivo recém-enviado na mesma requisição seria regravado em cada anexo.
+  const pendingFile = req.file;
+  req.file = undefined;
+  try {
+    if (attached.length > 0) {
+      await req.payload.update({
+        collection: LISTING_MEDIA,
+        where: { id: { in: attached } },
+        data: { public: visible } as never,
+        overrideAccess: true,
+        req,
+      });
+    }
+    if (detached.length > 0) {
+      await req.payload.update({
+        collection: LISTING_MEDIA,
+        where: { id: { in: detached } },
+        data: { public: false } as never,
+        overrideAccess: true,
+        req,
+      });
+    }
+  } finally {
+    req.file = pendingFile;
+  }
+  return doc;
 };
 
 export const membershipBeforeChange: CollectionBeforeChangeHook = async ({

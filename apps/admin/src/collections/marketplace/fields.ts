@@ -3,6 +3,7 @@ import type { Field, FieldAccess, Option } from 'payload';
 import {
   LISTING_STATUS_VALUES,
   MARKETPLACE_CURRENCY,
+  MARKETPLACE_LISTING_MAX_IMAGES,
   MEMBERSHIP_ROLE_VALUES,
   MEMBERSHIP_STATUS_VALUES,
   PRICE_MODE_VALUES,
@@ -177,16 +178,25 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
       type: 'array',
       label: 'Imagens',
       labels: { singular: 'Imagem', plural: 'Imagens' },
+      maxRows: MARKETPLACE_LISTING_MAX_IMAGES,
       fields: [
         {
           name: 'image',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: 'partner-listing-media',
           required: true,
           label: 'Imagem',
+          filterOptions: ({ data }) => ({ kind: { equals: 'image' }, partner: { equals: data?.partner } }),
         },
-        { name: 'alt', type: 'text', label: 'Texto alternativo' },
+        { name: 'alt', type: 'text', label: 'Texto alternativo', maxLength: 160 },
       ],
+    },
+    {
+      name: 'datasheet',
+      type: 'upload',
+      relationTo: 'partner-listing-media',
+      label: 'Ficha técnica (PDF)',
+      filterOptions: ({ data }) => ({ kind: { equals: 'datasheet' }, partner: { equals: data?.partner } }),
     },
     ...(isProduct
       ? ([

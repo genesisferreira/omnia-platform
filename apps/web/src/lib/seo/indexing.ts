@@ -15,6 +15,7 @@ export const PRIVATE_PATH_PREFIXES = [
   '/login',
   '/cadastro',
   '/minha-conta',
+  '/minhas-cotacoes',
   '/dispositivo',
   '/escola',
 ] as const;

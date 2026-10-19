@@ -2,6 +2,8 @@ import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload';
 import { commitTransaction, initTransaction, killTransaction } from 'payload';
 
 import {
+  MARKETPLACE_PROPOSAL_RATE_LIMIT_MAX,
+  MARKETPLACE_RATE_LIMIT_WINDOW_MS,
   PROPOSAL_MAX_BODY_BYTES,
   QUOTE_TERMINAL_STATUSES,
   canTransitionQuote,
@@ -13,6 +15,7 @@ import {
 import { hasPartnerCapability } from '../access/marketplace';
 import { getRelationId, hasStaffAccess } from '../access/rbac';
 import { isTrustedPartnerOrigin } from '../lib/partner-register';
+import { enforceMarketplaceRateLimit } from './marketplace-rate-limit';
 
 const QUOTE_REQUESTS = 'quote-requests' as CollectionSlug;
 const PROPOSALS = 'quote-proposals' as CollectionSlug;
@@ -58,6 +61,14 @@ export const marketplaceProposalSendEndpoint: Endpoint = {
     const validated = validateProposalBody((await req.json?.().catch(() => null)) ?? null);
     if (!validated.ok) return fail(422, 'UNPROCESSABLE', validated.message);
     const { data, totals } = validated;
+
+    const limited = await enforceMarketplaceRateLimit({
+      scope: 'marketplace-proposal-send',
+      userId: user.id,
+      max: MARKETPLACE_PROPOSAL_RATE_LIMIT_MAX,
+      windowMs: MARKETPLACE_RATE_LIMIT_WINDOW_MS,
+    });
+    if (limited) return limited;
 
     const shouldCommit = await initTransaction(req);
     try {
