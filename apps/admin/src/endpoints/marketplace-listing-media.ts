@@ -9,9 +9,11 @@ import {
 import {
   MARKETPLACE_LISTING_MAX_IMAGES,
   MARKETPLACE_MEDIA_RATE_LIMIT_MAX,
+  MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE,
   MARKETPLACE_RATE_LIMIT_WINDOW_MS,
   MARKETPLACE_UPLOAD_MAX_BODY_BYTES,
   effectiveRevisionValue,
+  isMarketplacePdfUploadEnabled,
 } from '@omnia/shared';
 
 import { hasPartnerCapability } from '../access/marketplace';
@@ -86,6 +88,9 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
     const alt = str(fields.alt, 160);
     if (!kind || !slot)
       return fail(422, 'UNPROCESSABLE', 'Informe o tipo do anúncio e do arquivo.');
+    if (slot === 'datasheet' && !isMarketplacePdfUploadEnabled()) {
+      return fail(403, 'PDF_UPLOAD_DISABLED', MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE);
+    }
     if (
       !(typeof listingId === 'number' && Number.isInteger(listingId) && listingId > 0) &&
       !(typeof listingId === 'string' && /^\d{1,12}$/.test(listingId))
@@ -183,6 +188,11 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
         const message =
           error instanceof Error && error.message ? error.message : 'Arquivo inválido.';
         return fail(status, status === 413 ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST', message);
+      }
+      if (status === 403) {
+        const message =
+          error instanceof Error && error.message ? error.message : 'Envio não permitido.';
+        return fail(403, 'FORBIDDEN', message);
       }
       // Erros de validação do Payload (tipo de arquivo) chegam como ValidationError.
       if ((error as { name?: string } | null)?.name === 'ValidationError') {

@@ -4,6 +4,19 @@ export const MARKETPLACE_LISTING_MAX_IMAGES = 8;
 /** Corpo multipart máximo aceito pela rota de upload (maior arquivo + folga dos campos). */
 export const MARKETPLACE_UPLOAD_MAX_BODY_BYTES = MARKETPLACE_DATASHEET_MAX_BYTES + 256 * 1024;
 
+export const MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE =
+  'O envio de ficha técnica em PDF está temporariamente desabilitado.';
+
+/**
+ * Upload de ficha técnica em PDF do Marketplace. Desligado por padrão: só liga com
+ * `MARKETPLACE_PDF_UPLOAD_ENABLED=true` explícito no ambiente do servidor.
+ */
+export function isMarketplacePdfUploadEnabled(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return env.MARKETPLACE_PDF_UPLOAD_ENABLED?.trim().toLowerCase() === 'true';
+}
+
 export type MarketplaceFileType = {
   kind: 'image' | 'pdf';
   mime: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';

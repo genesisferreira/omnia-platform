@@ -3,7 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
 
-import { MARKETPLACE_LISTING_MAX_IMAGES } from '@omnia/shared';
+import {
+  MARKETPLACE_LISTING_MAX_IMAGES,
+  MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE,
+} from '@omnia/shared';
 import { Alert, Button, Input } from '@omnia/ui';
 
 import type { ActionState } from '@/app/parceiro/actions';
@@ -17,6 +20,7 @@ type Props = {
   images: Array<{ mediaId: string; alt: string | null }>;
   datasheetId: string | null;
   canEdit: boolean;
+  pdfUploadEnabled: boolean;
   removeAction: RemoveAction;
 };
 
@@ -182,7 +186,7 @@ export function ListingFiles(props: Props) {
         ) : (
           <p className="mt-1 text-sm text-omnia-graphite-light">Nenhuma ficha técnica anexada.</p>
         )}
-        {props.canEdit ? (
+        {props.canEdit && props.pdfUploadEnabled ? (
           <div className="mt-3">
             <UploadForm
               kind={props.kind}
@@ -193,6 +197,11 @@ export function ListingFiles(props: Props) {
               hint="Somente PDF, até 10 MB."
             />
           </div>
+        ) : props.canEdit ? (
+          <p className="mt-3 text-sm text-omnia-graphite-light">
+            {MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE} Informe os dados técnicos na descrição do
+            anúncio.
+          </p>
         ) : null}
       </div>
     </section>

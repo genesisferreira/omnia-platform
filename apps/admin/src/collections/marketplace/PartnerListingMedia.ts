@@ -8,7 +8,9 @@ import { APIError } from 'payload';
 import {
   MARKETPLACE_DATASHEET_MAX_BYTES,
   MARKETPLACE_IMAGE_MAX_BYTES,
+  MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE,
   detectMarketplaceFileType,
+  isMarketplacePdfUploadEnabled,
 } from '@omnia/shared';
 
 import {
@@ -64,6 +66,10 @@ const validateListingUpload: CollectionBeforeOperationHook = async ({ args, oper
 
   const data = (args as { data?: Record<string, unknown> }).data ?? {};
   const kind = data.kind === 'datasheet' ? 'datasheet' : 'image';
+  // Vale para qualquer origem (painel, REST, Admin, Local API) e para staff.
+  if ((kind === 'datasheet' || detected.kind === 'pdf') && !isMarketplacePdfUploadEnabled()) {
+    throw new APIError(MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE, 403);
+  }
   if (kind === 'image' && detected.kind !== 'image') {
     throw new APIError('Imagens devem ser JPEG, PNG ou WebP.', 400);
   }

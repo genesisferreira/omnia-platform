@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { buildListingPublicSlug } from '@omnia/shared';
+import { buildListingPublicSlug, isMarketplacePdfUploadEnabled } from '@omnia/shared';
 import { Alert } from '@omnia/ui';
 
 import { removeListingFileAction, saveListingAction } from '@/app/parceiro/actions';
@@ -96,6 +96,7 @@ export default async function EditarProdutoPage({ params, searchParams }: PagePr
         })}
         datasheetId={relationId(editing.datasheet)}
         canEdit={canEdit}
+        pdfUploadEnabled={isMarketplacePdfUploadEnabled()}
         removeAction={removeListingFileAction.bind(null, 'product', id)}
       />
     </>

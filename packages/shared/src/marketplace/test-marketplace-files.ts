@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { detectMarketplaceFileType } from './files';
+import { detectMarketplaceFileType, isMarketplacePdfUploadEnabled } from './files';
 
 const bytes = (...values: number[]) => Uint8Array.from(values);
 const text = (value: string) => new TextEncoder().encode(value);
@@ -23,7 +23,7 @@ describe('detectMarketplaceFileType', () => {
     assert.equal(detectMarketplaceFileType(text('%PDF-1.7\n'))?.kind, 'pdf');
   });
 
-  it('rejeita SVG, HTML, executÃ¡vel e arquivos vazios', () => {
+  it('rejeita SVG, HTML, executável e arquivos vazios', () => {
     assert.equal(
       detectMarketplaceFileType(text('<svg xmlns="http://www.w3.org/2000/svg"><script/></svg>')),
       null,
@@ -32,5 +32,19 @@ describe('detectMarketplaceFileType', () => {
     assert.equal(detectMarketplaceFileType(bytes(0x4d, 0x5a, 0x90, 0x00)), null);
     assert.equal(detectMarketplaceFileType(new Uint8Array()), null);
     assert.equal(detectMarketplaceFileType(text('RIFF\u0000\u0000\u0000\u0000WAVE')), null);
+  });
+});
+
+describe('isMarketplacePdfUploadEnabled', () => {
+  it('fica desligado por padrão e com qualquer valor diferente de "true"', () => {
+    assert.equal(isMarketplacePdfUploadEnabled({}), false);
+    for (const value of ['', 'false', '0', '1', 'yes', 'on', 'enabled']) {
+      assert.equal(isMarketplacePdfUploadEnabled({ MARKETPLACE_PDF_UPLOAD_ENABLED: value }), false);
+    }
+  });
+
+  it('liga somente com "true" explícito', () => {
+    assert.equal(isMarketplacePdfUploadEnabled({ MARKETPLACE_PDF_UPLOAD_ENABLED: 'true' }), true);
+    assert.equal(isMarketplacePdfUploadEnabled({ MARKETPLACE_PDF_UPLOAD_ENABLED: ' TRUE ' }), true);
   });
 });

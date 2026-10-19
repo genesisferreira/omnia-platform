@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { MARKETPLACE_UPLOAD_MAX_BODY_BYTES } from '@omnia/shared';
+import {
+  MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE,
+  MARKETPLACE_UPLOAD_MAX_BODY_BYTES,
+  isMarketplacePdfUploadEnabled,
+} from '@omnia/shared';
 
 import { getAdminBaseUrl } from '@/lib/auth/admin-url';
 import { getSessionToken } from '@/lib/auth/session';
@@ -44,6 +48,9 @@ export async function POST(request: Request) {
     !/^\d{1,12}$/.test(listingId)
   ) {
     return json(422, { ok: false, message: 'Dados do envio inválidos.' });
+  }
+  if (slot === 'datasheet' && !isMarketplacePdfUploadEnabled()) {
+    return json(403, { ok: false, message: MARKETPLACE_PDF_UPLOAD_DISABLED_MESSAGE });
   }
 
   const upstream = new FormData();
