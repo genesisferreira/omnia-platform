@@ -94,12 +94,18 @@ export default async function ParceirosPage({ searchParams }: PageProps) {
           <p className="text-base text-omnia-graphite-light">
             Localize parceiros de refrigeração por proximidade, categoria e especialidade.
           </p>
-          <p>
+          <p className="flex flex-wrap gap-x-6 gap-y-2">
             <Link
               href="/parceiros/cadastro"
               className="text-sm font-medium text-omnia-deep-blue underline-offset-4 hover:underline"
             >
-              Seja um parceiro
+              Seja um parceiro Omnia Frigo
+            </Link>
+            <Link
+              href="/marketplace/seja-um-fornecedor"
+              className="text-sm font-medium text-omnia-emerald underline-offset-4 hover:underline"
+            >
+              Quero vender no Marketplace
             </Link>
           </p>
         </header>
