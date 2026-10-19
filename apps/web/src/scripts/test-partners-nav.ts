@@ -8,6 +8,8 @@ import { INSTITUTIONAL_NAV_ITEMS } from '../components/layout/nav-items';
 import {
   isFocusLeavingContainer,
   isPointerOutsideContainer,
+  shouldAlignMenuRight,
+  toggleOpenMenu,
 } from '../components/layout/partners-menu';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -92,8 +94,22 @@ describe('header partners dropdown regression', () => {
   it('closes partners dropdown only when focus leaves the container', () => {
     assert.match(headerSource, /isFocusLeavingContainer/);
     assert.match(headerSource, /isPointerOutsideContainer/);
-    assert.match(headerSource, /aria-expanded=\{partnersOpen\}/);
-    assert.match(headerSource, /aria-controls=\{partnersId\}/);
+    assert.match(headerSource, /aria-expanded=\{open\}/);
+    assert.match(headerSource, /aria-controls=\{panelId\}/);
+  });
+
+  it('keeps one open menu at a time with a unique panel id per dropdown', () => {
+    // Regressão: um booleano/ref/id compartilhado abria Parceiros e Marketplace juntos.
+    assert.equal(headerSource.includes('partnersOpen'), false);
+    assert.equal(headerSource.includes('partnersDesktopRef'), false);
+    assert.match(headerSource, /useState<string \| null>\(null\)/);
+    assert.match(headerSource, /const panelId = `\$\{baseId\}-menu-\$\{index\}`/);
+    assert.match(headerSource, /toggleOpenMenu\(current, key\)/);
+  });
+
+  it('closes menus on navigation', () => {
+    assert.match(headerSource, /usePathname\(\)/);
+    assert.match(headerSource, /\}, \[pathname\]\);/);
   });
 
   it('renders partner children with InstitutionalNavLink (real links)', () => {
@@ -103,8 +119,8 @@ describe('header partners dropdown regression', () => {
   });
 
   it('closes menu after partner link click without gating on auth', () => {
-    assert.match(headerSource, /onClick=\{\(\) => setPartnersOpen\(false\)\}/);
-    assert.match(headerSource, /onClick=\{closeMenu\}/);
+    assert.match(headerSource, /onClick=\{\(\) => setOpenKey\(null\)\}/);
+    assert.match(headerSource, /onClick=\{\(\) => setMenuOpen\(false\)\}/);
     assert.equal(headerSource.includes('/api/me'), false);
     assert.equal(headerSource.includes('authenticated'), false);
   });
@@ -115,9 +131,33 @@ describe('header partners dropdown regression', () => {
     assert.match(accountNavSource, /setAuthenticated\(false\)/);
   });
 
-  it('Escape closes open menus', () => {
-    assert.match(headerSource, /event\.key === 'Escape'/);
-    assert.match(headerSource, /\[menuOpen, partnersOpen\]/);
+  it('Escape closes open menus and returns focus to the trigger', () => {
+    assert.match(headerSource, /event\.key !== 'Escape'/);
+    assert.match(headerSource, /triggers\.current\.get\(openKey\)\?\.focus\(\)/);
+    assert.match(headerSource, /\[menuOpen, openKey\]/);
+  });
+});
+
+describe('dropdown open state and positioning', () => {
+  it('opening another menu closes the previous one; clicking the open one closes it', () => {
+    assert.equal(toggleOpenMenu(null, '/parceiros'), '/parceiros');
+    assert.equal(toggleOpenMenu('/parceiros', '/marketplace'), '/marketplace');
+    assert.equal(toggleOpenMenu('/marketplace', '/marketplace'), null);
+  });
+
+  it('aligns the panel right when it would overflow the viewport', () => {
+    assert.equal(shouldAlignMenuRight(100, 240, 1366), false);
+    assert.equal(shouldAlignMenuRight(1200, 240, 1366), true);
+    assert.equal(shouldAlignMenuRight(1118, 240, 1366), false);
+    assert.equal(shouldAlignMenuRight(1119, 240, 1366), true);
+  });
+
+  it('marketplace menu offers the supplier entry once', () => {
+    const marketplace = INSTITUTIONAL_NAV_ITEMS.find((item) => item.label === 'Marketplace');
+    const supplier = marketplace?.children?.filter(
+      (child) => child.href === '/marketplace/seja-um-fornecedor',
+    );
+    assert.equal(supplier?.length, 1);
   });
 });
 

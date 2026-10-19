@@ -1,6 +1,6 @@
 /**
- * Helpers do dropdown Parceiros (disclosure).
- * Fecha só quando o foco/clique sai do contentor — nunca no blur interno para os links.
+ * Helpers dos dropdowns do menu principal (padrão disclosure).
+ * Um único menu aberto por vez; fecha quando o foco/clique sai do contentor do menu aberto.
  */
 
 function isDomNode(value: EventTarget | null): value is Node {
@@ -40,4 +40,25 @@ export function isPointerOutsideContainer(
   }
 
   return !container.contains(target);
+}
+
+/** Clique no botão de um menu: abre esse e fecha qualquer outro; clicar no aberto fecha. */
+export function toggleOpenMenu(current: string | null, key: string): string | null {
+  return current === key ? null : key;
+}
+
+/** Margem mínima entre o painel e a borda da janela. */
+export const MENU_VIEWPORT_MARGIN = 8;
+
+/**
+ * Alinha o painel à direita do botão quando, alinhado à esquerda, ele ultrapassaria a borda
+ * direita da janela (evita menu cortado nos últimos itens do cabeçalho).
+ */
+export function shouldAlignMenuRight(
+  triggerLeft: number,
+  panelWidth: number,
+  viewportWidth: number,
+  margin = MENU_VIEWPORT_MARGIN,
+): boolean {
+  return triggerLeft + panelWidth > viewportWidth - margin;
 }
