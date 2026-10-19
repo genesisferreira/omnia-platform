@@ -118,7 +118,11 @@ export type ListingDoc = {
   status: ListingStatus;
   moderationNotes?: string | null;
   publishedAt?: string | null;
-  images?: Array<{ id?: string; image: RelationId | { id: RelationId }; alt?: string | null }> | null;
+  images?: Array<{
+    id?: string;
+    image: RelationId | { id: RelationId };
+    alt?: string | null;
+  }> | null;
   datasheet?: RelationId | { id: RelationId } | null;
   createdAt?: string;
   updatedAt?: string;
@@ -127,7 +131,14 @@ export type ListingDoc = {
 export type QuoteRequestDoc = {
   id: RelationId;
   publicId: string;
-  partner: RelationId | { id: RelationId; tradeName?: string | null; companyName?: string | null; slug?: string | null };
+  partner:
+    | RelationId
+    | {
+        id: RelationId;
+        tradeName?: string | null;
+        companyName?: string | null;
+        slug?: string | null;
+      };
   buyerUser?: RelationId | { id: RelationId };
   sourceType: QuoteSourceType;
   productListing?: RelationId | { id: RelationId; title?: string } | null;
@@ -207,5 +218,4 @@ export type PaginatedDocs<T> = {
 };
 
 export type PayloadResult<T> =
-  | { ok: true; status: number; data: T }
-  | { ok: false; status: number; error: string };
+  { ok: true; status: number; data: T } | { ok: false; status: number; error: string };

@@ -27,7 +27,14 @@ export const QuoteProposals: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     group: GROUP,
-    defaultColumns: ['title', 'quoteRequest', 'partner', 'status', 'currentVersionNumber', 'updatedAt'],
+    defaultColumns: [
+      'title',
+      'quoteRequest',
+      'partner',
+      'status',
+      'currentVersionNumber',
+      'updatedAt',
+    ],
     description: 'Propostas enviadas por parceiros em resposta a cotações.',
   },
   timestamps: true,

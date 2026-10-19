@@ -20,13 +20,18 @@ function startsWith(buffer: Uint8Array, bytes: readonly number[], offset = 0): b
  * e executáveis renomeados para `.jpg` ou `.pdf` são rejeitados.
  */
 export function detectMarketplaceFileType(buffer: Uint8Array): MarketplaceFileType | null {
-  if (startsWith(buffer, [0xff, 0xd8, 0xff])) return { kind: 'image', mime: 'image/jpeg', ext: 'jpg' };
+  if (startsWith(buffer, [0xff, 0xd8, 0xff]))
+    return { kind: 'image', mime: 'image/jpeg', ext: 'jpg' };
   if (startsWith(buffer, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
     return { kind: 'image', mime: 'image/png', ext: 'png' };
   }
-  if (startsWith(buffer, [0x52, 0x49, 0x46, 0x46]) && startsWith(buffer, [0x57, 0x45, 0x42, 0x50], 8)) {
+  if (
+    startsWith(buffer, [0x52, 0x49, 0x46, 0x46]) &&
+    startsWith(buffer, [0x57, 0x45, 0x42, 0x50], 8)
+  ) {
     return { kind: 'image', mime: 'image/webp', ext: 'webp' };
   }
-  if (startsWith(buffer, [0x25, 0x50, 0x44, 0x46, 0x2d])) return { kind: 'pdf', mime: 'application/pdf', ext: 'pdf' };
+  if (startsWith(buffer, [0x25, 0x50, 0x44, 0x46, 0x2d]))
+    return { kind: 'pdf', mime: 'application/pdf', ext: 'pdf' };
   return null;
 }

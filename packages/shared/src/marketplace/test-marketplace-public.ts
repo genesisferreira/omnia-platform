@@ -51,19 +51,31 @@ const listing = (overrides: Record<string, unknown> = {}) => ({
 
 describe('visibilidade pública do marketplace', () => {
   it('exige listing published e parceiro aprovado+ativo+publicado', () => {
-    assert.equal(isMarketplaceListingPubliclyVisible({ status: 'published' }, visiblePartner), true);
+    assert.equal(
+      isMarketplaceListingPubliclyVisible({ status: 'published' }, visiblePartner),
+      true,
+    );
     assert.equal(isMarketplaceListingPubliclyVisible({ status: 'pending' }, visiblePartner), false);
     assert.equal(isMarketplaceListingPubliclyVisible({ status: 'draft' }, visiblePartner), false);
     assert.equal(
-      isMarketplaceListingPubliclyVisible({ status: 'published' }, { ...visiblePartner, status: 'pending' }),
+      isMarketplaceListingPubliclyVisible(
+        { status: 'published' },
+        { ...visiblePartner, status: 'pending' },
+      ),
       false,
     );
     assert.equal(
-      isMarketplaceListingPubliclyVisible({ status: 'published' }, { ...visiblePartner, active: false }),
+      isMarketplaceListingPubliclyVisible(
+        { status: 'published' },
+        { ...visiblePartner, active: false },
+      ),
       false,
     );
     assert.equal(
-      isMarketplaceListingPubliclyVisible({ status: 'published' }, { ...visiblePartner, publishedAt: null }),
+      isMarketplaceListingPubliclyVisible(
+        { status: 'published' },
+        { ...visiblePartner, publishedAt: null },
+      ),
       false,
     );
     assert.equal(isMarketplaceListingPubliclyVisible({ status: 'published' }, 3 as never), false);
@@ -81,7 +93,13 @@ describe('visibilidade pública do marketplace', () => {
     for (const key of MARKETPLACE_LISTING_PRIVATE_FIELD_KEYS) {
       assert.equal(serialized.includes(`"${key}"`), false, `vazou ${key}`);
     }
-    for (const leaked of ['SKU-INTERNO', 'nota interna', 'segredo', 'interno@frio.sul', '00000000000000']) {
+    for (const leaked of [
+      'SKU-INTERNO',
+      'nota interna',
+      'segredo',
+      'interno@frio.sul',
+      '00000000000000',
+    ]) {
       assert.equal(serialized.includes(leaked), false, `vazou ${leaked}`);
     }
   });
@@ -94,7 +112,13 @@ describe('visibilidade pública do marketplace', () => {
           { image: { id: 1, url: '/f/a.jpg', alt: 'ok', public: true } },
           { image: { id: 2, url: '/f/b.jpg', alt: 'rascunho', public: false } },
         ],
-        datasheet: { id: 9, url: '/f/ficha.pdf', mimeType: 'application/pdf', alt: 'Ficha', public: true },
+        datasheet: {
+          id: 9,
+          url: '/f/ficha.pdf',
+          mimeType: 'application/pdf',
+          alt: 'Ficha',
+          public: true,
+        },
       }),
     );
     assert.ok(dto);
@@ -106,7 +130,9 @@ describe('visibilidade pública do marketplace', () => {
 
     const hidden = mapPublicMarketplaceListing(
       'product',
-      listing({ datasheet: { id: 9, url: '/f/ficha.pdf', mimeType: 'application/pdf', public: false } }),
+      listing({
+        datasheet: { id: 9, url: '/f/ficha.pdf', mimeType: 'application/pdf', public: false },
+      }),
     );
     assert.equal(hidden?.datasheet, null);
     const notPdf = mapPublicMarketplaceListing(
@@ -120,13 +146,19 @@ describe('visibilidade pública do marketplace', () => {
     assert.equal(mapPublicMarketplaceListing('product', listing({ status: 'draft' })), null);
     assert.equal(mapPublicMarketplaceListing('product', listing({ partner: 7 })), null);
     assert.equal(
-      mapPublicMarketplaceListing('service', listing({ partner: { ...visiblePartner, status: 'suspended' } })),
+      mapPublicMarketplaceListing(
+        'service',
+        listing({ partner: { ...visiblePartner, status: 'suspended' } }),
+      ),
       null,
     );
   });
 
   it('sob consulta nunca expõe preço; serviço não expõe marca', () => {
-    const onRequest = mapPublicMarketplaceListing('service', listing({ priceMode: 'on_request', price: 500 }));
+    const onRequest = mapPublicMarketplaceListing(
+      'service',
+      listing({ priceMode: 'on_request', price: 500 }),
+    );
     assert.equal(onRequest?.priceCents, null);
     assert.equal(onRequest?.brand, null);
     assert.equal(describePrice('on_request', 500), 'Sob consulta');
@@ -136,7 +168,10 @@ describe('visibilidade pública do marketplace', () => {
 describe('slug público', () => {
   it('compõe e separa slug-id', () => {
     assert.equal(buildListingPublicSlug('compressor', 5), 'compressor-5');
-    assert.deepEqual(parseListingPublicSlug('compressor-scroll-12'), { slug: 'compressor-scroll', id: '12' });
+    assert.deepEqual(parseListingPublicSlug('compressor-scroll-12'), {
+      slug: 'compressor-scroll',
+      id: '12',
+    });
     assert.deepEqual(parseListingPublicSlug('sem-id'), { slug: 'sem-id', id: null });
   });
 });
@@ -164,10 +199,20 @@ describe('preço em centavos', () => {
 });
 
 describe('validateQuoteRequestBody', () => {
-  const base = { sourceType: 'product', listingId: 4, description: 'Preciso de 3 unidades urgentes.' };
+  const base = {
+    sourceType: 'product',
+    listingId: 4,
+    description: 'Preciso de 3 unidades urgentes.',
+  };
 
   it('aceita produto com listing e normaliza campos', () => {
-    const result = validateQuoteRequestBody({ ...base, partnerId: '7', quantity: '3', city: ' Curitiba ', state: 'pr' });
+    const result = validateQuoteRequestBody({
+      ...base,
+      partnerId: '7',
+      quantity: '3',
+      city: ' Curitiba ',
+      state: 'pr',
+    });
     assert.equal(result.ok, true);
     if (result.ok) {
       assert.equal(result.data.quantity, 3);
@@ -177,8 +222,16 @@ describe('validateQuoteRequestBody', () => {
     }
   });
   it('projeto exige parceiro e ignora listing', () => {
-    assert.equal(validateQuoteRequestBody({ sourceType: 'project', description: base.description }).ok, false);
-    const ok = validateQuoteRequestBody({ sourceType: 'project', partnerId: 9, listingId: 3, description: base.description });
+    assert.equal(
+      validateQuoteRequestBody({ sourceType: 'project', description: base.description }).ok,
+      false,
+    );
+    const ok = validateQuoteRequestBody({
+      sourceType: 'project',
+      partnerId: 9,
+      listingId: 3,
+      description: base.description,
+    });
     assert.equal(ok.ok, true);
     if (ok.ok) assert.equal(ok.data.listingId, null);
   });
@@ -186,7 +239,10 @@ describe('validateQuoteRequestBody', () => {
     assert.equal(validateQuoteRequestBody({ ...base, sourceType: 'x' }).ok, false);
     assert.equal(validateQuoteRequestBody({ ...base, listingId: undefined }).ok, false);
     assert.equal(validateQuoteRequestBody({ ...base, description: 'curto' }).ok, false);
-    assert.equal(validateQuoteRequestBody({ ...base, description: '<script>alert(1)</script> aaaaaaaa' }).ok, false);
+    assert.equal(
+      validateQuoteRequestBody({ ...base, description: '<script>alert(1)</script> aaaaaaaa' }).ok,
+      false,
+    );
     assert.equal(validateQuoteRequestBody({ ...base, quantity: 0 }).ok, false);
     assert.equal(validateQuoteRequestBody({ ...base, quantity: 1.5 }).ok, false);
     assert.equal(validateQuoteRequestBody({ ...base, state: 'PRR' }).ok, false);
@@ -196,7 +252,9 @@ describe('validateQuoteRequestBody', () => {
 
 describe('parsePublicMarketplaceQuery', () => {
   it('aplica limites e normaliza', () => {
-    const q = parsePublicMarketplaceQuery(new URLSearchParams('q=%20  compressor   scroll&page=0&limit=999&brand=X'));
+    const q = parsePublicMarketplaceQuery(
+      new URLSearchParams('q=%20  compressor   scroll&page=0&limit=999&brand=X'),
+    );
     assert.equal(q.q, 'compressor scroll');
     assert.equal(q.page, 1);
     assert.equal(q.limit, 48);
@@ -209,19 +267,38 @@ describe('proposta comercial', () => {
   const item = { description: 'Compressor', quantity: 2, unitPriceCents: 150000 };
 
   it('calcula totais em centavos inteiros', () => {
-    assert.deepEqual(computeProposalTotals([item], 10000, 2500), { subtotalCents: 300000, totalCents: 292500 });
+    assert.deepEqual(computeProposalTotals([item], 10000, 2500), {
+      subtotalCents: 300000,
+      totalCents: 292500,
+    });
     assert.equal(computeProposalTotals([item], 400000, 0), null);
     assert.equal(computeProposalTotals([{ quantity: 1, unitPriceCents: 10.5 }], 0, 0), null);
   });
 
   it('valida corpo e descarta valores inválidos', () => {
-    const ok = validateProposalBody({ quoteId: 5, title: 'Proposta A', items: [item], discountCents: 0, shippingCents: 2500 });
+    const ok = validateProposalBody({
+      quoteId: 5,
+      title: 'Proposta A',
+      items: [item],
+      discountCents: 0,
+      shippingCents: 2500,
+    });
     assert.equal(ok.ok, true);
     if (ok.ok) assert.equal(ok.totals.totalCents, 302500);
     assert.equal(validateProposalBody({ quoteId: 5, title: '', items: [item] }).ok, false);
     assert.equal(validateProposalBody({ quoteId: 5, title: 'x', items: [] }).ok, false);
-    assert.equal(validateProposalBody({ quoteId: 5, title: 'x', items: [{ ...item, unitPriceCents: 12.3 }] }).ok, false);
-    assert.equal(validateProposalBody({ quoteId: 5, title: 'x', items: [item], validUntil: '2000-01-01' }).ok, false);
-    assert.equal(validateProposalBody({ quoteId: 5, title: 'x', items: [item], deliveryDays: -1 }).ok, false);
+    assert.equal(
+      validateProposalBody({ quoteId: 5, title: 'x', items: [{ ...item, unitPriceCents: 12.3 }] })
+        .ok,
+      false,
+    );
+    assert.equal(
+      validateProposalBody({ quoteId: 5, title: 'x', items: [item], validUntil: '2000-01-01' }).ok,
+      false,
+    );
+    assert.equal(
+      validateProposalBody({ quoteId: 5, title: 'x', items: [item], deliveryDays: -1 }).ok,
+      false,
+    );
   });
 });

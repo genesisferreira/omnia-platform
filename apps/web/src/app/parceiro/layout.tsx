@@ -20,7 +20,10 @@ export default async function ParceiroLayout({ children }: { children: React.Rea
       userName={ctx.user.name || ctx.user.email}
       partnerName={selected?.partner.displayName ?? null}
       roleLabel={selected ? (MEMBERSHIP_ROLE_LABELS[selected.role] ?? selected.role) : null}
-      partners={ctx.memberships.map((entry) => ({ id: entry.partner.id, name: entry.partner.displayName }))}
+      partners={ctx.memberships.map((entry) => ({
+        id: entry.partner.id,
+        name: entry.partner.displayName,
+      }))}
       selectedPartnerId={selected?.partner.id ?? null}
     >
       {children}

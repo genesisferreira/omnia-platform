@@ -27,7 +27,9 @@ export default async function MarketplaceHubPage() {
   return (
     <Container className="py-10 md:py-14">
       <header className="mb-10 max-w-3xl space-y-3">
-        <p className="text-sm font-medium uppercase tracking-wide text-omnia-emerald">Marketplace B2B</p>
+        <p className="text-sm font-medium uppercase tracking-wide text-omnia-emerald">
+          Marketplace B2B
+        </p>
         <h1 className="font-heading text-3xl font-semibold text-omnia-deep-blue md:text-4xl">
           Equipamentos, peças e serviços para o mercado do frio
         </h1>

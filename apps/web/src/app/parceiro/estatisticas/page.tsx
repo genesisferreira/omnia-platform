@@ -1,8 +1,4 @@
-import {
-  LISTING_STATUS_VALUES,
-  PROPOSAL_STATUS_VALUES,
-  QUOTE_STATUS_VALUES,
-} from '@omnia/shared';
+import { LISTING_STATUS_VALUES, PROPOSAL_STATUS_VALUES, QUOTE_STATUS_VALUES } from '@omnia/shared';
 import { Alert, Card, CardContent, CardHeader, CardTitle } from '@omnia/ui';
 
 import { LoadError, NoPartnerNotice, PageHeader } from '@/components/partner/ui';
@@ -41,7 +37,9 @@ function CountCard(props: {
                 <th scope="row" className="py-1.5 text-left font-normal text-omnia-graphite-light">
                   {labelOf(props.labels, status)}
                 </th>
-                <td className="py-1.5 text-right font-medium">{props.counts.byStatus[status] ?? 0}</td>
+                <td className="py-1.5 text-right font-medium">
+                  {props.counts.byStatus[status] ?? 0}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -61,7 +59,10 @@ export default async function ParceiroEstatisticasPage() {
       </>
     );
   }
-  const result = await fetchPartnerDashboard({ partnerId: ctx.selected.partner.id, token: ctx.token });
+  const result = await fetchPartnerDashboard({
+    partnerId: ctx.selected.partner.id,
+    token: ctx.token,
+  });
   const stats = result.ok ? result.data.stats : null;
 
   return (
@@ -71,16 +72,36 @@ export default async function ParceiroEstatisticasPage() {
         description="Contadores atuais da sua operação, por status."
       />
       <Alert className="mb-6 max-w-3xl" title="Fase A — visão resumida">
-        Exibimos apenas contagens reais dos seus cadastros. Visitas, conversão e histórico por período
-        ainda não são medidos e, por isso, não aparecem aqui.
+        Exibimos apenas contagens reais dos seus cadastros. Visitas, conversão e histórico por
+        período ainda não são medidos e, por isso, não aparecem aqui.
       </Alert>
       {!result.ok ? <LoadError message={result.error} /> : null}
       {stats ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <CountCard title="Produtos" counts={stats.products} statuses={LISTING_STATUS_VALUES} labels={LISTING_STATUS_LABELS} />
-          <CountCard title="Serviços" counts={stats.services} statuses={LISTING_STATUS_VALUES} labels={LISTING_STATUS_LABELS} />
-          <CountCard title="Solicitações" counts={stats.quotes} statuses={QUOTE_STATUS_VALUES} labels={QUOTE_STATUS_LABELS} />
-          <CountCard title="Propostas" counts={stats.proposals} statuses={PROPOSAL_STATUS_VALUES} labels={PROPOSAL_STATUS_LABELS} />
+          <CountCard
+            title="Produtos"
+            counts={stats.products}
+            statuses={LISTING_STATUS_VALUES}
+            labels={LISTING_STATUS_LABELS}
+          />
+          <CountCard
+            title="Serviços"
+            counts={stats.services}
+            statuses={LISTING_STATUS_VALUES}
+            labels={LISTING_STATUS_LABELS}
+          />
+          <CountCard
+            title="Solicitações"
+            counts={stats.quotes}
+            statuses={QUOTE_STATUS_VALUES}
+            labels={QUOTE_STATUS_LABELS}
+          />
+          <CountCard
+            title="Propostas"
+            counts={stats.proposals}
+            statuses={PROPOSAL_STATUS_VALUES}
+            labels={PROPOSAL_STATUS_LABELS}
+          />
         </div>
       ) : null}
     </>

@@ -116,7 +116,9 @@ export default async function MinhaContaPage() {
           <Card className="border-omnia-deep-blue/10 sm:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg">Minhas cotações</CardTitle>
-              <CardDescription>Solicitações do marketplace, propostas recebidas e respostas.</CardDescription>
+              <CardDescription>
+                Solicitações do marketplace, propostas recebidas e respostas.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline" className="w-full sm:w-auto">

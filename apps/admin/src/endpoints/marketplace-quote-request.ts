@@ -106,7 +106,9 @@ export const marketplaceQuoteRequestEndpoint: Endpoint = {
         if (input.partnerId != null && String(input.partnerId) !== dto.partner.id) {
           return fail(400, 'BAD_REQUEST', 'O item informado não pertence ao parceiro.');
         }
-        const listingPartner = getRelationId((listing as unknown as Record<string, unknown>).partner);
+        const listingPartner = getRelationId(
+          (listing as unknown as Record<string, unknown>).partner,
+        );
         partnerId = listingPartner ?? dto.partner.id;
       }
 
@@ -131,7 +133,12 @@ export const marketplaceQuoteRequestEndpoint: Endpoint = {
       if (!quota.allowed) {
         const retryAfter = quota.retryAfterSeconds ?? 600;
         if (quota.reason === 'redis_unavailable') {
-          return fail(503, 'SERVICE_UNAVAILABLE', 'Serviço temporariamente indisponível.', retryAfter);
+          return fail(
+            503,
+            'SERVICE_UNAVAILABLE',
+            'Serviço temporariamente indisponível.',
+            retryAfter,
+          );
         }
         const minutes = Math.max(1, Math.ceil(retryAfter / 60));
         return fail(

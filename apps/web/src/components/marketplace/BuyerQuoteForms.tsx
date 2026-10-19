@@ -20,7 +20,10 @@ export function BuyerRespondForm(props: {
   if (!props.canAccept && !props.canNegotiate && !props.canDecline) return null;
 
   return (
-    <form action={formAction} className="space-y-3 rounded-lg border border-omnia-deep-blue/10 bg-white p-4">
+    <form
+      action={formAction}
+      className="space-y-3 rounded-lg border border-omnia-deep-blue/10 bg-white p-4"
+    >
       {state.error ? <Alert variant="destructive">{state.error}</Alert> : null}
       <div>
         <label htmlFor="message" className="mb-1 block text-sm font-medium text-omnia-deep-blue">
@@ -42,8 +45,8 @@ export function BuyerRespondForm(props: {
             checked={confirmAccept}
             onChange={(event) => setConfirmAccept(event.target.checked)}
           />
-          Li a versão vigente da proposta e quero aceitá-la. O aceite não gera cobrança automática; o
-          parceiro entrará em contato para formalizar o pedido.
+          Li a versão vigente da proposta e quero aceitá-la. O aceite não gera cobrança automática;
+          o parceiro entrará em contato para formalizar o pedido.
         </label>
       ) : null}
       <div className="flex flex-wrap gap-2">
@@ -53,7 +56,13 @@ export function BuyerRespondForm(props: {
           </Button>
         ) : null}
         {props.canNegotiate ? (
-          <Button type="submit" name="action" value="negotiate" variant="outline" disabled={pending}>
+          <Button
+            type="submit"
+            name="action"
+            value="negotiate"
+            variant="outline"
+            disabled={pending}
+          >
             Pedir renegociação
           </Button>
         ) : null}
@@ -72,7 +81,14 @@ export function BuyerMessageForm({ action }: { action: Action }) {
   return (
     <form action={formAction} className="space-y-3">
       {state.error ? <Alert variant="destructive">{state.error}</Alert> : null}
-      <Textarea name="message" rows={3} required minLength={2} maxLength={2000} aria-label="Mensagem" />
+      <Textarea
+        name="message"
+        rows={3}
+        required
+        minLength={2}
+        maxLength={2000}
+        aria-label="Mensagem"
+      />
       <Button type="submit" variant="outline" disabled={pending}>
         Enviar mensagem
       </Button>

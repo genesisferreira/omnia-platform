@@ -66,16 +66,27 @@ function UploadForm(props: {
       {message ? <Alert variant="success">{message}</Alert> : null}
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-omnia-deep-blue" htmlFor={`file-${props.slot}`}>
+          <label
+            className="mb-1 block text-sm font-medium text-omnia-deep-blue"
+            htmlFor={`file-${props.slot}`}
+          >
             {props.label}
           </label>
           <Input id={`file-${props.slot}`} name="file" type="file" accept={props.accept} required />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-omnia-deep-blue" htmlFor={`alt-${props.slot}`}>
+          <label
+            className="mb-1 block text-sm font-medium text-omnia-deep-blue"
+            htmlFor={`alt-${props.slot}`}
+          >
             Descrição
           </label>
-          <Input id={`alt-${props.slot}`} name="alt" maxLength={160} placeholder="Ex.: vista frontal" />
+          <Input
+            id={`alt-${props.slot}`}
+            name="alt"
+            maxLength={160}
+            placeholder="Ex.: vista frontal"
+          />
         </div>
         <Button type="submit" variant="outline" disabled={pending}>
           {pending ? 'Enviando…' : 'Enviar'}
@@ -86,7 +97,12 @@ function UploadForm(props: {
   );
 }
 
-function RemoveButton(props: { action: RemoveAction; target: 'image' | 'datasheet'; mediaId?: string; label: string }) {
+function RemoveButton(props: {
+  action: RemoveAction;
+  target: 'image' | 'datasheet';
+  mediaId?: string;
+  label: string;
+}) {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(props.action, {});
   return (
     <form action={formAction}>
@@ -108,7 +124,8 @@ export function ListingFiles(props: Props) {
       <div>
         <h2 className="font-heading text-lg text-omnia-deep-blue">Imagens</h2>
         <p className="text-sm text-omnia-graphite-light">
-          Até {MARKETPLACE_LISTING_MAX_IMAGES} imagens. Ficam visíveis ao público só depois da publicação pela equipe Omnia.
+          Até {MARKETPLACE_LISTING_MAX_IMAGES} imagens. Ficam visíveis ao público só depois da
+          publicação pela equipe Omnia.
         </p>
       </div>
       {props.images.length > 0 ? (
@@ -122,7 +139,12 @@ export function ListingFiles(props: Props) {
                 className="aspect-square w-full rounded-md border border-omnia-deep-blue/10 object-cover"
               />
               {props.canEdit ? (
-                <RemoveButton action={props.removeAction} target="image" mediaId={image.mediaId} label="Remover" />
+                <RemoveButton
+                  action={props.removeAction}
+                  target="image"
+                  mediaId={image.mediaId}
+                  label="Remover"
+                />
               ) : null}
             </li>
           ))}

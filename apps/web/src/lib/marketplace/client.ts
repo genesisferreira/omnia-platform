@@ -40,14 +40,20 @@ const PUBLIC_PATHS: Record<MarketplaceListingKind, { list: string; detail: strin
 function absolutizeListing(item: PublicMarketplaceListingDto): PublicMarketplaceListingDto {
   return {
     ...item,
-    images: item.images.map((image) => ({ ...image, url: resolveMediaUrl(image.url) ?? image.url })),
+    images: item.images.map((image) => ({
+      ...image,
+      url: resolveMediaUrl(image.url) ?? image.url,
+    })),
     datasheet: item.datasheet
       ? { ...item.datasheet, url: resolveMediaUrl(item.datasheet.url) ?? item.datasheet.url }
       : null,
     partner: {
       ...item.partner,
       logo: item.partner.logo
-        ? { ...item.partner.logo, url: resolveMediaUrl(item.partner.logo.url) ?? item.partner.logo.url }
+        ? {
+            ...item.partner.logo,
+            url: resolveMediaUrl(item.partner.logo.url) ?? item.partner.logo.url,
+          }
         : null,
     },
   };
@@ -70,7 +76,11 @@ export async function fetchPublicMarketplaceListings(
     });
     if (!response.ok) return null;
     const data = (await response.json()) as
-      | { ok: true; items: PublicMarketplaceListingDto[]; pagination: PublicMarketplaceList['pagination'] }
+      | {
+          ok: true;
+          items: PublicMarketplaceListingDto[];
+          pagination: PublicMarketplaceList['pagination'];
+        }
       | { ok: false };
     if (!data || data.ok !== true) return null;
     return { items: data.items.map(absolutizeListing), pagination: data.pagination };
@@ -90,8 +100,7 @@ export async function fetchPublicMarketplaceListing(
     });
     if (!response.ok) return null;
     const data = (await response.json()) as
-      | { ok: true; item: PublicMarketplaceListingDto }
-      | { ok: false };
+      { ok: true; item: PublicMarketplaceListingDto } | { ok: false };
     if (!data || data.ok !== true) return null;
     return absolutizeListing(data.item);
   } catch {
@@ -130,9 +139,8 @@ function extractError(status: number, payload: unknown): string {
   const errors = Array.isArray(rec?.errors) ? (rec.errors as Array<Record<string, unknown>>) : [];
   const first = errors[0];
   const nested = Array.isArray((first?.data as Record<string, unknown> | undefined)?.errors)
-    ? (((first?.data as Record<string, unknown>).errors as Array<Record<string, unknown>>)[0]?.message as
-        | string
-        | undefined)
+    ? (((first?.data as Record<string, unknown>).errors as Array<Record<string, unknown>>)[0]
+        ?.message as string | undefined)
     : undefined;
   const candidate =
     nested ??
@@ -158,10 +166,15 @@ async function authedFetch<T>(
       cache: 'no-store',
     });
     const payload = (await response.json().catch(() => null)) as unknown;
-    if (!response.ok) return { ok: false, status: response.status, error: extractError(response.status, payload) };
+    if (!response.ok)
+      return { ok: false, status: response.status, error: extractError(response.status, payload) };
     return { ok: true, status: response.status, data: payload as T };
   } catch {
-    return { ok: false, status: 503, error: 'Serviço temporariamente indisponível. Tente novamente.' };
+    return {
+      ok: false,
+      status: 503,
+      error: 'Serviço temporariamente indisponível. Tente novamente.',
+    };
   }
 }
 
@@ -178,7 +191,9 @@ export function buildPayloadQuery(params: Record<string, QueryValue>): string {
   return qs ? `?${qs}` : '';
 }
 
-export function relationId(value: RelationId | { id: RelationId } | null | undefined): string | null {
+export function relationId(
+  value: RelationId | { id: RelationId } | null | undefined,
+): string | null {
   if (value == null) return null;
   if (typeof value === 'object') return String(value.id);
   return String(value);
@@ -193,7 +208,10 @@ type FindOptions = {
   token?: string | null;
 };
 
-function find<T>(collection: string, options: FindOptions = {}): Promise<PayloadResult<PaginatedDocs<T>>> {
+function find<T>(
+  collection: string,
+  options: FindOptions = {},
+): Promise<PayloadResult<PaginatedDocs<T>>> {
   const query = buildPayloadQuery({
     page: options.page,
     limit: options.limit ?? 20,
@@ -204,26 +222,44 @@ function find<T>(collection: string, options: FindOptions = {}): Promise<Payload
   return authedFetch<PaginatedDocs<T>>(`/api/${collection}${query}`, { token: options.token });
 }
 
-async function findById<T>(collection: string, id: RelationId, depth = 0): Promise<PayloadResult<T>> {
-  return authedFetch<T>(`/api/${collection}/${encodeURIComponent(String(id))}${buildPayloadQuery({ depth })}`);
+async function findById<T>(
+  collection: string,
+  id: RelationId,
+  depth = 0,
+): Promise<PayloadResult<T>> {
+  return authedFetch<T>(
+    `/api/${collection}/${encodeURIComponent(String(id))}${buildPayloadQuery({ depth })}`,
+  );
 }
 
 async function create<T>(collection: string, data: unknown): Promise<PayloadResult<T>> {
-  const result = await authedFetch<{ doc: T }>(`/api/${collection}`, { method: 'POST', body: data });
-  return result.ok ? { ok: true, status: result.status, data: result.data.doc } : result;
-}
-
-async function update<T>(collection: string, id: RelationId, data: unknown): Promise<PayloadResult<T>> {
-  const result = await authedFetch<{ doc: T }>(`/api/${collection}/${encodeURIComponent(String(id))}`, {
-    method: 'PATCH',
+  const result = await authedFetch<{ doc: T }>(`/api/${collection}`, {
+    method: 'POST',
     body: data,
   });
   return result.ok ? { ok: true, status: result.status, data: result.data.doc } : result;
 }
 
+async function update<T>(
+  collection: string,
+  id: RelationId,
+  data: unknown,
+): Promise<PayloadResult<T>> {
+  const result = await authedFetch<{ doc: T }>(
+    `/api/${collection}/${encodeURIComponent(String(id))}`,
+    {
+      method: 'PATCH',
+      body: data,
+    },
+  );
+  return result.ok ? { ok: true, status: result.status, data: result.data.doc } : result;
+}
+
 /* Memberships / painel */
 
-export function listMemberships(token?: string | null): Promise<PayloadResult<PaginatedDocs<MembershipDoc>>> {
+export function listMemberships(
+  token?: string | null,
+): Promise<PayloadResult<PaginatedDocs<MembershipDoc>>> {
   return find<MembershipDoc>('partner-memberships', {
     where: { 'where[status][equals]': 'active' },
     limit: 50,
@@ -267,7 +303,10 @@ export function listListings(
   });
 }
 
-export function getListing(kind: MarketplaceListingKind, id: RelationId): Promise<PayloadResult<ListingDoc>> {
+export function getListing(
+  kind: MarketplaceListingKind,
+  id: RelationId,
+): Promise<PayloadResult<ListingDoc>> {
   return findById<ListingDoc>(LISTING_COLLECTIONS[kind], id);
 }
 
@@ -275,7 +314,11 @@ export function createListing(kind: MarketplaceListingKind, data: Record<string,
   return create<ListingDoc>(LISTING_COLLECTIONS[kind], data);
 }
 
-export function updateListing(kind: MarketplaceListingKind, id: RelationId, data: Record<string, unknown>) {
+export function updateListing(
+  kind: MarketplaceListingKind,
+  id: RelationId,
+  data: Record<string, unknown>,
+) {
   return update<ListingDoc>(LISTING_COLLECTIONS[kind], id, data);
 }
 
@@ -308,7 +351,9 @@ export function updateQuoteRequest(id: RelationId, data: Record<string, unknown>
   return update<QuoteRequestDoc>('quote-requests', id, data);
 }
 
-export function listQuoteEvents(quoteId: RelationId): Promise<PayloadResult<PaginatedDocs<QuoteEventDoc>>> {
+export function listQuoteEvents(
+  quoteId: RelationId,
+): Promise<PayloadResult<PaginatedDocs<QuoteEventDoc>>> {
   return find<QuoteEventDoc>('quote-events', {
     limit: 100,
     sort: 'createdAt',
@@ -393,7 +438,9 @@ export function listBuyerQuoteRequests(options: {
 }
 
 /** Propostas visíveis ao comprador (rascunhos ficam ocultos pela ACL). */
-export function listBuyerProposals(quoteId: RelationId): Promise<PayloadResult<PaginatedDocs<QuoteProposalDoc>>> {
+export function listBuyerProposals(
+  quoteId: RelationId,
+): Promise<PayloadResult<PaginatedDocs<QuoteProposalDoc>>> {
   return find<QuoteProposalDoc>('quote-proposals', {
     limit: 20,
     sort: '-createdAt',
@@ -401,7 +448,11 @@ export function listBuyerProposals(quoteId: RelationId): Promise<PayloadResult<P
   });
 }
 
-export function respondToQuote(body: { quoteId: string; action: 'accept' | 'decline' | 'negotiate'; message?: string }) {
+export function respondToQuote(body: {
+  quoteId: string;
+  action: 'accept' | 'decline' | 'negotiate';
+  message?: string;
+}) {
   return authedFetch<{
     ok: true;
     message: string;

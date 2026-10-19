@@ -65,8 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     pages.push({
       pathname: candidate.pathname,
       noIndex: false,
-      changeFrequency:
-        candidate.pathname === '/' ? ('weekly' as const) : ('monthly' as const),
+      changeFrequency: candidate.pathname === '/' ? ('weekly' as const) : ('monthly' as const),
       priority: candidate.pathname === '/' ? 1 : 0.8,
     });
   }

@@ -18,7 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     pathname: '/marketplace/produtos',
     title: 'Produtos no Marketplace',
-    description: 'Catálogo público de produtos de refrigeração e climatização de parceiros aprovados.',
+    description:
+      'Catálogo público de produtos de refrigeração e climatização de parceiros aprovados.',
     hostname,
   });
 }
@@ -29,7 +30,13 @@ export default async function MarketplaceProdutosPage({ searchParams }: PageProp
   const category = first(sp.category);
   const brand = first(sp.brand);
   const page = Math.max(1, Number(first(sp.page) || 1) || 1);
-  const data = await fetchPublicMarketplaceListings('product', { q, category, brand, page, limit: 24 });
+  const data = await fetchPublicMarketplaceListings('product', {
+    q,
+    category,
+    brand,
+    page,
+    limit: 24,
+  });
 
   return (
     <Container className="py-10 md:py-14">
@@ -60,7 +67,10 @@ export default async function MarketplaceProdutosPage({ searchParams }: PageProp
             placeholder="Marca"
             className="h-10 rounded-md border px-3 text-sm"
           />
-          <button type="submit" className="h-10 rounded-md bg-omnia-deep-blue px-4 text-sm text-white">
+          <button
+            type="submit"
+            className="h-10 rounded-md bg-omnia-deep-blue px-4 text-sm text-white"
+          >
             Filtrar
           </button>
         </form>

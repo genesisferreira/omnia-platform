@@ -2,11 +2,23 @@ import Link from 'next/link';
 
 import { Button } from '@omnia/ui';
 
-import { EmptyList, LoadError, PageHeader, Pagination, StatusBadge, pageParam } from '@/components/partner/ui';
+import {
+  EmptyList,
+  LoadError,
+  PageHeader,
+  Pagination,
+  StatusBadge,
+  pageParam,
+} from '@/components/partner/ui';
 import { requirePortalSession } from '@/lib/auth/require-session';
 import { quoteListingTitle, quotePartnerName } from '@/lib/marketplace/buyer';
 import { listBuyerQuoteRequests } from '@/lib/marketplace/client';
-import { formatDateTime, labelOf, QUOTE_SOURCE_LABELS, QUOTE_STATUS_LABELS } from '@/lib/marketplace/labels';
+import {
+  formatDateTime,
+  labelOf,
+  QUOTE_SOURCE_LABELS,
+  QUOTE_STATUS_LABELS,
+} from '@/lib/marketplace/labels';
 
 type PageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -51,19 +63,27 @@ export default async function MinhasCotacoesPage({ searchParams }: PageProps) {
                       <p className="font-medium text-omnia-deep-blue">
                         {quote.publicId || `Solicitação #${quote.id}`}
                       </p>
-                      <StatusBadge tone={quote.status}>{labelOf(QUOTE_STATUS_LABELS, quote.status)}</StatusBadge>
+                      <StatusBadge tone={quote.status}>
+                        {labelOf(QUOTE_STATUS_LABELS, quote.status)}
+                      </StatusBadge>
                     </div>
                     <p className="mt-1 text-sm text-omnia-graphite">
                       {quotePartnerName(quote)} · {labelOf(QUOTE_SOURCE_LABELS, quote.sourceType)}
                       {listing ? ` · ${listing}` : ''}
                     </p>
-                    <p className="mt-1 text-xs text-omnia-graphite-light">Enviada em {formatDateTime(quote.createdAt)}</p>
+                    <p className="mt-1 text-xs text-omnia-graphite-light">
+                      Enviada em {formatDateTime(quote.createdAt)}
+                    </p>
                   </Link>
                 </li>
               );
             })}
           </ul>
-          <Pagination basePath="/minhas-cotacoes" page={result.data.page} totalPages={result.data.totalPages} />
+          <Pagination
+            basePath="/minhas-cotacoes"
+            page={result.data.page}
+            totalPages={result.data.totalPages}
+          />
         </>
       ) : null}
     </>

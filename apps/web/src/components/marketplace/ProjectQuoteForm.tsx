@@ -4,10 +4,7 @@ import { useActionState } from 'react';
 
 import { Alert, Button, Input, Textarea } from '@omnia/ui';
 
-import {
-  submitMarketplaceQuoteAction,
-  type QuoteActionState,
-} from '@/app/marketplace/actions';
+import { submitMarketplaceQuoteAction, type QuoteActionState } from '@/app/marketplace/actions';
 
 type PartnerOption = { id: string; label: string };
 

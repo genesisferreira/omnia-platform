@@ -132,7 +132,9 @@ function createDetailEndpoint(kind: MarketplaceListingKind, path: string): Endpo
         };
 
         // 1) `{slug}-{id}` (sem ambiguidade); 2) slug puro (primeiro publicado).
-        let doc = id ? await find({ and: [{ id: { equals: id } }, { slug: { equals: slug } }] }) : null;
+        let doc = id
+          ? await find({ and: [{ id: { equals: id } }, { slug: { equals: slug } }] })
+          : null;
         if (!doc) doc = await find({ slug: { equals: rawSlug.toLowerCase() } });
 
         const item = doc ? mapPublicMarketplaceListing(kind, doc) : null;
@@ -142,11 +144,7 @@ function createDetailEndpoint(kind: MarketplaceListingKind, path: string): Endpo
         return json(200, { ok: true, item });
       } catch {
         req.payload.logger.error(`public-marketplace-${kind}: failed`);
-        return json(
-          500,
-          errorBody('INTERNAL_ERROR', 'Não foi possível carregar o item.'),
-          false,
-        );
+        return json(500, errorBody('INTERNAL_ERROR', 'Não foi possível carregar o item.'), false);
       }
     },
   };

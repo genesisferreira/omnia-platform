@@ -117,10 +117,18 @@ export function PartnerShell(props: PartnerShellProps) {
           })}
         </nav>
         <div className="space-y-2 border-t border-white/10 p-3 text-xs text-white/70">
-          <Link href="/marketplace" className="block px-1 py-1 hover:underline" onClick={() => setOpen(false)}>
+          <Link
+            href="/marketplace"
+            className="block px-1 py-1 hover:underline"
+            onClick={() => setOpen(false)}
+          >
             Ver marketplace
           </Link>
-          <Link href="/minha-conta" className="block px-1 py-1 hover:underline" onClick={() => setOpen(false)}>
+          <Link
+            href="/minha-conta"
+            className="block px-1 py-1 hover:underline"
+            onClick={() => setOpen(false)}
+          >
             Minha conta
           </Link>
           <form action="/api/auth/logout" method="post">
@@ -135,7 +143,13 @@ export function PartnerShell(props: PartnerShellProps) {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-3 border-b border-omnia-deep-blue/10 bg-white px-4 py-3 lg:hidden">
-          <Button type="button" variant="outline" size="sm" className="min-h-11" onClick={() => setOpen(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="min-h-11"
+            onClick={() => setOpen(true)}
+          >
             Menu
           </Button>
           <span className="truncate font-heading text-sm font-semibold text-omnia-deep-blue">

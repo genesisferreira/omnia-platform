@@ -12,7 +12,9 @@ export function quotePartnerName(quote: Pick<QuoteRequestDoc, 'partner'>): strin
 }
 
 /** Título do item de catálogo de origem, quando houver. */
-export function quoteListingTitle(quote: Pick<QuoteRequestDoc, 'productListing' | 'serviceListing'>): string | null {
+export function quoteListingTitle(
+  quote: Pick<QuoteRequestDoc, 'productListing' | 'serviceListing'>,
+): string | null {
   const listing = quote.productListing ?? quote.serviceListing;
   return listing && typeof listing === 'object' && listing.title ? listing.title : null;
 }

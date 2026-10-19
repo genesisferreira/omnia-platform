@@ -22,7 +22,10 @@ export async function POST(request: Request) {
   }
   const length = Number(request.headers.get('content-length') ?? 0);
   if (!Number.isFinite(length) || length <= 0 || length > MARKETPLACE_UPLOAD_MAX_BODY_BYTES) {
-    return json(413, { ok: false, message: 'Arquivo acima do limite (imagem até 5 MB, PDF até 10 MB).' });
+    return json(413, {
+      ok: false,
+      message: 'Arquivo acima do limite (imagem até 5 MB, PDF até 10 MB).',
+    });
   }
   const token = await getSessionToken();
   if (!token) return json(401, { ok: false, message: 'Sua sessão expirou. Entre novamente.' });
@@ -35,7 +38,11 @@ export async function POST(request: Request) {
   const kind = String(form.get('kind') ?? '');
   const slot = String(form.get('slot') ?? '');
   const listingId = String(form.get('listingId') ?? '');
-  if (!['product', 'service'].includes(kind) || !['image', 'datasheet'].includes(slot) || !/^\d{1,12}$/.test(listingId)) {
+  if (
+    !['product', 'service'].includes(kind) ||
+    !['image', 'datasheet'].includes(slot) ||
+    !/^\d{1,12}$/.test(listingId)
+  ) {
     return json(422, { ok: false, message: 'Dados do envio inválidos.' });
   }
 
@@ -56,9 +63,17 @@ export async function POST(request: Request) {
     const body = ((await response.json().catch(() => null)) ?? {}) as Record<string, unknown>;
     return json(response.status, {
       ok: response.ok,
-      message: typeof body.message === 'string' ? body.message : response.ok ? 'Enviado.' : 'Não foi possível enviar.',
+      message:
+        typeof body.message === 'string'
+          ? body.message
+          : response.ok
+            ? 'Enviado.'
+            : 'Não foi possível enviar.',
     });
   } catch {
-    return json(503, { ok: false, message: 'Serviço temporariamente indisponível. Tente novamente.' });
+    return json(503, {
+      ok: false,
+      message: 'Serviço temporariamente indisponível. Tente novamente.',
+    });
   }
 }

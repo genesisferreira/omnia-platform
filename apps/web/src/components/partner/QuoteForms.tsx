@@ -94,7 +94,8 @@ export function ProposalForm(props: {
       quantity: Number(row.quantity),
       unitPriceCents: parseBrlToCents(row.price) ?? Number.NaN,
     }));
-    if (items.some((item) => !Number.isInteger(item.quantity) || Number.isNaN(item.unitPriceCents))) return null;
+    if (items.some((item) => !Number.isInteger(item.quantity) || Number.isNaN(item.unitPriceCents)))
+      return null;
     const discountCents = discount.trim() ? parseBrlToCents(discount) : 0;
     const shippingCents = shipping.trim() ? parseBrlToCents(shipping) : 0;
     if (discountCents == null || shippingCents == null) return null;
@@ -172,7 +173,12 @@ export function ProposalForm(props: {
           onClick={() =>
             setRows((current) => [
               ...current,
-              { key: Math.max(...current.map((r) => r.key)) + 1, description: '', quantity: '1', price: '' },
+              {
+                key: Math.max(...current.map((r) => r.key)) + 1,
+                description: '',
+                quantity: '1',
+                price: '',
+              },
             ])
           }
         >
@@ -183,11 +189,25 @@ export function ProposalForm(props: {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="discount">Desconto (R$)</Label>
-          <Input id="discount" name="discount" inputMode="decimal" placeholder="0,00" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+          <Input
+            id="discount"
+            name="discount"
+            inputMode="decimal"
+            placeholder="0,00"
+            value={discount}
+            onChange={(e) => setDiscount(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="shipping">Frete (R$)</Label>
-          <Input id="shipping" name="shipping" inputMode="decimal" placeholder="0,00" value={shipping} onChange={(e) => setShipping(e.target.value)} />
+          <Input
+            id="shipping"
+            name="shipping"
+            inputMode="decimal"
+            placeholder="0,00"
+            value={shipping}
+            onChange={(e) => setShipping(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="validUntil">Válida até</Label>

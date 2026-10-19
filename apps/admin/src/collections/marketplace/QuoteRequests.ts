@@ -1,16 +1,8 @@
 import type { CollectionConfig } from 'payload';
 
-import {
-  buyerOrPartnerQuoteAccess,
-  partnerMembershipScopedAccess,
-} from '../../access/marketplace';
+import { buyerOrPartnerQuoteAccess, partnerMembershipScopedAccess } from '../../access/marketplace';
 import { adminsOnly, authenticated } from '../../access/rbac';
-import {
-  GROUP,
-  QUOTE_SOURCE_OPTIONS,
-  QUOTE_STATUS_OPTIONS,
-  staffFieldAccess,
-} from './fields';
+import { GROUP, QUOTE_SOURCE_OPTIONS, QUOTE_STATUS_OPTIONS, staffFieldAccess } from './fields';
 import { quoteRequestBeforeChange, quoteRequestBeforeValidate } from './hooks';
 
 const staffUpdate = { update: staffFieldAccess } as const;

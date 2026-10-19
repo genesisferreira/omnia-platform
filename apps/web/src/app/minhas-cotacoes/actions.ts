@@ -3,7 +3,12 @@
 import { redirect } from 'next/navigation';
 
 import { requirePortalSession } from '@/lib/auth/require-session';
-import { createQuoteEvent, getQuoteRequest, relationId, respondToQuote } from '@/lib/marketplace/client';
+import {
+  createQuoteEvent,
+  getQuoteRequest,
+  relationId,
+  respondToQuote,
+} from '@/lib/marketplace/client';
 
 export type BuyerActionState = { error?: string; message?: string };
 

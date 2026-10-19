@@ -1,5 +1,10 @@
 import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload';
-import { addDataAndFileToRequest, commitTransaction, initTransaction, killTransaction } from 'payload';
+import {
+  addDataAndFileToRequest,
+  commitTransaction,
+  initTransaction,
+  killTransaction,
+} from 'payload';
 
 import {
   MARKETPLACE_LISTING_MAX_IMAGES,
@@ -72,11 +77,14 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
       return fail(400, 'BAD_REQUEST', 'Envio inválido.');
     }
     const fields = (req.data ?? {}) as Record<string, unknown>;
-    const kind = fields.kind === 'service' ? 'service' : fields.kind === 'product' ? 'product' : null;
-    const slot = fields.slot === 'datasheet' ? 'datasheet' : fields.slot === 'image' ? 'image' : null;
+    const kind =
+      fields.kind === 'service' ? 'service' : fields.kind === 'product' ? 'product' : null;
+    const slot =
+      fields.slot === 'datasheet' ? 'datasheet' : fields.slot === 'image' ? 'image' : null;
     const listingId = fields.listingId;
     const alt = str(fields.alt, 160);
-    if (!kind || !slot) return fail(422, 'UNPROCESSABLE', 'Informe o tipo do anúncio e do arquivo.');
+    if (!kind || !slot)
+      return fail(422, 'UNPROCESSABLE', 'Informe o tipo do anúncio e do arquivo.');
     if (
       !(typeof listingId === 'number' && Number.isInteger(listingId) && listingId > 0) &&
       !(typeof listingId === 'string' && /^\d{1,12}$/.test(listingId))
@@ -89,24 +97,43 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
     const shouldCommit = await initTransaction(req);
     try {
       const listing = (await req.payload
-        .findByID({ collection: LISTINGS[kind], id: listingId, depth: 0, overrideAccess: true, req })
+        .findByID({
+          collection: LISTINGS[kind],
+          id: listingId,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
         .catch(() => null)) as unknown as Record<string, unknown> | null;
       const partnerId = getRelationId(listing?.partner);
       // Sem permissão ou inexistente: mesma resposta (não revela anúncios de terceiros).
       const allowed =
         listing != null &&
         partnerId != null &&
-        (hasStaffAccess(user) || (await hasPartnerCapability(req.payload, user.id, partnerId, 'edit')));
+        (hasStaffAccess(user) ||
+          (await hasPartnerCapability(req.payload, user.id, partnerId, 'edit')));
       if (!allowed) throw new UploadError(404, 'NOT_FOUND', 'Anúncio não encontrado.');
 
-      const images = Array.isArray(listing.images) ? (listing.images as Array<Record<string, unknown>>) : [];
+      const images = Array.isArray(listing.images)
+        ? (listing.images as Array<Record<string, unknown>>)
+        : [];
       if (slot === 'image' && images.length >= MARKETPLACE_LISTING_MAX_IMAGES) {
-        throw new UploadError(409, 'CONFLICT', `Limite de ${MARKETPLACE_LISTING_MAX_IMAGES} imagens por anúncio.`);
+        throw new UploadError(
+          409,
+          'CONFLICT',
+          `Limite de ${MARKETPLACE_LISTING_MAX_IMAGES} imagens por anúncio.`,
+        );
       }
 
       const media = (await req.payload.create({
         collection: LISTING_MEDIA,
-        data: { alt: alt || undefined, kind: slot, partner: partnerId, uploadedBy: user.id, public: false } as never,
+        data: {
+          alt: alt || undefined,
+          kind: slot,
+          partner: partnerId,
+          uploadedBy: user.id,
+          public: false,
+        } as never,
         file,
         overrideAccess: true,
         req,
@@ -119,7 +146,10 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
         slot === 'image'
           ? {
               images: [
-                ...images.map((row) => ({ image: getRelationId(row.image), alt: row.alt ?? undefined })),
+                ...images.map((row) => ({
+                  image: getRelationId(row.image),
+                  alt: row.alt ?? undefined,
+                })),
                 { image: mediaId, alt: alt || undefined },
               ],
             }
@@ -137,7 +167,8 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
       return respond(201, {
         ok: true,
         code: 'UPLOADED',
-        message: slot === 'image' ? 'Imagem adicionada ao anúncio.' : 'Ficha técnica anexada ao anúncio.',
+        message:
+          slot === 'image' ? 'Imagem adicionada ao anúncio.' : 'Ficha técnica anexada ao anúncio.',
         media: { id: mediaId, kind: slot },
       });
     } catch (error) {
@@ -145,7 +176,8 @@ export const marketplaceListingMediaEndpoint: Endpoint = {
       if (error instanceof UploadError) return fail(error.status, error.code, error.message);
       const status = (error as { status?: number } | null)?.status;
       if (status === 400 || status === 413) {
-        const message = error instanceof Error && error.message ? error.message : 'Arquivo inválido.';
+        const message =
+          error instanceof Error && error.message ? error.message : 'Arquivo inválido.';
         return fail(status, status === 413 ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST', message);
       }
       // Erros de validação do Payload (tipo de arquivo) chegam como ValidationError.

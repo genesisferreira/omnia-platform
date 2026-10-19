@@ -11,7 +11,11 @@ import {
   detectMarketplaceFileType,
 } from '@omnia/shared';
 
-import { getActivePartnerIds, partnerMembershipCreateAccess, partnerMembershipScopedAccess } from '../../access/marketplace';
+import {
+  getActivePartnerIds,
+  partnerMembershipCreateAccess,
+  partnerMembershipScopedAccess,
+} from '../../access/marketplace';
 import { getRelationId, hasStaffAccess } from '../../access/rbac';
 import { resolveMediaStaticDir } from '../Media';
 import { GROUP, staffFieldAccess } from './fields';
@@ -51,7 +55,10 @@ const validateListingUpload: CollectionBeforeOperationHook = async ({ args, oper
 
   const detected = detectMarketplaceFileType(buffer);
   if (!detected) {
-    throw new APIError('Formato não permitido. Use JPEG, PNG, WebP (imagem) ou PDF (ficha técnica).', 400);
+    throw new APIError(
+      'Formato não permitido. Use JPEG, PNG, WebP (imagem) ou PDF (ficha técnica).',
+      400,
+    );
   }
 
   const data = (args as { data?: Record<string, unknown> }).data ?? {};
@@ -81,7 +88,8 @@ export const PartnerListingMedia: CollectionConfig = {
     useAsTitle: 'alt',
     group: GROUP,
     defaultColumns: ['filename', 'kind', 'partner', 'public', 'updatedAt'],
-    description: 'Imagens e fichas técnicas enviadas por parceiros. Públicas só quando anexadas a anúncio publicado.',
+    description:
+      'Imagens e fichas técnicas enviadas por parceiros. Públicas só quando anexadas a anúncio publicado.',
   },
   upload: {
     staticDir: path.join(resolveMediaStaticDir(), 'marketplace'),

@@ -49,7 +49,8 @@ async function requireEditor(): Promise<
   const ctx = await requirePartnerContext();
   const selected = ctx.selected;
   if (!selected) return { ok: false, error: 'Nenhuma empresa vinculada à sua conta.' };
-  if (!selected.canEdit) return { ok: false, error: 'Seu papel é somente de leitura nesta empresa.' };
+  if (!selected.canEdit)
+    return { ok: false, error: 'Seu papel é somente de leitura nesta empresa.' };
   return { ok: true, ctx, partnerId: selected.partner.id };
 }
 
@@ -184,7 +185,9 @@ export async function removeListingFileAction(
     patch = { datasheet: null };
   } else if (target === 'image' && /^\d{1,12}$/.test(mediaId)) {
     const images = (current.data.images ?? []).filter((row) => relationId(row.image) !== mediaId);
-    patch = { images: images.map((row) => ({ image: relationId(row.image), alt: row.alt ?? undefined })) };
+    patch = {
+      images: images.map((row) => ({ image: relationId(row.image), alt: row.alt ?? undefined })),
+    };
   } else {
     return { error: 'Arquivo inválido.' };
   }

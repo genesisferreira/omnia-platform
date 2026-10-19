@@ -29,8 +29,7 @@ export type ProposalTotals = {
 };
 
 export type ValidateProposalResult =
-  | { ok: true; data: ProposalInput; totals: ProposalTotals }
-  | { ok: false; message: string };
+  { ok: true; data: ProposalInput; totals: ProposalTotals } | { ok: false; message: string };
 
 const SCRIPT_RE = /<\s*script|javascript:|on\w+\s*=/i;
 
@@ -72,7 +71,10 @@ function optionalCents(value: unknown): number | null {
 }
 
 /** Whitelist do corpo de `POST /omnia/marketplace-proposal-send`. Valores monetários em centavos inteiros. */
-export function validateProposalBody(body: unknown, now: Date = new Date()): ValidateProposalResult {
+export function validateProposalBody(
+  body: unknown,
+  now: Date = new Date(),
+): ValidateProposalResult {
   const raw = asRecord(body);
   if (!raw) return { ok: false, message: 'Corpo da proposta inválido.' };
 
@@ -99,7 +101,8 @@ export function validateProposalBody(body: unknown, now: Date = new Date()): Val
     const row = asRecord(entry);
     const description = clean(row?.description, 200);
     const quantity = Number(row?.quantity);
-    const unit = typeof row?.unitPriceCents === 'string' ? Number(row.unitPriceCents) : row?.unitPriceCents;
+    const unit =
+      typeof row?.unitPriceCents === 'string' ? Number(row.unitPriceCents) : row?.unitPriceCents;
     if (!description) return { ok: false, message: 'Todos os itens precisam de descrição.' };
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 1_000_000) {
       return { ok: false, message: 'Quantidade do item inválida (inteiro maior ou igual a 1).' };

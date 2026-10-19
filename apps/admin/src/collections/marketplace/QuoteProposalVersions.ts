@@ -90,7 +90,14 @@ export const QuoteProposalVersions: CollectionConfig = {
       labels: { singular: 'Item', plural: 'Itens' },
       fields: [
         { name: 'description', type: 'text', required: true, label: 'Descrição' },
-        { name: 'quantity', type: 'number', required: true, min: 1, defaultValue: 1, label: 'Quantidade' },
+        {
+          name: 'quantity',
+          type: 'number',
+          required: true,
+          min: 1,
+          defaultValue: 1,
+          label: 'Quantidade',
+        },
         {
           name: 'unitPriceCents',
           type: 'number',

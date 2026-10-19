@@ -61,7 +61,9 @@ export default async function OportunidadesPage() {
                 </Link>
                 <p className="text-xs text-omnia-graphite-light">{formatDateTime(doc.createdAt)}</p>
               </div>
-              <StatusBadge tone={doc.status}>{labelOf(QUOTE_STATUS_LABELS, doc.status)}</StatusBadge>
+              <StatusBadge tone={doc.status}>
+                {labelOf(QUOTE_STATUS_LABELS, doc.status)}
+              </StatusBadge>
             </li>
           ))}
         </ul>

@@ -74,7 +74,10 @@ export default async function ParceiroServicosPage({ searchParams }: PageProps) 
             </thead>
             <tbody>
               {result.data.docs.map((doc) => (
-                <tr key={String(doc.id)} className="border-t border-omnia-deep-blue/5 hover:bg-omnia-ice/40">
+                <tr
+                  key={String(doc.id)}
+                  className="border-t border-omnia-deep-blue/5 hover:bg-omnia-ice/40"
+                >
                   <td className="px-4 py-3">
                     <Link
                       href={`/parceiro/servicos/${doc.id}`}
@@ -89,7 +92,9 @@ export default async function ParceiroServicosPage({ searchParams }: PageProps) 
                       {labelOf(LISTING_STATUS_LABELS, doc.status)}
                     </StatusBadge>
                   </td>
-                  <td className="px-4 py-3 text-omnia-graphite-light">{formatDateTime(doc.updatedAt)}</td>
+                  <td className="px-4 py-3 text-omnia-graphite-light">
+                    {formatDateTime(doc.updatedAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>

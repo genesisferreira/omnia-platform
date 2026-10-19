@@ -39,7 +39,9 @@ export default async function MarketplaceProjetoPage() {
           </Link>{' '}
           / Projeto
         </p>
-        <h1 className="font-heading text-3xl font-semibold text-omnia-deep-blue">Tenho um projeto</h1>
+        <h1 className="font-heading text-3xl font-semibold text-omnia-deep-blue">
+          Tenho um projeto
+        </h1>
         <p className="text-omnia-graphite">
           Informe a necessidade técnica e escolha um parceiro aprovado. Sem IA nesta fase: o
           formulário estrutura o pré-escopo para cotação registrada no portal.
@@ -48,7 +50,10 @@ export default async function MarketplaceProjetoPage() {
       {!token ? (
         <div className="rounded-lg border border-omnia-deep-blue/10 p-4 text-sm">
           <p className="mb-3">É necessário estar autenticado para enviar o projeto.</p>
-          <a href={getAdminLoginUrl('/marketplace/projeto')} className="text-omnia-deep-blue underline">
+          <a
+            href={getAdminLoginUrl('/marketplace/projeto')}
+            className="text-omnia-deep-blue underline"
+          >
             Fazer login
           </a>
         </div>

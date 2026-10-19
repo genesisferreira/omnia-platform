@@ -5,10 +5,7 @@ import { useActionState } from 'react';
 
 import { Alert, Button, Input, Textarea } from '@omnia/ui';
 
-import {
-  submitMarketplaceQuoteAction,
-  type QuoteActionState,
-} from '@/app/marketplace/actions';
+import { submitMarketplaceQuoteAction, type QuoteActionState } from '@/app/marketplace/actions';
 
 type Props = {
   partnerId: string;
@@ -24,7 +21,10 @@ export function QuoteRequestForm(props: Props) {
   );
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border border-omnia-deep-blue/10 bg-white p-4">
+    <form
+      action={formAction}
+      className="space-y-4 rounded-lg border border-omnia-deep-blue/10 bg-white p-4"
+    >
       <input type="hidden" name="partnerId" value={props.partnerId} />
       <input type="hidden" name="sourceType" value={props.sourceType} />
       {props.listingId ? <input type="hidden" name="listingId" value={props.listingId} /> : null}
@@ -50,7 +50,14 @@ export function QuoteRequestForm(props: Props) {
         <label htmlFor="description" className="mb-1 block text-sm font-medium">
           Descreva a necessidade *
         </label>
-        <Textarea id="description" name="description" required minLength={10} maxLength={4000} rows={5} />
+        <Textarea
+          id="description"
+          name="description"
+          required
+          minLength={10}
+          maxLength={4000}
+          rows={5}
+        />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
@@ -73,7 +80,8 @@ export function QuoteRequestForm(props: Props) {
         </div>
       </div>
       <p className="text-xs text-omnia-graphite-light">
-        A solicitação fica registrada no portal. WhatsApp do fornecedor, quando houver, é complementar.
+        A solicitação fica registrada no portal. WhatsApp do fornecedor, quando houver, é
+        complementar.
       </p>
       <Button type="submit" disabled={pending}>
         {pending ? 'Enviando…' : 'Enviar solicitação'}

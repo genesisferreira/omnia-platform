@@ -73,7 +73,13 @@ export const marketplaceProposalSendEndpoint: Endpoint = {
     const shouldCommit = await initTransaction(req);
     try {
       const quote = (await req.payload
-        .findByID({ collection: QUOTE_REQUESTS, id: data.quoteId, depth: 0, overrideAccess: true, req })
+        .findByID({
+          collection: QUOTE_REQUESTS,
+          id: data.quoteId,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
         .catch(() => null)) as unknown as Record<string, unknown> | null;
       if (!quote) throw new SendError(404, 'NOT_FOUND', 'Solicitação não encontrada.');
 
@@ -83,8 +89,14 @@ export const marketplaceProposalSendEndpoint: Endpoint = {
         throw new SendError(409, 'CONFLICT', 'Solicitação sem parceiro ou comprador.');
       }
       const allowed =
-        hasStaffAccess(user) || (await hasPartnerCapability(req.payload, user.id, partnerId, 'edit'));
-      if (!allowed) throw new SendError(403, 'FORBIDDEN', 'Você não pode enviar propostas para esta solicitação.');
+        hasStaffAccess(user) ||
+        (await hasPartnerCapability(req.payload, user.id, partnerId, 'edit'));
+      if (!allowed)
+        throw new SendError(
+          403,
+          'FORBIDDEN',
+          'Você não pode enviar propostas para esta solicitação.',
+        );
 
       const currentStatus = quote.status;
       if (!isQuoteStatus(currentStatus) || QUOTE_TERMINAL_STATUSES.includes(currentStatus)) {
@@ -232,7 +244,11 @@ export const marketplaceProposalSendEndpoint: Endpoint = {
       if (shouldCommit) await killTransaction(req);
       if (error instanceof SendError) return fail(error.status, error.code, error.message);
       req.payload.logger.error('marketplace-proposal-send: failed');
-      return fail(500, 'INTERNAL_ERROR', 'Não foi possível enviar a proposta agora. Tente novamente.');
+      return fail(
+        500,
+        'INTERNAL_ERROR',
+        'Não foi possível enviar a proposta agora. Tente novamente.',
+      );
     }
   },
 };

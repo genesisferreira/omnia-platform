@@ -54,13 +54,25 @@ export function ListingForm({ kind, listing, action, intents, readOnly, readOnly
       <fieldset disabled={contentDisabled} className="space-y-5 disabled:opacity-90">
         <div>
           <Label htmlFor="title">Título *</Label>
-          <Input id="title" name="title" required minLength={3} maxLength={160} defaultValue={listing?.title ?? ''} />
+          <Input
+            id="title"
+            name="title"
+            required
+            minLength={3}
+            maxLength={160}
+            defaultValue={listing?.title ?? ''}
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="category">Categoria</Label>
-            <Input id="category" name="category" maxLength={120} defaultValue={listing?.category ?? ''} />
+            <Input
+              id="category"
+              name="category"
+              maxLength={120}
+              defaultValue={listing?.category ?? ''}
+            />
           </div>
           {isProduct ? (
             <div>
@@ -85,7 +97,13 @@ export function ListingForm({ kind, listing, action, intents, readOnly, readOnly
 
         <div>
           <Label htmlFor="description">Descrição</Label>
-          <Textarea id="description" name="description" rows={6} maxLength={4000} defaultValue={listing?.description ?? ''} />
+          <Textarea
+            id="description"
+            name="description"
+            rows={6}
+            maxLength={4000}
+            defaultValue={listing?.description ?? ''}
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

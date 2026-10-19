@@ -1,6 +1,14 @@
 import Link from 'next/link';
 
-import { Alert, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@omnia/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@omnia/ui';
 
 import { NoPartnerNotice, PageHeader } from '@/components/partner/ui';
 import { PARTNER_PLAN_LABELS } from '@/lib/marketplace/labels';

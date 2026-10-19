@@ -131,7 +131,9 @@ async function assertListingFilesBelongToPartner(
     images: touchesImages ? data.images : originalDoc?.images,
     datasheet: touchesDatasheet ? data.datasheet : originalDoc?.datasheet,
   });
-  const ids = [...new Set([...refs.images, ...(refs.datasheet != null ? [refs.datasheet] : [])].map(String))];
+  const ids = [
+    ...new Set([...refs.images, ...(refs.datasheet != null ? [refs.datasheet] : [])].map(String)),
+  ];
   if (ids.length === 0) return;
   if (partnerId == null) throw new APIError('Parceiro obrigatório para anexar arquivos.', 400);
 
@@ -152,7 +154,10 @@ async function assertListingFilesBelongToPartner(
       throw new APIError('Arquivo inválido para este parceiro.', 403);
     }
     if (doc.kind !== kind) {
-      throw new APIError(kind === 'image' ? 'Use uma imagem na galeria.' : 'A ficha técnica deve ser um PDF.', 400);
+      throw new APIError(
+        kind === 'image' ? 'Use uma imagem na galeria.' : 'A ficha técnica deve ser um PDF.',
+        400,
+      );
     }
   };
   refs.images.forEach((id) => check(id, 'image'));
@@ -166,7 +171,10 @@ async function assertListingFilesBelongToPartner(
 export const listingAfterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
   const current = listingFileRefs(doc as Record<string, unknown>);
   const previous = listingFileRefs(previousDoc as Record<string, unknown> | undefined);
-  const attached = [...current.images, ...(current.datasheet != null ? [current.datasheet] : [])].map(String);
+  const attached = [
+    ...current.images,
+    ...(current.datasheet != null ? [current.datasheet] : []),
+  ].map(String);
   const detached = [...previous.images, ...(previous.datasheet != null ? [previous.datasheet] : [])]
     .map(String)
     .filter((id) => !attached.includes(id));
@@ -238,7 +246,11 @@ export const membershipBeforeChange: CollectionBeforeChangeHook = async ({
 
 /** Decisões exclusivas do comprador; `declined` também pode vir do parceiro (recusar a solicitação). */
 const BUYER_ONLY_QUOTE_STATUSES: readonly QuoteStatus[] = ['accepted', 'negotiating'];
-const BUYER_ALLOWED_QUOTE_STATUSES: readonly QuoteStatus[] = ['accepted', 'negotiating', 'declined'];
+const BUYER_ALLOWED_QUOTE_STATUSES: readonly QuoteStatus[] = [
+  'accepted',
+  'negotiating',
+  'declined',
+];
 
 const PUBLIC_ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -328,7 +340,10 @@ export const quoteRequestBeforeChange: CollectionBeforeChangeHook = async ({
 
   if (originalDoc && data.status && data.status !== originalDoc.status) {
     if (!isQuoteStatus(data.status) || !canTransitionQuote(originalDoc.status, data.status)) {
-      throw new APIError(`Transição de status inválida: ${originalDoc.status} → ${data.status}.`, 400);
+      throw new APIError(
+        `Transição de status inválida: ${originalDoc.status} → ${data.status}.`,
+        400,
+      );
     }
     if (!staff) {
       const buyerId = getRelationId(originalDoc.buyerUser);

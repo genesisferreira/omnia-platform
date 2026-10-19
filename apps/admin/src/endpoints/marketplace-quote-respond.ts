@@ -70,7 +70,9 @@ export const marketplaceQuoteRespondEndpoint: Endpoint = {
     const quoteId = body.quoteId;
     const actionRaw = typeof body.action === 'string' ? body.action.trim().toLowerCase() : '';
     const message =
-      typeof body.message === 'string' ? body.message.replace(/\r\n/g, '\n').trim().slice(0, 2000) : '';
+      typeof body.message === 'string'
+        ? body.message.replace(/\r\n/g, '\n').trim().slice(0, 2000)
+        : '';
 
     const validId =
       (typeof quoteId === 'number' && Number.isInteger(quoteId) && quoteId > 0) ||
@@ -99,7 +101,13 @@ export const marketplaceQuoteRespondEndpoint: Endpoint = {
     const shouldCommit = await initTransaction(req);
     try {
       const quote = (await req.payload
-        .findByID({ collection: QUOTE_REQUESTS, id: quoteId as string | number, depth: 0, overrideAccess: true, req })
+        .findByID({
+          collection: QUOTE_REQUESTS,
+          id: quoteId as string | number,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
         .catch(() => null)) as unknown as Record<string, unknown> | null;
       if (!quote) throw new RespondError(404, 'NOT_FOUND', 'Solicitação não encontrada.');
 
@@ -156,7 +164,10 @@ export const marketplaceQuoteRespondEndpoint: Endpoint = {
         await req.payload.update({
           collection: PROPOSALS,
           id: proposalId,
-          data: { status: action === 'accept' ? 'accepted' : 'rejected', respondedAt: now } as never,
+          data: {
+            status: action === 'accept' ? 'accepted' : 'rejected',
+            respondedAt: now,
+          } as never,
           overrideAccess: true,
           req,
         });

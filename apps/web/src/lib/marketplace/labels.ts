@@ -1,4 +1,10 @@
-import type { ListingStatus, ProposalStatus, QuoteEventType, QuoteSourceType, QuoteStatus } from '@omnia/shared';
+import type {
+  ListingStatus,
+  ProposalStatus,
+  QuoteEventType,
+  QuoteSourceType,
+  QuoteStatus,
+} from '@omnia/shared';
 
 export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   draft: 'Rascunho',
@@ -75,7 +81,10 @@ export const MEMBERSHIP_ROLE_LABELS: Record<string, string> = {
   viewer: 'Visualizador',
 };
 
-export function labelOf<T extends string>(map: Record<T, string>, key: string | null | undefined): string {
+export function labelOf<T extends string>(
+  map: Record<T, string>,
+  key: string | null | undefined,
+): string {
   if (!key) return '—';
   return (map as Record<string, string>)[key] ?? key;
 }
@@ -95,5 +104,8 @@ export function formatDate(value: string | null | undefined): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(date);
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeZone: 'America/Sao_Paulo',
+  }).format(date);
 }

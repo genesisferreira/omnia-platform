@@ -1,6 +1,16 @@
 import Link from 'next/link';
 
-import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, EmptyState, cn } from '@omnia/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  EmptyState,
+  cn,
+} from '@omnia/ui';
 
 import { PARTNER_STATUS_LABELS } from '@/lib/marketplace/labels';
 import type { PartnerContext, PartnerSummary } from '@/lib/marketplace/types';
@@ -49,17 +59,25 @@ export function PartnerStatusAlert({ partner }: { partner: PartnerSummary }) {
   return (
     <Alert variant="warning" title="Cadastro ainda não publicado" className="mb-6">
       Situação do cadastro: {label}
-      {partner.status === 'approved' && !partner.active ? ' (inativo)' : ''}. Seus anúncios só aparecem
-      no marketplace público quando o parceiro estiver aprovado, ativo e publicado pela equipe Omnia.
+      {partner.status === 'approved' && !partner.active ? ' (inativo)' : ''}. Seus anúncios só
+      aparecem no marketplace público quando o parceiro estiver aprovado, ativo e publicado pela
+      equipe Omnia.
     </Alert>
   );
 }
 
-export function StatCard(props: { label: string; value: number | string; hint?: string; href?: string }) {
+export function StatCard(props: {
+  label: string;
+  value: number | string;
+  hint?: string;
+  href?: string;
+}) {
   const body = (
     <Card className="h-full border-omnia-deep-blue/10 transition-colors hover:border-omnia-deep-blue/30">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-omnia-graphite-light">{props.label}</CardTitle>
+        <CardTitle className="text-sm font-medium text-omnia-graphite-light">
+          {props.label}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-3xl font-semibold text-omnia-deep-blue">{props.value}</p>
@@ -68,7 +86,10 @@ export function StatCard(props: { label: string; value: number | string; hint?: 
     </Card>
   );
   return props.href ? (
-    <Link href={props.href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald">
+    <Link
+      href={props.href}
+      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald"
+    >
       {body}
     </Link>
   ) : (
@@ -138,7 +159,8 @@ export function Pagination(props: {
   if (props.totalPages <= 1) return null;
   const href = (page: number) => {
     const search = new URLSearchParams();
-    for (const [key, value] of Object.entries(props.params ?? {})) if (value) search.set(key, value);
+    for (const [key, value] of Object.entries(props.params ?? {}))
+      if (value) search.set(key, value);
     if (page > 1) search.set('page', String(page));
     const qs = search.toString();
     return qs ? `${props.basePath}?${qs}` : props.basePath;

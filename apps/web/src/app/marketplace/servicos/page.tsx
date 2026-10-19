@@ -41,14 +41,22 @@ export default async function MarketplaceServicosPage({ searchParams }: PageProp
         </p>
         <h1 className="font-heading text-3xl font-semibold text-omnia-deep-blue">Serviços</h1>
         <form className="flex flex-wrap gap-2 pt-2" method="get">
-          <input name="q" defaultValue={q} placeholder="Buscar" className="h-10 rounded-md border px-3 text-sm" />
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Buscar"
+            className="h-10 rounded-md border px-3 text-sm"
+          />
           <input
             name="category"
             defaultValue={category}
             placeholder="Categoria"
             className="h-10 rounded-md border px-3 text-sm"
           />
-          <button type="submit" className="h-10 rounded-md bg-omnia-deep-blue px-4 text-sm text-white">
+          <button
+            type="submit"
+            className="h-10 rounded-md bg-omnia-deep-blue px-4 text-sm text-white"
+          >
             Filtrar
           </button>
         </form>

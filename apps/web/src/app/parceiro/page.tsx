@@ -2,7 +2,13 @@ import Link from 'next/link';
 
 import { Button } from '@omnia/ui';
 
-import { LoadError, NoPartnerNotice, PageHeader, PartnerStatusAlert, StatCard } from '@/components/partner/ui';
+import {
+  LoadError,
+  NoPartnerNotice,
+  PageHeader,
+  PartnerStatusAlert,
+  StatCard,
+} from '@/components/partner/ui';
 import { fetchPartnerDashboard } from '@/lib/marketplace/client';
 import { requirePartnerContext } from '@/lib/marketplace/require-partner';
 
@@ -74,9 +80,12 @@ export default async function ParceiroDashboardPage() {
       ) : null}
       {stats && stats.quotes.byStatus.submitted ? (
         <p className="mt-6 text-sm text-omnia-graphite">
-          Você tem <strong>{stats.quotes.byStatus.submitted}</strong> solicitação(ões) nova(s) aguardando
-          análise.{' '}
-          <Link href="/parceiro/solicitacoes?status=submitted" className="text-omnia-deep-blue underline">
+          Você tem <strong>{stats.quotes.byStatus.submitted}</strong> solicitação(ões) nova(s)
+          aguardando análise.{' '}
+          <Link
+            href="/parceiro/solicitacoes?status=submitted"
+            className="text-omnia-deep-blue underline"
+          >
             Ver agora
           </Link>
         </p>

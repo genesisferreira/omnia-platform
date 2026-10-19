@@ -5,14 +5,22 @@ export type ListingIntent = 'save' | 'submit' | 'draft' | 'archive';
 export const LISTING_INTENTS: readonly ListingIntent[] = ['save', 'submit', 'draft', 'archive'];
 
 /** Status em que o parceiro pode alterar o conteúdo (published volta para moderação). */
-export const PARTNER_EDITABLE_STATUSES: readonly ListingStatus[] = ['draft', 'rejected', 'published'];
+export const PARTNER_EDITABLE_STATUSES: readonly ListingStatus[] = [
+  'draft',
+  'rejected',
+  'published',
+];
 
 export function isListingIntent(value: unknown): value is ListingIntent {
   return typeof value === 'string' && (LISTING_INTENTS as readonly string[]).includes(value);
 }
 
 export type ListingIntentPlan =
-  | { ok: true; /** Atualiza os campos de conteúdo? */ writeContent: boolean; status: ListingStatus | undefined }
+  | {
+      ok: true;
+      /** Atualiza os campos de conteúdo? */ writeContent: boolean;
+      status: ListingStatus | undefined;
+    }
   | { ok: false; message: string };
 
 /**
@@ -24,7 +32,8 @@ export function planListingIntent(
   intent: ListingIntent,
 ): ListingIntentPlan {
   if (current == null) {
-    if (intent === 'draft' || intent === 'save') return { ok: true, writeContent: true, status: 'draft' };
+    if (intent === 'draft' || intent === 'save')
+      return { ok: true, writeContent: true, status: 'draft' };
     if (intent === 'submit') return { ok: true, writeContent: true, status: 'pending' };
     return { ok: false, message: 'Ação indisponível para um item novo.' };
   }
@@ -34,10 +43,15 @@ export function planListingIntent(
 
   if (intent === 'save') {
     if (!editable) return { ok: false, message: 'Este item não pode ser editado no status atual.' };
-    return { ok: true, writeContent: true, status: current === 'published' ? 'pending' : undefined };
+    return {
+      ok: true,
+      writeContent: true,
+      status: current === 'published' ? 'pending' : undefined,
+    };
   }
   if (intent === 'submit') {
-    if (!editable) return { ok: false, message: 'Este item não pode ser enviado para moderação agora.' };
+    if (!editable)
+      return { ok: false, message: 'Este item não pode ser enviado para moderação agora.' };
     return { ok: true, writeContent: true, status: 'pending' };
   }
   if (intent === 'draft') {

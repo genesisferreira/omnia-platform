@@ -1,6 +1,14 @@
 import Link from 'next/link';
 
-import { Alert, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@omnia/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@omnia/ui';
 
 import { NoPartnerNotice, PageHeader } from '@/components/partner/ui';
 import { MEMBERSHIP_ROLE_LABELS, PARTNER_STATUS_LABELS } from '@/lib/marketplace/labels';
@@ -13,7 +21,9 @@ export const metadata = { title: 'Empresa' };
 function Item({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-omnia-graphite-light">{label}</dt>
+      <dt className="text-xs font-medium uppercase tracking-wide text-omnia-graphite-light">
+        {label}
+      </dt>
       <dd className="mt-0.5 text-sm text-omnia-deep-blue">{value || '—'}</dd>
     </div>
   );
@@ -47,9 +57,18 @@ export default async function ParceiroEmpresaPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <dl className="grid gap-4 sm:grid-cols-2">
-            <Item label="Tipo" value={partner.partnerType === 'professional' ? 'Profissional' : 'Empresa'} />
-            <Item label="Situação do cadastro" value={PARTNER_STATUS_LABELS[partner.status ?? ''] ?? partner.status} />
-            <Item label="Publicação" value={partner.active && partner.publishedAt ? 'Publicado' : 'Não publicado'} />
+            <Item
+              label="Tipo"
+              value={partner.partnerType === 'professional' ? 'Profissional' : 'Empresa'}
+            />
+            <Item
+              label="Situação do cadastro"
+              value={PARTNER_STATUS_LABELS[partner.status ?? ''] ?? partner.status}
+            />
+            <Item
+              label="Publicação"
+              value={partner.active && partner.publishedAt ? 'Publicado' : 'Não publicado'}
+            />
             <Item label="Verificado" value={partner.verified ? 'Sim' : 'Não'} />
             <Item label="Localização" value={location} />
             <Item label="Seu papel" value={MEMBERSHIP_ROLE_LABELS[role] ?? role} />
@@ -60,16 +79,20 @@ export default async function ParceiroEmpresaPage() {
           </dl>
           {partner.description ? (
             <div>
-              <h2 className="text-xs font-medium uppercase tracking-wide text-omnia-graphite-light">Sobre</h2>
-              <p className="mt-1 whitespace-pre-line text-sm text-omnia-graphite">{partner.description}</p>
+              <h2 className="text-xs font-medium uppercase tracking-wide text-omnia-graphite-light">
+                Sobre
+              </h2>
+              <p className="mt-1 whitespace-pre-line text-sm text-omnia-graphite">
+                {partner.description}
+              </p>
             </div>
           ) : null}
         </CardContent>
       </Card>
 
       <Alert className="mt-6 max-w-3xl" title="Precisa alterar algum dado?">
-        O perfil da empresa é gerenciado pela equipe Omnia. Entre em contato informando o que deve ser
-        atualizado.
+        O perfil da empresa é gerenciado pela equipe Omnia. Entre em contato informando o que deve
+        ser atualizado.
         <div className="mt-3 flex flex-wrap gap-2">
           <Button asChild size="sm">
             <Link href="/contato">Falar com a equipe</Link>

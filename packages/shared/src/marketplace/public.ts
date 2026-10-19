@@ -213,7 +213,9 @@ export function mapPublicMarketplaceListing(
 /* ------------------------------ Preço (centavos) ------------------------------ */
 
 export function isValidPriceCents(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 99_999_999_999;
+  return (
+    typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 99_999_999_999
+  );
 }
 
 /**
@@ -225,9 +227,7 @@ export function parseBrlToCents(input: unknown): number | null {
   if (typeof input !== 'string') return null;
   const cleaned = input.replace(/[R$\s]/gi, '');
   if (cleaned === '') return null;
-  const normalized = cleaned.includes(',')
-    ? cleaned.replace(/\./g, '').replace(',', '.')
-    : cleaned;
+  const normalized = cleaned.includes(',') ? cleaned.replace(/\./g, '').replace(',', '.') : cleaned;
   const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(normalized);
   if (!match) return null;
   const cents = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0') || '0');
@@ -274,8 +274,7 @@ export type QuoteRequestInput = {
 };
 
 export type ValidateQuoteRequestResult =
-  | { ok: true; data: QuoteRequestInput }
-  | { ok: false; message: string };
+  { ok: true; data: QuoteRequestInput } | { ok: false; message: string };
 
 const SCRIPT_RE = /<\s*script|javascript:|on\w+\s*=/i;
 

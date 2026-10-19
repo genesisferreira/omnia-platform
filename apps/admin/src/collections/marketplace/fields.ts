@@ -118,7 +118,8 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
       index: true,
       label: 'Slug',
       admin: {
-        description: 'Gerado a partir do título; único por parceiro (/parceiros/{parceiro}/{slug}).',
+        description:
+          'Gerado a partir do título; único por parceiro (/parceiros/{parceiro}/{slug}).',
       },
     },
     {
@@ -162,7 +163,8 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
       min: 0,
       label: 'Preço (centavos)',
       admin: {
-        description: 'Valor em centavos de real (ex.: 12990 = R$ 129,90). Vazio quando sob consulta.',
+        description:
+          'Valor em centavos de real (ex.: 12990 = R$ 129,90). Vazio quando sob consulta.',
       },
     },
     {
@@ -186,7 +188,10 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
           relationTo: 'partner-listing-media',
           required: true,
           label: 'Imagem',
-          filterOptions: ({ data }) => ({ kind: { equals: 'image' }, partner: { equals: data?.partner } }),
+          filterOptions: ({ data }) => ({
+            kind: { equals: 'image' },
+            partner: { equals: data?.partner },
+          }),
         },
         { name: 'alt', type: 'text', label: 'Texto alternativo', maxLength: 160 },
       ],
@@ -196,7 +201,10 @@ export function listingFields(kind: 'product' | 'service'): Field[] {
       type: 'upload',
       relationTo: 'partner-listing-media',
       label: 'Ficha técnica (PDF)',
-      filterOptions: ({ data }) => ({ kind: { equals: 'datasheet' }, partner: { equals: data?.partner } }),
+      filterOptions: ({ data }) => ({
+        kind: { equals: 'datasheet' },
+        partner: { equals: data?.partner },
+      }),
     },
     ...(isProduct
       ? ([
