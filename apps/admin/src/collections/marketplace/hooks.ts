@@ -12,9 +12,9 @@ import {
   canChangeMembershipRole,
   canTransitionListing,
   canTransitionQuote,
-  diffListingRevision,
   isQuoteStatus,
   normalizePartnerSlug,
+  normalizeRevisionValue,
   requiresRevision,
   revisionFieldsFor,
   revisionPatchFrom,
@@ -31,8 +31,16 @@ import { recordMarketplaceAudit } from './MarketplaceAuditEvents';
 
 const PARTNER_LISTING_STATUSES: readonly ListingStatus[] = ['draft', 'pending', 'archived'];
 
-export const listingBeforeValidate: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
+export const listingBeforeValidate: CollectionBeforeValidateHook = ({
+  data,
+  originalDoc,
+  operation,
+  req,
+}) => {
   if (!data) return data;
+  // Aqui `data` ainda é só o patch recebido; no beforeChange já vem mesclado ao original.
+  // Guardamos os campos tocados para a revisão moderada saber o que o parceiro editou.
+  if (operation === 'update') req.context.listingTouchedFields = Object.keys(data);
   const source = data.slug ?? originalDoc?.slug ?? data.title ?? originalDoc?.title;
   const slug = normalizePartnerSlug(source);
   if (slug) data.slug = slug;
@@ -178,7 +186,11 @@ async function applyListingRevisionRules(args: {
     kind === 'product' ? 'partner-product-listings' : 'partner-service-listings';
 
   if (!staff) {
-    for (const field of REVISION_META_FIELDS) delete data[field];
+    // Parceiro nunca define o estado da revisão (nem aprova a si mesmo): mantém o original.
+    for (const field of REVISION_META_FIELDS) {
+      if (operation === 'update' && originalDoc) data[field] = originalDoc[field] ?? null;
+      else delete data[field];
+    }
   }
   if (operation !== 'update' || !originalDoc) return;
   const pending = pendingOf(originalDoc);
@@ -216,14 +228,20 @@ async function applyListingRevisionRules(args: {
     return;
   }
 
+  const touched = new Set(
+    Array.isArray(req.context?.listingTouchedFields)
+      ? (req.context.listingTouchedFields as string[])
+      : Object.keys(data),
+  );
+  const fields = revisionFieldsFor(kind).filter((field) => touched.has(field));
   const nextStatus = (data.status ?? originalDoc.status) as ListingStatus;
   // Saiu do ar por decisão do parceiro (rascunho/moderação/arquivado): a revisão vira o conteúdo
   // e passa pela moderação normal na próxima publicação.
   if (!requiresRevision(nextStatus)) {
     if (pending) {
-      const incoming = { ...data };
+      const edited = Object.fromEntries(fields.map((field) => [field, data[field]]));
       applyPendingInto(data, pending);
-      Object.assign(data, incoming);
+      Object.assign(data, edited);
       data.pendingRevision = null;
       data.revisionStatus = 'none';
     }
@@ -231,23 +249,29 @@ async function applyListingRevisionRules(args: {
   }
   if (!requiresRevision(originalDoc.status)) return;
 
-  const changes = diffListingRevision(kind, originalDoc, data);
+  const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+  const changes: RevisionChanges = {};
   const merged: RevisionChanges = { ...(pending?.changes ?? {}) };
   for (const field of revisionFieldsFor(kind)) {
-    if (!(field in data)) continue;
-    if (changes[field]) merged[field] = changes[field];
-    else delete merged[field];
-    delete data[field];
-  }
-  const touched = Object.keys(changes).length > 0;
-  if (Object.keys(merged).length === 0) {
-    if (pending) {
-      data.pendingRevision = null;
-      data.revisionStatus = 'none';
+    if (fields.includes(field)) {
+      const live = normalizeRevisionValue(field, originalDoc[field]);
+      const incoming = normalizeRevisionValue(field, data[field]);
+      const effective = merged[field] ? merged[field]!.to : live;
+      if (!same(incoming, effective)) {
+        changes[field] = { from: effective, to: incoming };
+        if (same(incoming, live)) delete merged[field];
+        else merged[field] = { from: live, to: incoming };
+      }
     }
+    // O conteúdo público continua o aprovado até a moderação.
+    data[field] = originalDoc[field];
+  }
+  if (Object.keys(changes).length === 0) return;
+  if (Object.keys(merged).length === 0) {
+    data.pendingRevision = null;
+    data.revisionStatus = 'none';
     return;
   }
-  if (!touched && pending) return;
   data.pendingRevision = { changes: merged, submittedAt: now, submittedBy: req.user?.id ?? null };
   data.revisionStatus = 'pending';
   data.revisionSubmittedAt = now;
