@@ -89,12 +89,17 @@ function assertDevOnly(): void {
   if (flag !== '1' && flag !== 'true' && flag !== 'yes') {
     throw new Error('ABORT: set OMNIA_ALLOW_MARKETPLACE_HOMOLOG=1');
   }
-  const db = String(process.env.DATABASE_URL || '');
-  if (!db.includes('omnia_staging') && !db.includes('@omnia-postgres')) {
-    // Soft check — hostname may be in URL; also check explicit name.
-    if (!/omnia_staging/.test(db)) {
-      throw new Error('ABORT: DATABASE_URL must target omnia_staging');
-    }
+  let host = '';
+  let dbName = '';
+  try {
+    const url = new URL(String(process.env.DATABASE_URL || '').replace(/^["']|["']$/g, ''));
+    host = url.hostname;
+    dbName = url.pathname.replace(/^\//, '');
+  } catch {
+    throw new Error('ABORT: DATABASE_URL inválida');
+  }
+  if (dbName !== 'omnia_staging' || host !== 'omnia-postgres') {
+    throw new Error('ABORT: DATABASE_URL must target omnia-postgres/omnia_staging');
   }
 }
 

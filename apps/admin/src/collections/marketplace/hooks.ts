@@ -132,6 +132,10 @@ export const membershipBeforeChange: CollectionBeforeChangeHook = async ({
   return data;
 };
 
+/** Decisões exclusivas do comprador; `declined` também pode vir do parceiro (recusar a solicitação). */
+const BUYER_ONLY_QUOTE_STATUSES: readonly QuoteStatus[] = ['accepted', 'negotiating'];
+const BUYER_ALLOWED_QUOTE_STATUSES: readonly QuoteStatus[] = ['accepted', 'negotiating', 'declined'];
+
 const PUBLIC_ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 export function generateQuotePublicId(): string {
@@ -225,12 +229,12 @@ export const quoteRequestBeforeChange: CollectionBeforeChangeHook = async ({
     if (!staff) {
       const buyerId = getRelationId(originalDoc.buyerUser);
       const isBuyer = user != null && buyerId != null && String(user.id) === String(buyerId);
-      const buyerStatuses: QuoteStatus[] = ['accepted', 'declined', 'negotiating'];
-      if (buyerStatuses.includes(data.status as QuoteStatus)) {
+      const next = data.status as QuoteStatus;
+      if (BUYER_ONLY_QUOTE_STATUSES.includes(next)) {
         if (!isBuyer) {
-          throw new APIError('Somente o comprador pode aceitar, recusar ou renegociar.', 403);
+          throw new APIError('Somente o comprador pode aceitar ou renegociar.', 403);
         }
-      } else if (isBuyer) {
+      } else if (isBuyer && !BUYER_ALLOWED_QUOTE_STATUSES.includes(next)) {
         throw new APIError('O comprador não pode aplicar este status.', 403);
       }
     }
