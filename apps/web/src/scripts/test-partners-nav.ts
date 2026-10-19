@@ -107,6 +107,15 @@ describe('header partners dropdown regression', () => {
     assert.match(headerSource, /toggleOpenMenu\(current, key\)/);
   });
 
+  it('uses the compact (hamburger) menu below lg so the header never overflows on tablets', () => {
+    assert.match(
+      headerSource,
+      /aria-label="Principal" className="hidden items-center gap-6 lg:flex/,
+    );
+    assert.match(headerSource, /matchMedia\('\(min-width: 1024px\)'\)/);
+    assert.equal(headerSource.includes('md:flex'), false);
+  });
+
   it('closes menus on navigation', () => {
     assert.match(headerSource, /usePathname\(\)/);
     assert.match(headerSource, /\}, \[pathname\]\);/);

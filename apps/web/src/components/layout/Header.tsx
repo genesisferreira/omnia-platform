@@ -69,7 +69,8 @@ export function Header() {
   }, [openKey]);
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 768px)');
+    // Mesmo breakpoint do menu desktop (Tailwind `lg`).
+    const media = window.matchMedia('(min-width: 1024px)');
     const onChange = () => {
       if (media.matches) setMenuOpen(false);
       else setOpenKey(null);
@@ -89,7 +90,7 @@ export function Header() {
       <Container className="flex h-16 items-center justify-between gap-3">
         <BrandHomeLink />
 
-        <nav aria-label="Principal" className="hidden items-center gap-7 md:flex">
+        <nav aria-label="Principal" className="hidden items-center gap-6 lg:flex xl:gap-7">
           {INSTITUTIONAL_NAV_ITEMS.map((item, index) => {
             if (!item.children) {
               return (
@@ -176,11 +177,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <AccountNav className="hidden border-omnia-deep-blue/20 text-omnia-deep-blue hover:bg-omnia-deep-blue/5 md:inline-flex" />
+          <AccountNav className="hidden border-omnia-deep-blue/20 text-omnia-deep-blue hover:bg-omnia-deep-blue/5 lg:inline-flex" />
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-omnia-deep-blue/15 text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-omnia-deep-blue/15 text-omnia-deep-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-omnia-emerald focus-visible:ring-offset-2 lg:hidden"
             aria-expanded={menuOpen}
             aria-controls={menuId}
             aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -203,7 +204,7 @@ export function Header() {
 
       <div
         id={menuId}
-        className={`max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-omnia-deep-blue/10 bg-omnia-white md:hidden ${menuOpen ? 'block' : 'hidden'}`}
+        className={`max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-omnia-deep-blue/10 bg-omnia-white lg:hidden ${menuOpen ? 'block' : 'hidden'}`}
         hidden={!menuOpen}
       >
         <Container className="flex flex-col gap-1 py-3">
