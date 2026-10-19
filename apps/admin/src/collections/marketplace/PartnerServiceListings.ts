@@ -5,7 +5,12 @@ import {
   partnerMembershipScopedAccess,
 } from '../../access/marketplace';
 import { GROUP, listingFields } from './fields';
-import { listingAfterChange, listingBeforeChange, listingBeforeValidate } from './hooks';
+import {
+  listingAfterChange,
+  listingBeforeChange,
+  listingBeforeOperation,
+  listingBeforeValidate,
+} from './hooks';
 
 /**
  * Catálogo de serviços do parceiro. Leitura pública apenas via endpoints dedicados
@@ -29,6 +34,7 @@ export const PartnerServiceListings: CollectionConfig = {
   },
   indexes: [{ fields: ['partner', 'slug'], unique: true }],
   hooks: {
+    beforeOperation: [listingBeforeOperation],
     beforeValidate: [listingBeforeValidate],
     beforeChange: [listingBeforeChange],
     afterChange: [listingAfterChange],

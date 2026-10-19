@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
+  CollectionBeforeOperationHook,
   CollectionBeforeValidateHook,
   CollectionSlug,
 } from 'payload';
@@ -31,16 +32,22 @@ import { recordMarketplaceAudit } from './MarketplaceAuditEvents';
 
 const PARTNER_LISTING_STATUSES: readonly ListingStatus[] = ['draft', 'pending', 'archived'];
 
-export const listingBeforeValidate: CollectionBeforeValidateHook = ({
-  data,
-  originalDoc,
-  operation,
-  req,
-}) => {
+/**
+ * No update o Payload completa `data` com os valores atuais já no beforeValidate (fallback dos
+ * campos ausentes); só aqui `args.data` ainda é o patch recebido. A revisão moderada usa esses
+ * campos para saber o que o parceiro realmente editou.
+ */
+export const listingBeforeOperation: CollectionBeforeOperationHook = ({ args, operation, req }) => {
+  if (operation === 'update') {
+    const patch = (args as { data?: unknown }).data;
+    req.context.listingTouchedFields =
+      patch && typeof patch === 'object' ? Object.keys(patch as Record<string, unknown>) : [];
+  }
+  return args;
+};
+
+export const listingBeforeValidate: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
   if (!data) return data;
-  // Aqui `data` ainda é só o patch recebido; no beforeChange já vem mesclado ao original.
-  // Guardamos os campos tocados para a revisão moderada saber o que o parceiro editou.
-  if (operation === 'update') req.context.listingTouchedFields = Object.keys(data);
   const source = data.slug ?? originalDoc?.slug ?? data.title ?? originalDoc?.title;
   const slug = normalizePartnerSlug(source);
   if (slug) data.slug = slug;
@@ -231,7 +238,7 @@ async function applyListingRevisionRules(args: {
   const touched = new Set(
     Array.isArray(req.context?.listingTouchedFields)
       ? (req.context.listingTouchedFields as string[])
-      : Object.keys(data),
+      : [],
   );
   const fields = revisionFieldsFor(kind).filter((field) => touched.has(field));
   const nextStatus = (data.status ?? originalDoc.status) as ListingStatus;
