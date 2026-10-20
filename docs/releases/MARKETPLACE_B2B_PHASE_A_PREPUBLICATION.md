@@ -1,6 +1,6 @@
 # Marketplace B2B — Fase A — Pré-publicação
 
-Status: **pronto para revisão em PR DRAFT**. Nenhum deploy, migration ou alteração de produção foi executado.
+Status: **publicado em produção em 2026-10-20** (código `0d304da`, upload de PDF desligado), com autorização expressa do responsável. PR #9 segue em DRAFT, sem merge. Registro na seção 12.
 
 | Item                             | Valor                                                                                                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -170,6 +170,21 @@ Namespace `HOMOLOG_MARKETPLACE_20261016`: parceiros `homolog-mk-*` e fornecedore
 2. Branch própria a partir da produção vigente, migrations numeradas depois da 43 e sem tocar nas tabelas do Marketplace.
 3. Homologação em DEV com backup, dry-run em banco descartável, regressão Fred/TECMOVA, fingerprints acadêmicos e DAC `false`.
 4. Rollback por imagem e migrations aditivas, como neste plano.
+
+## 12. Publicação em produção (2026-10-20, UTC)
+
+| Etapa          | Resultado                                                                                                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Preflight      | web/admin `9f5a070` healthy; Postgres/Redis healthy; `omnia_platform_prod`; 40 migrations; sem schema push; DAC `false`; `PAYLOAD_SECRET` igual ao env; 20,5 GB livres                                                   |
+| Build          | `omnia-platform-{web,admin,admin-bootstrap}-prod:0d304da0daa465895b7769ceb0292ba0ad753d27` (tags novas; nenhuma imagem antiga removida); URLs de produção; 0 segredos nas camadas                                        |
+| Ensaio isolado | Dump de produção em Postgres descartável (rede `--internal`): 40 → 43, idempotente, só tabelas novas e colunas novas em `partners`/`payload_locked_documents_rels`; admin `9f5a070` e novo saudáveis e lendo o schema 43 |
+| Backup         | `/opt/omnia/backups/production/pre-marketplace-final-20261020-111104` (dump sha256 `13f8adff…`, 170 tabelas no TOC, mídia 20/20 arquivos, manifestos, `SHA256SUMS`, `RESTORE.md`)                                        |
+| Migrations     | 11:18:37–11:18:56 via `admin-migrate`: 41, 42, 43 aplicadas; 183 tabelas; nenhuma tabela existente alterada além das previstas; fingerprints acadêmicos iguais                                                           |
+| Deploy         | admin 11:21:34 → healthy 11:21:46; web 11:21:46 → healthy 11:21:57; Postgres/Redis não reiniciados; sem rollback                                                                                                         |
+| Smoke          | 87 verificações PASS (Marketplace, portais, APIs, SEO, rotas acadêmicas, banco); PDF recusado em produção por REST direto com a mensagem de desabilitado; nenhum dado criado                                             |
+| Monitoramento  | 30 amostras (11:36–12:07): 0 indisponibilidade, 0 reinícios, 0 respostas ≠ 200, latência média 0,114 s, 0 erros de log, banco e DAC constantes                                                                           |
+
+Rollback de aplicação disponível: `omnia-platform-{web,admin}-prod:9f5a070…` com `/opt/omnia/builds/prod-images.9f5a070.yml` (compatível com o schema 43, comprovado no ensaio). Banco: não restaurar automaticamente.
 
 ## 11. Pendências conhecidas
 
