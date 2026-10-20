@@ -80,7 +80,10 @@ export default async function MarketplaceProdutoDetailPage({ params }: PageProps
           <h1 className="font-heading text-3xl font-semibold text-omnia-deep-blue">{item.title}</h1>
           <p className="text-sm text-omnia-graphite-light">
             Fornecedor:{' '}
-            <Link href={`/parceiros/${item.partner.slug}`} className="text-omnia-deep-blue underline">
+            <Link
+              href={`/parceiros/${item.partner.slug}`}
+              className="text-omnia-deep-blue underline"
+            >
               {item.partner.displayName}
             </Link>
           </p>

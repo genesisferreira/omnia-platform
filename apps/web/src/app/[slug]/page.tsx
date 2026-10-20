@@ -52,7 +52,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return buildPageMetadata({
     pathname: `/${slug}`,
     title: page.title,
-    description: resolveInstitutionalDescription(page.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION),
+    description: resolveInstitutionalDescription(
+      page.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION,
+    ),
     seo: {
       ...page.seo,
       metaDescription: resolveInstitutionalDescription(page.seo.metaDescription),

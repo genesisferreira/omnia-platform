@@ -18,7 +18,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const admin = getAdminBaseUrl();
   const auth = { Authorization: `JWT ${token}` };
   try {
-    const meta = await fetch(`${admin}/api/partner-listing-media/${id}?depth=0`, { headers: auth, cache: 'no-store' });
+    const meta = await fetch(`${admin}/api/partner-listing-media/${id}?depth=0`, {
+      headers: auth,
+      cache: 'no-store',
+    });
     if (!meta.ok) return new Response('Not found', { status: 404 });
     const doc = (await meta.json()) as { url?: unknown; mimeType?: unknown };
     let pathname = '';
@@ -29,7 +32,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       pathname = '';
     }
     const mimeType = typeof doc.mimeType === 'string' ? doc.mimeType : '';
-    if (!/^\/api\/partner-listing-media\/file\/mk-[0-9a-f-]{36}\.(jpg|png|webp|pdf)$/.test(pathname) || !ALLOWED_TYPES.has(mimeType)) {
+    if (
+      !/^\/api\/partner-listing-media\/file\/mk-[0-9a-f-]{36}\.(jpg|png|webp|pdf)$/.test(
+        pathname,
+      ) ||
+      !ALLOWED_TYPES.has(mimeType)
+    ) {
       return new Response('Not found', { status: 404 });
     }
     const file = await fetch(`${admin}${pathname}`, { headers: auth, cache: 'no-store' });

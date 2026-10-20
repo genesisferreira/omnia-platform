@@ -104,8 +104,7 @@ export function buildArticleJsonLd(args: {
     inLanguage: 'pt-BR',
     publisher: {
       '@type': 'Organization',
-      '@id':
-        `${resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin()}#organization`,
+      '@id': `${resolveCanonicalUrl({ pathname: '/', hostname: args.hostname }) ?? getPublicSiteOrigin()}#organization`,
       name: SEO_SITE_NAME,
     },
   };

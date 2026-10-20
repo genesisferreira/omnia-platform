@@ -52,7 +52,9 @@ function VersionCard({ version, current }: { version: QuoteProposalVersionDoc; c
           Versão {version.versionNumber}
           {current ? ' (vigente)' : ''}
         </h3>
-        <p className="text-xs text-omnia-graphite-light">Enviada em {formatDateTime(version.sentAt)}</p>
+        <p className="text-xs text-omnia-graphite-light">
+          Enviada em {formatDateTime(version.sentAt)}
+        </p>
       </header>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[28rem] text-sm">
@@ -70,7 +72,9 @@ function VersionCard({ version, current }: { version: QuoteProposalVersionDoc; c
                 <td className="py-1 pr-2">{item.description}</td>
                 <td className="py-1 pr-2 text-right">{item.quantity}</td>
                 <td className="py-1 pr-2 text-right">{formatPriceCents(item.unitPriceCents)}</td>
-                <td className="py-1 text-right">{formatPriceCents(item.quantity * item.unitPriceCents)}</td>
+                <td className="py-1 text-right">
+                  {formatPriceCents(item.quantity * item.unitPriceCents)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -84,13 +88,18 @@ function VersionCard({ version, current }: { version: QuoteProposalVersionDoc; c
         <dt className="text-omnia-graphite-light">Frete</dt>
         <dd className="text-right">{formatPriceCents(version.shippingCents ?? 0)}</dd>
         <dt className="font-medium text-omnia-deep-blue">Total</dt>
-        <dd className="text-right font-semibold text-omnia-deep-blue">{formatPriceCents(version.totalCents)}</dd>
+        <dd className="text-right font-semibold text-omnia-deep-blue">
+          {formatPriceCents(version.totalCents)}
+        </dd>
       </dl>
       <p className="mt-2 text-xs text-omnia-graphite-light">
-        Validade: {formatDate(version.validUntil)} · Entrega: {version.deliveryDays != null ? `${version.deliveryDays} dias` : '—'}
+        Validade: {formatDate(version.validUntil)} · Entrega:{' '}
+        {version.deliveryDays != null ? `${version.deliveryDays} dias` : '—'}
         {version.paymentTerms ? ` · Pagamento: ${version.paymentTerms}` : ''}
       </p>
-      {version.notes ? <p className="mt-2 whitespace-pre-wrap text-sm text-omnia-graphite">{version.notes}</p> : null}
+      {version.notes ? (
+        <p className="mt-2 whitespace-pre-wrap text-sm text-omnia-graphite">{version.notes}</p>
+      ) : null}
     </article>
   );
 }
@@ -180,13 +189,21 @@ export default async function MinhaCotacaoPage({ params, searchParams }: PagePro
             <div key={String(proposal.id)} className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-medium text-omnia-deep-blue">{proposal.title}</h3>
-                <StatusBadge tone={proposal.status}>{labelOf(PROPOSAL_STATUS_LABELS, proposal.status)}</StatusBadge>
+                <StatusBadge tone={proposal.status}>
+                  {labelOf(PROPOSAL_STATUS_LABELS, proposal.status)}
+                </StatusBadge>
               </div>
               {proposal.summary ? (
-                <p className="whitespace-pre-wrap text-sm text-omnia-graphite">{proposal.summary}</p>
+                <p className="whitespace-pre-wrap text-sm text-omnia-graphite">
+                  {proposal.summary}
+                </p>
               ) : null}
               {list.map((version) => (
-                <VersionCard key={String(version.id)} version={version} current={version.versionNumber === currentNumber} />
+                <VersionCard
+                  key={String(version.id)}
+                  version={version}
+                  current={version.versionNumber === currentNumber}
+                />
               ))}
               {list.length > 1 ? (
                 <p className="text-xs text-omnia-graphite-light">
@@ -219,9 +236,15 @@ export default async function MinhaCotacaoPage({ params, searchParams }: PagePro
           <ol className="space-y-3 border-l border-omnia-deep-blue/20 pl-4 text-sm">
             {events.data.docs.map((event) => (
               <li key={String(event.id)}>
-                <p className="font-medium text-omnia-deep-blue">{labelOf(QUOTE_EVENT_LABELS, event.type)}</p>
-                {event.message ? <p className="whitespace-pre-wrap text-omnia-graphite">{event.message}</p> : null}
-                <p className="text-xs text-omnia-graphite-light">{formatDateTime(event.createdAt)}</p>
+                <p className="font-medium text-omnia-deep-blue">
+                  {labelOf(QUOTE_EVENT_LABELS, event.type)}
+                </p>
+                {event.message ? (
+                  <p className="whitespace-pre-wrap text-omnia-graphite">{event.message}</p>
+                ) : null}
+                <p className="text-xs text-omnia-graphite-light">
+                  {formatDateTime(event.createdAt)}
+                </p>
               </li>
             ))}
           </ol>

@@ -123,7 +123,10 @@ describe('json-ld', () => {
 
     assert.equal(organization['@type'], 'Organization');
     assert.equal(organization['@id'], 'https://dev.omniafrigo.com.br/#organization');
-    assert.equal(organization.slogan, 'Tradição, Educação e Inteligência Artificial em Refrigeração.');
+    assert.equal(
+      organization.slogan,
+      'Tradição, Educação e Inteligência Artificial em Refrigeração.',
+    );
     assert.match(String(organization.description), /Ecossistema brasileiro/);
     assert.equal(website['@type'], 'WebSite');
     assert.equal(webpage['@type'], 'WebPage');

@@ -1,11 +1,7 @@
 import { Alert } from '@omnia/ui';
 import { canTransitionQuote, type QuoteStatus } from '@omnia/shared';
 
-import {
-  quoteMessageAction,
-  quoteStatusAction,
-  sendProposalAction,
-} from '@/app/parceiro/actions';
+import { quoteMessageAction, quoteStatusAction, sendProposalAction } from '@/app/parceiro/actions';
 import { ProposalForm, QuoteMessageForm, QuoteStatusForm } from '@/components/partner/QuoteForms';
 import { LoadError, NoPartnerNotice, PageHeader, StatusBadge } from '@/components/partner/ui';
 import {
@@ -130,7 +126,10 @@ export default async function SolicitacaoDetailPage({ params, searchParams }: Pa
         {proposals.ok ? (
           <ul className="space-y-2 text-sm">
             {proposals.data.docs.map((doc) => (
-              <li key={String(doc.id)} className="rounded-md border border-omnia-deep-blue/10 px-3 py-2">
+              <li
+                key={String(doc.id)}
+                className="rounded-md border border-omnia-deep-blue/10 px-3 py-2"
+              >
                 {doc.title || `Proposta #${doc.id}`} · versão {doc.currentVersionNumber ?? '—'} ·{' '}
                 {doc.status}
               </li>
@@ -158,7 +157,9 @@ export default async function SolicitacaoDetailPage({ params, searchParams }: Pa
                   {event.visibility === 'internal' ? ' (interno)' : ''}
                 </p>
                 {event.message ? <p className="text-omnia-graphite">{event.message}</p> : null}
-                <p className="text-xs text-omnia-graphite-light">{formatDateTime(event.createdAt)}</p>
+                <p className="text-xs text-omnia-graphite-light">
+                  {formatDateTime(event.createdAt)}
+                </p>
               </li>
             ))}
           </ol>

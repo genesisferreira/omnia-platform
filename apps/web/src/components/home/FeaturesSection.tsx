@@ -13,7 +13,8 @@ type FallbackItem = {
 const FALLBACK_ITEMS: readonly FallbackItem[] = [
   {
     title: 'Multiempresa',
-    description: 'Várias frentes de atuação reunidas no mesmo ecossistema, cada uma com a sua identidade.',
+    description:
+      'Várias frentes de atuação reunidas no mesmo ecossistema, cada uma com a sua identidade.',
     iconKey: 'multiempresa',
   },
   {
