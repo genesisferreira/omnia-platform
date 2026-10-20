@@ -2,7 +2,7 @@
 
 ## Pré-requisitos
 
-- **DNS A obrigatório:** `moodle.dev.omniafrigo.com.br` → `191.101.234.156` (sem isso o Traefik/Let's Encrypt não emite certificado e o HTTPS público falha)
+- **DNS A obrigatório:** `moodle.dev.omniafrigo.com.br` → IP do servidor de aplicação (ver documentação operacional privada) (sem isso o Traefik/Let's Encrypt não emite certificado e o HTTPS público falha)
 - Rede Docker `omnia_proxy` (Traefik) existente
 - Disco livre para imagem + volumes
 - Monorepo em `/opt/omnia/platform` **ou** checkout dedicado `/opt/omnia/lms`
