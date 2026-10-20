@@ -66,7 +66,9 @@ Executado com um banco sintético descartável e com uma cópia somente leitura 
 | Segundo servidor (pull via SSH)                                                      | Depende do hardening do segundo servidor; sem imutabilidade nativa   | Médio                  | Bom                                    | Média/alta                  |
 | Snapshot do provedor da VPS                                                          | Mesmo provedor e mesma conta: não protege contra perda de conta      | Variável               | Restaura a máquina inteira             | Baixa, mas grosseira        |
 
-Recomendação: storage de objetos S3 compatível com Object Lock, arquivos já criptografados com GPG no servidor, credencial de escrita sem permissão de exclusão e a chave privada guardada fora do servidor.
+| Storage S3 compatível com região no Brasil (ex.: AWS S3 São Paulo, Magalu Cloud) | Object Lock + criptografia no cliente; dados pessoais permanecem no país | Baixo para o volume atual (~2,5 GB com a retenção proposta) | Download direto | Baixa |
+
+Recomendação: storage de objetos S3 compatível **com região no Brasil** e Object Lock, arquivos já criptografados com GPG no servidor, credencial de escrita sem permissão de exclusão e a chave privada guardada fora do servidor. Preços e condições devem ser confirmados nos canais oficiais na contratação (CHG-BKP-001).
 
 ## Ativação em produção (requer autorização)
 

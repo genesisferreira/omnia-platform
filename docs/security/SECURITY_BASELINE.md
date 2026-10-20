@@ -52,4 +52,4 @@ Plano (requer decisão do responsável):
 
 ## Pendências de infraestrutura (sem detalhes públicos)
 
-Itens registrados em documentação privada e que dependem de autorização: endurecimento do acesso SSH, firewall do host, autenticação e restrição de acesso a painéis administrativos de infraestrutura, fixação de versões de imagens, limpeza de registros DNS sem serviço e registro DMARC.
+Itens registrados em documentação privada e que dependem de autorização individual (ver `docs/governance/CHANGE_MANAGEMENT.md`): troca de credencial potencialmente exposta e acesso ao servidor só por chave (CHG-SEC-002A/B), retirada da rota pública de painel de infraestrutura (CHG-SEC-001), proteção dos demais painéis (CHG-SEC-003), MFA e menor privilégio (CHG-SEC-004). Também pendentes, para a Fase 2: firewall do host, fixação de versões de imagens, limpeza de registros DNS sem serviço e registro DMARC.

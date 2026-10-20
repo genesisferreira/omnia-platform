@@ -158,7 +158,7 @@ Base técnica publicada (sitemap, robots, canonical, dados estruturados). O cont
 
 ## 13. Segurança
 
-Linha de base e pendências em `docs/security/SECURITY_BASELINE.md`. Vulnerabilidades devem ser reportadas em privado aos responsáveis técnicos, nunca em issues públicas.
+Linha de base e pendências em `docs/security/SECURITY_BASELINE.md`. Mudanças de produção seguem autorização individual por identificador (`docs/governance/CHANGE_MANAGEMENT.md`). Vulnerabilidades devem ser reportadas em privado aos responsáveis técnicos, nunca em issues públicas.
 
 ## 14. Limitações conhecidas
 
