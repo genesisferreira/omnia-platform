@@ -8,12 +8,15 @@ export const PRIVATE_PATH_PREFIXES = [
   '/admin',
   '/aluno',
   '/professor',
+  '/parceiro',
   '/lms',
   '/meu-perfil',
   '/ia',
   '/login',
   '/cadastro',
   '/minha-conta',
+  '/minhas-cotacoes',
+  '/convite',
   '/dispositivo',
   '/escola',
 ] as const;
@@ -52,7 +55,11 @@ export function isForeignSitemapHost(publicHost: string, candidateHost: string):
   const candidate = candidateHost.toLowerCase().replace(/^www\./, '');
   if (candidate === pub) return false;
   if (BLOCKED_SITEMAP_HOSTS.has(candidate)) return true;
-  if (candidate.startsWith('admin.') || candidate.includes('.dev.') || candidate.startsWith('dev.')) {
+  if (
+    candidate.startsWith('admin.') ||
+    candidate.includes('.dev.') ||
+    candidate.startsWith('dev.')
+  ) {
     return true;
   }
   if (candidate.startsWith('staging.') || candidate.includes('staging')) return true;

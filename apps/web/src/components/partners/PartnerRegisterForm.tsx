@@ -11,12 +11,19 @@ type Taxonomy = { id: string; name: string; slug: string };
 type PartnerRegisterFormProps = {
   categories: Taxonomy[];
   specialties: Taxonomy[];
+  /** `marketplace`: entrada "Quero vender" — responsável e interesse comercial obrigatórios. */
+  variant?: 'network' | 'marketplace';
 };
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 type CepState = 'idle' | 'loading' | 'found' | 'not_found' | 'error';
 
-export function PartnerRegisterForm({ categories, specialties }: PartnerRegisterFormProps) {
+export function PartnerRegisterForm({
+  categories,
+  specialties,
+  variant = 'network',
+}: PartnerRegisterFormProps) {
+  const isMarketplace = variant === 'marketplace';
   const [state, setState] = useState<FormState>('idle');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -90,6 +97,8 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
     const fd = new FormData(formEl);
     const payload = {
       companyName: String(fd.get('companyName') || ''),
+      contactName: String(fd.get('contactName') || ''),
+      marketplaceIntent: String(fd.get('marketplaceIntent') || 'none'),
       tradeName: String(fd.get('tradeName') || ''),
       partnerType: String(fd.get('partnerType') || 'company'),
       document: String(fd.get('document') || ''),
@@ -221,6 +230,13 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       >
         <h2 className="font-heading text-xl font-semibold">Cadastro recebido</h2>
         <p className="mt-2 text-sm leading-relaxed">{successMessage}</p>
+        {isMarketplace ? (
+          <p className="mt-2 text-sm leading-relaxed">
+            O envio não garante aprovação. Se o cadastro for aprovado, a equipe Omnia enviará um
+            convite pessoal para o responsável acessar o painel do fornecedor e cadastrar produtos e
+            serviços, que também passam por moderação.
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -280,6 +296,37 @@ export function PartnerRegisterForm({ categories, specialties }: PartnerRegister
       <fieldset className="space-y-4">
         <legend className="font-heading text-lg font-semibold text-omnia-deep-blue">Contato</legend>
         <div className="grid gap-4 md:grid-cols-2">
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">
+              Responsável pelo cadastro {isMarketplace ? <span aria-hidden="true">*</span> : null}
+            </span>
+            <Input
+              name="contactName"
+              required={isMarketplace}
+              minLength={3}
+              maxLength={160}
+              autoComplete="name"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">
+              O que deseja oferecer no Marketplace{' '}
+              {isMarketplace ? <span aria-hidden="true">*</span> : null}
+            </span>
+            <select
+              name="marketplaceIntent"
+              className="w-full rounded-md border border-omnia-deep-blue/20 bg-white px-3 py-2 text-sm"
+              defaultValue={isMarketplace ? 'both' : 'none'}
+              required={isMarketplace}
+            >
+              {isMarketplace ? null : (
+                <option value="none">Por enquanto, só a Rede de Parceiros</option>
+              )}
+              <option value="products">Produtos</option>
+              <option value="services">Serviços</option>
+              <option value="both">Produtos e serviços</option>
+            </select>
+          </label>
           <label className="block text-sm md:col-span-2">
             <span className="mb-1 block font-medium">E-mail *</span>
             <Input name="email" type="email" required autoComplete="email" />

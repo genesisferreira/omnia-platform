@@ -40,6 +40,7 @@
     "test:smtp-auth": "tsx --test src/scripts/test-smtp-auth.ts",
     "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts",
     "test:partner-register": "tsx --test src/scripts/test-partner-register.ts",
+    "test:marketplace-pdf-scan": "tsx --test src/scripts/test-marketplace-pdf-scan.ts",
     "test:postal-geocode": "tsx --test src/scripts/test-postal-geocode.ts",
     "test:lms-connector": "tsx --test ../../packages/lms-connector/src/**/test-*.ts",
     "test:lms-bff-helpers": "tsx --test src/scripts/test-lms-bff-helpers.ts",

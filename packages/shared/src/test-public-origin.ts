@@ -132,7 +132,21 @@ describe('public origin / browser redirect', () => {
     assert.equal(resolveEstablishDestination('instructor', '/aluno'), '/professor');
     assert.equal(resolveEstablishDestination('admin', '/ia'), '/ia');
     assert.equal(resolveEstablishDestination('client', '/cursos'), '/cursos');
-    assert.equal(resolveEstablishDestination('partner', '/ia'), '/ia');
+    assert.equal(resolveEstablishDestination('partner', '/ia'), '/parceiro');
+    assert.equal(resolveEstablishDestination('partner', null), '/parceiro');
+    assert.equal(
+      resolveEstablishDestination('partner', '/parceiro/cotacoes'),
+      '/parceiro/cotacoes',
+    );
+    assert.equal(resolveEstablishDestination('partner', '/aluno'), '/parceiro');
+    assert.equal(resolveEstablishDestination('partner', '/professor'), '/parceiro');
+    assert.equal(
+      resolveEstablishDestination('client', '/minhas-cotacoes/12'),
+      '/minhas-cotacoes/12',
+    );
+    assert.equal(resolveEstablishDestination('student', '/minhas-cotacoes'), '/aluno');
+    assert.equal(resolveEstablishDestination('client', '/convite?token=abc'), '/convite?token=abc');
+    assert.equal(resolveEstablishDestination('student', '/convite?token=abc'), '/aluno');
     assert.equal(urlLeaksInternalHost(resolveEstablishDestination('student', '/aluno')), false);
   });
 

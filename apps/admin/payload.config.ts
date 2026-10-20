@@ -22,6 +22,16 @@ import { Pages } from './src/collections/Pages';
 import { PartnerCategories } from './src/collections/PartnerCategories';
 import { Partners } from './src/collections/Partners';
 import { PartnerSpecialties } from './src/collections/PartnerSpecialties';
+import { MarketplaceAuditEvents } from './src/collections/marketplace/MarketplaceAuditEvents';
+import { PartnerInvitations } from './src/collections/marketplace/PartnerInvitations';
+import { PartnerListingMedia } from './src/collections/marketplace/PartnerListingMedia';
+import { PartnerMemberships } from './src/collections/marketplace/PartnerMemberships';
+import { PartnerProductListings } from './src/collections/marketplace/PartnerProductListings';
+import { PartnerServiceListings } from './src/collections/marketplace/PartnerServiceListings';
+import { QuoteEvents } from './src/collections/marketplace/QuoteEvents';
+import { QuoteProposals } from './src/collections/marketplace/QuoteProposals';
+import { QuoteProposalVersions } from './src/collections/marketplace/QuoteProposalVersions';
+import { QuoteRequests } from './src/collections/marketplace/QuoteRequests';
 import { Posts } from './src/collections/Posts';
 import { Sites } from './src/collections/Sites';
 import { Tags } from './src/collections/Tags';
@@ -85,6 +95,13 @@ import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
 import { partnerRegisterEndpoint } from './src/endpoints/partner-register';
+import { partnerDashboardEndpoint } from './src/endpoints/marketplace-partner-dashboard';
+import { marketplaceProposalSendEndpoint } from './src/endpoints/marketplace-proposal-send';
+import { publicMarketplaceEndpoints } from './src/endpoints/marketplace-public';
+import { marketplaceQuoteRequestEndpoint } from './src/endpoints/marketplace-quote-request';
+import { marketplaceQuoteRespondEndpoint } from './src/endpoints/marketplace-quote-respond';
+import { partnerInvitationEndpoints } from './src/endpoints/marketplace-invitations';
+import { marketplaceListingMediaEndpoint } from './src/endpoints/marketplace-listing-media';
 import {
   publicCourseEndpoint,
   publicCoursesEndpoint,
@@ -179,6 +196,16 @@ export default buildConfig({
     PartnerCategories,
     PartnerSpecialties,
     Partners,
+    PartnerMemberships,
+    PartnerProductListings,
+    PartnerServiceListings,
+    PartnerListingMedia,
+    PartnerInvitations,
+    MarketplaceAuditEvents,
+    QuoteRequests,
+    QuoteProposals,
+    QuoteProposalVersions,
+    QuoteEvents,
     LmsIdentityLinks,
     LmsAuditEvents,
     Courses,
@@ -269,6 +296,13 @@ export default buildConfig({
     publicPartnerSpecialtiesEndpoint,
     publicPostalCodeEndpoint,
     partnerRegisterEndpoint,
+    ...publicMarketplaceEndpoints,
+    marketplaceQuoteRequestEndpoint,
+    marketplaceQuoteRespondEndpoint,
+    marketplaceListingMediaEndpoint,
+    ...partnerInvitationEndpoints,
+    marketplaceProposalSendEndpoint,
+    partnerDashboardEndpoint,
     publicCoursesEndpoint,
     publicCourseEndpoint,
     publicLessonEndpoint,
@@ -292,6 +326,9 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Homologação/seeds e runtime DEV/prod: nunca schema push interativo.
+    // Schema só via migrations explícitas.
+    push: false,
     prodMigrations: migrations,
   }),
   cors: getAllowedCorsOrigins(),
