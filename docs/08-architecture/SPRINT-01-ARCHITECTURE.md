@@ -20,16 +20,16 @@
 
 ## Apps
 
-| App | Porta | Responsabilidade Sprint 1 |
-|-----|-------|---------------------------|
-| `@omnia/web` | 3000 | Portal placeholder + healthcheck |
-| `@omnia/admin` | 3001 | Admin placeholder + Payload CMS |
+| App            | Porta | Responsabilidade Sprint 1        |
+| -------------- | ----- | -------------------------------- |
+| `@omnia/web`   | 3000  | Portal placeholder + healthcheck |
+| `@omnia/admin` | 3001  | Admin placeholder + Payload CMS  |
 
 ## Payload vs Drizzle
 
-| Camada | Tecnologia | Dados |
-|--------|------------|-------|
-| CMS | Payload CMS | Conteúdo, usuários admin |
+| Camada    | Tecnologia  | Dados                        |
+| --------- | ----------- | ---------------------------- |
+| CMS       | Payload CMS | Conteúdo, usuários admin     |
 | Aplicação | Drizzle ORM | CRM, marketplace (Sprint 2+) |
 
 ## Fluxo de desenvolvimento

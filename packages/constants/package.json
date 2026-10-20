@@ -5,10 +5,7 @@
   "description": "Constantes globais da plataforma (roles, permissions, routes, etc.)",
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

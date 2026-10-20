@@ -33,13 +33,13 @@ Tenant (isolamento lógico)
 
 ### Regras
 
-| Conceito | Descrição |
-|----------|-----------|
-| **Tenant** | Unidade de isolamento de dados (schema lógico ou row-level) |
-| **Company** | Empresa do ecossistema dentro de um tenant |
-| **Workspace** | Subdivisão funcional (ex: CRM da RR) |
-| **User** | Identidade autenticada com RBAC |
-| **Partner** | Parceiro comercial com acesso restrito |
+| Conceito      | Descrição                                                   |
+| ------------- | ----------------------------------------------------------- |
+| **Tenant**    | Unidade de isolamento de dados (schema lógico ou row-level) |
+| **Company**   | Empresa do ecossistema dentro de um tenant                  |
+| **Workspace** | Subdivisão funcional (ex: CRM da RR)                        |
+| **User**      | Identidade autenticada com RBAC                             |
+| **Partner**   | Parceiro comercial com acesso restrito                      |
 
 ### Implementação (futura)
 

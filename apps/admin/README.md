@@ -15,11 +15,11 @@ pnpm --filter @omnia/admin dev   # http://localhost:3001
 
 ## URLs
 
-| Rota | Descrição |
-|------|-----------|
-| `/` | Página inicial (placeholder) |
-| `/admin` | Payload CMS admin panel |
-| `/api/health` | Healthcheck |
+| Rota          | Descrição                    |
+| ------------- | ---------------------------- |
+| `/`           | Página inicial (placeholder) |
+| `/admin`      | Payload CMS admin panel      |
+| `/api/health` | Healthcheck                  |
 
 ## Payload CMS
 

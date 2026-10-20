@@ -18,10 +18,10 @@ Configurados em `tsconfig.json` de cada app:
 }
 ```
 
-| Alias | Escopo | Uso |
-|-------|--------|-----|
-| `@/*` | `apps/web`, `apps/admin` | Código interno do app |
-| `@omnia/*` | Monorepo | Packages workspace |
+| Alias      | Escopo                   | Uso                   |
+| ---------- | ------------------------ | --------------------- |
+| `@/*`      | `apps/web`, `apps/admin` | Código interno do app |
+| `@omnia/*` | Monorepo                 | Packages workspace    |
 
 ### Packages
 
@@ -101,13 +101,13 @@ import { helper } from './helper';
 
 ## Convenções de nomenclatura
 
-| Tipo | Convenção | Exemplo |
-|------|-----------|---------|
-| Package | `@omnia/kebab-case` | `@omnia/ai-core` |
-| Arquivo | `PascalCase` classes, `camelCase` utils | `AppError.ts`, `formatDate.ts` |
-| Pasta domínio | `kebab-case` | `domains/marketplace/` |
-| Constantes | `SCREAMING_SNAKE` | `MAX_RETRY_COUNT` |
-| Types/Interfaces | `PascalCase` | `TenantContext` |
+| Tipo             | Convenção                               | Exemplo                        |
+| ---------------- | --------------------------------------- | ------------------------------ |
+| Package          | `@omnia/kebab-case`                     | `@omnia/ai-core`               |
+| Arquivo          | `PascalCase` classes, `camelCase` utils | `AppError.ts`, `formatDate.ts` |
+| Pasta domínio    | `kebab-case`                            | `domains/marketplace/`         |
+| Constantes       | `SCREAMING_SNAKE`                       | `MAX_RETRY_COUNT`              |
+| Types/Interfaces | `PascalCase`                            | `TenantContext`                |
 
 ---
 

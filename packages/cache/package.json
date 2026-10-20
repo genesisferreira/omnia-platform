@@ -4,7 +4,9 @@
   "private": true,
   "description": "Abstração de cache — Redis e memória",
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "eslint src/",

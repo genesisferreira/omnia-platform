@@ -1,0 +1,89 @@
+groups:
+  - name: omnia_lms
+    rules:
+      - alert: ConnectorHealthDown
+        expr: connector_health_status == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'LMS connector health DOWN'
+          description: 'connector_health_status is 0 for >2m'
+
+      - alert: MoodleUnavailable
+        expr: increase(moodle_errors_total[5m]) > 10 and connector_health_status < 1
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Moodle errors elevated / connector unhealthy'
+
+      - alert: RedisUnavailable
+        expr: increase(redis_operations_total{result="error"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Redis LMS operations failing'
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_errors_total[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total[5m])), 0.001)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'HTTP error rate > 5%'
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'HTTP P95 latency > 2s'
+
+      - alert: MoodleAuthFailure
+        expr: increase(moodle_errors_total{code=~".*auth.*|INVALIDTOKEN|accessexception"}[10m]) > 3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Moodle authentication failures detected'
+
+      - alert: ConnectorDisabled
+        expr: connector_health_status == 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'LMS connector disabled while scrape expects it'
+
+      - alert: SessionRevocationSpike
+        expr: increase(connector_revoked_sessions[15m]) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Session revocations above normal baseline'
+
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            sum(rate(connector_cache_hit_total[15m]))
+            /
+            clamp_min(
+              sum(rate(connector_cache_hit_total[15m])) + sum(rate(connector_cache_miss_total[15m])),
+              0.001
+            )
+          ) < 0.5
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: 'LMS cache hit rate below 50%'

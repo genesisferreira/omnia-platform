@@ -13,14 +13,35 @@ pnpm docker:down     # Parar serviços
 
 Arquivo: [`compose/development.yml`](compose/development.yml)
 
+## Homologação (VPS)
+
+```bash
+cp .env.staging.example .env.staging
+pnpm docker:staging:config   # validar compose
+pnpm docker:staging:up       # build + deploy
+pnpm docker:staging:down     # parar
+```
+
+Arquivo: [`compose/staging.yml`](compose/staging.yml)
+
+Documentação:
+
+- [Deploy staging](staging/DEPLOY.md)
+- [Checklist homologação](../docs/09-infrastructure/STAGING_CHECKLIST.md)
+
 ## Serviços
 
-| Serviço | Porta | Descrição |
-|---------|-------|-----------|
-| PostgreSQL 16 | 5432 | Banco principal (Payload + Drizzle) |
-| Redis 7 | 6379 | Cache e sessões |
-| MinIO | 9000/9001 | Object storage |
-| n8n | 5678 | Automações |
+| Serviço       | Porta     | Descrição                           |
+| ------------- | --------- | ----------------------------------- |
+| PostgreSQL 16 | 5432      | Banco principal (Payload + Drizzle) |
+| Redis 7       | 6379      | Cache e sessões                     |
+| MinIO         | 9000/9001 | Object storage                      |
+| n8n           | 5678      | Automações                          |
+
+## Omnia LMS (engine Moodle)
+
+Stack isolada em [`lms/`](lms/) — MariaDB + Redis + Moodle 4.5 LTS + Cron.  
+Documentação: [`../docs/09-infrastructure/OMNIA_LMS_ARCHITECTURE.md`](../docs/09-infrastructure/OMNIA_LMS_ARCHITECTURE.md).
 
 ## Documentação
 
@@ -28,4 +49,5 @@ Arquivo: [`compose/development.yml`](compose/development.yml)
 
 ## Status
 
-**Sprint 1** — Docker Compose funcional para desenvolvimento.
+**Sprint 2** — Docker Compose para desenvolvimento local e homologação VPS.  
+**Omnia LMS** — infraestrutura engine sob `docker/lms/` (DEV deployável).

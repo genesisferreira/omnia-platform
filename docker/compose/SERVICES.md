@@ -4,15 +4,15 @@
 
 ## Visão geral
 
-| Serviço | Imagem | Porta(s) | Propósito |
-|---------|--------|----------|-----------|
-| [PostgreSQL](#postgresql) | postgres:16-alpine | 5432 | Banco principal |
-| [pgAdmin](#pgadmin) | dpage/pgadmin4 | 5050 | GUI do PostgreSQL |
-| [Redis](#redis) | redis:7-alpine | 6379 | Cache e sessões |
-| [MinIO](#minio) | minio/minio | 9000, 9001 | Object storage |
-| [Mailpit](#mailpit) | axllent/mailpit | 1025, 8025 | Email dev (SMTP) |
-| [n8n](#n8n) | n8nio/n8n | 5678 | Automações |
-| [Payload](#payload-cms) | — (app) | 3001/admin | CMS (não é container) |
+| Serviço                   | Imagem             | Porta(s)   | Propósito             |
+| ------------------------- | ------------------ | ---------- | --------------------- |
+| [PostgreSQL](#postgresql) | postgres:16-alpine | 5432       | Banco principal       |
+| [pgAdmin](#pgadmin)       | dpage/pgadmin4     | 5050       | GUI do PostgreSQL     |
+| [Redis](#redis)           | redis:7-alpine     | 6379       | Cache e sessões       |
+| [MinIO](#minio)           | minio/minio        | 9000, 9001 | Object storage        |
+| [Mailpit](#mailpit)       | axllent/mailpit    | 1025, 8025 | Email dev (SMTP)      |
+| [n8n](#n8n)               | n8nio/n8n          | 5678       | Automações            |
+| [Payload](#payload-cms)   | — (app)            | 3001/admin | CMS (não é container) |
 
 ## PostgreSQL
 

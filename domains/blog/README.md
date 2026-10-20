@@ -17,10 +17,10 @@ Gerenciar e exibir conteúdo editorial — artigos, categorias, tags e autores �
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos compartilhados |
-| **cms** | Gestão de conteúdo via Payload |
+| Domínio  | Uso                            |
+| -------- | ------------------------------ |
+| **core** | Primitivos compartilhados      |
+| **cms**  | Gestão de conteúdo via Payload |
 
 ## Integrações
 
@@ -28,9 +28,9 @@ Gerenciar e exibir conteúdo editorial — artigos, categorias, tags e autores �
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `PostPublished` | Artigo publicado e disponível publicamente | 4 |
+| Evento          | Descrição                                  | Sprint |
+| --------------- | ------------------------------------------ | ------ |
+| `PostPublished` | Artigo publicado e disponível publicamente | 4      |
 
 ## Referências
 

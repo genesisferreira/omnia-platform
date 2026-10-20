@@ -1,3 +1,2 @@
-/** Config: redis — Sprint 2+ */
+/** Config: redis ï¿½ Sprint 2+ */
 export {};
-

@@ -17,10 +17,10 @@ Apresentar a presença institucional da plataforma — landing pages, páginas i
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos (`Tenant`, paginação, erros) |
-| **cms** | Conteúdo estruturado (somente API, sem import direto) |
+| Domínio  | Uso                                                   |
+| -------- | ----------------------------------------------------- |
+| **core** | Primitivos (`Tenant`, paginação, erros)               |
+| **cms**  | Conteúdo estruturado (somente API, sem import direto) |
 
 ## Integrações
 
@@ -28,9 +28,9 @@ Nenhuma integração externa direta. Todo conteúdo é obtido via API do domíni
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `PageViewed` | Página institucional visualizada | 3+ |
+| Evento       | Descrição                        | Sprint |
+| ------------ | -------------------------------- | ------ |
+| `PageViewed` | Página institucional visualizada | 3+     |
 
 ## Referências
 

@@ -4,15 +4,15 @@
 
 ## Tabela: `tenants`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `slug` | VARCHAR(50) | Identificador único (`ofh`, `renovacao`) |
-| `name` | VARCHAR(255) | Nome exibido |
-| `status` | ENUM | `active`, `suspended`, `archived` |
-| `settings` | JSONB | Configurações do tenant |
-| `created_at` | TIMESTAMPTZ | — |
-| `updated_at` | TIMESTAMPTZ | — |
+| Coluna       | Tipo         | Descrição                                |
+| ------------ | ------------ | ---------------------------------------- |
+| `id`         | UUID         | PK                                       |
+| `slug`       | VARCHAR(50)  | Identificador único (`ofh`, `renovacao`) |
+| `name`       | VARCHAR(255) | Nome exibido                             |
+| `status`     | ENUM         | `active`, `suspended`, `archived`        |
+| `settings`   | JSONB        | Configurações do tenant                  |
+| `created_at` | TIMESTAMPTZ  | —                                        |
+| `updated_at` | TIMESTAMPTZ  | —                                        |
 
 ## Regras
 

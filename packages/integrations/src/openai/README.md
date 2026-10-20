@@ -10,8 +10,8 @@ Consumido por `@omnia/ai-core` via router de providers. Apps nunca importam este
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
+| Variável         | Descrição           |
+| ---------------- | ------------------- |
 | `OPENAI_API_KEY` | Chave de API OpenAI |
 
 ## Sprint

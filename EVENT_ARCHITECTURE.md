@@ -21,12 +21,12 @@ Ver [events/README.md](events/README.md) para catálogo completo.
 
 ## Implementação futura
 
-| Sprint | Entrega |
-|--------|---------|
-| 5 | Eventos CRM (`LeadCreated`, `LeadUpdated`) |
-| 6 | Eventos marketplace (`OrderPlaced`) |
-| 7 | Eventos partner (`PartnerApproved`) |
-| 8+ | Eventos IA (`MessageReceived`, `WorkflowExecuted`) |
+| Sprint | Entrega                                            |
+| ------ | -------------------------------------------------- |
+| 5      | Eventos CRM (`LeadCreated`, `LeadUpdated`)         |
+| 6      | Eventos marketplace (`OrderPlaced`)                |
+| 7      | Eventos partner (`PartnerApproved`)                |
+| 8+     | Eventos IA (`MessageReceived`, `WorkflowExecuted`) |
 
 ## Tecnologias candidatas
 

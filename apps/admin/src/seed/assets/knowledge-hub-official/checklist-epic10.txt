@@ -1,0 +1,2 @@
+﻿Omnia Knowledge Hub — checklist TXT EPIC 10
+Pipeline: extract → normalize → chunk → hub → embeddings → retrieval.

@@ -25,17 +25,17 @@ apps/
 
 ## Mapeamento de migração
 
-| App atual | Destino | Módulos | Motivo |
-|-----------|---------|---------|--------|
-| `apps/web` (portal) | `apps/portal` | portal, companies | Domínio institucional isolado |
-| `apps/web` (marketplace) | `apps/portal` ou app dedicado | marketplace | Avaliar na Sprint 6 (tráfego) |
-| `apps/web` (blog) | `apps/portal` | blog | Compartilha layout com portal |
-| `apps/web` (partner) | `apps/portal` | partner | Mesma auth, domínio diferente |
-| `apps/web` (chat) | `apps/portal` ou widget | chat | Widget embeddable |
-| `apps/admin` | `apps/admin` | crm, cms | Mantém — backoffice unificado |
-| — | `apps/landing` | marketing | Campanhas leves, sem auth |
-| — | `apps/docs` | api | SDK + OpenAPI + guias |
-| — | `apps/status` | infra | Página de status independente |
+| App atual                | Destino                       | Módulos           | Motivo                        |
+| ------------------------ | ----------------------------- | ----------------- | ----------------------------- |
+| `apps/web` (portal)      | `apps/portal`                 | portal, companies | Domínio institucional isolado |
+| `apps/web` (marketplace) | `apps/portal` ou app dedicado | marketplace       | Avaliar na Sprint 6 (tráfego) |
+| `apps/web` (blog)        | `apps/portal`                 | blog              | Compartilha layout com portal |
+| `apps/web` (partner)     | `apps/portal`                 | partner           | Mesma auth, domínio diferente |
+| `apps/web` (chat)        | `apps/portal` ou widget       | chat              | Widget embeddable             |
+| `apps/admin`             | `apps/admin`                  | crm, cms          | Mantém — backoffice unificado |
+| —                        | `apps/landing`                | marketing         | Campanhas leves, sem auth     |
+| —                        | `apps/docs`                   | api               | SDK + OpenAPI + guias         |
+| —                        | `apps/status`                 | infra             | Página de status independente |
 
 ## Critérios para nova app
 
@@ -49,13 +49,13 @@ Criar app separada quando **pelo menos 2** forem verdadeiros:
 
 ## Domínios sugeridos (produção)
 
-| App | Domínio |
-|-----|---------|
-| portal | `omnia.com`, `*.omnia.com` |
-| admin | `admin.omnia.com` |
-| landing | `lp.omnia.com`, campanhas |
-| docs | `docs.omnia.com` |
-| status | `status.omnia.com` |
+| App     | Domínio                    |
+| ------- | -------------------------- |
+| portal  | `omnia.com`, `*.omnia.com` |
+| admin   | `admin.omnia.com`          |
+| landing | `lp.omnia.com`, campanhas  |
+| docs    | `docs.omnia.com`           |
+| status  | `status.omnia.com`         |
 
 ## Packages compartilhados
 

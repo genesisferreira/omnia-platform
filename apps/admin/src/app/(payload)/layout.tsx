@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import type { ServerFunctionClient } from 'payload';
 
 import config from '@payload-config';
+import '@payloadcms/next/css';
 import { RootLayout, handleServerFunctions } from '@payloadcms/next/layouts';
 
-import { importMap } from './admin/importMap';
+import { importMap } from './admin/importMap.js';
 
 import './custom.scss';
 
@@ -14,6 +15,7 @@ type Args = {
 
 export const metadata: Metadata = {
   title: 'Omnia Admin — Payload CMS',
+  robots: { index: false, follow: false },
 };
 
 const serverFunction: ServerFunctionClient = async (args) => {
@@ -25,7 +27,6 @@ const serverFunction: ServerFunctionClient = async (args) => {
   });
 };
 
-const Layout = ({ children }: Args) =>
-  RootLayout({ children, config, importMap, serverFunction });
+const Layout = ({ children }: Args) => RootLayout({ children, config, importMap, serverFunction });
 
 export default Layout;

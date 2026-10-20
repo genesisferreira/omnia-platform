@@ -16,12 +16,12 @@ src/
 
 ## Integrações futuras
 
-| Ferramenta | Módulo | Sprint |
-|------------|--------|--------|
-| Prometheus | `metrics/` | 2+ |
-| Grafana | `dashboards/` | 2+ |
-| OpenTelemetry | `tracing/` | 2+ |
-| Sentry | `alerts/` | 2+ |
+| Ferramenta    | Módulo        | Sprint |
+| ------------- | ------------- | ------ |
+| Prometheus    | `metrics/`    | 2+     |
+| Grafana       | `dashboards/` | 2+     |
+| OpenTelemetry | `tracing/`    | 2+     |
+| Sentry        | `alerts/`     | 2+     |
 
 ## Uso
 
@@ -35,15 +35,15 @@ const status = await getPlatformStatus({ includePayload: false });
 
 Documentação completa: [OBSERVABILITY.md](../../OBSERVABILITY.md)
 
-| Pilar | Módulo | Sprint |
-|-------|--------|--------|
-| Logs | `@omnia/logger` + `logs/` | 2+ |
-| Tracing | `tracing/` (OpenTelemetry) | 2+ |
-| Métricas | `metrics/` (Prometheus) | 2+ |
-| Alertas | `alerts/` (Sentry) | 2+ |
-| Dashboards | `dashboards/` (Grafana) | 11 |
-| Auditoria | `@omnia/security/audit` | 2+ |
-| Health | `health/` | 1.1 ✅ |
+| Pilar      | Módulo                     | Sprint |
+| ---------- | -------------------------- | ------ |
+| Logs       | `@omnia/logger` + `logs/`  | 2+     |
+| Tracing    | `tracing/` (OpenTelemetry) | 2+     |
+| Métricas   | `metrics/` (Prometheus)    | 2+     |
+| Alertas    | `alerts/` (Sentry)         | 2+     |
+| Dashboards | `dashboards/` (Grafana)    | 11     |
+| Auditoria  | `@omnia/security/audit`    | 2+     |
+| Health     | `health/`                  | 1.1 ✅ |
 
 ## Status
 

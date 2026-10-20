@@ -4,26 +4,26 @@
 
 ## Gates obrigatórios
 
-| Gate | Comando / Verificação | Bloqueante |
-|------|----------------------|------------|
-| **Build** | `pnpm build` | ✅ |
-| **Lint** | `pnpm lint` | ✅ |
-| **Typecheck** | `pnpm typecheck` | ✅ |
-| **Sem dependências circulares** | Revisão manual / ferramenta futura | ✅ |
-| **Sem warnings críticos** | ESLint errors = 0 | ✅ |
-| **Documentação atualizada** | README/ADR quando aplicável | ✅ |
-| **ADR quando necessário** | Mudança estrutural → ADR em `docs/14-adr/` | ✅ |
-| **Review aprovado** | Mínimo 1 approval (CODEOWNERS) | ✅ |
+| Gate                            | Comando / Verificação                      | Bloqueante |
+| ------------------------------- | ------------------------------------------ | ---------- |
+| **Build**                       | `pnpm build`                               | ✅         |
+| **Lint**                        | `pnpm lint`                                | ✅         |
+| **Typecheck**                   | `pnpm typecheck`                           | ✅         |
+| **Sem dependências circulares** | Revisão manual / ferramenta futura         | ✅         |
+| **Sem warnings críticos**       | ESLint errors = 0                          | ✅         |
+| **Documentação atualizada**     | README/ADR quando aplicável                | ✅         |
+| **ADR quando necessário**       | Mudança estrutural → ADR em `docs/14-adr/` | ✅         |
+| **Review aprovado**             | Mínimo 1 approval (CODEOWNERS)             | ✅         |
 
 ## Gates recomendados (Sprint 2+)
 
-| Gate | Comando | Status |
-|------|---------|--------|
-| Testes unitários | `pnpm test` | Sprint 2+ |
-| Testes E2E | `pnpm test:e2e` | Sprint 3+ |
-| Coverage mínimo | 70% packages críticos | Sprint 4+ |
-| Security scan | `pnpm audit` | Sprint 2+ |
-| Bundle size | Limite por app | Sprint 6+ |
+| Gate             | Comando               | Status    |
+| ---------------- | --------------------- | --------- |
+| Testes unitários | `pnpm test`           | Sprint 2+ |
+| Testes E2E       | `pnpm test:e2e`       | Sprint 3+ |
+| Coverage mínimo  | 70% packages críticos | Sprint 4+ |
+| Security scan    | `pnpm audit`          | Sprint 2+ |
+| Bundle size      | Limite por app        | Sprint 6+ |
 
 ## Verificações arquiteturais
 

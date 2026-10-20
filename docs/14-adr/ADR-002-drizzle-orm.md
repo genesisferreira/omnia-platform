@@ -28,10 +28,10 @@ Adotar **Drizzle ORM** como ORM principal para dados de aplicação customizados
 
 ### Responsabilidades
 
-| Camada | Tecnologia | Dados |
-|--------|------------|-------|
-| CMS | Payload CMS (ORM interno) | Conteúdo, mídia, usuários admin |
-| Aplicação | Drizzle ORM | CRM, marketplace, parceiros, domínio customizado |
+| Camada    | Tecnologia                | Dados                                            |
+| --------- | ------------------------- | ------------------------------------------------ |
+| CMS       | Payload CMS (ORM interno) | Conteúdo, mídia, usuários admin                  |
+| Aplicação | Drizzle ORM               | CRM, marketplace, parceiros, domínio customizado |
 
 ### Estrutura no `packages/database`
 
@@ -89,11 +89,11 @@ database/
 
 ### Riscos Mitigados
 
-| Risco | Mitigação |
-|-------|-----------|
-| Conflito de schemas Payload/Drizzle | Schemas Drizzle em tabelas prefixadas (`crm_`, `mkt_`) ou schema PostgreSQL separado |
-| Migrations divergentes | CI valida migrations; apenas `packages/database` gera migrations |
-| Duplicação de modelos | `@omnia/shared` centraliza tipos de domínio; Drizzle schema é fonte para persistência |
+| Risco                               | Mitigação                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------- |
+| Conflito de schemas Payload/Drizzle | Schemas Drizzle em tabelas prefixadas (`crm_`, `mkt_`) ou schema PostgreSQL separado  |
+| Migrations divergentes              | CI valida migrations; apenas `packages/database` gera migrations                      |
+| Duplicação de modelos               | `@omnia/shared` centraliza tipos de domínio; Drizzle schema é fonte para persistência |
 
 ## Referências
 

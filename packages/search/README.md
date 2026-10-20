@@ -13,13 +13,13 @@ src/
 
 ## Domínios cobertos (futuro)
 
-| Domínio | Índice |
-|---------|--------|
-| Blog | `blog_posts` |
-| Marketplace | `products` |
-| Parceiros | `partners` |
-| Cursos | `courses` |
-| CRM | `leads`, `contacts` |
+| Domínio     | Índice              |
+| ----------- | ------------------- |
+| Blog        | `blog_posts`        |
+| Marketplace | `products`          |
+| Parceiros   | `partners`          |
+| Cursos      | `courses`           |
+| CRM         | `leads`, `contacts` |
 
 ## Status
 

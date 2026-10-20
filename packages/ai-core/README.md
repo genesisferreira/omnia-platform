@@ -25,10 +25,10 @@ src/
 
 ## Camadas
 
-| Camada | Package |
-|--------|---------|
+| Camada          | Package                                  |
+| --------------- | ---------------------------------------- |
 | Conectores HTTP | `@omnia/integrations/deepseek`, `openai` |
-| Orquestração | `@omnia/ai-core` (este package) |
+| Orquestração    | `@omnia/ai-core` (este package)          |
 
 ## Documentação
 

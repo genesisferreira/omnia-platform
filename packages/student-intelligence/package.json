@@ -1,0 +1,24 @@
+{
+  "name": "@omnia/student-intelligence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Student Intelligence Platform — digital twin educacional (única fonte oficial do perfil do aluno)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/test-*.ts",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@omnia/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "rimraf": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

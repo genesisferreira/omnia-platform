@@ -24,23 +24,23 @@ apps / domains          → Casos de uso por módulo
 
 ### Estrutura `@omnia/ai-core`
 
-| Módulo | Responsabilidade |
-|--------|------------------|
-| `providers/` | Interface unificada LLM |
-| `router/` | Roteamento DeepSeek ↔ OpenAI |
-| `agents/` | Agentes por domínio |
-| `assistant/` | Assistente Omnia (UX) |
-| `prompts/` | Prompt library versionada |
-| `knowledge/` | Base de conhecimento |
-| `rag/` | Retrieval pipeline |
-| `embeddings/` | Geração de embeddings |
-| `vector-store/` | Armazenamento vetorial |
-| `memory/` | Memória curto/longo prazo |
-| `sessions/` | Sessões de conversa |
-| `context/` | Contexto dinâmico |
-| `tools/` | Function calling |
-| `workflow-engine/` | Chains e orquestração |
-| `models/` | Configuração de modelos |
+| Módulo             | Responsabilidade             |
+| ------------------ | ---------------------------- |
+| `providers/`       | Interface unificada LLM      |
+| `router/`          | Roteamento DeepSeek ↔ OpenAI |
+| `agents/`          | Agentes por domínio          |
+| `assistant/`       | Assistente Omnia (UX)        |
+| `prompts/`         | Prompt library versionada    |
+| `knowledge/`       | Base de conhecimento         |
+| `rag/`             | Retrieval pipeline           |
+| `embeddings/`      | Geração de embeddings        |
+| `vector-store/`    | Armazenamento vetorial       |
+| `memory/`          | Memória curto/longo prazo    |
+| `sessions/`        | Sessões de conversa          |
+| `context/`         | Contexto dinâmico            |
+| `tools/`           | Function calling             |
+| `workflow-engine/` | Chains e orquestração        |
+| `models/`          | Configuração de modelos      |
 
 ### Princípios
 

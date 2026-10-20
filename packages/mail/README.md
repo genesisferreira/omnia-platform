@@ -14,10 +14,10 @@ src/
 
 ## Ambientes
 
-| Ambiente | Provider |
-|----------|----------|
-| Development | Mailpit (porta 1025/8025) |
-| Staging/Prod | SMTP configurável |
+| Ambiente     | Provider                  |
+| ------------ | ------------------------- |
+| Development  | Mailpit (porta 1025/8025) |
+| Staging/Prod | SMTP configurável         |
 
 ## Status
 

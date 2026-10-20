@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Sugerir uma nova funcionalidade
-title: "[feature]: "
+title: '[feature]: '
 labels: feature
 assignees: ''
 ---

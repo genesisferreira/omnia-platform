@@ -8,14 +8,14 @@ A **Omnia Platform** é um monorepo modular para gestão empresarial multi-tenan
 
 ### Componentes principais
 
-| Camada | Localização | Papel |
-|--------|-------------|-------|
-| Apps | `apps/web`, `apps/admin` | Portal e backoffice CMS |
-| Domínios | `domains/` | Bounded contexts (DDD) |
-| Packages | `packages/` | Infraestrutura compartilhada |
-| Dados | `packages/database` + Payload | Drizzle (app) + CMS |
-| Eventos | `packages/events` + `events/` | Event-Driven Architecture |
-| Infra | `docker/` | Serviços locais e produção |
+| Camada   | Localização                   | Papel                        |
+| -------- | ----------------------------- | ---------------------------- |
+| Apps     | `apps/web`, `apps/admin`      | Portal e backoffice CMS      |
+| Domínios | `domains/`                    | Bounded contexts (DDD)       |
+| Packages | `packages/`                   | Infraestrutura compartilhada |
+| Dados    | `packages/database` + Payload | Drizzle (app) + CMS          |
+| Eventos  | `packages/events` + `events/` | Event-Driven Architecture    |
+| Infra    | `docker/`                     | Serviços locais e produção   |
 
 ---
 
@@ -275,13 +275,13 @@ flowchart TB
 
 ## Escalabilidade (visão futura)
 
-| Cenário | Estratégia |
-|---------|------------|
-| 500k usuários | Horizontal scaling apps, Redis cluster, read replicas PG |
-| 50k parceiros | Tenant isolation, índices por tenant |
-| 20M registros CRM | Particionamento, search index, archive |
-| Chat IA | Queue + rate limit + streaming |
-| Microserviços | Extrair domínios via eventos — contratos já preparados |
+| Cenário           | Estratégia                                               |
+| ----------------- | -------------------------------------------------------- |
+| 500k usuários     | Horizontal scaling apps, Redis cluster, read replicas PG |
+| 50k parceiros     | Tenant isolation, índices por tenant                     |
+| 20M registros CRM | Particionamento, search index, archive                   |
+| Chat IA           | Queue + rate limit + streaming                           |
+| Microserviços     | Extrair domínios via eventos — contratos já preparados   |
 
 ---
 

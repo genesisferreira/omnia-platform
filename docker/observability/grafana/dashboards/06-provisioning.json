@@ -1,0 +1,49 @@
+{
+  "uid": "omnia-lms-provisioning",
+  "title": "Omnia LMS — Academic Provisioning",
+  "tags": ["omnia", "lms", "provisioning"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Provision success / failure",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(provision_success_total[5m]))", "legendFormat": "success" },
+        { "expr": "sum(rate(provision_failure_total[5m]))", "legendFormat": "failure" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Enrollment success / failure",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(enrollment_success_total[5m]))", "legendFormat": "success" },
+        { "expr": "sum(rate(enrollment_failure_total[5m]))", "legendFormat": "failure" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Provision latency P95",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, action) (rate(provision_latency_seconds_bucket[5m])))",
+          "legendFormat": "{{action}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue size + retries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "provision_queue_size", "legendFormat": "queue" },
+        { "expr": "sum(rate(provision_retry_total[5m]))", "legendFormat": "retries" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1206 @@
+import type { Payload, PayloadRequest } from 'payload';
+
+import {
+  assertGovernanceTransition,
+  canApproveOmnia,
+  canApproveSchool,
+  canRevoke,
+  canSubmitForSchoolReview,
+  canTransitionGovernance,
+  GOVERNANCE_STATE_LABELS_PT,
+  hashContentVersion,
+  isAssessmentSecretContent,
+  isHubIngestionEligible,
+  isRetrievalEligibleState,
+  schoolApprovedLabel,
+  scopeForState,
+  stateAfterMaterialEdit,
+  versionsMatch,
+  type GovernanceState,
+  type KnowledgeScope,
+} from '@omnia/knowledge-governance';
+
+import { toPayloadRelationId } from '../../lib/payload-relation-id';
+import { processLearningResource } from '../knowledge-intelligence/pipeline';
+import { writeKnowledgeAudit } from './audit';
+
+/** Runtime collection slug (typed after `payload generate:types` in CI). */
+const KG_SLUG = 'knowledge-governance-submissions';
+
+type Rel = string | number | { id: string | number } | null | undefined;
+
+function relId(value: Rel): number | null {
+  if (value == null) return null;
+  if (typeof value === 'object' && 'id' in value) {
+    return toPayloadRelationId(value.id) ?? null;
+  }
+  return toPayloadRelationId(value) ?? null;
+}
+
+/** Flatten Payload Lexical JSON (or plain string) into searchable text. */
+function lexicalToPlain(value: unknown): string {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value !== 'object') return String(value);
+  const node = value as { text?: unknown; children?: unknown };
+  const parts: string[] = [];
+  if (typeof node.text === 'string' && node.text.trim()) parts.push(node.text);
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const chunk = lexicalToPlain(child);
+      if (chunk) parts.push(chunk);
+    }
+  } else {
+    for (const v of Object.values(node)) {
+      if (v && typeof v === 'object') {
+        const chunk = lexicalToPlain(v);
+        if (chunk) parts.push(chunk);
+      }
+    }
+  }
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function roleOf(user: unknown): string | null {
+  if (user && typeof user === 'object' && typeof (user as { role?: unknown }).role === 'string') {
+    return (user as { role: string }).role;
+  }
+  return null;
+}
+
+function userIdOf(user: unknown): string | number | null {
+  if (user && typeof user === 'object' && 'id' in user) {
+    return (user as { id: string | number }).id;
+  }
+  return null;
+}
+
+function statusLabelFor(state: GovernanceState, schoolKey: string | null): string {
+  if (state === 'SCHOOL_APPROVED') return schoolApprovedLabel(schoolKey);
+  return GOVERNANCE_STATE_LABELS_PT[state];
+}
+
+async function kgFindByID(
+  payload: Payload,
+  id: string | number,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const doc = await payload.findByID({
+    collection: KG_SLUG as 'media',
+    id,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  return doc as unknown as Record<string, unknown>;
+}
+
+async function kgFind(
+  payload: Payload,
+  where: Record<string, unknown>,
+  req?: PayloadRequest,
+  limit = 1,
+): Promise<Record<string, unknown>[]> {
+  const found = await payload.find({
+    collection: KG_SLUG as 'media',
+    where: where as never,
+    limit,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+  return found.docs as unknown as Record<string, unknown>[];
+}
+
+async function kgUpdate(
+  payload: Payload,
+  id: string | number,
+  data: Record<string, unknown>,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const updated = await payload.update({
+    collection: KG_SLUG as 'media',
+    id,
+    data: data as never,
+    overrideAccess: true,
+    req,
+    context: { governancePipelineActive: true },
+  });
+  return updated as unknown as Record<string, unknown>;
+}
+
+async function kgCreate(
+  payload: Payload,
+  data: Record<string, unknown>,
+  req?: PayloadRequest,
+): Promise<Record<string, unknown>> {
+  const created = await payload.create({
+    collection: KG_SLUG as 'media',
+    data: data as never,
+    overrideAccess: true,
+    req,
+    context: { governancePipelineActive: true },
+  });
+  return created as unknown as Record<string, unknown>;
+}
+
+async function appendDecision(
+  payload: Payload,
+  submissionId: string | number,
+  entry: Record<string, unknown>,
+  req?: PayloadRequest,
+) {
+  const doc = await kgFindByID(payload, submissionId, req);
+  const decisions = Array.isArray(doc.decisions) ? [...(doc.decisions as unknown[])] : [];
+  decisions.push(entry);
+  await kgUpdate(payload, submissionId, { decisions }, req);
+}
+
+type IndexOutcome = {
+  ok: boolean;
+  chunkCount: number;
+  indexedCount: number;
+  lastIndexedAt: string | null;
+  error: string | null;
+};
+
+/**
+ * Epic 17.3: run the retrieval indexing port for the approved resource (no direct vector-store
+ * coupling here). Never throws — failures come back as `ok:false` with the recorded error.
+ */
+async function indexGovernedResource(
+  payload: Payload,
+  learningResourceId: number,
+  knowledgeDocumentId: number | null,
+): Promise<IndexOutcome> {
+  try {
+    const { indexLearningResource } = await import('../retrieval/worker');
+    const result = await indexLearningResource(payload, {
+      learningResourceId,
+      knowledgeDocumentId,
+    });
+    return {
+      ok: result.ok,
+      chunkCount: result.chunkCount,
+      indexedCount: result.indexedCount,
+      lastIndexedAt: result.lastIndexedAt,
+      error: result.error,
+    };
+  } catch (err) {
+    const error = err instanceof Error ? err.message.slice(0, 400) : String(err);
+    payload.logger.error({
+      msg: 'governed.ingest.index_failed',
+      learningResourceId,
+      knowledgeDocumentId,
+      error,
+    });
+    if (knowledgeDocumentId != null) {
+      await payload
+        .update({
+          collection: 'knowledge-documents',
+          id: knowledgeDocumentId,
+          data: { lastIndexedAt: null, indexingError: error } as never,
+          overrideAccess: true,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        })
+        .catch(() => undefined);
+    }
+    return { ok: false, chunkCount: 0, indexedCount: 0, lastIndexedAt: null, error };
+  }
+}
+
+/** Epic 17.3: pull vectors when governance makes content non-retrievable (revoke/version/etc.). */
+async function deindexGovernedResource(
+  payload: Payload,
+  args: {
+    learningResourceId: number | null;
+    knowledgeDocumentId: number | null;
+    reason: string;
+  },
+): Promise<void> {
+  if (args.learningResourceId == null && args.knowledgeDocumentId == null) return;
+  try {
+    const { deindexLearningResource } = await import('../retrieval/worker');
+    await deindexLearningResource(payload, args);
+  } catch (err) {
+    const error = err instanceof Error ? err.message.slice(0, 400) : String(err);
+    payload.logger.error({ msg: 'governed.deindex_failed', ...args, error });
+    if (args.knowledgeDocumentId != null) {
+      await payload
+        .update({
+          collection: 'knowledge-documents',
+          id: args.knowledgeDocumentId,
+          data: { indexingError: `DEINDEX_FAILED:${error}`.slice(0, 800) } as never,
+          overrideAccess: true,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        })
+        .catch(() => undefined);
+    }
+  }
+}
+
+async function resolveLessonContext(
+  payload: Payload,
+  lessonId: number,
+  req?: PayloadRequest,
+): Promise<{
+  courseId: number | null;
+  schoolKey: string | null;
+  ownerCompanyId: number | null;
+  title: string;
+  contentHash: string;
+}> {
+  const lesson = (await payload.findByID({
+    collection: 'lessons',
+    id: lessonId,
+    depth: 2,
+    overrideAccess: true,
+    req,
+  })) as unknown as Record<string, unknown>;
+
+  const moduleId = relId(lesson.module as Rel);
+  let courseId: number | null = null;
+  let schoolKey: string | null = null;
+  let ownerCompanyId: number | null = null;
+  if (moduleId != null) {
+    const mod = (await payload.findByID({
+      collection: 'course-modules',
+      id: moduleId,
+      depth: 1,
+      overrideAccess: true,
+      req,
+    })) as unknown as Record<string, unknown>;
+    courseId = relId(mod.course as Rel);
+    if (courseId != null) {
+      const course = (await payload.findByID({
+        collection: 'courses',
+        id: courseId,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })) as unknown as Record<string, unknown>;
+      schoolKey = typeof course.schoolKey === 'string' ? course.schoolKey : null;
+      ownerCompanyId = relId(course.ownerCompany as Rel);
+    }
+  }
+
+  const title = String(lesson.title || `Aula ${lessonId}`);
+  const contentHash = hashContentVersion([
+    'lesson',
+    lessonId,
+    title,
+    String(lesson.summary || ''),
+    lexicalToPlain(lesson.content),
+    String(lesson.updatedAt || ''),
+  ]);
+
+  return { courseId, schoolKey, ownerCompanyId, title, contentHash };
+}
+
+export async function submitLessonForKnowledgeReview(args: {
+  payload: Payload;
+  lessonId: number;
+  user: unknown;
+  requestedScope?: 'SCHOOL_APPROVED' | 'OMNIA_APPROVED';
+  req?: PayloadRequest;
+}): Promise<Record<string, unknown>> {
+  const { payload, lessonId, user, req } = args;
+  const authorId = userIdOf(user);
+  if (authorId == null) throw new Error('UNAUTHORIZED');
+
+  const ctx = await resolveLessonContext(payload, lessonId, req);
+  if (!ctx.schoolKey) throw new Error('LESSON_SCHOOL_KEY_REQUIRED');
+
+  if (isAssessmentSecretContent({ title: ctx.title })) {
+    throw new Error('ASSESSMENT_SECRET_NOT_SUBMISSIBLE');
+  }
+
+  const existingDocs = await kgFind(
+    payload,
+    {
+      and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(lessonId) } }],
+    },
+    req,
+    1,
+  );
+
+  const requestedScope = args.requestedScope ?? 'SCHOOL_APPROVED';
+  const now = new Date().toISOString();
+
+  if (existingDocs[0]) {
+    const prev = existingDocs[0] as {
+      id: string | number;
+      governanceState?: string;
+      contentVersionHash?: string;
+    };
+    const state = (prev.governanceState || 'COURSE_PRIVATE') as GovernanceState;
+    if (!canSubmitForSchoolReview(state) && state !== 'COURSE_PRIVATE') {
+      if (state === 'PENDING_SCHOOL_REVIEW' || state === 'PENDING_OMNIA_REVIEW') {
+        return existingDocs[0];
+      }
+    }
+    const from = canSubmitForSchoolReview(state) ? state : 'COURSE_PRIVATE';
+    if (!canTransitionGovernance(from, 'PENDING_SCHOOL_REVIEW')) {
+      assertGovernanceTransition(from, 'PENDING_SCHOOL_REVIEW');
+    }
+    assertGovernanceTransition(from, 'PENDING_SCHOOL_REVIEW');
+
+    const updated = await kgUpdate(
+      payload,
+      prev.id,
+      {
+        title: ctx.title,
+        contentVersionHash: ctx.contentHash,
+        requestedScope,
+        knowledgeScope: 'COURSE_PRIVATE',
+        governanceState: 'PENDING_SCHOOL_REVIEW',
+        statusLabel: statusLabelFor('PENDING_SCHOOL_REVIEW', ctx.schoolKey),
+        submittedAt: now,
+        retrievalEligible: false,
+        assessmentSecret: false,
+        course: ctx.courseId ?? undefined,
+        lesson: lessonId,
+        schoolKey: ctx.schoolKey,
+        ownerCompany: ctx.ownerCompanyId ?? undefined,
+      },
+      req,
+    );
+
+    await appendDecision(
+      payload,
+      prev.id,
+      {
+        action: 'submitted',
+        fromState: from,
+        toState: 'PENDING_SCHOOL_REVIEW',
+        scope: requestedScope,
+        actorId: String(authorId),
+        at: now,
+        versionHash: ctx.contentHash,
+      },
+      req,
+    );
+
+    await writeKnowledgeAudit(
+      payload,
+      {
+        action: 'submitted',
+        entityType: 'knowledge-governance-submissions',
+        entityId: String(prev.id),
+        actorId: String(authorId),
+        nextState: { lessonId, schoolKey: ctx.schoolKey, requestedScope },
+      },
+      req,
+    );
+
+    return updated;
+  }
+
+  const created = await kgCreate(
+    payload,
+    {
+      title: ctx.title,
+      sourceType: 'lesson',
+      sourceId: String(lessonId),
+      course: ctx.courseId ?? undefined,
+      lesson: lessonId,
+      schoolKey: ctx.schoolKey,
+      ownerCompany: ctx.ownerCompanyId ?? undefined,
+      author: toPayloadRelationId(authorId) ?? authorId,
+      submittedAt: now,
+      contentVersionHash: ctx.contentHash,
+      requestedScope,
+      knowledgeScope: 'COURSE_PRIVATE',
+      governanceState: 'PENDING_SCHOOL_REVIEW',
+      statusLabel: statusLabelFor('PENDING_SCHOOL_REVIEW', ctx.schoolKey),
+      retrievalEligible: false,
+      assessmentSecret: false,
+      decisions: [
+        {
+          action: 'submitted',
+          fromState: 'COURSE_PRIVATE',
+          toState: 'PENDING_SCHOOL_REVIEW',
+          scope: requestedScope,
+          actorId: String(authorId),
+          at: now,
+          versionHash: ctx.contentHash,
+        },
+      ],
+    },
+    req,
+  );
+
+  await writeKnowledgeAudit(
+    payload,
+    {
+      action: 'submitted',
+      entityType: 'knowledge-governance-submissions',
+      entityId: String(created.id),
+      actorId: String(authorId),
+      nextState: { lessonId, schoolKey: ctx.schoolKey, requestedScope },
+    },
+    req,
+  );
+
+  return created;
+}
+
+async function ensureLessonTextLearningResource(args: {
+  payload: Payload;
+  submission: Record<string, unknown>;
+  req?: PayloadRequest;
+}): Promise<{ learningResourceId: number; sourceBuffer: Buffer; text: string } | null> {
+  const { payload, submission, req } = args;
+  const lessonId = relId(submission.lesson as Rel);
+  if (lessonId == null) return null;
+
+  const lesson = (await payload.findByID({
+    collection: 'lessons',
+    id: lessonId,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })) as unknown as Record<string, unknown>;
+
+  const title = String(lesson.title || submission.title || `Aula ${lessonId}`);
+  const text = [title, String(lesson.summary || ''), lexicalToPlain(lesson.content)]
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join('\n\n')
+    .trim();
+  if (!text) return null;
+
+  const sourceBuffer = Buffer.from(text, 'utf8');
+  const courseId = relId(submission.course as Rel);
+  const ownerCompanyId = relId(submission.ownerCompany as Rel);
+  const versionHash =
+    typeof submission.contentVersionHash === 'string' ? submission.contentVersionHash : '';
+
+  const existing = await payload.find({
+    collection: 'learning-resources',
+    where: {
+      and: [
+        { lesson: { equals: lessonId } },
+        { resourceType: { equals: 'txt' } },
+        { origin: { equals: 'upload' } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  });
+
+  let learningResourceId = relId(existing.docs[0]?.id as Rel);
+  if (learningResourceId == null) {
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: `Governance lesson ${lessonId}` },
+      file: {
+        data: sourceBuffer,
+        mimetype: 'text/plain',
+        name: `governance-lesson-${lessonId}-${Date.now()}.txt`,
+        size: sourceBuffer.length,
+      },
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    } as never);
+
+    const created = await payload.create({
+      collection: 'learning-resources',
+      data: {
+        title,
+        media: media.id,
+        lesson: lessonId,
+        course: courseId ?? undefined,
+        resourceType: 'txt',
+        origin: 'upload',
+        processingStatus: 'pending',
+        autoProcess: false,
+        language: 'pt-BR',
+        version: versionHash.slice(0, 12) || '1.0.0',
+        knowledgeScope: 'COURSE_PRIVATE',
+        retrievalEligible: false,
+        governanceState: 'COURSE_PRIVATE',
+        schoolKey: typeof submission.schoolKey === 'string' ? submission.schoolKey : undefined,
+        ownerCompany: ownerCompanyId ?? undefined,
+        contentVersionHash: versionHash || undefined,
+        tags: [{ tag: 'governance-lesson' }, { tag: `lesson:${lessonId}` }],
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    });
+    learningResourceId = relId(created.id);
+  } else {
+    // Idempotent retry / version change: refresh media + hash, reset processing.
+    const media = await payload.create({
+      collection: 'media',
+      data: { alt: `Governance lesson ${lessonId} v` },
+      file: {
+        data: sourceBuffer,
+        mimetype: 'text/plain',
+        name: `governance-lesson-${lessonId}-${Date.now()}.txt`,
+        size: sourceBuffer.length,
+      },
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    } as never);
+
+    await payload.update({
+      collection: 'learning-resources',
+      id: learningResourceId,
+      data: {
+        title,
+        media: media.id,
+        processingStatus: 'pending',
+        autoProcess: false,
+        retrievalEligible: false,
+        version: versionHash.slice(0, 12) || '1.0.0',
+        contentVersionHash: versionHash || undefined,
+        lastError: null,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    });
+  }
+
+  if (learningResourceId == null) return null;
+  return { learningResourceId, sourceBuffer, text };
+}
+
+async function applyHubEligibility(args: {
+  payload: Payload;
+  submission: Record<string, unknown>;
+  submissionId: string | number;
+  state: GovernanceState;
+  scope: KnowledgeScope;
+  actorId: string | number;
+  req?: PayloadRequest;
+}) {
+  const { payload, submission, submissionId, state, scope, actorId, req } = args;
+  const eligible = isRetrievalEligibleState(state) && isHubIngestionEligible(state);
+  let learningResourceId = relId(submission.learningResource as Rel);
+  const knowledgeDocumentId = relId(submission.knowledgeDocument as Rel);
+  const versionHash =
+    typeof submission.contentVersionHash === 'string' ? submission.contentVersionHash : null;
+
+  let sourceBuffer: Buffer | undefined;
+  let preText: string | undefined;
+
+  // OMNIA upgrade of already-ready SCHOOL ingest: commit scope/agents without re-blocking HTTP on full KI.
+  if (
+    eligible &&
+    state === 'OMNIA_APPROVED' &&
+    learningResourceId != null &&
+    knowledgeDocumentId != null
+  ) {
+    try {
+      const lr = (await payload.findByID({
+        collection: 'learning-resources',
+        id: learningResourceId,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })) as {
+        processingStatus?: string | null;
+        contentVersionHash?: string | null;
+      };
+      const sameVersion =
+        versionHash != null &&
+        typeof lr.contentVersionHash === 'string' &&
+        lr.contentVersionHash === versionHash;
+      if (lr.processingStatus === 'completed' && sameVersion) {
+        const omniaAgents = ['tutor', 'engineering', 'concierge'] as const;
+        await payload.update({
+          collection: 'knowledge-documents',
+          id: knowledgeDocumentId,
+          data: {
+            allowAiUse: true,
+            publicationStatus: 'published',
+            status: 'published',
+            knowledgeScope: scope,
+            schoolKey: submission.schoolKey,
+            retrievalEligible: true,
+            governanceState: state,
+            contentVersionHash: versionHash,
+            assessmentSecret: false,
+            processingStatus: 'succeeded',
+            allowedAgents: [...omniaAgents],
+            _status: 'published',
+          } as never,
+          draft: false,
+          overrideAccess: true,
+          req,
+          context: {
+            governancePipelineActive: true,
+            kiPipelineActive: true,
+            knowledgeOfficialLoad: true,
+          },
+        });
+        await payload.update({
+          collection: 'learning-resources',
+          id: learningResourceId,
+          data: {
+            retrievalEligible: true,
+            processingStatus: 'completed',
+            knowledgeScope: scope,
+            governanceState: state,
+            schoolKey: submission.schoolKey,
+            contentVersionHash: versionHash,
+          } as never,
+          overrideAccess: true,
+          req,
+          context: { governancePipelineActive: true, kiPipelineActive: true },
+        });
+        await kgUpdate(
+          payload,
+          submissionId,
+          {
+            learningResource: learningResourceId,
+            knowledgeDocument: knowledgeDocumentId,
+            retrievalEligible: false,
+          },
+          req,
+        );
+        // Epic 17.3: refresh vectors (agent tags/scope) through the indexing port, then record the
+        // real outcome. ingestion_completed only after indexing is verified.
+        const lrForIndex = learningResourceId;
+        const kdForIndex = knowledgeDocumentId;
+        void (async () => {
+          const index = await indexGovernedResource(payload, lrForIndex, kdForIndex);
+          try {
+            await kgUpdate(payload, submissionId, { retrievalEligible: index.ok });
+          } catch (err) {
+            payload.logger.error({
+              msg: 'governed.omnia_upgrade.submission_update_failed',
+              submissionId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+          await writeKnowledgeAudit(payload, {
+            action: index.ok ? 'ingestion_completed' : 'indexing_failed',
+            entityType: 'knowledge-governance-submissions',
+            entityId: String(submissionId),
+            actorId: String(actorId),
+            nextState: {
+              learningResourceId: lrForIndex,
+              knowledgeDocumentId: kdForIndex,
+              omniaUpgrade: true,
+              allowedAgents: omniaAgents,
+              chunkCount: index.chunkCount,
+              indexedCount: index.indexedCount,
+              indexed: index.ok,
+              lastIndexedAt: index.lastIndexedAt,
+              indexingError: index.error,
+              async: true,
+            },
+          });
+        })();
+        return;
+      }
+    } catch {
+      // fall through to full async ingest
+    }
+  }
+
+  // Always refresh lesson text/media on eligible approval/retry. Skipping when an LR already
+  // exists left stale media in place and re-ingested outdated content (no new markers).
+  if (eligible) {
+    const ensured = await ensureLessonTextLearningResource({ payload, submission, req });
+    if (ensured) {
+      learningResourceId = ensured.learningResourceId;
+      sourceBuffer = ensured.sourceBuffer;
+      preText = ensured.text;
+    }
+  }
+
+  if (knowledgeDocumentId != null) {
+    await payload.update({
+      collection: 'knowledge-documents',
+      id: knowledgeDocumentId,
+      data: {
+        allowAiUse: eligible,
+        publicationStatus: eligible ? 'published' : 'unpublished',
+        knowledgeScope: scope,
+        schoolKey: submission.schoolKey,
+        retrievalEligible: eligible,
+        governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
+        assessmentSecret: submission.assessmentSecret === true,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true },
+    });
+  }
+
+  if (learningResourceId != null && !eligible) {
+    await payload.update({
+      collection: 'learning-resources',
+      id: learningResourceId,
+      data: {
+        autoProcess: false,
+        knowledgeScope: scope,
+        schoolKey: submission.schoolKey,
+        retrievalEligible: false,
+        governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true },
+    });
+  }
+
+  if (!eligible) {
+    // Epic 17.3: governance says not retrievable → remove vectors (revocation preserved).
+    await deindexGovernedResource(payload, {
+      learningResourceId,
+      knowledgeDocumentId,
+      reason: `governance:${state}`,
+    });
+  }
+
+  if (eligible && learningResourceId != null) {
+    await writeKnowledgeAudit(
+      payload,
+      {
+        action: 'ingestion_started',
+        entityType: 'knowledge-governance-submissions',
+        entityId: String(submissionId),
+        actorId: String(actorId),
+        nextState: { learningResourceId, scope, state },
+      },
+      req,
+    );
+
+    // Governance approval ≠ retrieval-ready. Keep retrievalEligible=false until KI completes.
+    // Keep autoProcess=false: explicit processLearningResource below. Setting autoProcess=true
+    // would race the LR afterChange hook (un-governed KI run → draft Hub + slug conflicts).
+    await payload.update({
+      collection: 'learning-resources',
+      id: learningResourceId,
+      data: {
+        processingStatus: 'pending',
+        autoProcess: false,
+        knowledgeScope: scope,
+        schoolKey: submission.schoolKey,
+        retrievalEligible: false,
+        governanceState: state,
+        contentVersionHash: versionHash ?? undefined,
+      } as never,
+      overrideAccess: true,
+      req,
+      context: { governancePipelineActive: true, kiPipelineActive: true },
+    });
+
+    await kgUpdate(
+      payload,
+      submissionId,
+      {
+        learningResource: learningResourceId,
+        knowledgeDocument: knowledgeDocumentId ?? undefined,
+        retrievalEligible: false,
+      },
+      req,
+    );
+
+    const schoolKey = typeof submission.schoolKey === 'string' ? submission.schoolKey : undefined;
+    const ownerCompany = relId(submission.ownerCompany as Rel) ?? undefined;
+    const hubOverrides = {
+      allowAiUse: true,
+      publicationStatus: 'published' as const,
+      status: 'published',
+      humanReviewRequired: false,
+      securityClassification: 'STUDENT',
+      ownerCompany,
+      allowedAgents:
+        scope === 'OMNIA_APPROVED'
+          ? (['tutor', 'engineering', 'concierge'] as string[])
+          : (['tutor'] as string[]),
+      tags: [
+        `scope:${scope}`,
+        `school:${String(submission.schoolKey || '')}`,
+        `governance:${state}`,
+      ],
+      revisionNotes: `Epic 17 governed ingest (${scope}/${state}).`,
+    };
+
+    // Epic 17.2: do NOT await KI/chunk/embed inside the HTTP approval request.
+    // Commit governance + queue processing, then finish ingest asynchronously.
+    const bufferCopy = sourceBuffer ? Buffer.from(sourceBuffer) : undefined;
+    const textCopy = preText;
+    void (async () => {
+      try {
+        const processed = await processLearningResource({
+          payload,
+          learningResourceId,
+          sourceBuffer: bufferCopy,
+          sourceMimeType: bufferCopy ? 'text/plain' : undefined,
+          sourceFilename: bufferCopy ? `governance-lesson-${learningResourceId}.txt` : undefined,
+          preExtracted: textCopy
+            ? { text: textCopy, meta: { language: 'pt-BR', encoding: 'utf-8' } }
+            : undefined,
+          hubOverrides,
+        });
+
+        let kdId = relId(processed.knowledgeDocumentId as Rel) ?? knowledgeDocumentId;
+        const ingestReady = processed.ok === true && kdId != null;
+        let index: IndexOutcome | null = null;
+
+        if (ingestReady && kdId != null) {
+          await payload.update({
+            collection: 'knowledge-documents',
+            id: kdId,
+            data: {
+              allowAiUse: true,
+              publicationStatus: 'published',
+              status: 'published',
+              knowledgeScope: scope,
+              schoolKey,
+              retrievalEligible: true,
+              governanceState: state,
+              contentVersionHash: versionHash ?? undefined,
+              assessmentSecret: false,
+              processingStatus: 'succeeded',
+              _status: 'published',
+              allowedAgents: hubOverrides.allowedAgents,
+            } as never,
+            draft: false,
+            overrideAccess: true,
+            context: {
+              governancePipelineActive: true,
+              kiPipelineActive: true,
+              knowledgeOfficialLoad: true,
+            },
+          });
+
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              knowledgeDocument: kdId,
+              retrievalEligible: true,
+              processingStatus: 'completed',
+              knowledgeScope: scope,
+              governanceState: state,
+              schoolKey,
+              contentVersionHash: versionHash ?? undefined,
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true, kiPipelineActive: true },
+          });
+
+          // Epic 17.3: index THIS resource through the indexing port (not a global FIFO drain),
+          // and wait for a verified result before declaring the ingest complete.
+          index = await indexGovernedResource(payload, learningResourceId, kdId);
+        } else {
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              retrievalEligible: false,
+              processingStatus: 'failed',
+              knowledgeScope: scope,
+              governanceState: state,
+              schoolKey,
+              contentVersionHash: versionHash ?? undefined,
+              lastError: 'GOVERNED_INGEST_NOT_READY',
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true },
+          });
+          kdId = kdId ?? null;
+        }
+
+        const indexed = ingestReady && index?.ok === true;
+
+        await kgUpdate(payload, submissionId, {
+          learningResource: learningResourceId,
+          knowledgeDocument: kdId ?? undefined,
+          retrievalEligible: indexed,
+        });
+
+        await writeKnowledgeAudit(payload, {
+          action: indexed
+            ? 'ingestion_completed'
+            : ingestReady
+              ? 'indexing_failed'
+              : 'ingestion_started',
+          entityType: 'knowledge-governance-submissions',
+          entityId: String(submissionId),
+          actorId: String(actorId),
+          nextState: {
+            learningResourceId,
+            knowledgeDocumentId: kdId,
+            ok: processed.ok,
+            chunkCount: processed.chunkCount,
+            ingestReady,
+            indexed,
+            indexedCount: index?.indexedCount ?? 0,
+            lastIndexedAt: index?.lastIndexedAt ?? null,
+            indexingError: index?.error ?? null,
+            async: true,
+          },
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message.slice(0, 400) : String(err);
+        payload.logger.error({
+          msg: 'governed.ingest.async_failed',
+          submissionId,
+          learningResourceId,
+          error: message,
+        });
+        try {
+          await payload.update({
+            collection: 'learning-resources',
+            id: learningResourceId,
+            data: {
+              retrievalEligible: false,
+              processingStatus: 'failed',
+              lastError: message,
+            } as never,
+            overrideAccess: true,
+            context: { governancePipelineActive: true },
+          });
+        } catch {
+          /* best-effort */
+        }
+      }
+    })();
+  }
+}
+export async function reviewGovernanceSubmission(args: {
+  payload: Payload;
+  submissionId: string | number;
+  user: unknown;
+  action:
+    | 'approve_school'
+    | 'reject'
+    | 'promote_omnia'
+    | 'approve_omnia'
+    | 'revoke'
+    | 'request_correction';
+  reason?: string;
+  req?: PayloadRequest;
+}): Promise<Record<string, unknown>> {
+  const { payload, submissionId, user, action, reason, req } = args;
+  const role = roleOf(user);
+  const actorId = userIdOf(user);
+  if (actorId == null) throw new Error('UNAUTHORIZED');
+
+  const doc = await kgFindByID(payload, submissionId, req);
+
+  const from = (doc.governanceState || 'COURSE_PRIVATE') as GovernanceState;
+  let to: GovernanceState;
+  let auditAction = 'approved';
+
+  switch (action) {
+    case 'approve_school':
+      if (!canApproveSchool(role)) throw new Error('FORBIDDEN');
+      to = 'SCHOOL_APPROVED';
+      auditAction = 'approved';
+      break;
+    case 'reject':
+      if (!canApproveSchool(role)) throw new Error('FORBIDDEN');
+      if (!reason?.trim()) throw new Error('REASON_REQUIRED');
+      to = 'REJECTED';
+      auditAction = 'rejected';
+      break;
+    case 'request_correction':
+      if (!canApproveSchool(role)) throw new Error('FORBIDDEN');
+      if (!reason?.trim()) throw new Error('REASON_REQUIRED');
+      to = 'COURSE_PRIVATE';
+      auditAction = 'correction_requested';
+      break;
+    case 'promote_omnia':
+      if (!canApproveOmnia(role)) throw new Error('FORBIDDEN');
+      to = 'PENDING_OMNIA_REVIEW';
+      auditAction = 'promoted';
+      break;
+    case 'approve_omnia':
+      if (!canApproveOmnia(role)) throw new Error('FORBIDDEN');
+      to = 'OMNIA_APPROVED';
+      auditAction = 'approved';
+      break;
+    case 'revoke':
+      if (!canRevoke(role)) throw new Error('FORBIDDEN');
+      to = 'REVOKED';
+      auditAction = 'revoked';
+      break;
+    default:
+      throw new Error('UNKNOWN_ACTION');
+  }
+
+  assertGovernanceTransition(from, to);
+  const scope = (scopeForState(to) ?? 'COURSE_PRIVATE') as KnowledgeScope;
+  const schoolKey = typeof doc.schoolKey === 'string' ? doc.schoolKey : null;
+  const now = new Date().toISOString();
+  const eligible = isRetrievalEligibleState(to);
+  // Approval ≠ vector-ready. retrievalEligible becomes true only after KI ingest succeeds.
+  const initialRetrievalEligible = false;
+
+  const updated = await kgUpdate(
+    payload,
+    submissionId,
+    {
+      governanceState: to,
+      knowledgeScope: scope,
+      statusLabel: statusLabelFor(to, schoolKey),
+      retrievalEligible: eligible ? initialRetrievalEligible : false,
+      approvedVersionHash: eligible ? doc.contentVersionHash : doc.approvedVersionHash,
+      reviewNote: reason || doc.reviewNote,
+      lastReviewer: actorId,
+      reviewedAt: now,
+    },
+    req,
+  );
+
+  await appendDecision(
+    payload,
+    submissionId,
+    {
+      action: auditAction,
+      fromState: from,
+      toState: to,
+      scope,
+      reason: reason || null,
+      actorId: String(actorId),
+      at: now,
+      versionHash: doc.contentVersionHash,
+    },
+    req,
+  );
+
+  await applyHubEligibility({
+    payload,
+    submission: { ...doc, ...updated },
+    submissionId,
+    state: to,
+    scope,
+    actorId,
+    req,
+  });
+
+  await writeKnowledgeAudit(
+    payload,
+    {
+      action: auditAction,
+      entityType: 'knowledge-governance-submissions',
+      entityId: String(submissionId),
+      actorId: String(actorId),
+      previousState: { governanceState: from },
+      nextState: { governanceState: to, scope, schoolKey },
+      reason: reason || null,
+    },
+    req,
+  );
+
+  return updated;
+}
+
+export async function invalidateGovernanceOnLessonChange(args: {
+  payload: Payload;
+  lessonId: number;
+  req?: PayloadRequest;
+}): Promise<void> {
+  const { payload, lessonId, req } = args;
+  const ctx = await resolveLessonContext(payload, lessonId, req);
+  const foundDocs = await kgFind(
+    payload,
+    {
+      and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(lessonId) } }],
+    },
+    req,
+    5,
+  );
+
+  for (const raw of foundDocs) {
+    const doc = raw as {
+      id: string | number;
+      governanceState?: string;
+      contentVersionHash?: string;
+      approvedVersionHash?: string;
+      schoolKey?: string;
+      knowledgeDocument?: Rel;
+      learningResource?: Rel;
+    };
+    if (versionsMatch(doc.contentVersionHash, ctx.contentHash)) continue;
+    const from = (doc.governanceState || 'COURSE_PRIVATE') as GovernanceState;
+    const to = stateAfterMaterialEdit(from);
+    const now = new Date().toISOString();
+    await kgUpdate(
+      payload,
+      doc.id,
+      {
+        title: ctx.title,
+        contentVersionHash: ctx.contentHash,
+        governanceState: to,
+        knowledgeScope: 'COURSE_PRIVATE',
+        statusLabel: statusLabelFor(to, doc.schoolKey ?? ctx.schoolKey),
+        retrievalEligible: false,
+      },
+      req,
+    );
+
+    await appendDecision(
+      payload,
+      doc.id,
+      {
+        action: 'version_changed',
+        fromState: from,
+        toState: to,
+        scope: 'COURSE_PRIVATE',
+        reason: 'Conteúdo alterado — aprovação anterior não herdada',
+        at: now,
+        versionHash: ctx.contentHash,
+      },
+      req,
+    );
+
+    const kd = relId(doc.knowledgeDocument);
+    if (kd != null) {
+      await payload.update({
+        collection: 'knowledge-documents',
+        id: kd,
+        data: {
+          allowAiUse: false,
+          publicationStatus: 'unpublished',
+          retrievalEligible: false,
+          governanceState: to,
+          knowledgeScope: 'COURSE_PRIVATE',
+        } as never,
+        overrideAccess: true,
+        req,
+        context: { governancePipelineActive: true },
+      });
+    }
+
+    // Epic 17.3: prior approval is not inherited → remove stale vectors of the old version.
+    await deindexGovernedResource(payload, {
+      learningResourceId: relId(doc.learningResource),
+      knowledgeDocumentId: kd,
+      reason: 'version_changed',
+    });
+  }
+}
+
+export async function getGovernanceStatusForLesson(args: {
+  payload: Payload;
+  lessonId: number;
+  req?: PayloadRequest;
+}): Promise<Record<string, unknown> | null> {
+  const found = await kgFind(
+    args.payload,
+    {
+      and: [{ sourceType: { equals: 'lesson' } }, { sourceId: { equals: String(args.lessonId) } }],
+    },
+    args.req,
+    1,
+  );
+  return found[0] || null;
+}

@@ -16,15 +16,15 @@ modules/       10 bounded contexts (portal, crm, marketplace, etc.)
 
 ## Packages-chave
 
-| Package | Escopo |
-|---------|--------|
-| `typescript-config`, `eslint-config`, `prettier-config` | Tooling |
-| `types`, `constants` | Domínio DDD |
-| `shared` | Utils puros apenas |
-| `database` | Drizzle ORM (ADR-002) |
-| `integrations` | Conectores raw |
-| `ai-core` | Orquestração IA |
-| `security`, `auth`, `logger`, `monitoring` | Cross-cutting |
+| Package                                                 | Escopo                |
+| ------------------------------------------------------- | --------------------- |
+| `typescript-config`, `eslint-config`, `prettier-config` | Tooling               |
+| `types`, `constants`                                    | Domínio DDD           |
+| `shared`                                                | Utils puros apenas    |
+| `database`                                              | Drizzle ORM (ADR-002) |
+| `integrations`                                          | Conectores raw        |
+| `ai-core`                                               | Orquestração IA       |
+| `security`, `auth`, `logger`, `monitoring`              | Cross-cutting         |
 
 ## Guidelines
 

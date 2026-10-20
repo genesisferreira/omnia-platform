@@ -10,8 +10,8 @@ Consumido por `@omnia/ai-core` (router, agents, RAG). Apps nunca importam este c
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
+| Variável           | Descrição             |
+| ------------------ | --------------------- |
 | `DEEPSEEK_API_KEY` | Chave de API DeepSeek |
 
 ## Sprint

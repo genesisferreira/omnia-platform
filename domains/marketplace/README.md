@@ -17,11 +17,11 @@ Viabilizar a venda de produtos e serviços digitais — cursos, assinaturas, pro
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos (`Money`, `Tenant`, erros) |
-| **identity** | Autenticação do comprador |
-| **partner** | Produtos e comissões de parceiros |
+| Domínio      | Uso                                   |
+| ------------ | ------------------------------------- |
+| **core**     | Primitivos (`Money`, `Tenant`, erros) |
+| **identity** | Autenticação do comprador             |
+| **partner**  | Produtos e comissões de parceiros     |
 
 ## Integrações
 
@@ -29,9 +29,9 @@ Viabilizar a venda de produtos e serviços digitais — cursos, assinaturas, pro
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `OrderPlaced` | Pedido confirmado e registrado | 6 |
+| Evento        | Descrição                      | Sprint |
+| ------------- | ------------------------------ | ------ |
+| `OrderPlaced` | Pedido confirmado e registrado | 6      |
 
 ## Referências
 

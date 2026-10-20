@@ -6,15 +6,15 @@
 
 ### `mkt_products`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `tenant_id` | UUID | FK |
-| `name` | VARCHAR(255) | — |
-| `sku` | VARCHAR(50) | — |
-| `price` | DECIMAL | — |
-| `stock` | INTEGER | — |
-| `status` | ENUM | `active`, `inactive` |
+| Coluna      | Tipo         | Descrição            |
+| ----------- | ------------ | -------------------- |
+| `id`        | UUID         | PK                   |
+| `tenant_id` | UUID         | FK                   |
+| `name`      | VARCHAR(255) | —                    |
+| `sku`       | VARCHAR(50)  | —                    |
+| `price`     | DECIMAL      | —                    |
+| `stock`     | INTEGER      | —                    |
+| `status`    | ENUM         | `active`, `inactive` |
 
 ### `mkt_orders`
 

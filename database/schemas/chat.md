@@ -6,23 +6,23 @@
 
 ### `chat_conversations`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `tenant_id` | UUID | FK |
-| `user_id` | UUID | FK (opcional) |
-| `agent_id` | VARCHAR(50) | Agente IA |
-| `status` | ENUM | `open`, `closed`, `handoff` |
+| Coluna      | Tipo        | Descrição                   |
+| ----------- | ----------- | --------------------------- |
+| `id`        | UUID        | PK                          |
+| `tenant_id` | UUID        | FK                          |
+| `user_id`   | UUID        | FK (opcional)               |
+| `agent_id`  | VARCHAR(50) | Agente IA                   |
+| `status`    | ENUM        | `open`, `closed`, `handoff` |
 
 ### `chat_messages`
 
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | UUID | PK |
-| `conversation_id` | UUID | FK |
-| `role` | ENUM | `user`, `assistant`, `system` |
-| `content` | TEXT | — |
-| `tokens_used` | INTEGER | — |
+| Coluna            | Tipo    | Descrição                     |
+| ----------------- | ------- | ----------------------------- |
+| `id`              | UUID    | PK                            |
+| `conversation_id` | UUID    | FK                            |
+| `role`            | ENUM    | `user`, `assistant`, `system` |
+| `content`         | TEXT    | —                             |
+| `tokens_used`     | INTEGER | —                             |
 
 ## IA
 

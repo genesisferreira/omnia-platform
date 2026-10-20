@@ -17,11 +17,11 @@ Permitir que parceiros comerciais se cadastrem, sejam aprovados e gerenciem seus
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
-| **core** | Primitivos compartilhados |
-| **identity** | Autenticação e perfil do parceiro |
-| **crm** | Leads e oportunidades originados por parceiros |
+| Domínio      | Uso                                            |
+| ------------ | ---------------------------------------------- |
+| **core**     | Primitivos compartilhados                      |
+| **identity** | Autenticação e perfil do parceiro              |
+| **crm**      | Leads e oportunidades originados por parceiros |
 
 ## Integrações
 
@@ -29,9 +29,9 @@ Nenhuma integração externa direta. Comunicação com CRM via API ou eventos.
 
 ## Eventos futuros
 
-| Evento | Descrição | Sprint |
-|--------|-----------|--------|
-| `PartnerApproved` | Parceiro aprovado e habilitado na plataforma | 7 |
+| Evento            | Descrição                                    | Sprint |
+| ----------------- | -------------------------------------------- | ------ |
+| `PartnerApproved` | Parceiro aprovado e habilitado na plataforma | 7      |
 
 ## Referências
 

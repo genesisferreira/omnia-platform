@@ -1,3 +1,2 @@
-/** Config: openai — Sprint 2+ */
+/** Config: openai ï¿½ Sprint 2+ */
 export {};
-

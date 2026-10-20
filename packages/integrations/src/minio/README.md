@@ -10,14 +10,14 @@ Usado internamente por `@omnia/integrations/storage`. Apps preferem `storage/` e
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
-| `MINIO_ENDPOINT` | Host MinIO (ex.: `localhost`) |
-| `MINIO_PORT` | Porta API (padrão `9000`) |
-| `MINIO_ACCESS_KEY` | Access key |
-| `MINIO_SECRET_KEY` | Secret key |
-| `MINIO_BUCKET` | Bucket padrão (`omnia-media`) |
-| `MINIO_USE_SSL` | `true`/`false` |
+| Variável           | Descrição                     |
+| ------------------ | ----------------------------- |
+| `MINIO_ENDPOINT`   | Host MinIO (ex.: `localhost`) |
+| `MINIO_PORT`       | Porta API (padrão `9000`)     |
+| `MINIO_ACCESS_KEY` | Access key                    |
+| `MINIO_SECRET_KEY` | Secret key                    |
+| `MINIO_BUCKET`     | Bucket padrão (`omnia-media`) |
+| `MINIO_USE_SSL`    | `true`/`false`                |
 
 ## Sprint
 

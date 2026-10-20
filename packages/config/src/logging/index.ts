@@ -1,3 +1,2 @@
-/** Config: logging — Sprint 2+ */
+/** Config: logging ï¿½ Sprint 2+ */
 export {};
-

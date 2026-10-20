@@ -9,11 +9,11 @@
 
 A Sprint 1.2 conclui a **última sprint de arquitetura** da Omnia Platform. Foram criados 9 packages transversais, 10 documentos de governança na raiz, ADR-008 (congelamento), e expansão de observabilidade/segurança.
 
-| Métrica | Valor |
-|---------|-------|
-| **Nota da arquitetura** | **8.5 / 10** |
-| **Maturidade da plataforma** | **Fundacional completa** — pronta para features |
-| **Prontidão Sprint 2** | **Alta** — pendente validação local (`pnpm install`) |
+| Métrica                      | Valor                                                |
+| ---------------------------- | ---------------------------------------------------- |
+| **Nota da arquitetura**      | **8.5 / 10**                                         |
+| **Maturidade da plataforma** | **Fundacional completa** — pronta para features      |
+| **Prontidão Sprint 2**       | **Alta** — pendente validação local (`pnpm install`) |
 
 ---
 
@@ -21,17 +21,17 @@ A Sprint 1.2 conclui a **última sprint de arquitetura** da Omnia Platform. Fora
 
 ### Packages novos (9)
 
-| Package | Arquivos principais |
-|---------|---------------------|
-| `packages/config` | `package.json`, `README.md`, 14 submódulos em `src/` |
-| `packages/testing` | vitest, playwright, fixtures, mocks, factories, builders, helpers |
-| `packages/errors` | 9 classes + barrel `index.ts` |
-| `packages/events` | publish, subscribe, contracts, topics, handlers, dispatcher |
-| `packages/cache` | redis, memory, strategies, keys |
-| `packages/mail` | providers, templates, notifications, queue |
-| `packages/queue` | workers, jobs, retry, events |
-| `packages/validation` | zod, schemas, validators |
-| `packages/search` | providers, indexers, documents |
+| Package               | Arquivos principais                                               |
+| --------------------- | ----------------------------------------------------------------- |
+| `packages/config`     | `package.json`, `README.md`, 14 submódulos em `src/`              |
+| `packages/testing`    | vitest, playwright, fixtures, mocks, factories, builders, helpers |
+| `packages/errors`     | 9 classes + barrel `index.ts`                                     |
+| `packages/events`     | publish, subscribe, contracts, topics, handlers, dispatcher       |
+| `packages/cache`      | redis, memory, strategies, keys                                   |
+| `packages/mail`       | providers, templates, notifications, queue                        |
+| `packages/queue`      | workers, jobs, retry, events                                      |
+| `packages/validation` | zod, schemas, validators                                          |
+| `packages/search`     | providers, indexers, documents                                    |
 
 ### Documentação raiz (10)
 
@@ -51,14 +51,14 @@ A Sprint 1.2 conclui a **última sprint de arquitetura** da Omnia Platform. Fora
 
 ## 2. Arquivos alterados (Sprint 1.2)
 
-| Arquivo | Alteração |
-|---------|-----------|
-| `.github/CODEOWNERS` | Ownership por apps, packages, domains, docs, docker, .github |
-| `CHANGELOG.md` | Entrada Sprint 1.2 |
-| `docs/13-roadmap/README.md` | Sprint 1.2 + arquitetura congelada |
-| `docs/14-adr/README.md` | ADR-001, 002, 008 |
-| `packages/monitoring/README.md` | Link para OBSERVABILITY.md |
-| `PROJECT_CONTEXT.md` | 27 packages, governança, roadmap |
+| Arquivo                         | Alteração                                                    |
+| ------------------------------- | ------------------------------------------------------------ |
+| `.github/CODEOWNERS`            | Ownership por apps, packages, domains, docs, docker, .github |
+| `CHANGELOG.md`                  | Entrada Sprint 1.2                                           |
+| `docs/13-roadmap/README.md`     | Sprint 1.2 + arquitetura congelada                           |
+| `docs/14-adr/README.md`         | ADR-001, 002, 008                                            |
+| `packages/monitoring/README.md` | Link para OBSERVABILITY.md                                   |
+| `PROJECT_CONTEXT.md`            | 27 packages, governança, roadmap                             |
 
 ---
 
@@ -77,28 +77,28 @@ A Sprint 1.2 conclui a **última sprint de arquitetura** da Omnia Platform. Fora
 
 ## 4. Riscos
 
-| Risco | Severidade | Mitigação |
-|-------|------------|-----------|
-| `pnpm-lock.yaml` ausente | Média | `pnpm install` local |
-| Packages vazios (só estrutura) | Baixa | Implementação incremental Sprint 2+ |
-| Node 18 no ambiente dev | Média | Usar Node 22+ (`.nvmrc`) |
-| Sem testes automatizados ainda | Média | `@omnia/testing` + Sprint 2 |
-| dependency-cruiser não configurado | Baixa | Sprint 2 — validar DEPENDENCY_RULES |
+| Risco                              | Severidade | Mitigação                           |
+| ---------------------------------- | ---------- | ----------------------------------- |
+| `pnpm-lock.yaml` ausente           | Média      | `pnpm install` local                |
+| Packages vazios (só estrutura)     | Baixa      | Implementação incremental Sprint 2+ |
+| Node 18 no ambiente dev            | Média      | Usar Node 22+ (`.nvmrc`)            |
+| Sem testes automatizados ainda     | Média      | `@omnia/testing` + Sprint 2         |
+| dependency-cruiser não configurado | Baixa      | Sprint 2 — validar DEPENDENCY_RULES |
 
 ---
 
 ## 5. Dívidas técnicas
 
-| Item | Sprint alvo |
-|------|-------------|
-| Implementar `@omnia/config` com Zod | 2 |
-| JWT + RBAC | 2 |
-| Migrations Drizzle (tenants, users) | 2 |
-| Vitest + Playwright setup | 2 |
-| BullMQ workers | 3+ |
-| Meilisearch / search index | 4+ |
-| dependency-cruiser no CI | 2 |
-| `pnpm-lock.yaml` commitado | Próximo merge |
+| Item                                | Sprint alvo   |
+| ----------------------------------- | ------------- |
+| Implementar `@omnia/config` com Zod | 2             |
+| JWT + RBAC                          | 2             |
+| Migrations Drizzle (tenants, users) | 2             |
+| Vitest + Playwright setup           | 2             |
+| BullMQ workers                      | 3+            |
+| Meilisearch / search index          | 4+            |
+| dependency-cruiser no CI            | 2             |
+| `pnpm-lock.yaml` commitado          | Próximo merge |
 
 ---
 
@@ -116,18 +116,18 @@ A Sprint 1.2 conclui a **última sprint de arquitetura** da Omnia Platform. Fora
 
 Cenário: **500k usuários, 50k parceiros, 20M registros CRM**
 
-| Componente | Suporta? | Estratégia |
-|------------|----------|------------|
-| Monorepo modular | ✅ | Domínios desacoplados |
-| Multi-tenant | ✅ | ADR-005, tenantId em queries |
-| PostgreSQL | ✅ | Read replicas, particionamento CRM |
-| Redis | ✅ | Cluster para cache/sessions/queue |
-| Event bus | ✅ | `@omnia/events` + `@omnia/queue` |
-| Search | ⚠️ | `@omnia/search` — index externo necessário |
-| IA chat | ✅ | `@omnia/ai-core` + rate limit + queue |
-| CMS separado | ✅ | Portal via API — sem Payload coupling |
-| MinIO | ✅ | CDN + buckets por tenant |
-| Docker local | ✅ | Paridade com produção |
+| Componente       | Suporta? | Estratégia                                 |
+| ---------------- | -------- | ------------------------------------------ |
+| Monorepo modular | ✅       | Domínios desacoplados                      |
+| Multi-tenant     | ✅       | ADR-005, tenantId em queries               |
+| PostgreSQL       | ✅       | Read replicas, particionamento CRM         |
+| Redis            | ✅       | Cluster para cache/sessions/queue          |
+| Event bus        | ✅       | `@omnia/events` + `@omnia/queue`           |
+| Search           | ⚠️       | `@omnia/search` — index externo necessário |
+| IA chat          | ✅       | `@omnia/ai-core` + rate limit + queue      |
+| CMS separado     | ✅       | Portal via API — sem Payload coupling      |
+| MinIO            | ✅       | CDN + buckets por tenant                   |
+| Docker local     | ✅       | Paridade com produção                      |
 
 **Conclusão:** arquitetura suporta crescimento planejado. Gargalos esperados em CRM (volume) e search (índice dedicado) — já preparados estruturalmente.
 
@@ -177,15 +177,15 @@ Cenário: **500k usuários, 50k parceiros, 20M registros CRM**
 
 ## 9. Nota da arquitetura: 8.5 / 10
 
-| Critério | Nota | Comentário |
-|----------|------|------------|
-| Modularidade | 9/10 | Monorepo + domains + packages bem separados |
-| Governança | 9/10 | Docs completos, ADRs, quality gates |
-| Escalabilidade | 8/10 | Preparada; falta implementação runtime |
-| Segurança | 8/10 | Estrutura pronta; JWT/RBAC na Sprint 2 |
-| Observabilidade | 7.5/10 | Health OK; métricas/traces pendentes |
-| Testabilidade | 7/10 | `@omnia/testing` estruturado; sem testes ainda |
-| Documentação | 9.5/10 | Excepcional para fase fundacional |
+| Critério        | Nota   | Comentário                                     |
+| --------------- | ------ | ---------------------------------------------- |
+| Modularidade    | 9/10   | Monorepo + domains + packages bem separados    |
+| Governança      | 9/10   | Docs completos, ADRs, quality gates            |
+| Escalabilidade  | 8/10   | Preparada; falta implementação runtime         |
+| Segurança       | 8/10   | Estrutura pronta; JWT/RBAC na Sprint 2         |
+| Observabilidade | 7.5/10 | Health OK; métricas/traces pendentes           |
+| Testabilidade   | 7/10   | `@omnia/testing` estruturado; sem testes ainda |
+| Documentação    | 9.5/10 | Excepcional para fase fundacional              |
 
 **Média ponderada: 8.5/10**
 
@@ -193,12 +193,12 @@ Cenário: **500k usuários, 50k parceiros, 20M registros CRM**
 
 ## 10. Maturidade e prontidão
 
-| Aspecto | Status |
-|---------|--------|
-| **Maturidade** | Fundação arquitetural **completa** |
-| **Sprint 2** | **Pronta** — auth, migrations, config implementation |
-| **Bloqueadores** | Validação local `pnpm install` + build |
-| **Ação humana** | Revisar PR, aprovar merge para `develop` |
+| Aspecto          | Status                                               |
+| ---------------- | ---------------------------------------------------- |
+| **Maturidade**   | Fundação arquitetural **completa**                   |
+| **Sprint 2**     | **Pronta** — auth, migrations, config implementation |
+| **Bloqueadores** | Validação local `pnpm install` + build               |
+| **Ação humana**  | Revisar PR, aprovar merge para `develop`             |
 
 ---
 
@@ -216,4 +216,4 @@ rg "@payloadcms|from 'payload'" apps/web/   # deve ser vazio
 
 ---
 
-*Aguardando revisão humana. Nenhum commit realizado nesta sprint.*
+_Aguardando revisão humana. Nenhum commit realizado nesta sprint._

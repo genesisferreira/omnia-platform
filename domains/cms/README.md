@@ -17,8 +17,8 @@ Centralizar a criação, edição e publicação de conteúdo estruturado — p�
 
 ## Dependências
 
-| Domínio | Uso |
-|---------|-----|
+| Domínio  | Uso                       |
+| -------- | ------------------------- |
 | **core** | Primitivos compartilhados |
 
 ## Integrações

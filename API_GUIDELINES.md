@@ -36,12 +36,12 @@
 
 ## Convenções REST
 
-| Método | Uso | Exemplo |
-|--------|-----|---------|
-| GET | Leitura | `GET /api/v1/crm/leads` |
-| POST | Criação | `POST /api/v1/crm/leads` |
-| PATCH | Atualização parcial | `PATCH /api/v1/crm/leads/:id` |
-| DELETE | Remoção | `DELETE /api/v1/crm/leads/:id` |
+| Método | Uso                 | Exemplo                        |
+| ------ | ------------------- | ------------------------------ |
+| GET    | Leitura             | `GET /api/v1/crm/leads`        |
+| POST   | Criação             | `POST /api/v1/crm/leads`       |
+| PATCH  | Atualização parcial | `PATCH /api/v1/crm/leads/:id`  |
+| DELETE | Remoção             | `DELETE /api/v1/crm/leads/:id` |
 
 ## Autenticação
 

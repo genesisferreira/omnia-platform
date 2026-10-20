@@ -14,20 +14,20 @@ events/           → Eventos de domínio (futuro)
 
 ## Domínios
 
-| Domínio | Pasta | Sprint |
-|---------|-------|--------|
-| Core | [domains/core](domains/core/) | 1+ |
-| Portal | [domains/portal](domains/portal/) | 3 |
-| Blog | [domains/blog](domains/blog/) | 4 |
-| CRM | [domains/crm](domains/crm/) | 5 |
-| Marketplace | [domains/marketplace](domains/marketplace/) | 6 |
-| Academy | [domains/academy](domains/academy/) | 7 |
-| Partner | [domains/partner](domains/partner/) | 7 |
-| Chat | [domains/chat](domains/chat/) | 8+ |
-| Automation | [domains/automation](domains/automation/) | 8+ |
-| CMS | [domains/cms](domains/cms/) | 1/3 |
-| Companies | [domains/companies](domains/companies/) | 2 |
-| Identity | [domains/identity](domains/identity/) | 2 |
+| Domínio     | Pasta                                       | Sprint |
+| ----------- | ------------------------------------------- | ------ |
+| Core        | [domains/core](domains/core/)               | 1+     |
+| Portal      | [domains/portal](domains/portal/)           | 3      |
+| Blog        | [domains/blog](domains/blog/)               | 4      |
+| CRM         | [domains/crm](domains/crm/)                 | 5      |
+| Marketplace | [domains/marketplace](domains/marketplace/) | 6      |
+| Academy     | [domains/academy](domains/academy/)         | 7      |
+| Partner     | [domains/partner](domains/partner/)         | 7      |
+| Chat        | [domains/chat](domains/chat/)               | 8+     |
+| Automation  | [domains/automation](domains/automation/)   | 8+     |
+| CMS         | [domains/cms](domains/cms/)                 | 1/3    |
+| Companies   | [domains/companies](domains/companies/)     | 2      |
+| Identity    | [domains/identity](domains/identity/)       | 2      |
 
 ## Regras de comunicação
 

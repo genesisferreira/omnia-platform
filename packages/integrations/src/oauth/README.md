@@ -10,13 +10,13 @@ Usado por `@omnia/auth` nos fluxos de autenticação. Apps consomem via `@omnia/
 
 ## Variáveis de ambiente
 
-| Variável | Descrição |
-|----------|-----------|
-| `OAUTH_GOOGLE_CLIENT_ID` | Client ID Google OAuth |
-| `OAUTH_GOOGLE_CLIENT_SECRET` | Client secret Google |
-| `OAUTH_GITHUB_CLIENT_ID` | Client ID GitHub (opcional) |
+| Variável                     | Descrição                       |
+| ---------------------------- | ------------------------------- |
+| `OAUTH_GOOGLE_CLIENT_ID`     | Client ID Google OAuth          |
+| `OAUTH_GOOGLE_CLIENT_SECRET` | Client secret Google            |
+| `OAUTH_GITHUB_CLIENT_ID`     | Client ID GitHub (opcional)     |
 | `OAUTH_GITHUB_CLIENT_SECRET` | Client secret GitHub (opcional) |
-| `OAUTH_REDIRECT_URI` | URI de callback pós-autorização |
+| `OAUTH_REDIRECT_URI`         | URI de callback pós-autorização |
 
 ## Sprint
 

@@ -10,19 +10,19 @@
 
 ## Schemas
 
-| Arquivo | Domínio | Sprint |
-|---------|---------|--------|
-| [tenant.md](tenant.md) | Multi-tenant | 2 |
-| [users.md](users.md) | Identity | 2 |
-| [companies.md](companies.md) | Companies | 2 |
-| [partners.md](partners.md) | Partner | 7 |
-| [crm.md](crm.md) | CRM | 5 |
-| [blog.md](blog.md) | Blog | 4 |
-| [courses.md](courses.md) | Academy | 7 |
-| [marketplace.md](marketplace.md) | Marketplace | 6 |
-| [chat.md](chat.md) | Chat | 8+ |
-| [automation.md](automation.md) | Automation | 8+ |
-| [ai.md](ai.md) | IA | 8+ |
+| Arquivo                          | Domínio      | Sprint |
+| -------------------------------- | ------------ | ------ |
+| [tenant.md](tenant.md)           | Multi-tenant | 2      |
+| [users.md](users.md)             | Identity     | 2      |
+| [companies.md](companies.md)     | Companies    | 2      |
+| [partners.md](partners.md)       | Partner      | 7      |
+| [crm.md](crm.md)                 | CRM          | 5      |
+| [blog.md](blog.md)               | Blog         | 4      |
+| [courses.md](courses.md)         | Academy      | 7      |
+| [marketplace.md](marketplace.md) | Marketplace  | 6      |
+| [chat.md](chat.md)               | Chat         | 8+     |
+| [automation.md](automation.md)   | Automation   | 8+     |
+| [ai.md](ai.md)                   | IA           | 8+     |
 
 ## ORM
 

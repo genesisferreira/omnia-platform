@@ -26,26 +26,26 @@ Gaps identificados:
 
 Criar packages de configuração:
 
-| Package | Responsabilidade |
-|---------|------------------|
+| Package                    | Responsabilidade                           |
+| -------------------------- | ------------------------------------------ |
 | `@omnia/typescript-config` | tsconfig base, nextjs, react-library, node |
-| `@omnia/eslint-config` | ESLint base + next |
-| `@omnia/prettier-config` | Prettier centralizado |
+| `@omnia/eslint-config`     | ESLint base + next                         |
+| `@omnia/prettier-config`   | Prettier centralizado                      |
 
 ### 2. Separação de concerns em packages
 
-| Package | Responsabilidade |
-|---------|------------------|
-| `@omnia/types` | Tipos por bounded context (DDD) |
-| `@omnia/constants` | Roles, permissions, routes, status |
-| `@omnia/shared` | Apenas utilitários puros (legado migrado) |
-| `@omnia/sdk` | Client API pública |
-| `@omnia/logger` | Logging estruturado |
-| `@omnia/security` | JWT, RBAC, encryption, audit, headers |
-| `@omnia/integrations` | Conectores externos (raw adapters) |
-| `@omnia/monitoring` | OpenTelemetry, Sentry, Prometheus |
-| `@omnia/feature-flags` | Flags dinâmicas |
-| `@omnia/i18n` | Internacionalização (pt-BR inicial) |
+| Package                | Responsabilidade                          |
+| ---------------------- | ----------------------------------------- |
+| `@omnia/types`         | Tipos por bounded context (DDD)           |
+| `@omnia/constants`     | Roles, permissions, routes, status        |
+| `@omnia/shared`        | Apenas utilitários puros (legado migrado) |
+| `@omnia/sdk`           | Client API pública                        |
+| `@omnia/logger`        | Logging estruturado                       |
+| `@omnia/security`      | JWT, RBAC, encryption, audit, headers     |
+| `@omnia/integrations`  | Conectores externos (raw adapters)        |
+| `@omnia/monitoring`    | OpenTelemetry, Sentry, Prometheus         |
+| `@omnia/feature-flags` | Flags dinâmicas                           |
+| `@omnia/i18n`          | Internacionalização (pt-BR inicial)       |
 
 ### 3. Módulos de negócio
 

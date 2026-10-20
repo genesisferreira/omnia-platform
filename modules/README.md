@@ -8,18 +8,18 @@ A pasta `modules/` documenta os **módulos de negócio** da plataforma. Não con
 
 ## Módulos
 
-| Módulo | Bounded Context | Packages relacionados | App principal |
-|--------|----------------|----------------------|---------------|
-| [portal](portal/) | Portal institucional | `types`, `ui`, `i18n` | `apps/web` → `apps/portal` |
-| [blog](blog/) | Conteúdo editorial | `types`, `integrations/payload` | `apps/web` |
-| [crm](crm/) | Gestão de relacionamento | `types`, `database`, `sdk` | `apps/admin` |
-| [marketplace](marketplace/) | E-commerce B2B/B2C | `types`, `database`, `integrations/minio` | `apps/web` |
-| [partner](partner/) | Área do parceiro | `types`, `auth`, `security` | `apps/web` |
-| [academy](academy/) | Educação e cursos | `types`, `database` | `apps/web` |
-| [chat](chat/) | Chat inteligente | `ai-core`, `integrations/deepseek` | `apps/web` |
-| [ai](ai/) | Motor de IA | `ai-core`, `integrations` | Transversal |
-| [automation](automation/) | Workflows n8n | `automation`, `integrations/n8n` | Transversal |
-| [cms](cms/) | Gestão de conteúdo | `integrations/payload` | `apps/admin` |
+| Módulo                      | Bounded Context          | Packages relacionados                     | App principal              |
+| --------------------------- | ------------------------ | ----------------------------------------- | -------------------------- |
+| [portal](portal/)           | Portal institucional     | `types`, `ui`, `i18n`                     | `apps/web` → `apps/portal` |
+| [blog](blog/)               | Conteúdo editorial       | `types`, `integrations/payload`           | `apps/web`                 |
+| [crm](crm/)                 | Gestão de relacionamento | `types`, `database`, `sdk`                | `apps/admin`               |
+| [marketplace](marketplace/) | E-commerce B2B/B2C       | `types`, `database`, `integrations/minio` | `apps/web`                 |
+| [partner](partner/)         | Área do parceiro         | `types`, `auth`, `security`               | `apps/web`                 |
+| [academy](academy/)         | Educação e cursos        | `types`, `database`                       | `apps/web`                 |
+| [chat](chat/)               | Chat inteligente         | `ai-core`, `integrations/deepseek`        | `apps/web`                 |
+| [ai](ai/)                   | Motor de IA              | `ai-core`, `integrations`                 | Transversal                |
+| [automation](automation/)   | Workflows n8n            | `automation`, `integrations/n8n`          | Transversal                |
+| [cms](cms/)                 | Gestão de conteúdo       | `integrations/payload`                    | `apps/admin`               |
 
 ## Camadas por módulo (Clean Architecture)
 

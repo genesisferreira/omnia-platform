@@ -1,0 +1,18 @@
+export type {
+  LmsActivity,
+  LmsCompletion,
+  LmsConnectedUser,
+  LmsConnectorHealth,
+  LmsCourse,
+  LmsCourseSection,
+  LmsEnrollment,
+  LmsGrade,
+  LmsIdentityLink,
+  LmsLinkStatus,
+  LmsNotLinked,
+  LmsProfileRole,
+  LmsProgress,
+  LmsSessionRecord,
+  LmsSyncStatus,
+  LmsUser,
+} from './types';

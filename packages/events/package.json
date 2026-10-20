@@ -4,7 +4,9 @@
   "private": true,
   "description": "Event Bus — publish/subscribe, contratos e dispatcher",
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "eslint src/",

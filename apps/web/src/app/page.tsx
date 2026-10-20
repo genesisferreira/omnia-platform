@@ -1,15 +1,92 @@
-import { Button } from '@omnia/ui';
+import type { Metadata } from 'next';
+import { cache } from 'react';
 
-export default function HomePage() {
+import { BlockRenderer } from '@/components/home/BlockRenderer';
+import { CompanyCards } from '@/components/home/CompanyCards';
+import { FeaturesSection } from '@/components/home/FeaturesSection';
+import { Hero } from '@/components/home/Hero';
+import { NearbyPartnersSection } from '@/components/partners/NearbyPartnersSection';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { fetchCompanies, fetchGlobalSettings, fetchPublicPage } from '@/lib/cms';
+import {
+  buildFallbackMetadata,
+  buildPageMetadata,
+  buildWebPageJsonLd,
+  resolveInstitutionalDescription,
+  SEO_FALLBACK_DESCRIPTION,
+  SEO_FALLBACK_TITLE,
+} from '@/lib/seo';
+import { getSiteContext } from '@/lib/site-context';
+
+/**
+ * Deduplica resolve-site + public-page entre generateMetadata e a página
+ * na mesma renderização RSC. Não compartilha entre hosts/sites diferentes.
+ */
+const loadHomePage = cache(async () => {
+  const siteContext = await getSiteContext();
+  if (!siteContext.resolution.ok) {
+    return { page: null, hostname: siteContext.hostname };
+  }
+
+  const page = await fetchPublicPage(siteContext.resolution.context.site.slug, 'home');
+  return { page, hostname: siteContext.hostname };
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { page, hostname } = await loadHomePage();
+  if (!page) {
+    return buildFallbackMetadata(hostname);
+  }
+
+  return buildPageMetadata({
+    pathname: '/',
+    title: page.title,
+    description: resolveInstitutionalDescription(page.seo.metaDescription),
+    seo: {
+      ...page.seo,
+      metaDescription: resolveInstitutionalDescription(page.seo.metaDescription),
+    },
+    hostname,
+  });
+}
+
+async function FallbackHome() {
+  const [settings, companies] = await Promise.all([fetchGlobalSettings(), fetchCompanies()]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">Omnia Platform</h1>
-        <p className="mt-4 text-lg text-muted-foreground">Portal em construção</p>
-      </div>
-      <Button variant="outline" disabled>
-        Sprint 1 — Base executável
-      </Button>
-    </main>
+    <>
+      <Hero settings={settings} />
+      <FeaturesSection />
+      <CompanyCards companies={companies} />
+      <NearbyPartnersSection />
+    </>
+  );
+}
+
+export default async function HomePage() {
+  const { page, hostname } = await loadHomePage();
+
+  const webPageLd = buildWebPageJsonLd({
+    pathname: '/',
+    title: page?.seo.metaTitle ?? page?.title ?? SEO_FALLBACK_TITLE,
+    description: page?.seo.metaDescription ?? SEO_FALLBACK_DESCRIPTION,
+    hostname,
+  });
+
+  if (!page || page.blocks.length === 0) {
+    return (
+      <>
+        <JsonLd data={webPageLd} />
+        <FallbackHome />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <JsonLd data={webPageLd} />
+      <BlockRenderer blocks={page.blocks} />
+      <NearbyPartnersSection />
+    </>
   );
 }
