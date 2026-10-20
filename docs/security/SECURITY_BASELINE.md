@@ -48,8 +48,8 @@ Plano (requer decisão do responsável):
 
 - Repositório público: `scripts/ci/check-secrets.mjs` bloqueia chaves privadas, tokens e URLs de banco com credencial fora do ambiente local.
 - Os arquivos `.env*.example` contêm só valores de exemplo de desenvolvimento local.
-- Uma senha temporária de acesso ao servidor foi compartilhada num canal de conversa em 14/10/2026. **Rotação obrigatória**, a cargo do responsável (decisão humana).
+- Rotação de credenciais de infraestrutura segue o procedimento privado de controle de mudanças.
 
 ## Pendências de infraestrutura (sem detalhes públicos)
 
-Itens registrados em documentação privada e que dependem de autorização individual (ver `docs/governance/CHANGE_MANAGEMENT.md`): troca de credencial potencialmente exposta e acesso ao servidor só por chave (CHG-SEC-002A/B), retirada da rota pública de painel de infraestrutura (CHG-SEC-001), proteção dos demais painéis (CHG-SEC-003), MFA e menor privilégio (CHG-SEC-004). Também pendentes, para a Fase 2: firewall do host, fixação de versões de imagens, limpeza de registros DNS sem serviço e registro DMARC.
+Itens registrados em documentação privada e que dependem de autorização individual (ver `docs/governance/CHANGE_MANAGEMENT.md`): segurança do acesso administrativo ao servidor (CHG-SEC-002A/B), retirada da rota pública de painel de infraestrutura (CHG-SEC-001), proteção dos demais painéis (CHG-SEC-003), MFA e menor privilégio (CHG-SEC-004). Também pendentes, para a Fase 2: firewall do host, fixação de versões de imagens, limpeza de registros DNS sem serviço e registro DMARC.
