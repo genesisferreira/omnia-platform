@@ -1,10 +1,29 @@
 name: CI
 
+# Somente verificação: este workflow não faz deploy e não usa segredos de produção.
 on:
   push:
-    branches: [main, develop, staging, 'feature/**', 'release/**']
+    branches:
+      [
+        main,
+        develop,
+        staging,
+        'feature/**',
+        'feat/**',
+        'fix/**',
+        'hotfix/**',
+        'chore/**',
+        'release/**',
+      ]
+  # Qualquer base: os PRs de release encadeados apontam para branches feat/*.
   pull_request:
-    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DATABASE_URL: postgresql://omnia:omnia_dev_password@localhost:5432/omnia_platform
@@ -18,9 +37,26 @@ env:
   OMNIA_SMTP_ALLOW_BUILD: '1'
 
 jobs:
+  guards:
+    name: Guards (migrations e segredos)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Migrations registradas e aditivas
+        run: node scripts/ci/check-migrations.mjs
+
+      - name: Varredura de segredos (repositório público)
+        run: node scripts/ci/check-secrets.mjs
+
   quality:
     name: Quality Checks
     runs-on: ubuntu-latest
+    needs: guards
     steps:
       - uses: actions/checkout@v4
 
@@ -128,6 +164,18 @@ jobs:
 
       - name: Assessment engine native grade
         run: pnpm --filter @omnia/assessment-engine test
+
+      - name: Marketplace (estados, público, arquivos, acesso)
+        run: pnpm --filter @omnia/shared test:marketplace
+
+      - name: Marketplace cadastro de fornecedor e PDF
+        run: pnpm --filter @omnia/admin test:partner-register && pnpm --filter @omnia/admin test:marketplace-pdf-scan
+
+      - name: SEO Google V1 e navegação pública
+        run: pnpm --filter @omnia/web test:seo-google && pnpm --filter @omnia/web test:partners-nav
+
+      - name: Headers de segurança (Portal e Admin)
+        run: pnpm --filter @omnia/web test:security-headers && pnpm --filter @omnia/admin test:security-headers
 
   build:
     name: Build
