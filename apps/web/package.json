@@ -15,6 +15,7 @@
     "test:seo-blog": "tsx src/scripts/test-seo-blog.ts",
     "test:seo-companies": "tsx src/scripts/test-seo-companies.ts",
     "test:seo-google": "tsx --test src/scripts/test-seo-google.ts",
+    "test:security-headers": "tsx --test src/scripts/test-security-headers.ts",
     "test:ai-auth-ordering": "tsx --test src/scripts/test-ai-auth-ordering.ts",
     "test:epic16-ai-context": "tsx --test src/scripts/test-epic16-ai-context.ts",
     "test:partners-nav": "tsx --test src/scripts/test-partners-nav.ts",

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { Access, CollectionBeforeOperationHook, CollectionConfig, Where } from 'payload';
-import { APIError } from 'payload';
+import { APIError, Forbidden } from 'payload';
 
 import {
   MARKETPLACE_DATASHEET_MAX_BYTES,
@@ -42,6 +42,10 @@ const listingMediaRead: Access = async ({ req: { user, payload } }) => {
  */
 const validateListingUpload: CollectionBeforeOperationHook = async ({ args, operation, req }) => {
   if (operation !== 'create' && operation !== 'update') return args;
+  // O beforeOperation roda antes do controle de acesso: sem usuário, nega antes de ler o arquivo.
+  if (!req.user && !(args as { overrideAccess?: boolean }).overrideAccess) {
+    throw new Forbidden(req.t);
+  }
   const file = req.file;
   if (!file) {
     if (operation === 'create') throw new APIError('Envie um arquivo.', 400);
