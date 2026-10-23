@@ -96,6 +96,12 @@ jobs:
       - name: Public origin / auth redirect contracts
         run: pnpm --filter @omnia/shared test:public-origin
 
+      - name: Contact page contracts
+        run: pnpm --filter @omnia/shared test:contact
+
+      - name: Contact message endpoint
+        run: pnpm --filter @omnia/admin test:contact-message
+
       - name: Public companies contract tests
         run: pnpm --filter @omnia/admin test:public-companies
 

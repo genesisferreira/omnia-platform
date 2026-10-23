@@ -24,6 +24,7 @@ export * from './cms/public-post';
 export * from './cms/public-company';
 export * from './partners';
 export * from './marketplace';
+export * from './contact';
 export {
   DEVICE_BLOCKING_STATES,
   DEVICE_COOKIE_MAX_AGE_SECONDS,

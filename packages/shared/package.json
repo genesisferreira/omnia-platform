@@ -21,6 +21,7 @@
     "test:partners": "tsx src/partners/test-partners.ts && tsx src/partners/test-partners-geo.ts",
     "test:marketplace": "tsx --test src/marketplace/test-quote-state.ts src/marketplace/test-marketplace-public.ts src/marketplace/test-marketplace-files.ts src/marketplace/test-marketplace-access.ts",
     "test:public-origin": "tsx --test src/test-public-origin.ts",
+    "test:contact": "tsx --test src/test-contact.ts",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {

@@ -40,6 +40,7 @@
     "test:smtp-auth": "tsx --test src/scripts/test-smtp-auth.ts",
     "test:allowed-origins": "tsx --test src/scripts/test-allowed-origins.ts",
     "test:partner-register": "tsx --test src/scripts/test-partner-register.ts",
+    "test:contact-message": "tsx --test src/scripts/test-contact-message.ts",
     "test:marketplace-pdf-scan": "tsx --test src/scripts/test-marketplace-pdf-scan.ts",
     "test:security-headers": "tsx --test src/scripts/test-security-headers.ts",
     "test:postal-geocode": "tsx --test src/scripts/test-postal-geocode.ts",

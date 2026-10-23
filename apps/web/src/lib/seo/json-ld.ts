@@ -48,7 +48,7 @@ export function buildWebPageJsonLd(args: {
   title?: string | null;
   description?: string | null;
   hostname?: string | null;
-  type?: 'WebPage' | 'AboutPage';
+  type?: 'WebPage' | 'AboutPage' | 'ContactPage';
 }): JsonLdRecord {
   const url =
     resolveCanonicalUrl({

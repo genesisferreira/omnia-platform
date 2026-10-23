@@ -94,6 +94,7 @@ import { KnowledgeSources } from './src/collections/knowledge/KnowledgeSources';
 import { publicCompaniesEndpoint, publicCompanyEndpoint } from './src/endpoints/public-companies';
 import { publicOrganizationsEndpoint } from './src/endpoints/public-organizations';
 import { leadCaptureEndpoint } from './src/endpoints/lead-capture';
+import { contactMessageEndpoint } from './src/endpoints/contact-message';
 import { partnerRegisterEndpoint } from './src/endpoints/partner-register';
 import { partnerDashboardEndpoint } from './src/endpoints/marketplace-partner-dashboard';
 import { marketplaceProposalSendEndpoint } from './src/endpoints/marketplace-proposal-send';
@@ -285,6 +286,7 @@ export default buildConfig({
     publicCompanyEndpoint,
     publicOrganizationsEndpoint,
     leadCaptureEndpoint,
+    contactMessageEndpoint,
     publicPageEndpoint,
     publicPostsEndpoint,
     publicPostEndpoint,
