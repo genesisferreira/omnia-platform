@@ -87,6 +87,10 @@ export function ContactForm() {
 
   const pending = state === 'submitting';
   const invalid = (field: ContactField) => (errorField === field ? true : undefined);
+  const edit = (field: ContactField, set: (value: string) => void) => (value: string) => {
+    if (errorField === field) setErrorField(null);
+    set(value);
+  };
 
   return (
     <form
@@ -118,7 +122,7 @@ export function ContactForm() {
             maxLength={CONTACT_MESSAGE_LIMITS.nameMax}
             aria-invalid={invalid('nome')}
             value={nome}
-            onChange={(event) => setNome(event.target.value)}
+            onChange={(event) => edit('nome', setNome)(event.target.value)}
             disabled={pending}
           />
         </div>
@@ -136,7 +140,7 @@ export function ContactForm() {
             maxLength={CONTACT_MESSAGE_LIMITS.emailMax}
             aria-invalid={invalid('email')}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => edit('email', setEmail)(event.target.value)}
             disabled={pending}
           />
         </div>
@@ -152,7 +156,7 @@ export function ContactForm() {
             aria-invalid={invalid('assunto')}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
             value={assunto}
-            onChange={(event) => setAssunto(event.target.value)}
+            onChange={(event) => edit('assunto', setAssunto)(event.target.value)}
             disabled={pending}
           >
             <option value="">Selecione</option>
@@ -177,7 +181,7 @@ export function ContactForm() {
             aria-invalid={invalid('mensagem')}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={mensagem}
-            onChange={(event) => setMensagem(event.target.value)}
+            onChange={(event) => edit('mensagem', setMensagem)(event.target.value)}
             disabled={pending}
           />
         </div>
